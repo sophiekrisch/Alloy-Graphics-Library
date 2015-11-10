@@ -22,6 +22,7 @@
 #include "AlloyIsoContour.h"
 #include <map>
 #include <list>
+#include <algorithm>
 namespace aly {
 	bool IsoContour::orient(const Image1f& img, const EdgeSplit& split1, const EdgeSplit& split2, Edge& edge) {
 		float2 pt1 = split1.pt2d;
@@ -34,7 +35,7 @@ namespace aly {
 		return true;
 	}
 
-	void IsoContour::solve(const Image1f& levelset, float isoLevel, const TopologyRule2D& topoRule,const Winding& winding){
+	void IsoContour::solve(const Image1f& levelset, Vector2f& points, std::vector<std::list<uint32_t>>& lines, float isoLevel, const TopologyRule2D& topoRule, const Winding& winding) {
 		rows = levelset.width;
 		cols = levelset.height;
 		this->isoLevel = isoLevel;
@@ -52,8 +53,107 @@ namespace aly {
 		for (const std::pair<uint64_t, EdgeSplitPtr>& split : splits) {
 			pts[split.second->vid] = split.second;
 		}
-		// Generate iso-surface from list of triangles
-		indexes.resize(edges.size() * 2);
+		lines.clear();
+		points.resize(splits.size());
+		uint32_t index = 0;
+		for (const std::pair<uint64_t, EdgeSplitPtr>& split : splits) {
+			index = split.second->vid;
+			points[index] = split.second->pt2d;
+		}
+		EdgeSplitPtr lastSplit = pts.front();
+		bool firstPass = true;
+		std::list<uint32_t> curvePath;
+		index = 0;
+		while (lastSplit.get() != nullptr) {
+			curvePath.push_back(lastSplit->vid);
+			EdgePtr e1 = lastSplit->e1;
+			EdgePtr e2 = lastSplit->e2;
+			float val = getValue(lastSplit->pt1.x, lastSplit->pt1.y);
+			if ((val > 0 && winding == Winding::CounterClockwise)
+				|| (val <= 0 && winding == Winding::Clockwise)) {
+				// Swap edges so they are correctly ordered. This technique may
+				// fail if a vertex lies exactly on the iso-level.
+				std::swap(e1, e2);
+			}
+			// March around contour
+			if (e1.get() != nullptr) {
+				if (!firstPass) {
+					lastSplit->e1.reset();
+				}
+				if (e1->x == lastSplit->vid) {
+					lastSplit = pts[e1->y];
+				}
+				else {
+					lastSplit = pts[e1->x];
+				}
+				if (!firstPass) {
+					if (lastSplit->e1.get() == e1.get()) {
+						lastSplit->e1.reset();
+					}
+					if (lastSplit->e2.get() == e1.get()) {
+						lastSplit->e2.reset();
+					}
+				}
+				firstPass = false;
+			}
+			else if (e2.get() != nullptr) {
+				if (!firstPass) {
+					lastSplit->e2.reset();
+				}
+				firstPass = false;
+				if (e2->x == lastSplit->vid) {
+					lastSplit = pts[e2->y];
+				}
+				else {
+					lastSplit = pts[e2->x];
+				}
+				if (!firstPass) {
+					if (lastSplit->e1.get() == e2.get()) {
+						lastSplit->e1.reset();
+					}
+					if (lastSplit->e2.get() == e2.get()) {
+						lastSplit->e2.reset();
+					}
+				}
+				firstPass = false;
+			}
+			else {
+				// Start new contour
+				lastSplit.reset();
+				lines.push_back(curvePath);
+				curvePath.clear();
+				firstPass = true;
+				index = 0;
+				while (index < pts.size()) {
+					EdgeSplitPtr tmp = pts[index++];
+					if (tmp->e1.get() != nullptr && tmp->e2.get() != nullptr) {
+						lastSplit = tmp;
+						break;
+					}
+				}
+			}
+		}
+		img = nullptr;
+	}
+	void IsoContour::solve(const Image1f& levelset, Vector2f& points, Vector2ui& indexes, float isoLevel, const TopologyRule2D& topoRule,const Winding& winding){
+		rows = levelset.width;
+		cols = levelset.height;
+		this->isoLevel = isoLevel;
+		rule = topoRule;
+		img = &levelset;
+		vertCount = 0;
+		std::map<uint64_t, EdgeSplitPtr> splits;
+		std::list<EdgePtr> edges;
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < cols; j++) {
+				processSquare(i, j, splits, edges);
+			}
+		}
+		std::vector<EdgeSplitPtr> pts(splits.size());
+		for (const std::pair<uint64_t, EdgeSplitPtr>& split : splits) {
+			pts[split.second->vid] = split.second;
+		}
+		indexes.resize(edges.size());
 		points.resize(splits.size());
 		uint32_t index = 0;
 		if (winding == Winding::Clockwise) {
@@ -505,8 +605,6 @@ namespace aly {
 	void IsoContour::addEdge(std::map<uint64_t, EdgeSplitPtr>& splits, std::list<EdgePtr>& edges, int p1x, int p1y, int p2x, int p2y, int p3x, int p3y, int p4x, int p4y) {
 		EdgeSplitPtr split1 = createSplit(splits, p1x, p1y, p2x, p2y);
 		EdgeSplitPtr split2 = createSplit(splits, p3x, p3y, p4x, p4y);
-		lastSplit1 = split1;
-		lastSplit2 = split2;
 		EdgePtr edge = EdgePtr(new Edge(split1->vid, split2->vid));
 		if (split1->e1.get() == nullptr) {
 			split1->e1 = edge;

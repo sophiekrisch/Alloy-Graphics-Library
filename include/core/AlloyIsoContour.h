@@ -29,7 +29,14 @@
 namespace aly {
 	enum class TopologyRule2D {Unconstrained, Connect4, Connect8 };
 	enum class Winding { Clockwise, CounterClockwise };
-	typedef uint2 Edge;
+	struct Edge : public uint2 {
+		Edge(uint32_t x, uint32_t y) :uint2(x, y) {
+
+		}
+		Edge(uint32_t x) :uint2(x) {
+
+		}
+	};
 	typedef std::shared_ptr<Edge> EdgePtr;
 	struct EdgeSplit {
 		EdgePtr e1, e2;
@@ -58,6 +65,9 @@ namespace aly {
 
 	};
 	typedef std::shared_ptr<EdgeSplit> EdgeSplitPtr;
+	inline bool operator==(const Edge& e1, const Edge e2) {
+		return ((e1.x==e2.x&&e1.y == e2.y)|| (e1.x == e2.y&&e1.y == e2.x));
+	}
 	inline bool operator==(const EdgeSplit& split1,const EdgeSplit& split2) {
 		return (
 			(split1.pt1 == split2.pt1 && split1.pt2== split2.pt2) ||
@@ -67,8 +77,6 @@ namespace aly {
 	class IsoContour {
 	protected:
 		uint32_t vertCount = 0;
-		Vector2f points;
-		Vector2ui indexes;
 		const int a2fVertex1Offset[4][2] = { { 0, 0 },{ 1, 0 },{ 1, 1 },{ 0, 1 } };
 		const int a2fVertex2Offset[4][2] = { { 1, 0 },{ 1, 1 },{ 0, 1 },{ 0, 0 } };
 		const int afSquareValue4[16][4] = {
@@ -100,7 +108,7 @@ namespace aly {
 			{ 3, 2, 4, 4 },// 0111 7
 			{ 2, 3, 4, 4 },// 1000 8
 			{ 2, 0, 4, 4 },// 1001 9
-			{ 1, 0, 3, 2 },// 1010 10
+			{ 1, 0, 3, 2 },// 1010 10s
 			{ 2, 1, 4, 4 },// 1011 11
 			{ 1, 3, 4, 4 },// 1100 12
 			{ 1, 0, 4, 4 },// 1101 13
@@ -109,8 +117,6 @@ namespace aly {
 		};
 		const float LEVEL_SET_TOLERANCE = 1E-3f;
 		float isoLevel=0.0f;
-		EdgeSplitPtr lastSplit1;
-		EdgeSplitPtr lastSplit2;
 		bool nudgeLevelSet = true;
 		TopologyRule2D rule= TopologyRule2D::Unconstrained;
 		const Image1f* img;
@@ -127,20 +133,9 @@ namespace aly {
 		IsoContour(bool nudgeLevelSet=true,float levelSetTolerance=1E-3f):nudgeLevelSet(nudgeLevelSet), LEVEL_SET_TOLERANCE(levelSetTolerance){
 
 		}
-		inline const Vector2f& getPoints() const {
-			return points;
-		}
-		inline const Vector2ui& getIndexes() const {
-			return indexes;
-		}
-		inline Vector2f getPoints() {
-			return points;
-		}
-		inline Vector2ui getIndexes() {
-			return indexes;
-		}
 		virtual ~IsoContour() {}
-		void solve(const Image1f& levelset, float isoLevel=0.0f, const TopologyRule2D& rule=TopologyRule2D::Unconstrained, const Winding& winding=Winding::CounterClockwise);
+		void solve(const Image1f& levelset, Vector2f& points, Vector2ui& indexes, float isoLevel=0.0f, const TopologyRule2D& rule=TopologyRule2D::Unconstrained, const Winding& winding=Winding::CounterClockwise);
+		void solve(const Image1f& levelset, Vector2f& points, std::vector<std::list<uint32_t>>& indexes, float isoLevel = 0.0f, const TopologyRule2D& rule = TopologyRule2D::Unconstrained, const Winding& winding = Winding::CounterClockwise);
 	};
 }
 #endif 

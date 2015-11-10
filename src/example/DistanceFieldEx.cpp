@@ -55,9 +55,7 @@ bool DistanceFieldEx::init(Composite& rootNode) {
 	//Solve distance field out to +/- 40 pixels
 	df.solve(gray, distField, maxDistance);
 	IsoContour isoContour;
-	isoContour.solve(distField, 0.0f, TopologyRule2D::Unconstrained);
-	curvePoints=isoContour.getPoints();
-	curveIndexes = isoContour.getIndexes();
+	isoContour.solve(distField,curvePoints,curveIndexes, 0.0f, TopologyRule2D::Unconstrained);
 	//Normalize distance field range so it can be rendered as gray scale image.
 	distField = (distField + float1(maxDistance)) / float1(2.0f * maxDistance);
 	GlyphRegionPtr imageRegion = MakeGlyphRegion(createImageGlyph(distField),
@@ -73,17 +71,20 @@ bool DistanceFieldEx::init(Composite& rootNode) {
 		nvgLineCap(nvg, NVG_ROUND);
 		nvgBeginPath(nvg);
 		for (int n = 0;n < (int)curveIndexes.size();n++) {
-			uint2 e = curveIndexes[n];
-			float2 pt = curvePoints[e.x];
-			pt.x = pt.x / (float)w;
-			pt.y = pt.y / (float)h;
-			pt = pt*bounds.dimensions + bounds.position;
-			nvgMoveTo(nvg, pt.x, pt.y);
-			pt = curvePoints[e.y];
-			pt.x = pt.x / (float)w;
-			pt.y = pt.y / (float)h;
-			pt = pt*bounds.dimensions + bounds.position;
-			nvgLineTo(nvg, pt.x, pt.y);
+			std::list<uint32_t> curve = curveIndexes[n];
+			bool firstTime = true;
+			for (uint32_t idx : curve) {
+				float2 pt = curvePoints[idx];
+				pt.x = pt.x / (float)w;
+				pt.y = pt.y / (float)h;
+				pt = pt*bounds.dimensions + bounds.position;
+				if (firstTime) {
+					nvgMoveTo(nvg, pt.x, pt.y);
+				} else {
+					nvgLineTo(nvg, pt.x, pt.y);
+				}
+				firstTime = false;
+			}
 		}
 		nvgStroke(nvg);
 	};
