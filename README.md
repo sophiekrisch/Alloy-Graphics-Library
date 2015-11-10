@@ -48,6 +48,7 @@ Alloy is yet another 2D/3D graphics library written in C++11. As mundane as that
 - Gradient Vector Flow
 - KAZE features
 - DAISY features
+- SLIC super pixels 
 - Spring Level Sets
 - Force directed graph and other visualizations (Prefuse)
 - "One Euro" filter
