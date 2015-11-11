@@ -76,14 +76,6 @@ namespace aly {
 			nvgText(nvg,  - shift, 0, txt, nullptr);
 			nvgText(nvg, 0,  + shift, txt, nullptr);
 			nvgText(nvg, 0,  - shift, txt, nullptr);
-			nvgText(nvg,  + shift,  - shift, txt, nullptr);
-			nvgText(nvg,  + shift,  + shift, txt, nullptr);
-			nvgText(nvg,  + shift,  - shift, txt, nullptr);
-			nvgText(nvg,  + shift,  + shift, txt, nullptr);
-			nvgText(nvg,  - shift,  - shift, txt, nullptr);
-			nvgText(nvg,  - shift,  + shift, txt, nullptr);
-			nvgText(nvg,  - shift,  - shift, txt, nullptr);
-			nvgText(nvg,  - shift,  + shift, txt, nullptr);
 			nvgFillColor(nvg, Color(255, 255, 255));
 			nvgText(nvg, 0, 0, txt, nullptr);
 			nvgRestore(nvg);
