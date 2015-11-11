@@ -94,7 +94,6 @@ namespace aly {
 		bool hover = context->isMouseContainedIn(this);
 		if (hover) {
 
-			checkLabel->textColor = MakeColor(context->theme.HIGHLIGHT);
 		}
 		else {
 			checkLabel->textColor = MakeColor(context->theme.LIGHT_TEXT);
@@ -3130,7 +3129,6 @@ namespace aly {
 				setMaximize(!this->maximized);
 				if (maximized) {
 					windowInitialBounds = getBounds(false);
-					windowInitialBounds.position -= this->getDragOffset();
 					this->setDragOffset(pixel2(0.0f, 0.0f));
 					this->position = CoordPX(0.0f,0.0f);
 					this->dimensions = CoordPercent(1.0f,1.0f);
