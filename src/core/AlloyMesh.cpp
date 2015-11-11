@@ -1432,7 +1432,6 @@ namespace aly {
 			vertNbrs[face.w].push_back(face.x);
 		}
 		int N = (int)vertNbrs.size();
-#pragma omp parallel for
 		for (int n = 0; n < N; n++) {
 			std::vector<uint32_t>& nbrs = vertNbrs[n];
 			if (nbrs.size() > 0) {
