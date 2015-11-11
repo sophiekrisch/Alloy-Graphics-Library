@@ -44,8 +44,8 @@ namespace aly {
 		vertCount = 0;
 		std::map<uint64_t, EdgeSplitPtr> splits;
 		std::list<EdgePtr> edges;
-		for (int i = 1; i < rows-1; i++) {
-			for (int j = 1; j < cols-1; j++) {
+		for (int i = 0; i < rows-1; i++) {
+			for (int j = 0; j < cols-1; j++) {
 				processSquare(i, j, splits, edges);
 			}
 		}
@@ -144,8 +144,8 @@ namespace aly {
 		vertCount = 0;
 		std::map<uint64_t, EdgeSplitPtr> splits;
 		std::list<EdgePtr> edges;
-		for (int i = 1; i < rows - 1; i++) {
-			for (int j = 1; j < cols - 1; j++) {
+		for (int i = 0; i < rows - 1; i++) {
+			for (int j = 0; j < cols - 1; j++) {
 				processSquare(i, j, splits, edges);
 			}
 		}
