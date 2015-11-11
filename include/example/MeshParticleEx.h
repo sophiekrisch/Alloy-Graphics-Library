@@ -28,12 +28,9 @@ class MeshParticleEx: public aly::Application {
 protected:
 	aly::RegionPtr renderRegion;
 	aly::GLFrameBuffer depthFrameBuffer;
-	aly::GLFrameBuffer wireframeBuffer;
 	aly::ParticleMatcapShader particleMatcapShader;
 	aly::ParticleDepthShader particleDepthShader;
 	aly::MatcapShader matcapShader;
-
-	aly::WireframeShader wireframeShader;
 	aly::ImageShader imageShader;
 	aly::Mesh mesh;
 	aly::Camera camera;

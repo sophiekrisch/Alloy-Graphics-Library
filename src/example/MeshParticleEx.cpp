@@ -44,7 +44,6 @@ bool MeshParticleEx::init(Composite& rootNode) {
 	renderRegion=MakeRegion("Render View",CoordPerPX(0.5f,0.5f,-256,-256),CoordPX(512,512),COLOR_NONE,COLOR_WHITE,UnitPX(1.0f));
 	//Initialize depth buffer to store the render
 	depthFrameBuffer.initialize(512, 512);
-	wireframeBuffer.initialize(512, 512);
 	//Set up camera
 	camera.setNearFarPlanes(0.1f, 3.0f);
 	camera.setZoom(1.0f);
@@ -56,10 +55,6 @@ bool MeshParticleEx::init(Composite& rootNode) {
 	addListener(&camera);
 	//Add render component to root node so it is relatively positioned.
 	rootNode.add(renderRegion);
-	wireframeShader.setEdgeColor(RGBAf(1.0f));
-	wireframeShader.setFaceColor(RGBAf(0.0f));
-	wireframeShader.setLineWidth(2.0f);
-	wireframeShader.setSolid(false);
 	return true;
 }
 void MeshParticleEx::draw(AlloyContext* context){
@@ -70,10 +65,7 @@ void MeshParticleEx::draw(AlloyContext* context){
 		using pair = std::pair<const aly::Mesh *,aly::float4x4>;
 		using list = std::initializer_list<pair>;
 		particleDepthShader.draw(list{ pair{ &mesh,S} }, camera, depthFrameBuffer, 0.03f);
-		wireframeShader.draw(list{ pair{ &mesh,S } }, camera, wireframeBuffer);
 	}
-	//Occlusion is not handled because wireframe is drawn as image. w component corresponds to alpha, not depth.
-	imageShader.draw(wireframeBuffer.getTexture(), renderRegion->getBounds(), 1.0f, false);
 	//Recompute lighting at every draw pass.
 	matcapShader.draw(depthFrameBuffer.getTexture(), camera, renderRegion->getBounds(), getContext()->getViewport(), RGBAf(1.0f,0.0f,0.0f,1.0f));
 	//Draw particles and lighting in one pass
