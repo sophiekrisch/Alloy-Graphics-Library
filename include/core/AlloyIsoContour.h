@@ -115,9 +115,9 @@ namespace aly {
 			{ 0, 3, 4, 4 },// 1110 14
 			{ 4, 4, 4, 4 } // 1111 15
 		};
-		const float LEVEL_SET_TOLERANCE = 1E-3f;
 		float isoLevel=0.0f;
-		bool nudgeLevelSet = true;
+		bool nudgeLevelSet;
+		const float LEVEL_SET_TOLERANCE;
 		TopologyRule2D rule= TopologyRule2D::Unconstrained;
 		const Image1f* img;
 		int rows,  cols;
