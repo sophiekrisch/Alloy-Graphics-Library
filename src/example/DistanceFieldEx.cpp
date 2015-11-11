@@ -32,7 +32,6 @@ bool DistanceFieldEx::init(Composite& rootNode) {
 	currentIso = maxDistance;
 	int w = getContext()->width()/2;
 	int h = getContext()->height()/2;
-	std::cout << "Dimensions " << w << " " << h << std::endl;
 	GLFrameBuffer renderBuffer;
 	//Render text to image
 	NVGcontext* nvg = getContext()->nvgContext;
@@ -54,10 +53,7 @@ bool DistanceFieldEx::init(Composite& rootNode) {
 	gray -= float1(0.5f);
 	DistanceField2f df;
 	//Solve distance field out to +/- 40 pixels
-
-	gray.writeToXML(GetDesktopDirectory() + "\\gray.xml");
 	df.solve(gray, distField, maxDistance);
-	distField.writeToXML(GetDesktopDirectory()+"\\dist_field.xml");
 	IsoContour isoContour;
 	isoContour.solve(distField,curvePoints,curveIndexes, 0.0f, TopologyRule2D::Unconstrained);
 	//Normalize distance field range so it can be rendered as gray scale image.

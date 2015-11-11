@@ -693,9 +693,6 @@ void DistanceField2f::solve(const Image1f& vol, Image1f& distVol,
 			}
 		}
 	}
-	signVol.writeToXML(GetDesktopDirectory() + "\\sign_vol.xml");
-	labelVol.writeToXML(GetDesktopDirectory() + "\\label_vol.xml");
-	distVol.writeToXML(GetDesktopDirectory() + "\\dist_vol.xml");
 #pragma omp parallel for
 	for (int j = 0; j < height; j++) {
 		for (int i = 0; i < width; i++) {
