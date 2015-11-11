@@ -26,7 +26,7 @@
 #include "AlloyVector.h"
 class DistanceFieldEx: public aly::Application {
 protected:
-	const float maxDistance = 20.0f;
+	const float maxDistance = 40.0f;
 	float currentIso;
 	aly::Vector2f curvePoints;
 	std::vector<std::list<uint32_t>> curveIndexes;
