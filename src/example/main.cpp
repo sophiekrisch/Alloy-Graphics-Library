@@ -52,7 +52,21 @@
 #include "../../include/example/WindowPaneEx.h"
 #include "../../include/example/DistanceFieldEx.h"
 #include <cstring>
+/*
+For simple execution, main method should look like:
 
+	int main(int argc, char *argv[]) {
+		try {
+			MyApplication app;
+			app.run();
+			return 0;
+		} catch (std::exception& e) {
+			std::cout << "Error: " << e.what() << std::endl;
+			return 1;
+		}
+	}
+
+*/
 #ifndef EXAMPLE_NAME
 #define EXAMPLE_NAME ""
 #endif
