@@ -41,11 +41,11 @@ protected:
 	std::vector<size_t> backPointers;
 	size_t currentSize;
 protected:
-	size_t& getPointer(const vec<int, C>& idx) {
+	inline size_t& getPointer(const vec<int, C>& idx) {
 		switch (C) {
 			case 1: return backPointers[idx[0]];break;
-			case 2: return backPointers[idx[0]+ idx[1]*dimensions[1]];break;
-			case 3: return backPointers[idx[0] + dimensions[1]*(idx[1] + dimensions[2]*idx[2])];break;
+			case 2: return backPointers[idx[0]+ idx[1]*dimensions[0]];break;
+			case 3: return backPointers[idx[0] + dimensions[0] * ( idx[1] + dimensions[1] *idx[2])];break;
 			default: throw std::runtime_error(MakeString()<<"Heap dimension not supported [" << C << "]");
 		}
 	}

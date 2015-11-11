@@ -25,12 +25,14 @@
 #include "AlloyIsoContour.h"
 using namespace aly;
 DistanceFieldEx::DistanceFieldEx() :
-		Application(800, 600, "Distance Field Example") {
+		Application(800, 400, "Distance Field Example") {
 }
 bool DistanceFieldEx::init(Composite& rootNode) {
 	//SANITY_CHECK_DISTANCE_FIELD();
-	w = getContext()->width();
-	h = getContext()->height();
+	currentIso = maxDistance;
+	int w = getContext()->width()/2;
+	int h = getContext()->height()/2;
+	std::cout << "Dimensions " << w << " " << h << std::endl;
 	GLFrameBuffer renderBuffer;
 	//Render text to image
 	NVGcontext* nvg = getContext()->nvgContext;
@@ -39,21 +41,23 @@ bool DistanceFieldEx::init(Composite& rootNode) {
 		nvgBeginFrame(nvg, w, h, 1.0f);
 			nvgFontFaceId(nvg, getContext()->getFont(FontType::Bold)->handle);
 			nvgFillColor(nvg, Color(0, 0, 0));
-			nvgFontSize(nvg, 300.0f);
+			nvgFontSize(nvg, 150.0f);
 			nvgTextAlign(nvg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
 			nvgText(nvg, w * 0.5f, h * 0.5f, "Alloy", nullptr);
 		nvgEndFrame(nvg);
 	renderBuffer.end();
 	ImageRGBAf img = renderBuffer.getTexture().read();
 	FlipVertical(img);
-	Image1f gray, distField;
+	Image1f gray;
 	ConvertImage(img, gray);
 	//Make boundary == 0, outside == 0.5 inside == -0.5
 	gray -= float1(0.5f);
-	const float maxDistance = 40.0f;
 	DistanceField2f df;
 	//Solve distance field out to +/- 40 pixels
+
+	gray.writeToXML(GetDesktopDirectory() + "\\gray.xml");
 	df.solve(gray, distField, maxDistance);
+	distField.writeToXML(GetDesktopDirectory()+"\\dist_field.xml");
 	IsoContour isoContour;
 	isoContour.solve(distField,curvePoints,curveIndexes, 0.0f, TopologyRule2D::Unconstrained);
 	//Normalize distance field range so it can be rendered as gray scale image.
@@ -62,10 +66,39 @@ bool DistanceFieldEx::init(Composite& rootNode) {
 			CoordPX(0.0f, 0.0f), CoordPercent(1.0f,1.0f), AspectRule::FixedHeight,
 			COLOR_NONE, COLOR_NONE, Color(200, 200, 200, 255), UnitPX(1.0f));
 	rootNode.add(imageRegion);
-	DrawPtr draw = DrawPtr(new Draw("Iso-Contour", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)));
+	draw = DrawPtr(new Draw("Iso-Contour", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)));
 	draw->setAspectRule(AspectRule::FixedHeight);
+	draw->onMouseOver = [this](const AlloyContext* context, const InputEvent& e) {
+		box2px bounds = draw->getBounds();
+		float2 pt=(e.cursor-bounds.position)/bounds.dimensions;
+		float level = distField(pt.x*distField.width, pt.y*distField.height).x;
+		if (std::abs(level-currentIso)>1.0f/maxDistance&&level<0.999f) {
+			IsoContour traceContour;
+			traceContour.solve(distField, tracePoints, traceIndexes, level, TopologyRule2D::Unconstrained);
+			currentIso = level;
+		}
+		return false;
+	};
 	draw->onDraw = [this](const AlloyContext* context, const box2px& bounds) {
 		NVGcontext* nvg = context->nvgContext;
+		nvgStrokeWidth(nvg, 3.0f);
+		nvgStrokeColor(nvg, Color(128, 128, 255));
+		nvgLineCap(nvg, NVG_ROUND);
+		nvgBeginPath(nvg);
+		for (int n = 0;n < (int)traceIndexes.size();n++) {
+			uint2 ln = traceIndexes[n];
+			float2 pt = tracePoints[ln.x];
+			pt.x = pt.x / (float)distField.width;
+			pt.y = pt.y / (float)distField.height;
+			pt = pt*bounds.dimensions + bounds.position;
+			nvgMoveTo(nvg, pt.x, pt.y);
+			pt = tracePoints[ln.y];
+			pt.x = pt.x / (float)distField.width;
+			pt.y = pt.y / (float)distField.height;
+			pt = pt*bounds.dimensions + bounds.position;
+			nvgLineTo(nvg, pt.x, pt.y);
+		}
+		nvgStroke(nvg);
 		nvgStrokeWidth(nvg, 4.0f);
 		nvgStrokeColor(nvg, Color( 255,128,64));
 		nvgLineCap(nvg, NVG_ROUND);
@@ -75,8 +108,8 @@ bool DistanceFieldEx::init(Composite& rootNode) {
 			bool firstTime = true;
 			for (uint32_t idx : curve) {
 				float2 pt = curvePoints[idx];
-				pt.x = pt.x / (float)w;
-				pt.y = pt.y / (float)h;
+				pt.x = pt.x / (float)distField.width;
+				pt.y = pt.y / (float)distField.height;
 				pt = pt*bounds.dimensions + bounds.position;
 				if (firstTime) {
 					nvgMoveTo(nvg, pt.x, pt.y);
@@ -87,6 +120,8 @@ bool DistanceFieldEx::init(Composite& rootNode) {
 			}
 		}
 		nvgStroke(nvg);
+
+
 	};
 	rootNode.add(draw);
 	return true;

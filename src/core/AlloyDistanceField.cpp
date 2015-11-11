@@ -43,8 +43,8 @@ const float DistanceField2f::DISTANCE_UNDEFINED =
 float DistanceField3f::march(float IMv, float IPv, float JMv, float JPv,
 		float KMv, float KPv, int IMl, int IPl, int JMl, int JPl, int KMl,
 		int KPl) {
-	float s, s2;
-	float tmp;
+	double s, s2;
+	double tmp;
 	int count;
 	s = 0;
 	s2 = 0;
@@ -91,8 +91,8 @@ float DistanceField3f::march(float IMv, float IPv, float JMv, float JPv,
 		s2 += KPv * KPv;
 		count++;
 	}
-	tmp = (s + std::sqrt((s * s - count * (s2 - 1.0f)))) / count;
-	return tmp;
+	tmp = (s + std::sqrt(std::max(0.0,s * s - count * (s2 - 1.0f)))) / count;
+	return (float)tmp;
 }
 void DistanceField3f::solve(const Volume1f& vol, Volume1f& distVol,
 		float maxDistance) {
@@ -418,8 +418,8 @@ void DistanceField3f::solve(const Volume1f& vol, Volume1f& distVol,
 
 float DistanceField2f::march(float IMv, float IPv, float JMv, float JPv,
 		int IMl, int IPl, int JMl, int JPl) {
-	float s, s2;
-	float tmp;
+	double s, s2;
+	double tmp;
 	int count;
 	s = 0;
 	s2 = 0;
@@ -452,8 +452,8 @@ float DistanceField2f::march(float IMv, float IPv, float JMv, float JPv,
 		s2 += JPv * JPv;
 		count++;
 	}
-	tmp = (s + std::sqrt((s * s - count * (s2 - 1.0f)))) / count;
-	return tmp;
+	tmp = (s + std::sqrt(std::max(0.0, s * s - count * (s2 - 1.0f)))) / count;
+	return (float)tmp;
 }
 void DistanceField2f::solve(const Image1f& vol, Image1f& distVol,
 		float maxDistance) {
@@ -550,6 +550,7 @@ void DistanceField2f::solve(const Image1f& vol, Image1f& distVol,
 			}
 		}
 	}
+
 	heap.reserve(countAlive);
 	{
 		int koff;
@@ -581,6 +582,7 @@ void DistanceField2f::solve(const Image1f& vol, Image1f& distVol,
 						JMs = signVol(ni, nj - 1).x;
 						JMl = labelVol(ni, nj - 1);
 					} else {
+						JMv = maxDistance;
 						JMs = 0;
 						JMl = 0;
 					}
@@ -589,27 +591,30 @@ void DistanceField2f::solve(const Image1f& vol, Image1f& distVol,
 						JPs = signVol(ni, nj + 1).x;
 						JPl = labelVol(ni, nj + 1);
 					} else {
+						JPv = maxDistance;
 						JPs = 0;
 						JPl = 0;
 					}
 					if (ni < width - 1) {
 						IPv = distVol(ni + 1, nj).x;
-						IMs = signVol(ni + 1, nj).x;
+						IPs = signVol(ni + 1, nj).x;
 						IPl = labelVol(ni + 1, nj);
 					} else {
-						IMs = 0;
+						IPv = maxDistance;
+						IPs = 0;
 						IPl = 0;
 					}
 					if (ni > 0) {
 						IMv = distVol(ni - 1, nj).x;
-						IPs = signVol(ni - 1, nj).x;
+						IMs = signVol(ni - 1, nj).x;
 						IMl = labelVol(ni - 1, nj);
 					} else {
-						IPs = 0;
+						IMv = maxDistance;
+						IMs = 0;
 						IMl = 0;
 					}
 					signVol(ni, nj).x = aly::sign(JMs + JPs + IPs + IMs);
-					newvalue = march(JMv, JPv, IPv, IMv, JMl, JPl, IPl, IMl);
+					newvalue = march(JMv, JPv, IMv, IPv, JMl, JPl, IMl, IPl);
 					distVol(ni, nj).x = (float) (newvalue);
 					voxelList.push_back(
 							PixelIndex(Coord(ni, nj), (float) newvalue));
@@ -617,6 +622,7 @@ void DistanceField2f::solve(const Image1f& vol, Image1f& distVol,
 				}
 			}
 		}
+
 		while (!heap.isEmpty()) {
 			int i, j;
 			he = heap.remove();
@@ -641,6 +647,7 @@ void DistanceField2f::solve(const Image1f& vol, Image1f& distVol,
 					JMs = signVol(ni, nj - 1).x;
 					JMl = labelVol(ni, nj - 1);
 				} else {
+					JMv = maxDistance;
 					JMs = 0;
 					JMl = 0;
 				}
@@ -649,28 +656,31 @@ void DistanceField2f::solve(const Image1f& vol, Image1f& distVol,
 					JPs = signVol(ni, nj + 1).x;
 					JPl = labelVol(ni, nj + 1);
 				} else {
+					JPv = maxDistance;
 					JPs = 0;
 					JPl = 0;
 				}
 
 				if (ni < width - 1) {
 					IPv = distVol(ni + 1, nj).x;
-					IMs = signVol(ni + 1, nj).x;
+					IPs = signVol(ni + 1, nj).x;
 					IPl = labelVol(ni + 1, nj);
 				} else {
-					IMs = 0;
+					IPv = maxDistance;
+					IPs = 0;
 					IPl = 0;
 				}
 				if (ni > 0) {
 					IMv = distVol(ni - 1, nj).x;
-					IPs = signVol(ni - 1, nj).x;
+					IMs = signVol(ni - 1, nj).x;
 					IMl = labelVol(ni - 1, nj);
 				} else {
-					IPs = 0;
+					IMv = maxDistance;
+					IMs = 0;
 					IMl = 0;
 				}
 				signVol(ni, nj).x = aly::sign(JMs + JPs + IPs + IMs);
-				newvalue = march(JMv, JPv, IPv, IMv, JMl, JPl, IPl, IMl);
+				newvalue = march(JMv, JPv, IMv, IPv, JMl, JPl, IMl, IPl);
 				voxelList.push_back(
 						PixelIndex(Coord(ni, nj), (float) newvalue));
 				PixelIndex* vox = &voxelList.back();
@@ -683,6 +693,9 @@ void DistanceField2f::solve(const Image1f& vol, Image1f& distVol,
 			}
 		}
 	}
+	signVol.writeToXML(GetDesktopDirectory() + "\\sign_vol.xml");
+	labelVol.writeToXML(GetDesktopDirectory() + "\\label_vol.xml");
+	distVol.writeToXML(GetDesktopDirectory() + "\\dist_vol.xml");
 #pragma omp parallel for
 	for (int j = 0; j < height; j++) {
 		for (int i = 0; i < width; i++) {

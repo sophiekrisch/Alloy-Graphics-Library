@@ -844,7 +844,7 @@ template<class T, int C, ImageType I> void WriteImageToRawFile(
 		for (int j = 0; j < img.height; j++) {
 			for (int i = 0; i < img.width; i++) {
 				T val = img(i, j)[c];
-				fwrite(&val, sizeof(float), 1, f);
+				fwrite(&val, sizeof(T), 1, f);
 			}
 		}
 	}

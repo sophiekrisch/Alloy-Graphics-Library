@@ -769,7 +769,7 @@ namespace aly {
 				for (int j = 0; j < img.cols; j++) {
 					for (int i = 0; i < img.rows; i++) {
 						T val = img(i, j, k)[c];
-						fwrite(&val, sizeof(float), 1, f);
+						fwrite(&val, sizeof(T), 1, f);
 					}
 				}
 			}

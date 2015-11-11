@@ -26,9 +26,14 @@
 #include "AlloyVector.h"
 class DistanceFieldEx: public aly::Application {
 protected:
+	const float maxDistance = 20.0f;
+	float currentIso;
 	aly::Vector2f curvePoints;
 	std::vector<std::list<uint32_t>> curveIndexes;
-	int w, h;
+	aly::Vector2f tracePoints;
+	aly::Vector2ui traceIndexes;
+	aly::Image1f distField;
+	aly::DrawPtr draw;
 public:
 	DistanceFieldEx();
 	bool init(aly::Composite& rootNode);
