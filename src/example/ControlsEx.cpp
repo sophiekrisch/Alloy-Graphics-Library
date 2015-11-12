@@ -97,7 +97,10 @@ bool ControlsEx::init(Composite& rootNode) {
 	TextFieldPtr tfield = MakeTextField("Text Field", CoordPercent(0.1f, 0.8f),
 		CoordPX(200.0f, 50.0f), Theme::Default.LIGHT,
 		Theme::Default.DARK_TEXT);
+	NumberFieldPtr nfield = NumberFieldPtr(new NumberField("Number Field", CoordPercent(0.1f, 0.4f),
+		CoordPX(200.0f, 30.0f),NumberType::Float));
 	rootNode.add(tfield);
+	rootNode.add(nfield);
 	progressTask = std::unique_ptr<aly::RecurrentWorker>(
 		new RecurrentWorker([pbar](uint64_t iter) {
 		//std::cout << "Iteration " << iter << std::endl;

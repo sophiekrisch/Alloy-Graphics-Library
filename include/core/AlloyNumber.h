@@ -32,7 +32,23 @@
 #include "cereal/types/tuple.hpp"
 
 namespace aly {
-
+	enum class NumberType {
+		Integer, Float, Double, Boolean
+	};
+	template<class C, class R> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, const NumberType& type) {
+		switch (type) {
+		case NumberType::Integer:
+			return ss << "Integer";
+		case NumberType::Float:
+			return ss << "Float";
+		case NumberType::Double:
+			return ss << "Double";
+		case NumberType::Boolean:
+			return ss << "Boolean";
+		}
+		return ss;
+	}
 class Number {
 public:
 	struct Interface {
@@ -45,7 +61,7 @@ public:
 		virtual void setValue(double value) = 0;
 		virtual void setValue(bool value) = 0;
 		virtual std::string toString() const = 0;
-		std::string virtual type() const = 0;
+		NumberType virtual type() const = 0;
 	};
 private:
 	template<class T> struct Impl: public Interface {
@@ -53,7 +69,7 @@ private:
 		Impl(const T& value) :
 				value(value) {
 		}
-		std::string virtual type() const {
+		NumberType virtual type() const {
 			return value.type();
 		}
 		virtual int toInteger() const {
@@ -88,7 +104,8 @@ private:
 public:
 	template<class Archive> void save(Archive& archive) const {
 		if (impl.get()) {
-			archive(cereal::make_nvp(impl->type(), impl->toString()));
+			std::string typeName = MakeString() << impl->type();
+			archive(cereal::make_nvp(typeName, impl->toString()));
 		} else {
 			archive("");
 		}
@@ -160,7 +177,7 @@ public:
 			throw std::runtime_error("Number storage type has not been defined.");
 		impl->setValue(val);
 	}
-	virtual std::string type() const {
+	virtual NumberType type() const {
                 if (impl.get() == nullptr)
                         throw std::runtime_error("Number storage type has not been defined.");
                 return impl->type();
@@ -174,11 +191,12 @@ private:
 	int value = 0;
 public:
 	Integer() {}
-	std::string virtual type() const {
-		return "int";
+	NumberType virtual type() const {
+		return NumberType::Integer;
 	}
 	template<class Archive> void serialize(Archive& archive) {
-		archive(cereal::make_nvp(type(), value));
+		std::string typeName = MakeString() << type();
+		archive(cereal::make_nvp(typeName, value));
 	}
 
 	int toInteger() const {
@@ -223,11 +241,12 @@ private:
 	float value = 0;
 public:
 	Float() {}
-	std::string virtual type() const {
-		return "float";
+	NumberType virtual type() const {
+		return NumberType::Float;
 	}
 	template<class Archive> void serialize(Archive& archive) {
-		archive(cereal::make_nvp(type(), value));
+		std::string typeName = MakeString() << type();
+		archive(cereal::make_nvp(typeName, value));
 	}
 	int toInteger() const {
 		return (int) value;
@@ -270,11 +289,12 @@ private:
 	double value = 0;
 public:
 	Double(){}
-	std::string virtual type() const {
-		return "double";
+	NumberType virtual type() const {
+		return NumberType::Double;
 	}
 	template<class Archive> void serialize(Archive& archive) {
-		archive(cereal::make_nvp(type(), value));
+		std::string typeName = MakeString() << type();
+		archive(cereal::make_nvp(typeName, value));
 	}
 	int toInteger() const {
 		return (int) value;
@@ -317,11 +337,12 @@ private:
 	bool value = 0;
 public:
 	Boolean(){}
-	std::string virtual type() const {
-		return "boolean";
+	NumberType virtual type() const {
+		return NumberType::Boolean;
 	}
 	template<class Archive> void serialize(Archive& archive) {
-		archive(cereal::make_nvp(type(), value));
+		std::string typeName = MakeString() << type();
+		archive(cereal::make_nvp(typeName, value));
 	}
 	int toInteger() const {
 		return value ? 1 : 0;
@@ -359,6 +380,21 @@ public:
 	virtual ~Boolean() {
 	}
 };
+template<class T> Number MakeNumber(const NumberType& numberType,T value) {
+	switch (numberType) {
+	case NumberType::Integer:
+		return Integer((int)(value));
+	case NumberType::Float:
+		return Float((float)(value));
+	case NumberType::Double:
+		return Double((double)(value));
+	case NumberType::Boolean:
+		return Boolean((value!=0));
+	default:
+		throw std::runtime_error("Number type not defined.");
+	}
+	return Integer(0);
+}
 template<class C, class R> std::basic_ostream<C, R> & operator <<(
 	std::basic_ostream<C, R> & ss, const Number& v) {
 	return ss << v.toString();

@@ -43,6 +43,7 @@ enum class FileDialogType {
 enum class GlyphType {
 	Image, Awesome
 };
+
 enum class InputType {
 	Unspecified, Cursor, MouseButton, Key, Character, Scroll
 };

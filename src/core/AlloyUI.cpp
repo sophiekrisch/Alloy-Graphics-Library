@@ -35,6 +35,7 @@ namespace aly {
 	const RGBA DEBUG_ON_TOP_HOVER_COLOR = RGBA(180, 180, 0, 255);
 	const float Composite::scrollBarSize = 15.0f;
 	const float TextField::PADDING = 2;
+	const float NumberField::PADDING = 2;
 	bool Region::isVisible() const {
 		if (!visible)
 			return false;
@@ -1499,6 +1500,332 @@ namespace aly {
 			showDefaultLabel = true;
 		}
 	}
+
+	void NumberField::setValue(const std::string& text) {
+		this->value = text;
+		textStart = 0;
+		moveCursorTo((int)text.size());
+	}
+
+	void NumberField::erase() {
+		int lo = std::min(cursorEnd, cursorStart);
+		int hi = std::max(cursorEnd, cursorStart);
+		if (hi != lo) {
+			value.erase(value.begin() + lo, value.begin() + hi);
+		}
+		cursorEnd = cursorStart = lo;
+		textStart = clamp(cursorStart - 1, 0, textStart);
+	}
+
+	void NumberField::dragCursorTo(int index) {
+		if (index < 0 || index >(int) value.size())
+			throw std::runtime_error(
+				MakeString() << name << ": Cursor position out of range.");
+		cursorStart = index;
+		textStart = clamp(cursorStart - 1, 0, textStart);
+	}
+
+	void NumberField::moveCursorTo(int index, bool isShiftHeld) {
+		dragCursorTo(index);
+		if (!isShiftHeld)
+			cursorEnd = cursorStart;
+	}
+
+	void NumberField::clear() {
+		setValue("");
+	}
+
+	NumberField::NumberField(const std::string& name) :
+		Composite(name), label(name), value("") {
+		Application::addListener(this);
+		lastTime = std::chrono::high_resolution_clock::now();
+	}
+	NumberField::NumberField(const std::string& name, const AUnit2D& position,
+		const AUnit2D& dimensions,const NumberType& numberType) :
+		Composite(name, position, dimensions), label(name), value(""),numberType(numberType) {
+		Application::addListener(this);
+		lastTime = std::chrono::high_resolution_clock::now();
+		numberValue = MakeNumber(numberType, 0);
+	}
+	void NumberField::handleCharacterInput(AlloyContext* context,
+		const InputEvent& e) {
+		if (e.codepoint < 128 && isprint(e.codepoint) && !e.isControlDown()) {
+			erase();
+			value.insert(value.begin() + cursorStart, e.codepoint);
+			showCursor = true;
+			cursorEnd = ++cursorStart;
+			showDefaultLabel = false;
+			if (onKeyInput)
+				onKeyInput(this);
+		}
+	}
+	void NumberField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
+		showCursor = true;
+		if (e.isDown()) {
+			switch (e.key) {
+			case GLFW_KEY_RIGHT:
+				if (cursorStart < (int)value.size()) {
+					moveCursorTo(cursorStart + 1, e.isShiftDown());
+				}
+				else {
+					moveCursorTo((int)value.size(), e.isShiftDown());
+				}
+				break;
+			case GLFW_KEY_LEFT:
+				if (cursorStart > 0) {
+					moveCursorTo(cursorStart - 1, e.isShiftDown());
+				}
+				else {
+					moveCursorTo(0, e.isShiftDown());
+				}
+				break;
+			case GLFW_KEY_END:
+				moveCursorTo((int)value.size(), e.isShiftDown());
+				break;
+			case GLFW_KEY_HOME:
+				moveCursorTo(0, e.isShiftDown());
+				break;
+			case GLFW_KEY_BACKSPACE:
+				if (cursorEnd != cursorStart)
+					erase();
+				else if (cursorStart > 0) {
+					moveCursorTo(cursorStart - 1);
+					value.erase(value.begin() + cursorStart);
+					showDefaultLabel = false;
+					if (onKeyInput)
+						onKeyInput(this);
+				}
+				break;
+			case GLFW_KEY_A:
+				if (e.isControlDown()) {
+					cursorEnd = 0;
+					cursorStart = (int)(value.size());
+				}
+				break;
+			case GLFW_KEY_C:
+				if (e.isControlDown()) {
+					glfwSetClipboardString(context->window,
+						value.substr(std::min(cursorEnd, cursorStart),
+							std::abs(cursorEnd - cursorStart)).c_str());
+				}
+				break;
+			case GLFW_KEY_X:
+				if (e.isControlDown()) {
+					glfwSetClipboardString(context->window,
+						value.substr(std::min(cursorEnd, cursorStart),
+							std::abs(cursorEnd - cursorStart)).c_str());
+					erase();
+				}
+				break;
+			case GLFW_KEY_V:
+				if (e.isControlDown()) {
+					erase();
+					auto pasteText = glfwGetClipboardString(context->window);
+					value.insert(cursorStart, pasteText);
+					moveCursorTo(cursorStart + (int)std::string(pasteText).size(),
+						e.isShiftDown());
+				}
+				break;
+			case GLFW_KEY_DELETE:
+				if (cursorEnd != cursorStart)
+					erase();
+				else if (cursorStart < (int)value.size())
+					value.erase(value.begin() + cursorStart);
+				showDefaultLabel = false;
+				if (onKeyInput)
+					onKeyInput(this);
+				break;
+			case GLFW_KEY_ENTER:
+				if (onTextEntered) {
+					onTextEntered(this);
+				}
+				break;
+			}
+		}
+	}
+
+	void NumberField::handleMouseInput(AlloyContext* context, const InputEvent& e) {
+		FontPtr fontFace = context->getFont(FontType::Bold);
+		if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
+			if (e.isDown()) {
+				showCursor = true;
+				showDefaultLabel = false;
+				int shift = (int)(e.cursor.x - textOffsetX);
+				int cursorPos = fontFace->getCursorPosition(value, fontSize, shift);
+				moveCursorTo(cursorPos);
+				textStart = 0;
+				dragging = true;
+			}
+			else {
+				dragging = false;
+			}
+		}
+	}
+	void NumberField::handleCursorInput(AlloyContext* context, const InputEvent& e) {
+		FontPtr fontFace = context->getFont(FontType::Bold);
+		if (dragging) {
+			int shift = (int)(e.cursor.x - textOffsetX);
+			dragCursorTo(fontFace->getCursorPosition(value, fontSize, shift));
+		}
+	}
+	bool NumberField::onEventHandler(AlloyContext* context, const InputEvent& e) {
+		if (isVisible()) {
+			if (!context->isFocused(this) || fontSize <= 0)
+				return false;
+			switch (e.type) {
+			case InputType::MouseButton:
+				handleMouseInput(context, e);
+				break;
+			case InputType::Character:
+				handleCharacterInput(context, e);
+				break;
+			case InputType::Key:
+				handleKeyInput(context, e);
+				break;
+			case InputType::Cursor:
+				handleCursorInput(context, e);
+				break;
+			case InputType::Unspecified:
+				break;
+			case InputType::Scroll:
+				break;
+			}
+		}
+		return Region::onEventHandler(context, e);
+	}
+	void NumberField::draw(AlloyContext* context) {
+
+		float ascender, descender, lineh;
+		std::vector<NVGglyphPosition> positions(value.size());
+		NVGcontext* nvg = context->nvgContext;
+		box2px bounds = getBounds();
+		bool hover = context->isMouseOver(this);
+		float x = bounds.position.x;
+		float y = bounds.position.y;
+		float w = bounds.dimensions.x;
+		float h = bounds.dimensions.y;
+		if (hover) {
+			context->setCursor(&Cursor::TextInsert);
+		}
+		if (backgroundColor->a > 0) {
+			if (hover) {
+
+				nvgBeginPath(nvg);
+				nvgRoundedRect(nvg, x, y, w, h, context->theme.CORNER_RADIUS);
+				nvgFillColor(nvg, *backgroundColor);
+				nvgFill(nvg);
+
+			}
+			else {
+				nvgBeginPath(nvg);
+				nvgRoundedRect(nvg, x + 1, y + 1, w - 2, h - 2,
+					context->theme.CORNER_RADIUS);
+				nvgFillColor(nvg, *backgroundColor);
+				nvgFill(nvg);
+			}
+		}
+
+		pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
+			context->pixelRatio);
+
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		double elapsed =
+			std::chrono::duration<double>(currentTime - lastTime).count();
+		if (elapsed >= 0.5f) {
+			showCursor = !showCursor;
+			lastTime = currentTime;
+		}
+		textOffsetX = x + 2.0f * lineWidth + PADDING;
+		float textY = y;
+
+		NVGpaint bg = nvgBoxGradient(nvg, x + 1, y + 3, w - 2 * PADDING,
+			h - 2 * PADDING, context->theme.CORNER_RADIUS, 4,
+			context->theme.HIGHLIGHT.toSemiTransparent(0.5f),
+			context->theme.SHADOW.toSemiTransparent(0.5f));
+		nvgBeginPath(nvg);
+		nvgRoundedRect(nvg, x + PADDING, y + PADDING, w - 2 * PADDING,
+			h - 2 * PADDING, context->theme.CORNER_RADIUS);
+		nvgFillPaint(nvg, bg);
+		nvgFill(nvg);
+
+		fontSize = std::max(8.0f, h - 4 * PADDING);
+		nvgFontSize(nvg, fontSize);
+		nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold));
+		nvgTextMetrics(nvg, &ascender, &descender, &lineh);
+
+		pushScissor(nvg, x + PADDING, y, w - 2 * PADDING, h);
+
+		nvgTextAlign(nvg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
+		positions.resize(value.size() + 1);
+		nvgTextGlyphPositions(nvg, 0, textY, value.data(),
+			value.data() + value.size(), positions.data(),
+			(int)positions.size());
+		float fwidth = (w - 3.0f * PADDING - 2.0f * lineWidth);
+		if (cursorStart > 0) {
+			if (positions[cursorStart - 1].maxx - positions[textStart].minx
+				> fwidth) {
+				while (positions[cursorStart - 1].maxx
+					> positions[textStart].minx + fwidth) {
+					if (textStart >= (int)positions.size() - 1)
+						break;
+					textStart++;
+				}
+			}
+		}
+		if (!showDefaultLabel) {
+			textOffsetX = textOffsetX - positions[textStart].minx;
+		}
+		float cursorOffset = textOffsetX
+			+ (cursorStart ? positions[cursorStart - 1].maxx - 1 : 0);
+		bool isFocused = context->isFocused(this);
+
+		if (cursorEnd != cursorStart && isFocused) {
+			int lo = std::min(cursorEnd, cursorStart);
+			int hi = std::max(cursorEnd, cursorStart);
+			float x0 = textOffsetX + (lo ? positions[lo - 1].maxx - 1 : 0);
+			float x1 = textOffsetX + (hi ? positions[hi - 1].maxx - 1 : 0);
+			nvgBeginPath(nvg);
+			nvgRect(nvg, x0, textY + (h - lineh) / 2 + PADDING, x1 - x0,
+				lineh - 2 * PADDING);
+			nvgFillColor(nvg,
+				isFocused ?
+				context->theme.DARK.toSemiTransparent(0.5f) :
+				context->theme.DARK.toSemiTransparent(0.25f));
+			nvgFill(nvg);
+		}
+
+		if (showDefaultLabel) {
+			nvgFillColor(nvg, backgroundColor->toDarker(0.75f));
+			nvgText(nvg, textOffsetX, textY + h / 2, label.c_str(), NULL);
+		}
+		else {
+			nvgFillColor(nvg, *textColor);
+			nvgText(nvg, textOffsetX, textY + h / 2, value.c_str(), NULL);
+		}
+		if (isFocused && showCursor) {
+			nvgBeginPath(nvg);
+
+			nvgMoveTo(nvg, cursorOffset, textY + h / 2 - lineh / 2 + PADDING);
+			nvgLineTo(nvg, cursorOffset, textY + h / 2 + lineh / 2 - PADDING);
+			nvgStrokeWidth(nvg, lineWidth);
+			nvgLineCap(nvg, NVG_ROUND);
+			nvgStrokeColor(nvg, context->theme.SHADOW);
+			nvgStroke(nvg);
+		}
+		popScissor(nvg);
+		if (borderColor->a > 0) {
+
+			nvgBeginPath(nvg);
+			nvgStrokeWidth(nvg, lineWidth);
+			nvgRoundedRect(nvg, x + lineWidth, y + lineWidth, w - 2 * lineWidth,
+				h - 2 * lineWidth, context->theme.CORNER_RADIUS);
+			nvgStrokeColor(nvg, *borderColor);
+			nvgStroke(nvg);
+		}
+		if (!isFocused && value.size() == 0) {
+			showDefaultLabel = true;
+		}
+	}
 	FileField::FileField(const std::string& name, const AUnit2D& position,
 		const AUnit2D& dimensions) :
 		TextField(name, position, dimensions) {
@@ -2836,9 +3163,6 @@ namespace aly {
 			nvgFillColor(nvg, *backgroundColor);
 			nvgFill(nvg);
 		}
-
-
-
 		float th = fontSize.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
 		nvgFontSize(nvg, th);

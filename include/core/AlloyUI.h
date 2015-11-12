@@ -449,6 +449,49 @@ public:
 	std::function<void(TextField*)> onTextEntered;
 	std::function<void(TextField*)> onKeyInput;
 };
+
+class NumberField : public Composite {
+protected:
+	bool showDefaultLabel = true;
+	std::string label;
+	std::string value;
+	float fontSize = 0;
+	float textOffsetX = 0;
+	bool showCursor = false;
+	std::chrono::high_resolution_clock::time_point lastTime;
+	void clear();
+	void erase();
+	void handleCursorInput(AlloyContext* context, const InputEvent& e);
+	void handleMouseInput(AlloyContext* context, const InputEvent& e);
+	void handleKeyInput(AlloyContext* context, const InputEvent& e);
+	void handleCharacterInput(AlloyContext* context, const InputEvent& e);
+	void moveCursorTo(int index, bool isShiftHeld = false);
+	void dragCursorTo(int index);
+	int cursorStart = 0, cursorEnd = 0, textStart = 0;
+	bool dragging = false;
+	std::string lastValue;
+	Number numberValue;
+	NumberType numberType;
+public:
+	static const float PADDING;
+	AColor textColor = MakeColor(Theme::Default.LIGHT_TEXT);
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
+		override;
+	virtual inline ~NumberField() {
+	}
+	NumberField(
+		const std::string& name = MakeString() << "t" << std::setw(8)
+		<< std::setfill('0') << (REGION_COUNTER++));
+	NumberField(const std::string& name, const AUnit2D& position,
+		const AUnit2D& dimensions,const NumberType& numberType);
+	virtual void draw(AlloyContext* context) override;
+	virtual void setValue(const std::string& value);
+	Number getValue() const {
+		return numberValue;
+	}
+	std::function<void(NumberField*)> onTextEntered;
+	std::function<void(NumberField*)> onKeyInput;
+};
 class SelectionBox: public Region {
 protected:
 	int selectedIndex = -1;
@@ -726,5 +769,6 @@ typedef std::shared_ptr<Menu> MenuPtr;
 typedef std::shared_ptr<MenuHeader> MenuHeaderPtr;
 typedef std::shared_ptr<MenuBar> MenuBarPtr;
 typedef std::shared_ptr<Draw> DrawPtr;
+typedef std::shared_ptr<NumberField> NumberFieldPtr;
 }
 #endif /* ALLOYUI_H_ */
