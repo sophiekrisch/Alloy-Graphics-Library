@@ -489,6 +489,7 @@ public:
 		const AUnit2D& dimensions,const NumberType& numberType);
 	virtual void draw(AlloyContext* context) override;
 	virtual bool setValue(const std::string& value);
+	bool setNumberValue(const Number& val);
 	bool validate();
 	Number getValue() const {
 		return numberValue;

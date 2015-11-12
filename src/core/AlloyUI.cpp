@@ -1501,6 +1501,9 @@ namespace aly {
 			showDefaultLabel = true;
 		}
 	}
+	bool NumberField::setNumberValue(const Number& val) {
+		return setValue(MakeString() << val);
+	}
 	bool NumberField::validate() {
 		int dotCount = 0;
 		int index = 0;
