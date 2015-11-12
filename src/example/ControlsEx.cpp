@@ -97,10 +97,20 @@ bool ControlsEx::init(Composite& rootNode) {
 	TextFieldPtr tfield = MakeTextField("Text Field", CoordPercent(0.1f, 0.8f),
 		CoordPX(200.0f, 50.0f), Theme::Default.LIGHT,
 		Theme::Default.DARK_TEXT);
-	NumberFieldPtr nfield = NumberFieldPtr(new NumberField("Number Field", CoordPercent(0.1f, 0.4f),
-		CoordPX(200.0f, 30.0f),NumberType::Float));
+	NumberFieldPtr ifield = MakeNumberField("Integer Field", CoordPerPX(0.5f, 0.5f,0.0f,0.0f),
+		CoordPX(200.0f, 30.0f), NumberType::Integer, Theme::Default.LIGHT,
+		Theme::Default.DARK_TEXT);
+	NumberFieldPtr bfield = MakeNumberField("Binary Field", CoordPerPX(0.5f, 0.5f, 0.0f, 35.0f),
+		CoordPX(200.0f, 30.0f), NumberType::Boolean, Theme::Default.LIGHT,
+		Theme::Default.DARK_TEXT);
+	NumberFieldPtr ffield = MakeNumberField("Float Field", CoordPercent(0.1f, 0.4f),
+		CoordPX(200.0f, 30.0f),NumberType::Float, Theme::Default.LIGHT,
+		Theme::Default.DARK_TEXT);
 	rootNode.add(tfield);
-	rootNode.add(nfield);
+	rootNode.add(bfield);
+	rootNode.add(ifield);
+	rootNode.add(ffield);
+
 	progressTask = std::unique_ptr<aly::RecurrentWorker>(
 		new RecurrentWorker([pbar](uint64_t iter) {
 		//std::cout << "Iteration " << iter << std::endl;

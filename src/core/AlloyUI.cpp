@@ -24,6 +24,7 @@
 #include "AlloyApplication.h"
 #include "AlloyDrawUtil.h"
 #include "AlloyFileUtil.h"
+#include <cctype>
 namespace aly {
 	uint64_t Region::REGION_COUNTER = 0;
 	const RGBA DEBUG_STROKE_COLOR = RGBA(32, 32, 200, 255);
@@ -1500,11 +1501,108 @@ namespace aly {
 			showDefaultLabel = true;
 		}
 	}
-
-	void NumberField::setValue(const std::string& text) {
+	bool NumberField::validate() {
+		int dotCount = 0;
+		int index = 0;
+		try {
+			switch (numberType) {
+			case NumberType::Boolean:
+				if (value.length() == 1) {
+					for (char c : value) {
+						if (c != '0' && c != '1') {
+							dotCount += 2;
+							break;
+						}
+					}
+				}
+				else {
+					dotCount = 2;
+				}
+				if (dotCount < 2) {
+					valid = true;
+				}
+				else {
+					valid = false;
+				}
+				numberValue.setValue(std::stoi(value)!=0);
+				break;
+			case NumberType::Integer:
+				for (char c : value) {
+					if (index == 0 && c == '-') {
+						//negative is first character, skip.
+						continue;
+					}
+					if (!isdigit(c)) {
+						//Case for any other letter. we ignore exponential notation.
+						dotCount += 2;
+						break;
+					}
+					index++;
+				}
+				if (dotCount < 2) {
+					valid = true;
+				}
+				else {
+					valid = false;
+				}
+				numberValue.setValue(std::stoi(value));
+				break;
+			case NumberType::Double:
+			case NumberType::Float:
+				for (char c : value) {
+					if (index == 0 && c == '-') {
+						//negative is first character, skip.
+						continue;
+					}
+					if (!isdigit(c)) {
+						if (c == '.') {
+							//decimal is first character, must be an error.
+							if (index == 0) {
+								dotCount += 2;
+								break;
+							}
+							else {
+								dotCount++;
+							}
+						} else {
+							//Case for any other letter. we ignore exponential notation.
+							dotCount += 2;
+							break;
+						}
+					}
+					index++;
+				}
+				if (dotCount < 2) {
+					valid = true;
+				}
+				else {
+					valid = false;
+				}
+				if (numberType == NumberType::Float) {
+					numberValue.setValue(std::stof(value));
+				}
+				else {
+					numberValue.setValue(std::stod(value));
+				}
+				break;
+			default:
+				valid = false;
+			}
+		} catch (std::invalid_argument&) {
+			valid = false;
+		}
+		catch (std::out_of_range&) {
+			valid = false;
+		}
+		return valid;
+	}
+	bool NumberField::setValue(const std::string& text) {
+		
 		this->value = text;
+		validate();
 		textStart = 0;
 		moveCursorTo((int)text.size());
+		return valid;
 	}
 
 	void NumberField::erase() {
@@ -1512,6 +1610,7 @@ namespace aly {
 		int hi = std::max(cursorEnd, cursorStart);
 		if (hi != lo) {
 			value.erase(value.begin() + lo, value.begin() + hi);
+			validate();
 		}
 		cursorEnd = cursorStart = lo;
 		textStart = clamp(cursorStart - 1, 0, textStart);
@@ -1530,28 +1629,36 @@ namespace aly {
 		if (!isShiftHeld)
 			cursorEnd = cursorStart;
 	}
-
 	void NumberField::clear() {
-		setValue("");
+		if (numberType == NumberType::Double || numberType == NumberType::Float) {
+			setValue("0.0");
+		} else {
+			setValue("0");
+		}
 	}
-
-	NumberField::NumberField(const std::string& name) :
-		Composite(name), label(name), value("") {
+	NumberField::NumberField(const std::string& name, const NumberType& numberType) :
+		Composite(name), label(name), value(""), numberType(numberType) {
 		Application::addListener(this);
 		lastTime = std::chrono::high_resolution_clock::now();
+		numberValue = MakeNumber(numberType, 0);
+		invalidNumberColor=MakeColor(255, 0, 0, 128);
+		clear();
 	}
 	NumberField::NumberField(const std::string& name, const AUnit2D& position,
 		const AUnit2D& dimensions,const NumberType& numberType) :
 		Composite(name, position, dimensions), label(name), value(""),numberType(numberType) {
 		Application::addListener(this);
+		invalidNumberColor = MakeColor(255, 0, 0, 128);
 		lastTime = std::chrono::high_resolution_clock::now();
 		numberValue = MakeNumber(numberType, 0);
+		clear();
 	}
 	void NumberField::handleCharacterInput(AlloyContext* context,
 		const InputEvent& e) {
 		if (e.codepoint < 128 && isprint(e.codepoint) && !e.isControlDown()) {
 			erase();
 			value.insert(value.begin() + cursorStart, e.codepoint);
+			validate();
 			showCursor = true;
 			cursorEnd = ++cursorStart;
 			showDefaultLabel = false;
@@ -1591,6 +1698,7 @@ namespace aly {
 				else if (cursorStart > 0) {
 					moveCursorTo(cursorStart - 1);
 					value.erase(value.begin() + cursorStart);
+					validate();
 					showDefaultLabel = false;
 					if (onKeyInput)
 						onKeyInput(this);
@@ -1622,6 +1730,7 @@ namespace aly {
 					erase();
 					auto pasteText = glfwGetClipboardString(context->window);
 					value.insert(cursorStart, pasteText);
+					validate();
 					moveCursorTo(cursorStart + (int)std::string(pasteText).size(),
 						e.isShiftDown());
 				}
@@ -1629,8 +1738,9 @@ namespace aly {
 			case GLFW_KEY_DELETE:
 				if (cursorEnd != cursorStart)
 					erase();
-				else if (cursorStart < (int)value.size())
+				else if (cursorStart < (int)value.size()) {
 					value.erase(value.begin() + cursorStart);
+				}
 				showDefaultLabel = false;
 				if (onKeyInput)
 					onKeyInput(this);
@@ -1694,7 +1804,6 @@ namespace aly {
 		return Region::onEventHandler(context, e);
 	}
 	void NumberField::draw(AlloyContext* context) {
-
 		float ascender, descender, lineh;
 		std::vector<NVGglyphPosition> positions(value.size());
 		NVGcontext* nvg = context->nvgContext;
@@ -1709,14 +1818,11 @@ namespace aly {
 		}
 		if (backgroundColor->a > 0) {
 			if (hover) {
-
 				nvgBeginPath(nvg);
 				nvgRoundedRect(nvg, x, y, w, h, context->theme.CORNER_RADIUS);
 				nvgFillColor(nvg, *backgroundColor);
 				nvgFill(nvg);
-
-			}
-			else {
+			} else {
 				nvgBeginPath(nvg);
 				nvgRoundedRect(nvg, x + 1, y + 1, w - 2, h - 2,
 					context->theme.CORNER_RADIUS);
@@ -1724,10 +1830,8 @@ namespace aly {
 				nvgFill(nvg);
 			}
 		}
-
 		pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
-
 		auto currentTime = std::chrono::high_resolution_clock::now();
 		double elapsed =
 			std::chrono::duration<double>(currentTime - lastTime).count();
@@ -1736,25 +1840,31 @@ namespace aly {
 			lastTime = currentTime;
 		}
 		textOffsetX = x + 2.0f * lineWidth + PADDING;
-		float textY = y;
-
+		float textY = y;	;
+		
 		NVGpaint bg = nvgBoxGradient(nvg, x + 1, y + 3, w - 2 * PADDING,
-			h - 2 * PADDING, context->theme.CORNER_RADIUS, 4,
-			context->theme.HIGHLIGHT.toSemiTransparent(0.5f),
-			context->theme.SHADOW.toSemiTransparent(0.5f));
+				h - 2 * PADDING, context->theme.CORNER_RADIUS, 4,
+				context->theme.HIGHLIGHT.toSemiTransparent(0.5f),
+				context->theme.SHADOW.toSemiTransparent(0.5f));
+		
 		nvgBeginPath(nvg);
 		nvgRoundedRect(nvg, x + PADDING, y + PADDING, w - 2 * PADDING,
 			h - 2 * PADDING, context->theme.CORNER_RADIUS);
 		nvgFillPaint(nvg, bg);
 		nvgFill(nvg);
+		if (!valid&&!showDefaultLabel) {
+			nvgBeginPath(nvg);
+			nvgRoundedRect(nvg, x + PADDING, y + PADDING, w - 2 * PADDING,
+				h - 2 * PADDING, context->theme.CORNER_RADIUS);
+			nvgFillColor(nvg, *invalidNumberColor);
+			nvgFill(nvg);
 
+		}
 		fontSize = std::max(8.0f, h - 4 * PADDING);
 		nvgFontSize(nvg, fontSize);
 		nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold));
 		nvgTextMetrics(nvg, &ascender, &descender, &lineh);
-
 		pushScissor(nvg, x + PADDING, y, w - 2 * PADDING, h);
-
 		nvgTextAlign(nvg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
 		positions.resize(value.size() + 1);
 		nvgTextGlyphPositions(nvg, 0, textY, value.data(),
@@ -1778,7 +1888,6 @@ namespace aly {
 		float cursorOffset = textOffsetX
 			+ (cursorStart ? positions[cursorStart - 1].maxx - 1 : 0);
 		bool isFocused = context->isFocused(this);
-
 		if (cursorEnd != cursorStart && isFocused) {
 			int lo = std::min(cursorEnd, cursorStart);
 			int hi = std::max(cursorEnd, cursorStart);
@@ -1787,10 +1896,10 @@ namespace aly {
 			nvgBeginPath(nvg);
 			nvgRect(nvg, x0, textY + (h - lineh) / 2 + PADDING, x1 - x0,
 				lineh - 2 * PADDING);
-			nvgFillColor(nvg,
-				isFocused ?
-				context->theme.DARK.toSemiTransparent(0.5f) :
-				context->theme.DARK.toSemiTransparent(0.25f));
+				nvgFillColor(nvg,
+					isFocused ?
+					context->theme.DARK.toSemiTransparent(0.5f) :
+					context->theme.DARK.toSemiTransparent(0.25f));
 			nvgFill(nvg);
 		}
 
@@ -1804,7 +1913,6 @@ namespace aly {
 		}
 		if (isFocused && showCursor) {
 			nvgBeginPath(nvg);
-
 			nvgMoveTo(nvg, cursorOffset, textY + h / 2 - lineh / 2 + PADDING);
 			nvgLineTo(nvg, cursorOffset, textY + h / 2 + lineh / 2 - PADDING);
 			nvgStrokeWidth(nvg, lineWidth);
@@ -1813,6 +1921,7 @@ namespace aly {
 			nvgStroke(nvg);
 		}
 		popScissor(nvg);
+
 		if (borderColor->a > 0) {
 
 			nvgBeginPath(nvg);
@@ -2285,6 +2394,21 @@ namespace aly {
 		region->setValue(value);
 		return region;
 	}
+	std::shared_ptr<NumberField> MakeNumberField(const std::string& name,
+		const AUnit2D& position, const AUnit2D& dimensions,const NumberType& numberType,
+		const Color& bgColor, const Color& textColor,const Color& invalidColor) {
+		std::shared_ptr<NumberField> region = std::shared_ptr<NumberField>(
+			new NumberField(name,numberType));
+		region->position = position;
+		region->dimensions = dimensions;
+		region->invalidNumberColor = MakeColor(invalidColor);
+		region->backgroundColor = MakeColor(bgColor);
+		region->textColor = MakeColor(textColor);
+		region->borderColor = MakeColor(bgColor.toDarker(0.5f));
+
+		return region;
+	}
+
 	std::shared_ptr<Region> MakeRegion(const std::string& name,
 		const AUnit2D& position, const AUnit2D& dimensions,
 		const Color& bgColor, const Color& borderColor,

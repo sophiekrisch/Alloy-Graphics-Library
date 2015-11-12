@@ -469,23 +469,27 @@ protected:
 	void dragCursorTo(int index);
 	int cursorStart = 0, cursorEnd = 0, textStart = 0;
 	bool dragging = false;
+	bool valid = true;
 	std::string lastValue;
 	Number numberValue;
 	NumberType numberType;
 public:
+	AColor invalidNumberColor;
+	bool isValid() const {
+		return valid;
+	}
 	static const float PADDING;
 	AColor textColor = MakeColor(Theme::Default.LIGHT_TEXT);
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
 		override;
 	virtual inline ~NumberField() {
 	}
-	NumberField(
-		const std::string& name = MakeString() << "t" << std::setw(8)
-		<< std::setfill('0') << (REGION_COUNTER++));
+	NumberField(const std::string& name, const NumberType& numberType);
 	NumberField(const std::string& name, const AUnit2D& position,
 		const AUnit2D& dimensions,const NumberType& numberType);
 	virtual void draw(AlloyContext* context) override;
-	virtual void setValue(const std::string& value);
+	virtual bool setValue(const std::string& value);
+	bool validate();
 	Number getValue() const {
 		return numberValue;
 	}
@@ -692,6 +696,10 @@ std::shared_ptr<TextField> MakeTextField(const std::string& name,
 		const AUnit2D& position, const AUnit2D& dimensions,
 		const Color& bgColor = Theme::Default.DARK, const Color& textColor =
 				Theme::Default.LIGHT_TEXT, const std::string& value = "");
+std::shared_ptr<NumberField> MakeNumberField(const std::string& name,
+	const AUnit2D& position, const AUnit2D& dimensions,const NumberType& type,
+	const Color& bgColor = Theme::Default.DARK, const Color& textColor =
+	Theme::Default.LIGHT_TEXT,const Color& invalidColor =Color(220,64,64));
 std::shared_ptr<Region> MakeRegion(const std::string& name,
 		const AUnit2D& position, const AUnit2D& dimensions,
 		const Color& bgColor = COLOR_NONE, const Color& lineColor = COLOR_WHITE,
