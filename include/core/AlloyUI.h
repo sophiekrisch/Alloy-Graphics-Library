@@ -26,6 +26,7 @@
 #include "AlloyContext.h"
 #include "AlloyUnits.h"
 #include "AlloyWorker.h"
+#include "AlloyEnum.h"
 #include "nanovg.h"
 #include  "GLTexture.h"
 #include <iostream>

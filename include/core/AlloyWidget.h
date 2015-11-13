@@ -306,6 +306,19 @@ public:
 	void draw(AlloyContext* context) override;
 };
 
+class MessageDialog : public Composite {
+protected:
+	bool returnValue=false;
+	MessageOption option;
+	MessageType type;
+public:
+	bool getValue() const {
+		return returnValue;
+	}
+	MessageDialog(const std::string& name, const AUnit2D& pos,const AUnit2D& dims,const MessageOption& option,const MessageType& type);
+	virtual void draw(AlloyContext* context) override;
+	std::function<void(MessageDialog* dialog)> onSelect;
+};
 class ColorSelector: public Composite {
 private:
 	TextLabelPtr textLabel;
@@ -611,6 +624,7 @@ typedef std::shared_ptr<ListBox> ListBoxPtr;
 typedef std::shared_ptr<ListEntry> ListEntryPtr;
 typedef std::shared_ptr<Graph> GraphPtr;
 typedef std::shared_ptr<WindowPane> WindowPanePtr;
+typedef std::shared_ptr<MessageDialog> MessageDialogPtr;
 }
 
 #endif /* ALLOYWIDGET_H_ */

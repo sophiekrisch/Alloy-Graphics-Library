@@ -37,6 +37,12 @@ enum class Origin {
 	MiddleCenter,
 	MiddleRight
 };
+enum class MessageOption {
+	YesNo, OkayCancel, Okay
+};
+enum class MessageType {
+	Question, Information, Warning, Error
+};
 enum class FileDialogType {
 	OpenFile, OpenMultiFile,SaveFile
 };

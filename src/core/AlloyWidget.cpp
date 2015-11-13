@@ -3148,5 +3148,11 @@ namespace aly {
 		setMaximize(false);
 		Application::addListener(this);
 	}
+	MessageDialog::MessageDialog(const std::string& name, const AUnit2D& pos, const AUnit2D& dims, const MessageOption& option, const MessageType& type):
+		Composite(name,pos,dims),option(option),type(type) {
+
+	}
+	void MessageDialog::draw(AlloyContext* context) {
+	}
 }
 
