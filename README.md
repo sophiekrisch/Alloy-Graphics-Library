@@ -38,7 +38,7 @@ Alloy is yet another 2D/3D graphics library written in C++11. As mundane as that
 - Iso-contour generation (with connectivity rules)
 
 ## Future Work
-- Message pop-ups
+- Message pop-ups, tree
 - Active contour segmentation
 - Iso-surface
 - Visual programming UI
