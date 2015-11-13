@@ -155,7 +155,7 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(
 		std::basic_ostream<C, R> & ss, const Mesh & m) {
 	ss << "Mesh: " << std::endl;
 	ss << "\tBounds: " << m.getBoundingBox() << std::endl;
-	ss << "\tVertex Location: " << m.vertexLocations.size() << std::endl;
+	ss << "\tVertex Locations: " << m.vertexLocations.size() << std::endl;
 	ss << "\tVertex Normals: " << m.vertexNormals.size() << std::endl;
 	ss << "\tVertex Colors: " << m.vertexColors.size() << std::endl;
 	ss << "\tQuad Faces: " << m.quadIndexes.size() << std::endl;
