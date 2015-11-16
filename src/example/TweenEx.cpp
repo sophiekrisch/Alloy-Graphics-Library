@@ -40,7 +40,7 @@ bool TweenEx::init(Composite& rootNode) {
 	addTween(label->position, CoordPercent(0.5f, 0.7f), CoordPercent(0.5f, 0.9f), 1.0f, ExponentialOut())->addCompleteEvent([=](Tweenable* tween) {
 		addTween(label->fontSize, UnitPT(16.0f), UnitPT(36.0f), 1.0f, ExponentialIn())->addCompleteEvent(
 			[=](Tweenable* object) {
-			label->label = "Did you like that tween?";
+			label->setLabel( "Did you like that tween?");
 		});
 	});
 	

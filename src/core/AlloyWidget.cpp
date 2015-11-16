@@ -714,7 +714,7 @@ Selection::Selection(const std::string& label, const AUnit2D& position,
 					if (selectionBox->onSelect) {
 						selectionBox->onSelect(selectionBox.get());
 					}
-					selectionLabel->label = this->getValue();
+					selectionLabel->setLabel( this->getValue());
 					return true;
 				}
 				else if (event.button == GLFW_MOUSE_BUTTON_RIGHT) {
@@ -733,7 +733,7 @@ Selection::Selection(const std::string& label, const AUnit2D& position,
 			selectedIndex = selectionBox->getSelectedIndex();
 			selectionBox->setSelectedIndex(selectedIndex);
 		}
-		selectionLabel->label = this->getValue();
+		selectionLabel->setLabel( this->getValue());
 		if (this->onSelect) {
 			this->onSelect(selectedIndex);
 		}
@@ -912,7 +912,7 @@ bool HorizontalSlider::onMouseDrag(AlloyContext* context, Region* region,
 }
 void HorizontalSlider::draw(AlloyContext* context) {
 
-	valueLabel->label = labelFormatter(value);
+	valueLabel->setLabel(labelFormatter(value));
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
 
@@ -1074,7 +1074,7 @@ bool VerticalSlider::onMouseDrag(AlloyContext* context, Region* region,
 	return false;
 }
 void VerticalSlider::draw(AlloyContext* context) {
-	valueLabel->label = labelFormatter(value);
+	valueLabel->setLabel(labelFormatter(value));
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
 
@@ -1680,8 +1680,8 @@ void ExpandRegion::setExpanded(bool expanded) {
 		}
 	}
 	this->expanded = expanded;
-	arrowIcon->label =
-			(expanded) ? CodePointToUTF8(0xf056) : CodePointToUTF8(0xf055);
+	arrowIcon->setLabel(
+			(expanded) ? CodePointToUTF8(0xf056) : CodePointToUTF8(0xf055));
 
 }
 ExpandRegion::ExpandRegion(const std::string& name,
@@ -1735,8 +1735,8 @@ ExpandRegion::ExpandRegion(const std::string& name,
 				}
 				return false;
 			};
-	arrowIcon->label =
-			(expanded) ? CodePointToUTF8(0xf056) : CodePointToUTF8(0xf055);
+	arrowIcon->setLabel(
+			(expanded) ? CodePointToUTF8(0xf056) : CodePointToUTF8(0xf055));
 	if (expanded) {
 		contentRegion->dimensions = CoordPerPX(1.0f, 0.0f,
 				-Composite::scrollBarSize, (float) expandHeight);
@@ -3183,7 +3183,7 @@ WindowPane::WindowPane(const RegionPtr& content) :
 	Application::addListener(this);
 }
 MessageDialog::MessageDialog(const std::string& name, const AUnit2D& pos,
-		const AUnit2D& dims, const MessageOption& option,
+		const AUnit2D& dims, bool wrap, const MessageOption& option,
 		const MessageType& type) :
 		Composite(name, pos, dims), option(option), type(type) {
 	setVisible(false);
@@ -3257,12 +3257,9 @@ MessageDialog::MessageDialog(const std::string& name, const AUnit2D& pos,
 			new GlyphRegion("icon",
 					AlloyApplicationContext()->createAwesomeGlyph(code,
 							FontStyle::Normal, 50.0f),
-					CoordPerPX(0.0f, 0.5f, 10.0f, -40.0f),
+					CoordPerPX(0.0f, 0.5f, 10.0f, (wrap)?-50.0f:-40.0f),
 					CoordPX(50.0f, 50.0f)));
-	TextLabelPtr textLabel = TextLabelPtr(
-			new TextLabel(name, CoordPerPX(0.0f, 0.5f, 60.0f, -5.0f),
-					CoordPerPX(0.0f, 0.0f, -20.0f, 50.0f)));
-	textLabel->setOrigin(Origin::MiddleLeft);
+
 	glyphRegion->setAspectRule(AspectRule::FixedHeight);
 	glyphRegion->setOrigin(Origin::TopLeft);
 
@@ -3278,7 +3275,19 @@ MessageDialog::MessageDialog(const std::string& name, const AUnit2D& pos,
 				return true;
 			};
 	containerRegion->add(glyphRegion);
-	containerRegion->add(textLabel);
+
+	if (wrap) {
+		TextRegionPtr textLabel = TextRegionPtr(
+				new TextRegion(name, CoordPerPX(0.0f, 0.5f, 60.0f, -50.0f),
+						CoordPerPX(1.0f, 0.0f, -70.0f, 50.0f)));
+		containerRegion->add(textLabel);
+	} else {
+		TextLabelPtr textLabel = TextLabelPtr(
+				new TextLabel(name, CoordPerPX(0.0f, 0.5f, 60.0f, -40.0f),
+						CoordPerPX(1.0f, 0.0f, -70.0f, 50.0f)));
+		containerRegion->add(textLabel);
+		textLabel->verticalAlignment=VerticalAlignment::Middle;
+	}
 	add(containerRegion);
 	add(cancelButton);
 	AlloyApplicationContext()->getGlassPanel()->add(this);
@@ -3328,10 +3337,10 @@ void MessageDialog::setVisible(bool visible) {
 		AlloyApplicationContext()->getGlassPanel()->setVisible(false);
 	}
 }
-MessageDialog::MessageDialog(const std::string& name,
+MessageDialog::MessageDialog(const std::string& name, bool wrap,
 		const MessageOption& option, const MessageType& type) :
-		MessageDialog(name, CoordPerPX(0.5, 0.5, -200 + 7.5f, -75 - 7.5f),
-				CoordPX(400, 150), option, type) {
+		MessageDialog(name, CoordPerPX(0.5, 0.5, -200 + 7.5f, -100 - 7.5f),
+				CoordPX(400, 200), wrap, option, type) {
 
 }
 }

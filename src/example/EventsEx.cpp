@@ -27,55 +27,63 @@ EventsEx::EventsEx() :
 }
 bool EventsEx::init(Composite& rootNode) {
 
-	TextLabelPtr labelA = MakeTextLabel("Region A", CoordPercent(0.1f, 0.333333f), CoordPercent(0.3f, 0.333333f), FontType::Bold, UnitPT(16.0f), COLOR_WHITE, HorizontalAlignment::Center, VerticalAlignment::Middle);
-	TextLabelPtr labelB = MakeTextLabel("Region B", CoordPercent(0.6f, 0.333333f), CoordPercent(0.3f, 0.333333f), FontType::Bold, UnitPT(16.0f), COLOR_WHITE, HorizontalAlignment::Center, VerticalAlignment::Middle);
-	TextLabelPtr labelC = MakeTextLabel("Event", CoordPX(5.0f, 5.0f), CoordPercent(1.0f, 0.3f), FontType::Bold, UnitPT(16.0f), COLOR_WHITE, HorizontalAlignment::Left, VerticalAlignment::Top);
+	TextLabelPtr labelA = MakeTextLabel("Region A",
+			CoordPercent(0.1f, 0.333333f), CoordPercent(0.3f, 0.333333f),
+			FontType::Bold, UnitPT(16.0f), COLOR_WHITE,
+			HorizontalAlignment::Center, VerticalAlignment::Middle);
+	TextLabelPtr labelB = MakeTextLabel("Region B",
+			CoordPercent(0.6f, 0.333333f), CoordPercent(0.3f, 0.333333f),
+			FontType::Bold, UnitPT(16.0f), COLOR_WHITE,
+			HorizontalAlignment::Center, VerticalAlignment::Middle);
+	TextLabelPtr labelC = MakeTextLabel("Event", CoordPX(5.0f, 5.0f),
+			CoordPercent(1.0f, 0.3f), FontType::Bold, UnitPT(16.0f),
+			COLOR_WHITE, HorizontalAlignment::Left, VerticalAlignment::Top);
 
 	labelA->backgroundColor = MakeColor(255, 128, 64);
 	labelB->backgroundColor = MakeColor(64, 128, 255);
 	labelA->onMouseDown = [=](AlloyContext* context, const InputEvent& event) {
-		labelA->label="Mouse Down A";
+		labelA->setLabel("Mouse Down A");
 		labelA->backgroundColor = MakeColor(128, 64, 32);
 		//Return false so event is not consumed. If event is consumed here, then onEvent() will not be called.
-		return false;
-	};
+			return false;
+		};
 	labelA->onMouseUp = [=](AlloyContext* context, const InputEvent& event) {
-		labelA->label = "Mouse Up A";
+		labelA->setLabel("Mouse Up A");
 		labelA->backgroundColor = MakeColor(255, 128, 64);
 		//Return false so event is not consumed. If event is consumed here, then onEvent() will not be called.
-		return false;
-	};
+			return false;
+		};
 	labelA->onMouseOver = [=](AlloyContext* context, const InputEvent& event) {
-		labelA->label = "Mouse Over A";
+		labelA->setLabel("Mouse Over A");
 		//Return false so event is not consumed. If event is consumed here, then onEvent() will not be called.
-		return false;
-	};
+			return false;
+		};
 	labelB->onMouseDown = [=](AlloyContext* context, const InputEvent& event) {
-		labelB->label = "Mouse Down B";
+		labelB->setLabel("Mouse Down B");
 		labelB->backgroundColor = MakeColor(32,64,128);
 		//Return false so event is not consumed. If event is consumed here, then onEvent() will not be called.
-		return false;
-	};
+			return false;
+		};
 	labelB->onMouseUp = [=](AlloyContext* context, const InputEvent& event) {
-		labelB->label = "Mouse Up B";
+		labelB->setLabel("Mouse Up B");
 		labelB->backgroundColor = MakeColor(64,128,255);
 		//Return false so event is not consumed. If event is consumed here, then onEvent() will not be called.
-		return false;
-	};
+			return false;
+		};
 	labelB->onMouseOver = [=](AlloyContext* context, const InputEvent& event) {
-		labelB->label = "Mouse Over B";
+		labelB->setLabel("Mouse Over B");
 		//Return false so event is not consumed. If event is consumed here, then onEvent() will not be called.
-		return false;
-	};
+			return false;
+		};
 	rootNode.onEvent = [=](AlloyContext* context, const InputEvent& event) {
-		labelC->label = MakeString()<<"["<<event.type<<"] "<<event.cursor;
+		labelC->setLabel(MakeString()<<"["<<event.type<<"] "<<event.cursor);
 		if (event.type == InputType::Cursor) {
 			if (!context->isMouseOver(labelA.get())) {
-				labelA->label = "Region A";
+				labelA->setLabel("Region A");
 				labelA->backgroundColor = MakeColor(255, 128, 64);
 			}
 			if (!context->isMouseOver(labelB.get())) {
-				labelB->label = "Region B";
+				labelB->setLabel( "Region B");
 				labelB->backgroundColor = MakeColor(64, 128, 255);
 			}
 		}

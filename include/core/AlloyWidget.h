@@ -260,7 +260,7 @@ public:
 	void setValue(int selection) {
 		selectedIndex = selection;
 		selectionBox->setSelectedIndex(selection);
-		selectionLabel->label = this->getValue();
+		selectionLabel->setLabel(this->getValue());
 		if (onSelect)onSelect(selectedIndex);
 	}
 	void addSelection(const std::string& selection) {
@@ -269,7 +269,7 @@ public:
 	void setSelectionIndex(int selection) {
 		selectedIndex = selection;
 		selectionBox->setSelectedIndex(selection);
-		selectionLabel->label = this->getValue();
+		selectionLabel->setLabel(this->getValue());
 		if (onSelect)onSelect(selectedIndex);
 	}
 	virtual void draw(AlloyContext* context) override;
@@ -317,8 +317,8 @@ public:
 		return returnValue;
 	}
 	void setVisible(bool visible);
-	MessageDialog(const std::string& name, const AUnit2D& pos,const AUnit2D& dims,const MessageOption& option,const MessageType& type);
-	MessageDialog(const std::string& name,const MessageOption& option,const MessageType& type);
+	MessageDialog(const std::string& name, const AUnit2D& pos,const AUnit2D& dims, bool wrap,const MessageOption& option,const MessageType& type);
+	MessageDialog(const std::string& name, bool wrap,const MessageOption& option,const MessageType& type);
 	virtual void draw(AlloyContext* context) override;
 	std::function<void(MessageDialog* dialog)> onSelect;
 };

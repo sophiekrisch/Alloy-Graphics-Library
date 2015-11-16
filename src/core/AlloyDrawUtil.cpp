@@ -50,7 +50,26 @@ int popScissor(NVGcontext* ctx) {
 	}
 	return (int) NVG_SCISSOR_STACK.size();
 }
-
+float drawParagraph(NVGcontext* nvg, float x, float y, float width, float lineh,
+		const char* txt, const FontStyle& style, const Color& foreground,
+		const Color& background) {
+	std::vector<NVGtextRow> rows(3);
+	nvgFontSize(nvg, lineh);
+	const char* start = txt;
+	const char* end = txt + strlen(txt);
+	float h = lineh;
+	while (int nrows = nvgTextBreakLines(nvg, start, end, width, rows.data(), 3)) {
+		for (int i = 0; i < nrows; i++) {
+			NVGtextRow* row = &rows[i];
+			drawText(nvg, x, y, row->start, style, foreground, background,
+					row->end);
+			y += lineh;
+			h = std::max(y, h);
+		}
+		start = rows[nrows - 1].next;
+	}
+	return h;
+}
 float drawText(NVGcontext* nvg, float x, float y, const char* txt,
 		const FontStyle& style, const Color& foreground,
 		const Color& background, const char* end) {
@@ -58,27 +77,27 @@ float drawText(NVGcontext* nvg, float x, float y, const char* txt,
 	const float shift = 1.0f;
 	nvgFillColor(nvg, background);
 	if (style == FontStyle::Outline) {
-		nvgText(nvg, x + shift, y, txt, nullptr);
-		nvgText(nvg, x - shift, y, txt, nullptr);
-		nvgText(nvg, x, y + shift, txt, nullptr);
-		nvgText(nvg, x, y - shift, txt, nullptr);
-		nvgText(nvg, x + shift, y - shift, txt, nullptr);
-		nvgText(nvg, x + shift, y + shift, txt, nullptr);
-		nvgText(nvg, x + shift, y - shift, txt, nullptr);
-		nvgText(nvg, x + shift, y + shift, txt, nullptr);
-		nvgText(nvg, x - shift, y - shift, txt, nullptr);
-		nvgText(nvg, x - shift, y + shift, txt, nullptr);
-		nvgText(nvg, x - shift, y - shift, txt, nullptr);
-		nvgText(nvg, x - shift, y + shift, txt, nullptr);
+		nvgText(nvg, x + shift, y, txt, end);
+		nvgText(nvg, x - shift, y, txt, end);
+		nvgText(nvg, x, y + shift, txt, end);
+		nvgText(nvg, x, y - shift, txt, end);
+		nvgText(nvg, x + shift, y - shift, txt, end);
+		nvgText(nvg, x + shift, y + shift, txt, end);
+		nvgText(nvg, x + shift, y - shift, txt, end);
+		nvgText(nvg, x + shift, y + shift, txt, end);
+		nvgText(nvg, x - shift, y - shift, txt, end);
+		nvgText(nvg, x - shift, y + shift, txt, end);
+		nvgText(nvg, x - shift, y - shift, txt, end);
+		nvgText(nvg, x - shift, y + shift, txt, end);
 	} else if (style == FontStyle::Shadow) {
-		nvgText(nvg, x, y + shift, txt, nullptr);
+		nvgText(nvg, x, y + shift, txt, end);
 	} else if (style == FontStyle::Glow) {
 		nvgFontBlur(nvg, 4.0f);
-		nvgText(nvg, x, y, txt, nullptr);
+		nvgText(nvg, x, y, txt, end);
 		nvgFontBlur(nvg, 0.0f);
 	}
 	nvgFillColor(nvg, foreground);
-	ret = nvgText(nvg, x, y, txt, nullptr);
+	ret = nvgText(nvg, x, y, txt, end);
 	return ret;
 }
 }

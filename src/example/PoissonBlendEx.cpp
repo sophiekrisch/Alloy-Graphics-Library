@@ -70,7 +70,7 @@ bool PoissonBlendEx::init(Composite& rootNode) {
 		ConvertImage(tar,out);
 		getContext()->addDeferredTask([=]() {
 					resultGlyph->set(out,getContext().get());
-					textLabel->label="Finished!";
+					textLabel->setLabel("Finished!");
 				});
 	}));
 	workerTask->execute(isForcedClose());

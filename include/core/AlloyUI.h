@@ -396,8 +396,10 @@ struct GlyphRegion: public Region {
 };
 
 struct TextLabel: public Region {
+protected:
+	std::string label;
 public:
-	pixel2 getTextDimensions(AlloyContext* context);
+	virtual pixel2 getTextDimensions(AlloyContext* context);
 	HorizontalAlignment horizontalAlignment = HorizontalAlignment::Left;
 	VerticalAlignment verticalAlignment = VerticalAlignment::Top;
 	FontStyle fontStyle = FontStyle::Normal;
@@ -405,7 +407,9 @@ public:
 	AUnit1D fontSize = UnitPX(24);
 	AColor textColor = MakeColor(Theme::Default.LIGHT_TEXT);
 	AColor textAltColor = MakeColor(Theme::Default.DARK_TEXT);
-	std::string label;
+	void setLabel(const std::string& labels) {
+		this->label = label;
+	}
 	TextLabel(
 			const std::string& name = MakeString() << "t" << std::setw(8)
 					<< std::setfill('0') << (REGION_COUNTER++)) :
@@ -414,6 +418,22 @@ public:
 	TextLabel(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
 			Region(name, pos, dims), label(name) {
 	}
+
+	virtual void draw(AlloyContext* context) override;
+};
+struct TextRegion: public TextLabel {
+
+public:
+	virtual pixel2 getTextDimensions(AlloyContext* context) override;
+
+	TextRegion(
+			const std::string& name = MakeString() << "t" << std::setw(8)
+			<< std::setfill('0') << (REGION_COUNTER++)) :TextLabel(name) {
+	}
+	TextRegion(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
+	TextLabel(name,pos,dims) {
+	}
+
 	virtual void draw(AlloyContext* context) override;
 };
 class TextField: public Composite {
@@ -778,6 +798,7 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(
 	return ss;
 }
 typedef std::shared_ptr<TextLabel> TextLabelPtr;
+typedef std::shared_ptr<TextRegion> TextRegionPtr;
 typedef std::shared_ptr<TextField> TextFieldPtr;
 typedef std::shared_ptr<Composite> CompositePtr;
 typedef std::shared_ptr<SelectionBox> SelectionBoxPtr;

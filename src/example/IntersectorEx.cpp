@@ -78,9 +78,9 @@ bool IntersectorEx::init(Composite& rootNode) {
 		Image1f distImg(tarImg.width, tarImg.height);
 		Image1f depthImg(tarImg.width, tarImg.height);
 		camera.aim(depthFrameBuffer.getViewport());
-		textLabel->label = "Building Kd-Tree ...";
+		textLabel->setLabel( "Building Kd-Tree ...");
 		kdTree.build(mesh,6);
-		textLabel->label = "Computing Depth Field ...";
+		textLabel->setLabel( "Computing Depth Field ...");
 		float minD = 1E30f;
 		float maxD = 0;
 #pragma omp parallel for
@@ -120,7 +120,7 @@ bool IntersectorEx::init(Composite& rootNode) {
 		getContext()->addDeferredTask([=]() {
 			depthGlyph->set(depthRGBA, getContext().get());
 		});
-		textLabel->label = "Computing Distance Field ...";
+		textLabel->setLabel("Computing Distance Field ...");
 		box3f bbox = mesh.getBoundingBox();
 		minD = 1E30f;
 		maxD = -1E30f;
@@ -161,7 +161,7 @@ bool IntersectorEx::init(Composite& rootNode) {
 		getContext()->addDeferredTask([=]() {
 			distGlyph->set(distRGBA, getContext().get());
 		});
-		textLabel->label = "Finished!";
+		textLabel->setLabel("Finished!");
 	}));
 	workerTask->execute(isForcedClose());
 	return true;

@@ -37,6 +37,10 @@ float drawText(NVGcontext* ctx, float x, float y, const char* string,
 		const FontStyle& style = FontStyle::Normal, const Color& foreground =
 				COLOR_WHITE, const Color& background = COLOR_BLACK,
 		const char* end = nullptr);
+float drawParagraph(NVGcontext* ctx, float x, float y, float width,
+		float lineHeight, const char* string, const FontStyle& style =
+				FontStyle::Normal, const Color& foreground = COLOR_WHITE,
+		const Color& background = COLOR_BLACK);
 inline float drawText(NVGcontext* ctx, const pixel2& pix,
 		const std::string& txt, const FontStyle& style = FontStyle::Normal,
 		const Color& foreground = COLOR_WHITE, const Color& background =
@@ -44,7 +48,13 @@ inline float drawText(NVGcontext* ctx, const pixel2& pix,
 	return drawText(ctx, pix.x, pix.y, txt.c_str(), style, foreground,
 			background, end);
 }
-
+inline float drawParagraph(NVGcontext* ctx, const pixel2& pix, float width,
+		float lineHeight, const std::string& txt, const FontStyle& style =
+				FontStyle::Normal, const Color& foreground = COLOR_WHITE,
+		const Color& background = COLOR_BLACK) {
+	return drawParagraph(ctx, pix.x, pix.y, width, lineHeight, txt.c_str(), style,
+			foreground, background);
+}
 }
 
 #endif /* ALLOYDRAWUTIL_H_ */

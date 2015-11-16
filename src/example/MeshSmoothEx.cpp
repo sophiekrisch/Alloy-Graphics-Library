@@ -73,13 +73,13 @@ bool MeshSmoothEx::init(Composite& rootNode) {
 	rootNode.add(textLabel);
 	rootNode.add(smoothButton);
 	workerTask = WorkerTaskPtr(new Worker([=] {
-		textLabel->label = "Smoothing Mesh ...";
+		textLabel->setLabel("Smoothing Mesh ...");
 		smoothButton->setVisible(false);
 		smooth();
 		mesh.setDirty(true);
 		camera.setDirty(true);
 		smoothButton->setVisible(true);
-		textLabel->label = "";
+		textLabel->setLabel("");
 	}));
 	smoothButton->onMouseDown =
 			[=](AlloyContext* context, const InputEvent& e) {
@@ -144,7 +144,7 @@ void MeshSmoothEx::smooth() {
 	}
 	SolveBICGStab(b, A, mesh.vertexLocations, 100, 1E-6f,
 			[this](int iter,double error) {
-				textLabel->label = MakeString() << "Smooth [" << iter << "] Error: " << error;
+				textLabel->setLabel( MakeString() << "Smooth [" << iter << "] Error: " << error);
 			});
 	mesh.updateVertexNormals();
 }

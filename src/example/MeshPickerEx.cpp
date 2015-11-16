@@ -65,7 +65,7 @@ bool MeshPickerEx::init(Composite& rootNode) {
 	rootNode.add(cursorText);
 	selectedFaceId = int2(-1, -1);
 	rootNode.onMouseOver = [this](AlloyContext* context, const InputEvent& e) {
-		cursorText->label = "";
+		cursorText->setLabel("");
 		selectedFaceId = int2(-1, -1);
 		return false;
 	};
@@ -76,13 +76,13 @@ bool MeshPickerEx::init(Composite& rootNode) {
 			pix.y = faceIds.height - 1 - pix.y;
 			selectedFaceId=faceIds((int)pix.x,(int)pix.y);
 			if (selectedFaceId.y >= 0) {
-				cursorText->label =MakeString()<< "Face Id: " << selectedFaceId.x;
+				cursorText->setLabel(MakeString()<< "Face Id: " << selectedFaceId.x);
 				cursorText->position=CoordPX(e.cursor);
 				cursorText->pack(context);
 			}
 			else {
 				selectedFaceId = int2(-1,-1);
-				cursorText->label = "";
+				cursorText->setLabel( "");
 			}
 		}
 		return false;

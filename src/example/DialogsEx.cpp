@@ -73,25 +73,25 @@ bool DialogsEx::init(Composite& rootNode) {
 			new TextIconButton("Information", 0xf05a,
 					CoordPerPX(0.0f, 1.0f, 340.0f, -75.0f), CoordPX(120, 30)));
 
-	MessageDialogPtr warningMessage = MessageDialogPtr(new MessageDialog("Warning Message!",MessageOption::Okay,MessageType::Warning));
+	MessageDialogPtr warningMessage = MessageDialogPtr(new MessageDialog("This is a warning message that continues for multiple lines so you know what it will look like.",true,MessageOption::Okay,MessageType::Warning));
 	warningButton->onMouseDown=[=](AlloyContext* context,const InputEvent& e){
 		warningMessage->setVisible(true);
 		return true;
 	};
 
-	MessageDialogPtr errorMessage = MessageDialogPtr(new MessageDialog("Error Message!",MessageOption::Okay,MessageType::Error));
+	MessageDialogPtr errorMessage = MessageDialogPtr(new MessageDialog("This is an error message!",false,MessageOption::Okay,MessageType::Error));
 	errorButton->onMouseDown=[=](AlloyContext* context,const InputEvent& e){
 		errorMessage->setVisible(true);
 		return true;
 	};
 
-	MessageDialogPtr questionMessage = MessageDialogPtr(new MessageDialog("Does this look okay?",MessageOption::YesNo,MessageType::Question));
+	MessageDialogPtr questionMessage = MessageDialogPtr(new MessageDialog("Do you like how this looks?",false,MessageOption::YesNo,MessageType::Question));
 	questionButton->onMouseDown=[=](AlloyContext* context,const InputEvent& e){
 		questionMessage->setVisible(true);
 		return true;
 	};
 
-	MessageDialogPtr infoMessage = MessageDialogPtr(new MessageDialog("Go for it?",MessageOption::OkayCancel,MessageType::Information));
+	MessageDialogPtr infoMessage = MessageDialogPtr(new MessageDialog("I'm going to do this.",false,MessageOption::OkayCancel,MessageType::Information));
 	infoButton->onMouseDown=[=](AlloyContext* context,const InputEvent& e){
 		infoMessage->setVisible(true);
 		return true;
