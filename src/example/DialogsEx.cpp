@@ -59,6 +59,48 @@ bool DialogsEx::init(Composite& rootNode) {
 	openMultiButton->addFileExtensionRule("XML", extensions { "raw", "xml" });
 	openMultiButton->addFileExtensionRule("Text", "txt");
 	openMultiButton->setValue(exampleFile);
+
+	TextIconButtonPtr warningButton = std::shared_ptr<TextIconButton>(
+			new TextIconButton("Warning", 0xf06a,
+					CoordPerPX(0.0f, 1.0f, 10.0f, -75.0f), CoordPX(100, 30)));
+	TextIconButtonPtr errorButton = std::shared_ptr<TextIconButton>(
+			new TextIconButton("Error", 0xf056,
+					CoordPerPX(0.0f, 1.0f, 120.0f, -75.0f), CoordPX(100, 30)));
+	TextIconButtonPtr questionButton = std::shared_ptr<TextIconButton>(
+			new TextIconButton("Question", 0xf059,
+					CoordPerPX(0.0f, 1.0f, 230.0f, -75.0f), CoordPX(100, 30)));
+	TextIconButtonPtr infoButton = std::shared_ptr<TextIconButton>(
+			new TextIconButton("Information", 0xf05a,
+					CoordPerPX(0.0f, 1.0f, 340.0f, -75.0f), CoordPX(120, 30)));
+
+	MessageDialogPtr warningMessage = MessageDialogPtr(new MessageDialog("Warning Message!",MessageOption::Okay,MessageType::Warning));
+	warningButton->onMouseDown=[=](AlloyContext* context,const InputEvent& e){
+		warningMessage->setVisible(true);
+		return true;
+	};
+
+	MessageDialogPtr errorMessage = MessageDialogPtr(new MessageDialog("Error Message!",MessageOption::Okay,MessageType::Error));
+	errorButton->onMouseDown=[=](AlloyContext* context,const InputEvent& e){
+		errorMessage->setVisible(true);
+		return true;
+	};
+
+	MessageDialogPtr questionMessage = MessageDialogPtr(new MessageDialog("Does this look okay?",MessageOption::YesNo,MessageType::Question));
+	questionButton->onMouseDown=[=](AlloyContext* context,const InputEvent& e){
+		questionMessage->setVisible(true);
+		return true;
+	};
+
+	MessageDialogPtr infoMessage = MessageDialogPtr(new MessageDialog("Go for it?",MessageOption::OkayCancel,MessageType::Information));
+	infoButton->onMouseDown=[=](AlloyContext* context,const InputEvent& e){
+		infoMessage->setVisible(true);
+		return true;
+	};
+
+	rootNode.add(warningButton);
+	rootNode.add(errorButton);
+	rootNode.add(questionButton);
+	rootNode.add(infoButton);
 	return true;
 }
 

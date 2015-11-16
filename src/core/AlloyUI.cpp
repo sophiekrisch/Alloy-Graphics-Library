@@ -2292,8 +2292,8 @@ std::shared_ptr<GlyphRegion> MakeGlyphRegion(
 		const AUnit2D& dimensions, const Color& bgColor, const Color& fgColor,
 		const Color& borderColor, const AUnit1D& borderWidth) {
 	std::shared_ptr<GlyphRegion> region = std::shared_ptr<GlyphRegion>(
-			new GlyphRegion(glyph->name));
-	region->glyph = glyph;
+			new GlyphRegion(glyph->name,glyph));
+
 	region->position = position;
 	region->dimensions = dimensions;
 	region->backgroundColor = MakeColor(bgColor);
@@ -2310,8 +2310,8 @@ std::shared_ptr<GlyphRegion> MakeGlyphRegion(
 		const Color& bgColor, const Color& fgColor, const Color& borderColor,
 		const AUnit1D& borderWidth) {
 	std::shared_ptr<GlyphRegion> region = std::shared_ptr<GlyphRegion>(
-			new GlyphRegion(name));
-	region->glyph = glyph;
+			new GlyphRegion(name,glyph));
+
 	region->position = position;
 	region->dimensions = dimensions;
 	region->backgroundColor = MakeColor(bgColor);
@@ -2329,8 +2329,8 @@ std::shared_ptr<GlyphRegion> MakeGlyphRegion(
 		const Color& fgColor, const Color& borderColor,
 		const AUnit1D& borderWidth) {
 	std::shared_ptr<GlyphRegion> region = std::shared_ptr<GlyphRegion>(
-			new GlyphRegion(name));
-	region->glyph = glyph;
+			new GlyphRegion(name,glyph));
+
 	region->position = position;
 	region->dimensions = dimensions;
 	region->backgroundColor = MakeColor(bgColor);
@@ -2347,8 +2347,8 @@ std::shared_ptr<GlyphRegion> MakeGlyphRegion(
 		const Color& bgColor, const Color& fgColor, const Color& borderColor,
 		const AUnit1D& borderWidth) {
 	std::shared_ptr<GlyphRegion> region = std::shared_ptr<GlyphRegion>(
-			new GlyphRegion(glyph->name));
-	region->glyph = glyph;
+			new GlyphRegion(glyph->name,glyph));
+
 	region->position = position;
 	region->dimensions = dimensions;
 	region->backgroundColor = MakeColor(bgColor);

@@ -135,7 +135,8 @@ public:
 
 	inline void setDragEnabled(bool enabled) {
 		dragEnabled = enabled;
-		if(dragEnabled)clampToParentBounds = true;
+		if (dragEnabled)
+			clampToParentBounds = true;
 	}
 	inline void setOrigin(const Origin& org) {
 		origin = org;
@@ -179,13 +180,17 @@ public:
 	virtual void draw(AlloyContext* context);
 	virtual void update(CursorLocator* cursorLocator);
 	virtual void drawDebug(AlloyContext* context);
-	bool isVisible() const ;
+	bool isVisible() const;
 	virtual ~Region();
 };
-class Draw : public Region {
+class Draw: public Region {
 public:
-	std::function<void(const AlloyContext* context,const box2px& bounds)> onDraw;
-	Draw(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,const std::function<void(const AlloyContext* context, const box2px& bounds)>& func=nullptr):Region(name,pos,dims),onDraw(func) {
+	std::function<void(const AlloyContext* context, const box2px& bounds)> onDraw;
+	Draw(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,
+			const std::function<
+					void(const AlloyContext* context, const box2px& bounds)>& func =
+					nullptr) :
+			Region(name, pos, dims), onDraw(func) {
 	}
 	virtual void draw(AlloyContext* context) override;
 };
@@ -376,10 +381,13 @@ public:
 struct GlyphRegion: public Region {
 	AColor foregroundColor = MakeColor(Theme::Default.LIGHT_TEXT);
 	std::shared_ptr<Glyph> glyph;
-	GlyphRegion(
-			const std::string& name = MakeString() << "g" << std::setw(8)
-					<< std::setfill('0') << (REGION_COUNTER++)) :
-			Region(name) {
+	GlyphRegion(const std::string& name, const std::shared_ptr<Glyph>& glyph) :
+			Region(name), glyph(glyph) {
+		aspectRule = AspectRule::FixedHeight;
+	}
+	GlyphRegion(const std::string& name, const std::shared_ptr<Glyph>& glyph,
+			const AUnit2D& pos, const AUnit2D& dims) :
+			Region(name, pos, dims), glyph(glyph) {
 		aspectRule = AspectRule::FixedHeight;
 	}
 	;
@@ -403,10 +411,8 @@ public:
 					<< std::setfill('0') << (REGION_COUNTER++)) :
 			Region(name), label(name) {
 	}
-	TextLabel(
-		const std::string& name , const AUnit2D& pos,
-		const AUnit2D& dims) :
-		Region(name,pos,dims), label(name) {
+	TextLabel(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
+			Region(name, pos, dims), label(name) {
 	}
 	virtual void draw(AlloyContext* context) override;
 };
@@ -451,7 +457,7 @@ public:
 	std::function<void(TextField*)> onKeyInput;
 };
 
-class NumberField : public Composite {
+class NumberField: public Composite {
 protected:
 	bool showDefaultLabel = true;
 	std::string label;
@@ -482,12 +488,12 @@ public:
 	static const float PADDING;
 	AColor textColor = MakeColor(Theme::Default.LIGHT_TEXT);
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
-		override;
+			override;
 	virtual inline ~NumberField() {
 	}
 	NumberField(const std::string& name, const NumberType& numberType);
 	NumberField(const std::string& name, const AUnit2D& position,
-		const AUnit2D& dimensions,const NumberType& numberType);
+			const AUnit2D& dimensions, const NumberType& numberType);
 	virtual void draw(AlloyContext* context) override;
 	virtual bool setValue(const std::string& value);
 	bool setNumberValue(const Number& val);
@@ -540,7 +546,7 @@ public:
 					std::vector<std::string>());
 };
 class MenuBar;
-class MenuItem : public Composite {
+class MenuItem: public Composite {
 protected:
 
 	std::mutex showLock;
@@ -551,7 +557,7 @@ protected:
 	const int MENU_DISPLAY_DELAY = 250;
 public:
 	MenuItem* getSelectedItem();
-	MenuBar* menuBar=nullptr;
+	MenuBar* menuBar = nullptr;
 	FontStyle fontStyle = FontStyle::Normal;
 	FontType fontType = FontType::Normal;
 	AUnit1D fontSize = UnitPX(24.0f);
@@ -564,12 +570,13 @@ public:
 	virtual void setVisible(bool visible) override;
 	MenuItem(const std::string& name);
 	MenuItem(const std::string& name, const AUnit2D& position,
-		const AUnit2D& dimensions);
+			const AUnit2D& dimensions);
 
-	virtual void setVisibleItem(const std::shared_ptr<MenuItem>& item,bool forceShow=false);
+	virtual void setVisibleItem(const std::shared_ptr<MenuItem>& item,
+			bool forceShow = false);
 };
 
-class Menu : public MenuItem {
+class Menu: public MenuItem {
 protected:
 	int selectedIndex = -1;
 	std::shared_ptr<MenuItem> label;
@@ -601,16 +608,17 @@ public:
 	void setSelectedIndex(int index);
 	void draw(AlloyContext* context) override;
 	std::shared_ptr<MenuItem> addItem(const std::string& selection) {
-		std::shared_ptr<MenuItem> item= std::shared_ptr<MenuItem>(new MenuItem(selection));
+		std::shared_ptr<MenuItem> item = std::shared_ptr<MenuItem>(
+				new MenuItem(selection));
 		options.push_back(item);
 		return item;
 	}
 	void addItem(const std::shared_ptr<MenuItem>& selection);
-	Menu(const std::string& name,float menuWidth=150.0f,
-		const std::vector<std::shared_ptr<MenuItem>>& options =
-		std::vector<std::shared_ptr<MenuItem>>());
+	Menu(const std::string& name, float menuWidth = 150.0f,
+			const std::vector<std::shared_ptr<MenuItem>>& options = std::vector<
+					std::shared_ptr<MenuItem>>());
 };
-class MenuHeader : public MenuItem {
+class MenuHeader: public MenuItem {
 public:
 	AColor backgroundAltColor;
 	std::shared_ptr<Menu> menu;
@@ -618,20 +626,23 @@ public:
 		return menu->isVisible();
 	}
 	MenuHeader(const std::shared_ptr<Menu>& menu, const AUnit2D& position,
-		const AUnit2D& dimensions);
+			const AUnit2D& dimensions);
 	virtual void draw(AlloyContext* context) override;
-	virtual inline ~MenuHeader() {}
+	virtual inline ~MenuHeader() {
+	}
 };
-class MenuBar : public MenuItem {
+class MenuBar: public MenuItem {
 protected:
 	std::list<std::shared_ptr<MenuHeader>> headers;
 	std::shared_ptr<Composite> barRegion;
-	virtual void setVisibleItem(const std::shared_ptr<MenuItem>& item, bool forceShow = false) override;
+	virtual void setVisibleItem(const std::shared_ptr<MenuItem>& item,
+			bool forceShow = false) override;
 	bool active;
 public:
 	void add(const std::shared_ptr<Menu>& menu);
 	void hideMenus();
-	MenuBar(const std::string& name, const AUnit2D& position, const AUnit2D& dimensions);
+	MenuBar(const std::string& name, const AUnit2D& position,
+			const AUnit2D& dimensions);
 };
 struct FileField: public TextField {
 protected:
@@ -668,13 +679,12 @@ std::shared_ptr<GlyphRegion> MakeGlyphRegion(
 		const Color& borderColor = COLOR_NONE, const AUnit1D& borderWidth =
 				UnitPX(2));
 std::shared_ptr<GlyphRegion> MakeGlyphRegion(
-	const std::shared_ptr<ImageGlyph>& glyph, const std::string& name,
-	const AUnit2D& position,
-	const AUnit2D& dimensions, const AspectRule& aspectRatio =
-	AspectRule::Unspecified, const Color& bgColor = COLOR_NONE,
-	const Color& fgColor = COLOR_NONE,
-	const Color& borderColor = COLOR_NONE, const AUnit1D& borderWidth =
-	UnitPX(2));
+		const std::shared_ptr<ImageGlyph>& glyph, const std::string& name,
+		const AUnit2D& position, const AUnit2D& dimensions,
+		const AspectRule& aspectRatio = AspectRule::Unspecified,
+		const Color& bgColor = COLOR_NONE, const Color& fgColor = COLOR_NONE,
+		const Color& borderColor = COLOR_NONE, const AUnit1D& borderWidth =
+				UnitPX(2));
 std::shared_ptr<GlyphRegion> MakeGlyphRegion(
 		const std::shared_ptr<AwesomeGlyph>& glyph, const AUnit2D& position,
 		const AUnit2D& dimensions, const Color& bgColor = COLOR_NONE,
@@ -682,12 +692,11 @@ std::shared_ptr<GlyphRegion> MakeGlyphRegion(
 		const Color& borderColor = COLOR_NONE, const AUnit1D& borderWidth =
 				UnitPX(2));
 std::shared_ptr<GlyphRegion> MakeGlyphRegion(
-	const std::shared_ptr<AwesomeGlyph>& glyph, const std::string& name,
-	const AUnit2D& position,
-	const AUnit2D& dimensions, const Color& bgColor = COLOR_NONE,
-	const Color& fgColor = COLOR_NONE,
-	const Color& borderColor = COLOR_NONE, const AUnit1D& borderWidth =
-	UnitPX(2));
+		const std::shared_ptr<AwesomeGlyph>& glyph, const std::string& name,
+		const AUnit2D& position, const AUnit2D& dimensions,
+		const Color& bgColor = COLOR_NONE, const Color& fgColor = COLOR_NONE,
+		const Color& borderColor = COLOR_NONE, const AUnit1D& borderWidth =
+				UnitPX(2));
 std::shared_ptr<TextLabel> MakeTextLabel(const std::string& name,
 		const AUnit2D& position, const AUnit2D& dimensions,
 		const FontType& fontType, const AUnit1D& fontSize = UnitPT(14.0f),
@@ -699,9 +708,10 @@ std::shared_ptr<TextField> MakeTextField(const std::string& name,
 		const Color& bgColor = Theme::Default.DARK, const Color& textColor =
 				Theme::Default.LIGHT_TEXT, const std::string& value = "");
 std::shared_ptr<NumberField> MakeNumberField(const std::string& name,
-	const AUnit2D& position, const AUnit2D& dimensions,const NumberType& type,
-	const Color& bgColor = Theme::Default.DARK, const Color& textColor =
-	Theme::Default.LIGHT_TEXT,const Color& invalidColor =Color(220,64,64));
+		const AUnit2D& position, const AUnit2D& dimensions,
+		const NumberType& type, const Color& bgColor = Theme::Default.DARK,
+		const Color& textColor = Theme::Default.LIGHT_TEXT,
+		const Color& invalidColor = Color(220, 64, 64));
 std::shared_ptr<Region> MakeRegion(const std::string& name,
 		const AUnit2D& position, const AUnit2D& dimensions,
 		const Color& bgColor = COLOR_NONE, const Color& lineColor = COLOR_WHITE,
@@ -725,7 +735,7 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(
 	if (region.glyph.get() != nullptr)
 		ss << "\t" << *region.glyph << std::endl;
 	ss << "\tOrigin: " << region.origin << std::endl;
-	ss << "\tRelative Position: " << region.position<< std::endl;
+	ss << "\tRelative Position: " << region.position << std::endl;
 	ss << "\tRelative Dimensions: " << region.dimensions << std::endl;
 	ss << "\tBounds: " << region.getBounds() << std::endl;
 	ss << "\tAspect Ratio: " << region.aspectRule << " (" << region.aspectRatio

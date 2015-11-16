@@ -311,11 +311,14 @@ protected:
 	bool returnValue=false;
 	MessageOption option;
 	MessageType type;
+	std::shared_ptr<Composite> containerRegion;
 public:
 	bool getValue() const {
 		return returnValue;
 	}
+	void setVisible(bool visible);
 	MessageDialog(const std::string& name, const AUnit2D& pos,const AUnit2D& dims,const MessageOption& option,const MessageType& type);
+	MessageDialog(const std::string& name,const MessageOption& option,const MessageType& type);
 	virtual void draw(AlloyContext* context) override;
 	std::function<void(MessageDialog* dialog)> onSelect;
 };
