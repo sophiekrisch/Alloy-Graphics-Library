@@ -367,6 +367,7 @@ protected:
 	float fontSize = 24;
 	bool dirty;
 	pixel2 dimensions;
+	bool expanded;
 	std::vector<std::shared_ptr<TreeItem>> children;
 public:
 	std::string getName() const {
@@ -377,12 +378,7 @@ public:
 		dirty = true;
 	}
 	TreeItem(const std::string& name = "", int iconCode = 0,
-			float fontSize = 24) :
-			name(name), fontSize(fontSize), dirty(true), dimensions(0.0f) {
-		if (iconCode != 0) {
-			iconCodeString = CodePointToUTF8(iconCode);
-		}
-	}
+			float fontSize = 24);
 	pixel2 getTextDimensions(AlloyContext* context);
 	void draw(AlloyContext* context, const pixel2& location);
 };
