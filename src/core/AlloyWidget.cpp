@@ -3348,8 +3348,9 @@ ExpandTree::ExpandTree(const std::string& name, const AUnit2D& pos,
 		Composite(name, pos, dims) {
 	setScrollEnabled(true);
 	setAlwaysShowVerticalScrollBar(true);
+	backgroundColor=MakeColor(AlloyApplicationContext()->theme.DARK);
 	draw = DrawPtr(
-			new Draw("Tree Region", CoordPX(0.0f, 0.0f), CoordPX(0.0f, 0.0f)));
+			new Draw("Tree Region", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)));
 	draw->onDraw = [this](AlloyContext* context,const box2px& bounds) {
 		root.draw(context,bounds.position);
 	};
@@ -3404,6 +3405,7 @@ TreeItem::TreeItem(const std::string& name, int iconCode, float fontSize) :
 }
 void TreeItem::draw(AlloyContext* context, const pixel2& pt) {
 	NVGcontext* nvg = context->nvgContext;
+	nvgFillColor(nvg,context->theme.LIGHT_TEXT);
 	nvgFontSize(nvg, fontSize);
 	nvgFontFaceId(nvg, context->getFontHandle(FontType::Icon));
 	float spaceWidth = fontSize + PADDING * 2;
