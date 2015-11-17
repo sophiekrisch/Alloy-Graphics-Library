@@ -49,6 +49,7 @@
     <ClCompile Include="..\..\src\example\PoissonBlendEx.cpp" />
     <ClCompile Include="..\..\src\example\PoissonInpaintEx.cpp" />
     <ClCompile Include="..\..\src\example\SplineEx.cpp" />
+    <ClCompile Include="..\..\src\example\TreeEx.cpp" />
     <ClCompile Include="..\..\src\example\TweenEx.cpp" />
     <ClCompile Include="..\..\src\example\UnitsEx.cpp" />
     <ClCompile Include="..\..\src\example\WindowPaneEx.cpp" />
@@ -84,6 +85,7 @@
     <ClInclude Include="..\..\include\example\PoissonInpaintEx.h" />
     <ClInclude Include="..\..\include\example\SplineEx.h" />
     <ClInclude Include="..\..\include\example\stb_image_write.h" />
+    <ClInclude Include="..\..\include\example\TreeEx.h" />
     <ClInclude Include="..\..\include\example\TweenEx.h" />
     <ClInclude Include="..\..\include\example\UnitsEx.h" />
     <ClInclude Include="..\..\include\example\WindowPaneEx.h" />
