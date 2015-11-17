@@ -3257,7 +3257,7 @@ MessageDialog::MessageDialog(const std::string& name, const AUnit2D& pos,
 			new GlyphRegion("icon",
 					AlloyApplicationContext()->createAwesomeGlyph(code,
 							FontStyle::Normal, 50.0f),
-					CoordPerPX(0.0f, 0.5f, 10.0f, (wrap)?-50.0f:-40.0f),
+					CoordPerPX(0.0f, 0.5f, 10.0f, (wrap) ? -50.0f : -40.0f),
 					CoordPX(50.0f, 50.0f)));
 
 	glyphRegion->setAspectRule(AspectRule::FixedHeight);
@@ -3286,7 +3286,7 @@ MessageDialog::MessageDialog(const std::string& name, const AUnit2D& pos,
 				new TextLabel(name, CoordPerPX(0.0f, 0.5f, 60.0f, -40.0f),
 						CoordPerPX(1.0f, 0.0f, -70.0f, 50.0f)));
 		containerRegion->add(textLabel);
-		textLabel->verticalAlignment=VerticalAlignment::Middle;
+		textLabel->verticalAlignment = VerticalAlignment::Middle;
 	}
 	add(containerRegion);
 	add(cancelButton);
@@ -3342,6 +3342,78 @@ MessageDialog::MessageDialog(const std::string& name, bool wrap,
 		MessageDialog(name, CoordPerPX(0.5, 0.5, -200 + 7.5f, -100 - 7.5f),
 				CoordPX(400, 200), wrap, option, type) {
 
+}
+ExpandTree::ExpandTree(const std::string& name, const AUnit2D& pos,
+		const AUnit2D& dims) :
+		Composite(name, pos, dims) {
+	setScrollEnabled(true);
+	setAlwaysShowVerticalScrollBar(true);
+	draw = DrawPtr(
+			new Draw("Tree Region", CoordPX(0.0f, 0.0f), CoordPX(0.0f, 0.0f)));
+	draw->onDraw = [this](AlloyContext* context,const box2px& bounds) {
+		root.draw(context,bounds.position);
+	};
+	Composite::add(draw);
+}
+void ExpandTree::pack(const pixel2& pos, const pixel2& dims,
+		const double2& dpmm, double pixelRatio, bool clamp) {
+	draw->dimensions = CoordPX(
+			root.getTextDimensions(AlloyApplicationContext().get()));
+	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
+}
+void ExpandTree::add(const std::shared_ptr<TreeItem>& item) {
+	root.add(item);
+}
+const int TreeItem::PADDING = 2;
+pixel2 TreeItem::getTextDimensions(AlloyContext* context) {
+	if (!dirty) {
+		return dimensions;
+	}
+	NVGcontext* nvg = context->nvgContext;
+
+	nvgTextAlign(nvg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+	nvgFontSize(nvg, fontSize);
+	nvgFontFaceId(nvg, context->getFontHandle(FontType::Normal));
+	float tw1 = nvgTextBounds(nvg, 0, 0, name.c_str(), nullptr, nullptr);
+	nvgFontFaceId(nvg, context->getFontHandle(FontType::Icon));
+	float tw2 =
+			(iconCodeString.length() == 0) ?
+					0 :
+					nvgTextBounds(nvg, 0, 0, iconCodeString.c_str(), nullptr,
+							nullptr);
+	float th = (name.length() > 0) ? fontSize + PADDING * 2 : 0;
+	pixel2 dims = pixel2(tw1 + tw2 + fontSize + PADDING * 2, th);
+	for (TreeItemPtr& item : children) {
+		pixel2 cdims = item->getTextDimensions(context);
+		dims.y += cdims.y;
+		dims.x = std::max(dims.x, cdims.x);
+	}
+	dimensions = dims;
+	dirty = false;
+	return dimensions;
+}
+void TreeItem::draw(AlloyContext* context, const pixel2& pt) {
+	NVGcontext* nvg = context->nvgContext;
+	nvgTextAlign(nvg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+	nvgFontSize(nvg, fontSize);
+	nvgFontFaceId(nvg, context->getFontHandle(FontType::Icon));
+	float tw1 = 0;
+	if (iconCodeString.length() > 0) {
+		nvgTextBounds(nvg, 0, 0, iconCodeString.c_str(), nullptr, nullptr);
+		nvgText(nvg, pt.x + PADDING, pt.y + PADDING, iconCodeString.c_str(),
+				nullptr);
+	}
+	pixel yoff = pt.y;
+	if (name.length() > 0) {
+		nvgFontFaceId(nvg, context->getFontHandle(FontType::Normal));
+		nvgText(nvg, pt.x + tw1 * 2 * PADDING, pt.y + PADDING, name.c_str(),
+				nullptr);
+		yoff = pt.y + fontSize + PADDING * 2;
+	}
+	for (TreeItemPtr& item : children) {
+		item->draw(context, pixel2(pt.x + fontSize + 2 * PADDING, yoff));
+		yoff += item->getTextDimensions(context).y;
+	}
 }
 }
 

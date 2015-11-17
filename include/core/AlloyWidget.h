@@ -261,7 +261,8 @@ public:
 		selectedIndex = selection;
 		selectionBox->setSelectedIndex(selection);
 		selectionLabel->setLabel(this->getValue());
-		if (onSelect)onSelect(selectedIndex);
+		if (onSelect)
+			onSelect(selectedIndex);
 	}
 	void addSelection(const std::string& selection) {
 		selectionBox->addSelection(selection);
@@ -270,7 +271,8 @@ public:
 		selectedIndex = selection;
 		selectionBox->setSelectedIndex(selection);
 		selectionLabel->setLabel(this->getValue());
-		if (onSelect)onSelect(selectedIndex);
+		if (onSelect)
+			onSelect(selectedIndex);
 	}
 	virtual void draw(AlloyContext* context) override;
 	Selection(const std::string& label, const AUnit2D& position,
@@ -306,9 +308,9 @@ public:
 	void draw(AlloyContext* context) override;
 };
 
-class MessageDialog : public Composite {
+class MessageDialog: public Composite {
 protected:
-	bool returnValue=false;
+	bool returnValue = false;
 	MessageOption option;
 	MessageType type;
 	std::shared_ptr<Composite> containerRegion;
@@ -317,8 +319,11 @@ public:
 		return returnValue;
 	}
 	void setVisible(bool visible);
-	MessageDialog(const std::string& name, const AUnit2D& pos,const AUnit2D& dims, bool wrap,const MessageOption& option,const MessageType& type);
-	MessageDialog(const std::string& name, bool wrap,const MessageOption& option,const MessageType& type);
+	MessageDialog(const std::string& name, const AUnit2D& pos,
+			const AUnit2D& dims, bool wrap, const MessageOption& option,
+			const MessageType& type);
+	MessageDialog(const std::string& name, bool wrap,
+			const MessageOption& option, const MessageType& type);
 	virtual void draw(AlloyContext* context) override;
 	std::function<void(MessageDialog* dialog)> onSelect;
 };
@@ -350,16 +355,55 @@ private:
 public:
 	pixel expandHeight;
 	void setExpanded(bool expanded);
-	ExpandRegion(const std::string& name, const std::shared_ptr<Composite>& region,
-			const AUnit2D& pos, const AUnit2D& dims,pixel expandHeight,bool expanded);
+	ExpandRegion(const std::string& name,
+			const std::shared_ptr<Composite>& region, const AUnit2D& pos,
+			const AUnit2D& dims, pixel expandHeight, bool expanded);
+};
+class TreeItem {
+protected:
+	static const int PADDING;
+	std::string name;
+	std::string iconCodeString;
+	float fontSize = 24;
+	bool dirty;
+	pixel2 dimensions;
+	std::vector<std::shared_ptr<TreeItem>> children;
+public:
+	std::string getName() const {
+		return name;
+	}
+	void add(const std::shared_ptr<TreeItem>& item) {
+		children.push_back(item);
+		dirty = true;
+	}
+	TreeItem(const std::string& name = "", int iconCode = 0,
+			float fontSize = 24) :
+			name(name), fontSize(fontSize), dirty(true), dimensions(0.0f) {
+		if (iconCode != 0) {
+			iconCodeString = CodePointToUTF8(iconCode);
+		}
+	}
+	pixel2 getTextDimensions(AlloyContext* context);
+	void draw(AlloyContext* context, const pixel2& location);
+};
+class ExpandTree: public Composite {
+	TreeItem root;
+	DrawPtr draw;
+public:
+	ExpandTree(const std::string& name, const AUnit2D& pos,
+			const AUnit2D& dims);
+	void add(const std::shared_ptr<TreeItem>& item);
+	void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
+			double pixelRatio, bool clamp);
 };
 class ExpandBar: public Composite {
 private:
 	std::list<std::shared_ptr<ExpandRegion>> expandRegions;
 	std::list<std::shared_ptr<Region>> contentRegions;
 public:
-	CompositePtr add(Region* region,pixel expandHeight, bool expanded);
-	CompositePtr add(const std::shared_ptr<Region>&,pixel expandHeight, bool expanded);
+	CompositePtr add(Region* region, pixel expandHeight, bool expanded);
+	CompositePtr add(const std::shared_ptr<Region>&, pixel expandHeight,
+			bool expanded);
 
 	ExpandBar(const std::string& name, const AUnit2D& pos, const AUnit2D& dims);
 };
@@ -378,7 +422,7 @@ public:
 	bool isSelected();
 	void setLabel(const std::string& label);
 	void setIcon(int icon);
-	ListEntry(ListBox* listBox, const std::string& name,float entryHeight);
+	ListEntry(ListBox* listBox, const std::string& name, float entryHeight);
 	virtual void draw(AlloyContext* context) override;
 };
 class FileEntry: public ListEntry {
@@ -561,13 +605,14 @@ struct GraphData {
 	Color color;
 	std::vector<float2> points;
 	static const float NO_INTERSECT;
-	GraphData(const std::string& name = "", Color color = Color(200, 64, 64)):name(name),color(color) {
+	GraphData(const std::string& name = "", Color color = Color(200, 64, 64)) :
+			name(name), color(color) {
 
 	}
-	float interpolate(float x) const ;
+	float interpolate(float x) const;
 };
 typedef std::shared_ptr<GraphData> GraphDataPtr;
-class Graph : public Region{
+class Graph: public Region {
 protected:
 	std::vector<GraphDataPtr> curves;
 	box2f graphBounds;
@@ -585,16 +630,16 @@ public:
 	void setGraphBounds(const box2f& r) {
 		graphBounds = r;
 	}
-	Graph(const std::string& name,const AUnit2D& pos, const AUnit2D& dims);
+	Graph(const std::string& name, const AUnit2D& pos, const AUnit2D& dims);
 	virtual void draw(AlloyContext* context) override;
 };
 
-class WindowPane : public Composite {
+class WindowPane: public Composite {
 protected:
 	pixel2 cursorDownPosition;
 	box2px windowInitialBounds;
 	CompositePtr titleRegion;
-	CompositePtr contentRegion;	
+	CompositePtr contentRegion;
 	bool maximized;
 	bool dragging;
 	bool resizing;
@@ -628,6 +673,8 @@ typedef std::shared_ptr<ListEntry> ListEntryPtr;
 typedef std::shared_ptr<Graph> GraphPtr;
 typedef std::shared_ptr<WindowPane> WindowPanePtr;
 typedef std::shared_ptr<MessageDialog> MessageDialogPtr;
+typedef std::shared_ptr<TreeItem> TreeItemPtr;
+typedef std::shared_ptr<ExpandTree> ExpandTreePtr;
 }
 
 #endif /* ALLOYWIDGET_H_ */

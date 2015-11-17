@@ -185,10 +185,10 @@ public:
 };
 class Draw: public Region {
 public:
-	std::function<void(const AlloyContext* context, const box2px& bounds)> onDraw;
+	std::function<void(AlloyContext* context, const box2px& bounds)> onDraw;
 	Draw(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,
 			const std::function<
-					void(const AlloyContext* context, const box2px& bounds)>& func =
+					void(AlloyContext* context, const box2px& bounds)>& func =
 					nullptr) :
 			Region(name, pos, dims), onDraw(func) {
 	}
@@ -428,10 +428,11 @@ public:
 
 	TextRegion(
 			const std::string& name = MakeString() << "t" << std::setw(8)
-			<< std::setfill('0') << (REGION_COUNTER++)) :TextLabel(name) {
+					<< std::setfill('0') << (REGION_COUNTER++)) :
+			TextLabel(name) {
 	}
 	TextRegion(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
-	TextLabel(name,pos,dims) {
+			TextLabel(name, pos, dims) {
 	}
 
 	virtual void draw(AlloyContext* context) override;

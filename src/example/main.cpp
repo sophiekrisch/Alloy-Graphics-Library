@@ -51,22 +51,23 @@
 #include "../../include/example/IntersectorEx.h"
 #include "../../include/example/WindowPaneEx.h"
 #include "../../include/example/DistanceFieldEx.h"
+#include "../../include/example/TreeEx.h"
 #include <cstring>
 /*
-For simple execution, main method should look like:
+ For simple execution, main method should look like:
 
-	int main(int argc, char *argv[]) {
-		try {
-			MyApplication app;
-			app.run();
-			return 0;
-		} catch (std::exception& e) {
-			std::cout << "Error: " << e.what() << std::endl;
-			return 1;
-		}
-	}
+ int main(int argc, char *argv[]) {
+ try {
+ MyApplication app;
+ app.run();
+ return 0;
+ } catch (std::exception& e) {
+ std::cout << "Error: " << e.what() << std::endl;
+ return 1;
+ }
+ }
 
-*/
+ */
 #ifndef EXAMPLE_NAME
 #define EXAMPLE_NAME ""
 #endif
@@ -107,7 +108,7 @@ typedef std::unique_ptr<Example> ExamplePtr;
 
 bool SANITY_CHECK() {
 	bool ret = true;
-	ret&=SANITY_CHECK_LOCATOR();
+	ret &= SANITY_CHECK_LOCATOR();
 	//SANITY_CHECK_ANY();
 	//SANITY_CHECK_SVD();
 	//SANITY_CHECK_ALGO();
@@ -126,7 +127,7 @@ bool SANITY_CHECK() {
 	return ret;
 }
 int main(int argc, char *argv[]) {
-	const int N =32;
+	const int N = 33;
 	ExamplePtr apps[N] = { MAKE_EXAMPLE(UnitsEx), MAKE_EXAMPLE(CompositeEx),
 			MAKE_EXAMPLE(EventsEx), MAKE_EXAMPLE(DragEx), MAKE_EXAMPLE(TweenEx),
 			MAKE_EXAMPLE(ImageEx), MAKE_EXAMPLE(ControlsEx), MAKE_EXAMPLE(
@@ -137,11 +138,12 @@ int main(int argc, char *argv[]) {
 			MAKE_EXAMPLE(MeshDepthEx), MAKE_EXAMPLE(MeshPhongEx), MAKE_EXAMPLE(
 					LaplaceFillEx), MAKE_EXAMPLE(PoissonBlendEx), MAKE_EXAMPLE(
 					PoissonInpaintEx), MAKE_EXAMPLE(ImageProcessingEx),
-			MAKE_EXAMPLE(MeshPickerEx), MAKE_EXAMPLE(IntersectorEx), MAKE_EXAMPLE(
-					MeshSmoothEx), MAKE_EXAMPLE(ColorSpaceEx), MAKE_EXAMPLE(
-					MeshPrimitivesEx),MAKE_EXAMPLE(MenuEx),MAKE_EXAMPLE(LocatorEx),
-					MAKE_EXAMPLE(GraphEx),MAKE_EXAMPLE(WindowPaneEx),MAKE_EXAMPLE(SplineEx),
-			MAKE_EXAMPLE(DistanceFieldEx) };
+			MAKE_EXAMPLE(MeshPickerEx), MAKE_EXAMPLE(IntersectorEx),
+			MAKE_EXAMPLE(MeshSmoothEx), MAKE_EXAMPLE(ColorSpaceEx),
+			MAKE_EXAMPLE(MeshPrimitivesEx), MAKE_EXAMPLE(MenuEx), MAKE_EXAMPLE(
+					LocatorEx), MAKE_EXAMPLE(GraphEx), MAKE_EXAMPLE(
+					WindowPaneEx), MAKE_EXAMPLE(SplineEx), MAKE_EXAMPLE(
+					DistanceFieldEx), MAKE_EXAMPLE(TreeEx) };
 	try {
 		//Example name is specified in a makefile at compile time so 
 		//all example applications are compiled to seperate exe targets.
@@ -152,7 +154,7 @@ int main(int argc, char *argv[]) {
 				exampleIndex = n;
 				break;
 			}
-		} 
+		}
 		if (exampleIndex >= 0) {
 			apps[exampleIndex]->getApplication()->run(1);
 		} else {
@@ -192,15 +194,13 @@ int main(int argc, char *argv[]) {
 				std::cout << "Usage: " << argv[0]
 						<< " [example index] [output directory]\nAlloy Graphics Library Examples:"
 						<< std::endl;
-				std::cout << "[" << -2
-					<< "] Sanity Check"
-					<< std::endl;
+				std::cout << "[" << -2 << "] Sanity Check" << std::endl;
 				std::cout << "[" << -1
 						<< "] Generate screenshots for all examples"
 						<< std::endl;
 				for (int i = 0; i < N; i++) {
-					std::cout << "[" <<std::setw(2)<<std::setfill(' ')<< i << "] "<< apps[i]->getName()
-							<< std::endl;
+					std::cout << "[" << std::setw(2) << std::setfill(' ') << i
+							<< "] " << apps[i]->getName() << std::endl;
 				}
 				std::cout << ">> Enter Example Number: ";
 				int index = -1;
@@ -226,7 +226,6 @@ int main(int argc, char *argv[]) {
 			}
 		}
 
-		
 		return 0;
 	} catch (std::exception& e) {
 		std::cout << "Error: " << e.what() << std::endl;
