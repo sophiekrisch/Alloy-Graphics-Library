@@ -359,6 +359,7 @@ public:
 			const std::shared_ptr<Composite>& region, const AUnit2D& pos,
 			const AUnit2D& dims, pixel expandHeight, bool expanded);
 };
+class ExpandTree;
 class TreeItem {
 protected:
 	static const int PADDING;
@@ -366,26 +367,38 @@ protected:
 	std::string iconCodeString;
 	float fontSize = 24;
 	bool dirty;
-	pixel2 dimensions;
+	box2px bounds;
+	box2px selectionBounds;
 	bool expanded;
 	std::vector<std::shared_ptr<TreeItem>> children;
 public:
+	bool isExpanded() const {
+		return expanded;
+	}
 	std::string getName() const {
 		return name;
 	}
-	void add(const std::shared_ptr<TreeItem>& item) {
-		children.push_back(item);
-		dirty = true;
-	}
+	void setExpanded(bool expand);
+	void add(const std::shared_ptr<TreeItem>& item);
+	TreeItem* locate(AlloyContext* context, const pixel2& pt);
 	TreeItem(const std::string& name = "", int iconCode = 0,
 			float fontSize = 24);
-	pixel2 getTextDimensions(AlloyContext* context);
-	void draw(AlloyContext* context, const pixel2& location);
+	bool isDirty() const;
+	box2px getBounds() const;
+	box2px update(AlloyContext* context,
+			const pixel2& offset = pixel2(0.0f));
+	void draw(ExpandTree* tree, AlloyContext* context, const pixel2& offset);
 };
 class ExpandTree: public Composite {
+protected:
 	TreeItem root;
 	DrawPtr draw;
+	TreeItem* selectedItem;
 public:
+	TreeItem* getSelectedItem() const {
+		return selectedItem;
+	}
+	void update(AlloyContext* context);
 	ExpandTree(const std::string& name, const AUnit2D& pos,
 			const AUnit2D& dims);
 	void add(const std::shared_ptr<TreeItem>& item);

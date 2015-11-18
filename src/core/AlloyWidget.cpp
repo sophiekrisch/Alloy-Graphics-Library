@@ -3345,34 +3345,78 @@ MessageDialog::MessageDialog(const std::string& name, bool wrap,
 }
 ExpandTree::ExpandTree(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims) :
-		Composite(name, pos, dims) {
+		Composite(name, pos, dims), selectedItem(nullptr) {
 	setScrollEnabled(true);
 	setAlwaysShowVerticalScrollBar(true);
-	backgroundColor=MakeColor(AlloyApplicationContext()->theme.DARK);
+	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	draw = DrawPtr(
-			new Draw("Tree Region", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)));
+			new Draw("Tree Region", CoordPX(0.0f, 0.0f),
+					CoordPercent(1.0f, 1.0f)));
 	draw->onDraw = [this](AlloyContext* context,const box2px& bounds) {
-		root.draw(context,bounds.position);
+		root.draw(this,context,bounds.position);
+	};
+	draw->onMouseOver = [this](AlloyContext* context,const InputEvent& e) {
+		box2px box=draw->getBounds();
+		selectedItem=root.locate(context,e.cursor-box.position);
+		return false;
+	};
+	draw->onMouseDown = [this](AlloyContext* context, const InputEvent& e) {
+		if(e.button==GLFW_MOUSE_BUTTON_LEFT) {
+			if(selectedItem!=nullptr) {
+				selectedItem->setExpanded(!selectedItem->isExpanded());
+				update(context);
+				return true;
+			}
+		}
+		return false;
 	};
 	Composite::add(draw);
 }
 void ExpandTree::pack(const pixel2& pos, const pixel2& dims,
 		const double2& dpmm, double pixelRatio, bool clamp) {
+	update(AlloyApplicationContext().get());
 	draw->dimensions = CoordPX(
-			root.getTextDimensions(AlloyApplicationContext().get())
-					+ pixel2(Composite::scrollBarSize));
+			root.getBounds().dimensions + pixel2(Composite::scrollBarSize));
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
+}
+void ExpandTree::update(AlloyContext* context) {
+	if (root.isDirty()) {
+		root.update(context);
+	}
 }
 void ExpandTree::add(const std::shared_ptr<TreeItem>& item) {
 	root.add(item);
 }
 const int TreeItem::PADDING = 2;
-pixel2 TreeItem::getTextDimensions(AlloyContext* context) {
-	if (!dirty) {
-		return dimensions;
-	}
-	NVGcontext* nvg = context->nvgContext;
 
+void TreeItem::setExpanded(bool ex) {
+	expanded = ex;
+	dirty = true;
+}
+void TreeItem::add(const std::shared_ptr<TreeItem>& item) {
+	children.push_back(item);
+	dirty = true;
+}
+TreeItem* TreeItem::locate(AlloyContext* context, const pixel2& pt) {
+	box2px box = getBounds();
+	if (box.contains(pt)) {
+		if (selectionBounds.contains(pt)) {
+			return this;
+		}
+		for (TreeItemPtr& item : children) {
+			TreeItem* selected = item->locate(context, pt);
+			if (selected != nullptr)
+				return selected;
+		}
+
+	}
+	return nullptr;
+}
+box2px TreeItem::getBounds() const {
+	return bounds;
+}
+box2px TreeItem::update(AlloyContext* context, const pixel2& offset) {
+	NVGcontext* nvg = context->nvgContext;
 	nvgTextAlign(nvg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
 	nvgFontSize(nvg, fontSize);
 	nvgFontFaceId(nvg, context->getFontHandle(FontType::Normal));
@@ -3385,36 +3429,55 @@ pixel2 TreeItem::getTextDimensions(AlloyContext* context) {
 					nvgTextBounds(nvg, 0, 0, iconCodeString.c_str(), nullptr,
 							nullptr) + PADDING * 2;
 	float th = (name.length() > 0) ? fontSize + PADDING * 2 : 0;
-
-	pixel2 dims = pixel2(textWidth + iconWidth + spaceWidth + PADDING, th);
-	for (TreeItemPtr& item : children) {
-		pixel2 cdims = item->getTextDimensions(context);
-		dims.y += cdims.y;
-		dims.x = std::max(dims.x, spaceWidth + cdims.x);
+	selectionBounds = box2px(offset,
+			pixel2(textWidth + iconWidth + spaceWidth + PADDING, th));
+	bounds = selectionBounds;
+	if (isExpanded()) {
+		pixel2 pt = offset + pixel2((name.length() > 0) ? spaceWidth : 0, th);
+		for (TreeItemPtr& item : children) {
+			box2px cdims = item->update(context, pt);
+			bounds.dimensions = aly::max(bounds.max(), cdims.max())
+					- aly::min(bounds.min(), cdims.min());
+			pt += pixel2(0.0f, cdims.dimensions.y);
+		}
 	}
-	dimensions = dims;
-	dirty = false;
-	return dimensions;
+	return bounds;
 }
 TreeItem::TreeItem(const std::string& name, int iconCode, float fontSize) :
-		name(name), fontSize(fontSize), dirty(true), dimensions(0.0f), expanded(
-				true) {
+		name(name), fontSize(fontSize), dirty(true), expanded(
+				name.length() == 0) {
 	if (iconCode != 0) {
 		iconCodeString = CodePointToUTF8(iconCode);
 	}
 }
-void TreeItem::draw(AlloyContext* context, const pixel2& pt) {
+bool TreeItem::isDirty() const {
+	if (dirty)
+		return true;
+	for (const TreeItemPtr& item : children) {
+		if (item->isDirty())
+			return true;
+	}
+	return false;
+}
+
+void TreeItem::draw(ExpandTree* tree, AlloyContext* context,
+		const pixel2& offset) {
+	box2px bounds = getBounds();
 	NVGcontext* nvg = context->nvgContext;
-	nvgFillColor(nvg,context->theme.LIGHT_TEXT);
-	nvgFontSize(nvg, fontSize);
 	nvgFontFaceId(nvg, context->getFontHandle(FontType::Icon));
 	float spaceWidth = fontSize + PADDING * 2;
 	float iconWidth = 0;
 	static const std::string rightArrow = CodePointToUTF8(0xf0da);
 	static const std::string downArrow = CodePointToUTF8(0xf0d7);
-
+	pixel2 pt = bounds.position + offset;
+	bool selected = (tree->getSelectedItem() == this);
+	nvgFontSize(nvg, fontSize);
+	if (selected) {
+		nvgFillColor(nvg, context->theme.HIGHLIGHT);
+	} else {
+		nvgFillColor(nvg, context->theme.LIGHT_TEXT);
+	}
 	if (iconCodeString.length() > 0) {
-
 		iconWidth = nvgTextBounds(nvg, 0, 0, iconCodeString.c_str(), nullptr,
 				nullptr) + PADDING * 2;
 
@@ -3424,26 +3487,36 @@ void TreeItem::draw(AlloyContext* context, const pixel2& pt) {
 					(expanded) ? downArrow.c_str() : rightArrow.c_str(),
 					nullptr);
 		}
+
 		nvgTextAlign(nvg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
 		nvgText(nvg, pt.x + spaceWidth, pt.y + PADDING, iconCodeString.c_str(),
 				nullptr);
-
 	}
-	pixel yoff = pt.y;
 	if (name.length() > 0) {
-
 		nvgTextAlign(nvg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
-		nvgFontFaceId(nvg, context->getFontHandle(FontType::Normal));
+		if (selected) {
+			nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold));
+		} else {
+			nvgFontFaceId(nvg, context->getFontHandle(FontType::Normal));
+		}
 		nvgText(nvg, pt.x + iconWidth + spaceWidth, pt.y + PADDING,
 				name.c_str(), nullptr);
-		yoff = pt.y + fontSize + PADDING * 2;
 	}
 	if (expanded) {
 		for (TreeItemPtr& item : children) {
-			item->draw(context, pixel2(pt.x + spaceWidth, yoff));
-			yoff += item->getTextDimensions(context).y;
+			item->draw(tree, context, offset);
 		}
 	}
+	/*
+	 if (tree->getSelectedItem() == this) {
+	 nvgStrokeWidth(nvg, 1.0f);
+	 nvgStrokeColor(nvg, Color(255, 0, 0));
+	 nvgBeginPath(nvg);
+	 nvgRect(nvg, pt.x, pt.y, bounds.dimensions.x, bounds.dimensions.y);
+	 nvgStroke(nvg);
+	 }
+	 */
+
 }
 }
 
