@@ -1,7 +1,7 @@
 Alloy Graphics Library
 ========
 
-Alloy is yet another 2D/3D graphics library written in C++11. As mundane as that sounds, this API provides an extensive collection of UI components and engineering reference implementations of common 2D/3D graphics algorithms for fast prototyping on windows and linux platforms.
+Alloy is yet another 2D/3D graphics library written in C++11. As mundane as that sounds, this API provides an extensive collection of GUI components and engineering reference implementations of common 2D/3D graphics algorithms for fast prototyping on windows and linux platforms.
 
 ## Contents
 - Anti-aliased vector graphics drawing (NanoVG).
@@ -9,7 +9,7 @@ Alloy is yet another 2D/3D graphics library written in C++11. As mundane as that
 - OpenGL core 3.3 and higher support. Legacy OpenGL will not run, but you won't need it!
 - Generic handling of absolute/relative coordinates in pixels, dp, in, and mm.
 - Tweenable positions, dimensions, font sizes, and colors.
-- UI components: Region, Composite, Border Layout, Vertical Layout, Horizontal Layout, Scroll Bars, Draw 2D Region, Text Button, Icon Button, Text Icon Button, Text Label, Text Region, Text Field, Number Field, Message Dialog, Selection Box, Drop Down Box, Menu Bar, Vertical Slider, Horizontal Slider, Color Selection, File Dialog, File Field, File Button, List Box, Window Pane, Graph Plot, Progress Bar, Expand Region, Expand Tree, Toggle Box, Check Box, Glass Pane.
+- GUI components: Region, Composite, Border Layout, Vertical Layout, Horizontal Layout, Scroll Bars, Draw 2D Region, Text Button, Icon Button, Text Icon Button, Text Label, Text Region, Text Field, Number Field, Message Dialog, Selection Box, Drop Down Box, Menu Bar, Vertical Slider, Horizontal Slider, Color Selection, File Dialog, File Field, File Button, List Box, Window Pane, Graph Plot, Progress Bar, Expand Region, Expand Tree, Toggle Box, Check Box, Glass Pane.
 - Worker, timer, and recurrent worker.
 - Vector types from one to four dimensions.
 - Quaternions.
