@@ -392,7 +392,7 @@ public:
 class ExpandTree: public Composite {
 protected:
 	TreeItem root;
-	DrawPtr draw;
+	DrawPtr drawRegion;
 	TreeItem* selectedItem;
 public:
 	TreeItem* getSelectedItem() const {
@@ -404,6 +404,7 @@ public:
 	void add(const std::shared_ptr<TreeItem>& item);
 	void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 			double pixelRatio, bool clamp);
+	virtual void draw(AlloyContext* context) override;
 };
 class ExpandBar: public Composite {
 private:

@@ -3349,35 +3349,43 @@ ExpandTree::ExpandTree(const std::string& name, const AUnit2D& pos,
 	setScrollEnabled(true);
 	setAlwaysShowVerticalScrollBar(true);
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
-	draw = DrawPtr(
+	drawRegion = DrawPtr(
 			new Draw("Tree Region", CoordPX(0.0f, 0.0f),
 					CoordPercent(1.0f, 1.0f)));
-	draw->onDraw = [this](AlloyContext* context,const box2px& bounds) {
+	drawRegion->onDraw = [this](AlloyContext* context,const box2px& bounds) {
 		root.draw(this,context,bounds.position);
 	};
-	draw->onMouseOver = [this](AlloyContext* context,const InputEvent& e) {
-		box2px box=draw->getBounds();
-		selectedItem=root.locate(context,e.cursor-box.position);
-		return false;
-	};
-	draw->onMouseDown = [this](AlloyContext* context, const InputEvent& e) {
-		if(e.button==GLFW_MOUSE_BUTTON_LEFT) {
-			if(selectedItem!=nullptr) {
-				selectedItem->setExpanded(!selectedItem->isExpanded());
-				update(context);
-				return true;
-			}
-		}
-		return false;
-	};
-	Composite::add(draw);
+	drawRegion->onMouseOver =
+			[this](AlloyContext* context,const InputEvent& e) {
+				box2px box=drawRegion->getBounds();
+				selectedItem=root.locate(context,e.cursor-box.position);
+				return false;
+			};
+	drawRegion->onMouseDown =
+			[this](AlloyContext* context, const InputEvent& e) {
+				if(e.button==GLFW_MOUSE_BUTTON_LEFT) {
+					if(selectedItem!=nullptr) {
+						selectedItem->setExpanded(!selectedItem->isExpanded());
+						update(context);
+						return true;
+					}
+				}
+				return false;
+			};
+	Composite::add (drawRegion);
 }
 void ExpandTree::pack(const pixel2& pos, const pixel2& dims,
 		const double2& dpmm, double pixelRatio, bool clamp) {
 	update(AlloyApplicationContext().get());
-	draw->dimensions = CoordPX(
+	drawRegion->dimensions = CoordPX(
 			root.getBounds().dimensions + pixel2(Composite::scrollBarSize));
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
+}
+void ExpandTree::draw(AlloyContext* context) {
+	if(!context->isMouseOver(this,true)){
+		selectedItem=nullptr;
+	}
+	Composite::draw(context);
 }
 void ExpandTree::update(AlloyContext* context) {
 	if (root.isDirty()) {

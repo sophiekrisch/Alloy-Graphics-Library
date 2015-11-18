@@ -32,12 +32,6 @@ void TreeEx::addDirectory(const std::string& dir,
 		if (fileName.length() > 0 && fileName[0] == '.')
 			continue;
 		TreeItemPtr child;
-		/*
-		 for (int d = 0; d < depth; d++) {
-		 std::cout << "--";
-		 }
-		 std::cout << child->getName() << std::endl;
-		 */
 		if (depth < 4) {
 			if (fd.fileType == FileType::Directory) {
 				child = TreeItemPtr(new TreeItem(fileName, 0xf115, 20));
@@ -51,15 +45,14 @@ void TreeEx::addDirectory(const std::string& dir,
 }
 bool TreeEx::init(Composite& rootNode) {
 	ExpandTreePtr tree = ExpandTreePtr(
-			new ExpandTree("Tree", CoordPercent(0.7f, 0.0f),
-					CoordPercent(0.3f, 1.0f)));
+			new ExpandTree("Tree", CoordPercent(0.0f, 0.0f),
+					CoordPercent(0.35f, 1.0f)));
 	std::string homeDir = GetCurrentWorkingDirectory();
 	for (FileDescription fd : GetDirectoryDescriptionListing(homeDir)) {
 		std::string fileName = GetFileName(fd.fileLocation);
 		if (fileName.length() > 0 && fileName[0] == '.')
 			continue;
 		TreeItemPtr child;
-		//std::cout << child->getName() << std::endl;
 		if (fd.fileType == FileType::Directory) {
 			child = TreeItemPtr(new TreeItem(fileName, 0xf115, 20));
 			addDirectory(fd.fileLocation, child, 0);
