@@ -390,15 +390,17 @@ public:
 
 	void setExpanded(bool expand);
 	void add(const std::shared_ptr<TreeItem>& item);
-	TreeItem* locate(AlloyContext* context, const pixel2& pt);
+	virtual TreeItem* locate(AlloyContext* context, const pixel2& pt);
 	TreeItem(const std::string& name = "", int iconCode = 0,
 			float fontSize = 24);
-
 	virtual box2px getBounds() const;
 	virtual box2px update(AlloyContext* context,
 			const pixel2& offset = pixel2(0.0f));
 	virtual void draw(ExpandTree* tree, AlloyContext* context,
 			const pixel2& offset);
+	virtual ~TreeItem() {
+
+	}
 };
 class LeafItem: public TreeItem {
 protected:
@@ -413,6 +415,9 @@ public:
 			const pixel2& offset = pixel2(0.0f)) override;
 	virtual void draw(ExpandTree* tree, AlloyContext* context,
 			const pixel2& offset) override;
+	virtual TreeItem* locate(AlloyContext* context, const pixel2& pt) override;
+	virtual ~LeafItem() {
+	}
 };
 class ExpandTree: public Composite {
 protected:

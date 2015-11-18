@@ -3395,6 +3395,20 @@ void ExpandTree::draw(AlloyContext* context) {
 		selectedItem = nullptr;
 	}
 	Composite::draw(context);
+	/*
+	//For debugging
+	if (selectedItem) {
+		NVGcontext* nvg = context->nvgContext;
+		nvgStrokeWidth(nvg, 1.0f);
+		nvgStrokeColor(nvg, Color(255, 0, 0));
+		nvgBeginPath(nvg);
+		box2px bounds = selectedItem->getBounds();
+		nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
+				bounds.dimensions.x, bounds.dimensions.y,
+				context->theme.CORNER_RADIUS);
+		nvgStroke(nvg);
+	}
+	*/
 }
 void ExpandTree::update(AlloyContext* context) {
 	if (dirty) {
@@ -3439,6 +3453,12 @@ TreeItem* TreeItem::locate(AlloyContext* context, const pixel2& pt) {
 	}
 	return nullptr;
 }
+TreeItem* LeafItem::locate(AlloyContext* context, const pixel2& pt) {
+	if (bounds.contains(pt)) {
+		return this;
+	}
+	return nullptr;
+}
 box2px TreeItem::getBounds() const {
 	return bounds;
 }
@@ -3446,7 +3466,7 @@ box2px TreeItem::update(AlloyContext* context, const pixel2& offset) {
 	NVGcontext* nvg = context->nvgContext;
 	nvgTextAlign(nvg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
 	nvgFontSize(nvg, fontSize);
-	nvgFontFaceId(nvg, context->getFontHandle(FontType::Normal));
+	nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold));
 	float spaceWidth = fontSize + PADDING * 2;
 	float textWidth = nvgTextBounds(nvg, 0, 0, name.c_str(), nullptr, nullptr);
 	nvgFontFaceId(nvg, context->getFontHandle(FontType::Icon));
@@ -3528,11 +3548,7 @@ void TreeItem::draw(ExpandTree* tree, AlloyContext* context,
 	}
 	if (name.length() > 0) {
 		nvgTextAlign(nvg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
-		if (selected) {
-			nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold));
-		} else {
-			nvgFontFaceId(nvg, context->getFontHandle(FontType::Normal));
-		}
+		nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold));
 		nvgText(nvg, pt.x + iconWidth + spaceWidth, pt.y + PADDING,
 				name.c_str(), nullptr);
 	}
