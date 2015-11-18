@@ -372,21 +372,47 @@ protected:
 	bool expanded;
 	std::vector<std::shared_ptr<TreeItem>> children;
 public:
+	std::function<void(TreeItem* item)> onExpand;
+	std::function<void(TreeItem* item)> onCollapse;
+	std::function<void(TreeItem* item)> onSelect;
 	bool isExpanded() const {
 		return expanded;
 	}
 	std::string getName() const {
 		return name;
 	}
+	void clear() {
+		children.clear();
+	}
+	bool hasChildren() const {
+		return (children.size() != 0);
+	}
+
 	void setExpanded(bool expand);
 	void add(const std::shared_ptr<TreeItem>& item);
 	TreeItem* locate(AlloyContext* context, const pixel2& pt);
 	TreeItem(const std::string& name = "", int iconCode = 0,
 			float fontSize = 24);
 
-	box2px getBounds() const;
-	box2px update(AlloyContext* context, const pixel2& offset = pixel2(0.0f));
-	void draw(ExpandTree* tree, AlloyContext* context, const pixel2& offset);
+	virtual box2px getBounds() const;
+	virtual box2px update(AlloyContext* context,
+			const pixel2& offset = pixel2(0.0f));
+	virtual void draw(ExpandTree* tree, AlloyContext* context,
+			const pixel2& offset);
+};
+class LeafItem: public TreeItem {
+protected:
+	std::function<void(AlloyContext* context, const box2px& bounds)> onDraw;
+public:
+	LeafItem(
+			const std::function<
+					void(AlloyContext* context, const box2px& bounds)>& onDraw,
+			const pixel2& dimensions);
+	virtual box2px getBounds() const;
+	virtual box2px update(AlloyContext* context,
+			const pixel2& offset = pixel2(0.0f)) override;
+	virtual void draw(ExpandTree* tree, AlloyContext* context,
+			const pixel2& offset) override;
 };
 class ExpandTree: public Composite {
 protected:
@@ -687,6 +713,7 @@ typedef std::shared_ptr<Graph> GraphPtr;
 typedef std::shared_ptr<WindowPane> WindowPanePtr;
 typedef std::shared_ptr<MessageDialog> MessageDialogPtr;
 typedef std::shared_ptr<TreeItem> TreeItemPtr;
+typedef std::shared_ptr<LeafItem> LeafItemPtr;
 typedef std::shared_ptr<ExpandTree> ExpandTreePtr;
 }
 

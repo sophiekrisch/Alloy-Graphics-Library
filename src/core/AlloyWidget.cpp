@@ -3365,7 +3365,13 @@ ExpandTree::ExpandTree(const std::string& name, const AUnit2D& pos,
 			[this](AlloyContext* context, const InputEvent& e) {
 				if(e.button==GLFW_MOUSE_BUTTON_LEFT) {
 					if(selectedItem!=nullptr) {
-						selectedItem->setExpanded(!selectedItem->isExpanded());
+						if(selectedItem->onExpand||selectedItem->hasChildren()) {
+							selectedItem->setExpanded(!selectedItem->isExpanded());
+						} else {
+							if(selectedItem->onSelect) {
+								selectedItem->onSelect(selectedItem);
+							}
+						}
 						setDirty(true);
 						update(context);
 						return true;
@@ -3403,6 +3409,15 @@ const int TreeItem::PADDING = 2;
 
 void TreeItem::setExpanded(bool ex) {
 	expanded = ex;
+	if (ex) {
+		if (onExpand) {
+			onExpand(this);
+		}
+	} else {
+		if (onCollapse) {
+			onCollapse(this);
+		}
+	}
 }
 void TreeItem::add(const std::shared_ptr<TreeItem>& item) {
 	children.push_back(item);
@@ -3461,7 +3476,24 @@ TreeItem::TreeItem(const std::string& name, int iconCode, float fontSize) :
 		iconCodeString = CodePointToUTF8(iconCode);
 	}
 }
-
+LeafItem::LeafItem(
+		const std::function<void(AlloyContext* context, const box2px& bounds)>& onDraw,
+		const pixel2& dimensions) :
+		onDraw(onDraw) {
+	bounds = box2px(pixel2(0.0f), dimensions);
+}
+box2px LeafItem::getBounds() const {
+	return bounds;
+}
+box2px LeafItem::update(AlloyContext* context, const pixel2& offset) {
+	bounds.position = offset;
+	return bounds;
+}
+void LeafItem::draw(ExpandTree* tree, AlloyContext* context,
+		const pixel2& offset) {
+	box2px box(bounds.position + offset, bounds.dimensions);
+	onDraw(context, box);
+}
 void TreeItem::draw(ExpandTree* tree, AlloyContext* context,
 		const pixel2& offset) {
 	box2px bounds = getBounds();
@@ -3483,7 +3515,7 @@ void TreeItem::draw(ExpandTree* tree, AlloyContext* context,
 		iconWidth = nvgTextBounds(nvg, 0, 0, iconCodeString.c_str(), nullptr,
 				nullptr) + PADDING * 2;
 
-		if (children.size() > 0) {
+		if (children.size() > 0 || onExpand) {
 			nvgTextAlign(nvg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
 			nvgText(nvg, pt.x + spaceWidth * 0.5f, pt.y + PADDING,
 					(expanded) ? downArrow.c_str() : rightArrow.c_str(),

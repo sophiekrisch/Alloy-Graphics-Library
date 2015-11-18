@@ -26,8 +26,8 @@
 #include "AlloyWidget.h"
 class TreeEx: public aly::Application {
 protected:
-	void addDirectory(const std::string& dir,
-			const std::shared_ptr<aly::TreeItem>& item, int depth);
+	void addDirectory(const std::string& dir, aly::TreeItem* item);
+	void addLeaf(aly::TreeItem* item,const aly::FileDescription& fd);
 public:
 	TreeEx();
 	bool init(aly::Composite& rootNode);
