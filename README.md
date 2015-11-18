@@ -9,7 +9,7 @@ Alloy is yet another 2D/3D graphics library written in C++11. As mundane as that
 - OpenGL core 3.3 and higher support. Legacy OpenGL will not run, but you won't need it!
 - Generic handling of absolute/relative coordinates in pixels, dp, in, and mm.
 - Tweenable positions, dimensions, font sizes, and colors.
-- UI components: Region, Composite, Border Layout, Vertical Layout, Horizontal Layout, Scroll Bars, Draw 2D Region, Text Button, Icon Button, Text Icon Button, Text Label, Text Region, Text Field, Number Field, Message Dialog, Selection Box, Drop Down Box, Menu Bar, Vertical Slider, Horizontal Slider, Color Selection, File Dialog, File Field, File Button, List Box, Window Pane, Graph Plot, Progress Bar, Expand Region, Toggle Box, Check Box, Glass Pane.
+- UI components: Region, Composite, Border Layout, Vertical Layout, Horizontal Layout, Scroll Bars, Draw 2D Region, Text Button, Icon Button, Text Icon Button, Text Label, Text Region, Text Field, Number Field, Message Dialog, Selection Box, Drop Down Box, Menu Bar, Vertical Slider, Horizontal Slider, Color Selection, File Dialog, File Field, File Button, List Box, Window Pane, Graph Plot, Progress Bar, Expand Region, Expand Tree, Toggle Box, Check Box, Glass Pane.
 - Worker, timer, and recurrent worker.
 - Vector types from one to four dimensions.
 - Quaternions.
@@ -38,7 +38,6 @@ Alloy is yet another 2D/3D graphics library written in C++11. As mundane as that
 - Iso-contour generation (with connectivity rules)
 
 ## Future Work
-- Browsing tree
 - Active contour segmentation
 - Iso-surface
 - Visual programming UI
@@ -189,3 +188,7 @@ B-Spline Example
 Distance Field Example
 -------------------------
 ![DistanceFieldEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0031.png)
+
+Expand Tree Example
+-------------------------
+![DistanceFieldEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0032.png)
