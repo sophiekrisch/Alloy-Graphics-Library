@@ -3378,9 +3378,10 @@ ExpandTree::ExpandTree(const std::string& name, const AUnit2D& pos,
 void ExpandTree::pack(const pixel2& pos, const pixel2& dims,
 		const double2& dpmm, double pixelRatio, bool clamp) {
 	update(AlloyApplicationContext().get());
-	//pixel2 pbounds = dimensions.toPixels(AlloyApplicationContext()->getScreenSize(), dpmm, pixelRatio);
 	drawRegion->dimensions = CoordPX(
-			root.getBounds().dimensions + pixel2(Composite::scrollBarSize));
+			aly::max(getBounds().dimensions,
+					root.getBounds().dimensions
+							+ pixel2(Composite::scrollBarSize)));
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
 }
 void ExpandTree::draw(AlloyContext* context) {
@@ -3508,15 +3509,6 @@ void TreeItem::draw(ExpandTree* tree, AlloyContext* context,
 			item->draw(tree, context, offset);
 		}
 	}
-	/*
-	 if (tree->getSelectedItem() == this) {
-	 nvgStrokeWidth(nvg, 1.0f);
-	 nvgStrokeColor(nvg, Color(255, 0, 0));
-	 nvgBeginPath(nvg);
-	 nvgRect(nvg, pt.x, pt.y, bounds.dimensions.x, bounds.dimensions.y);
-	 nvgStroke(nvg);
-	 }
-	 */
 
 }
 }
