@@ -50,7 +50,7 @@ void TreeEx::addLeaf(TreeItem* item, const FileDescription& fd) {
 								label=MakeString()<<"Accessed: "<<FormatDateAndTime(fd.lastAccessTime);
 								drawText(nvg,bounds.position.x,yoff,label.c_str(),FontStyle::Normal,context->theme.LIGHT_TEXT);
 								popScissor(nvg);
-							}, pixel2(150, 4 * (fontSize + 2) + 2))));
+							}, pixel2(180, 4 * (fontSize + 2) + 2))));
 }
 void TreeEx::addDirectory(const std::string& dir, aly::TreeItem* parent) {
 	for (FileDescription fd : GetDirectoryDescriptionListing(dir)) {
