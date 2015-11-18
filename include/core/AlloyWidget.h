@@ -366,7 +366,7 @@ protected:
 	std::string name;
 	std::string iconCodeString;
 	float fontSize = 24;
-	bool dirty;
+
 	box2px bounds;
 	box2px selectionBounds;
 	bool expanded;
@@ -383,10 +383,9 @@ public:
 	TreeItem* locate(AlloyContext* context, const pixel2& pt);
 	TreeItem(const std::string& name = "", int iconCode = 0,
 			float fontSize = 24);
-	bool isDirty() const;
+
 	box2px getBounds() const;
-	box2px update(AlloyContext* context,
-			const pixel2& offset = pixel2(0.0f));
+	box2px update(AlloyContext* context, const pixel2& offset = pixel2(0.0f));
 	void draw(ExpandTree* tree, AlloyContext* context, const pixel2& offset);
 };
 class ExpandTree: public Composite {
@@ -394,9 +393,13 @@ protected:
 	TreeItem root;
 	DrawPtr drawRegion;
 	TreeItem* selectedItem;
+	bool dirty;
 public:
 	TreeItem* getSelectedItem() const {
 		return selectedItem;
+	}
+	void setDirty(bool d) {
+		dirty = d;
 	}
 	void update(AlloyContext* context);
 	ExpandTree(const std::string& name, const AUnit2D& pos,

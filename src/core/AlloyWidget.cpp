@@ -3345,7 +3345,7 @@ MessageDialog::MessageDialog(const std::string& name, bool wrap,
 }
 ExpandTree::ExpandTree(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims) :
-		Composite(name, pos, dims), selectedItem(nullptr) {
+		Composite(name, pos, dims), selectedItem(nullptr), dirty(true) {
 	setScrollEnabled(true);
 	setAlwaysShowVerticalScrollBar(true);
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
@@ -3366,30 +3366,33 @@ ExpandTree::ExpandTree(const std::string& name, const AUnit2D& pos,
 				if(e.button==GLFW_MOUSE_BUTTON_LEFT) {
 					if(selectedItem!=nullptr) {
 						selectedItem->setExpanded(!selectedItem->isExpanded());
+						setDirty(true);
 						update(context);
 						return true;
 					}
 				}
 				return false;
 			};
-	Composite::add (drawRegion);
+	Composite::add(drawRegion);
 }
 void ExpandTree::pack(const pixel2& pos, const pixel2& dims,
 		const double2& dpmm, double pixelRatio, bool clamp) {
 	update(AlloyApplicationContext().get());
+	//pixel2 pbounds = dimensions.toPixels(AlloyApplicationContext()->getScreenSize(), dpmm, pixelRatio);
 	drawRegion->dimensions = CoordPX(
 			root.getBounds().dimensions + pixel2(Composite::scrollBarSize));
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
 }
 void ExpandTree::draw(AlloyContext* context) {
-	if(!context->isMouseOver(this,true)){
-		selectedItem=nullptr;
+	if (!context->isMouseOver(this, true)) {
+		selectedItem = nullptr;
 	}
 	Composite::draw(context);
 }
 void ExpandTree::update(AlloyContext* context) {
-	if (root.isDirty()) {
+	if (dirty) {
 		root.update(context);
+		dirty = false;
 	}
 }
 void ExpandTree::add(const std::shared_ptr<TreeItem>& item) {
@@ -3399,24 +3402,24 @@ const int TreeItem::PADDING = 2;
 
 void TreeItem::setExpanded(bool ex) {
 	expanded = ex;
-	dirty = true;
 }
 void TreeItem::add(const std::shared_ptr<TreeItem>& item) {
 	children.push_back(item);
-	dirty = true;
+
 }
 TreeItem* TreeItem::locate(AlloyContext* context, const pixel2& pt) {
-	box2px box = getBounds();
-	if (box.contains(pt)) {
-		if (selectionBounds.contains(pt)) {
-			return this;
-		}
+	if (isExpanded()) {
 		for (TreeItemPtr& item : children) {
 			TreeItem* selected = item->locate(context, pt);
 			if (selected != nullptr)
 				return selected;
 		}
-
+	}
+	if (pt.y >= selectionBounds.position.y
+			&& pt.y
+					< selectionBounds.position.y
+							+ selectionBounds.dimensions.y) {
+		return this;
 	}
 	return nullptr;
 }
@@ -3452,20 +3455,10 @@ box2px TreeItem::update(AlloyContext* context, const pixel2& offset) {
 	return bounds;
 }
 TreeItem::TreeItem(const std::string& name, int iconCode, float fontSize) :
-		name(name), fontSize(fontSize), dirty(true), expanded(
-				name.length() == 0) {
+		name(name), fontSize(fontSize), expanded(name.length() == 0) {
 	if (iconCode != 0) {
 		iconCodeString = CodePointToUTF8(iconCode);
 	}
-}
-bool TreeItem::isDirty() const {
-	if (dirty)
-		return true;
-	for (const TreeItemPtr& item : children) {
-		if (item->isDirty())
-			return true;
-	}
-	return false;
 }
 
 void TreeItem::draw(ExpandTree* tree, AlloyContext* context,
