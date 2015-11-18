@@ -62,7 +62,7 @@ void TreeEx::addDirectory(const std::string& dir, aly::TreeItem* parent) {
 		if (fd.fileType == FileType::Directory) {
 			child = TreeItemPtr(new TreeItem(fileName, 0xf115, 22));
 
-			//Use on expand for lazy tree evaluation.
+			//Use onExpand for lazy tree evaluation.
 			child->onExpand = [this,fileLocation](TreeItem* current) {
 				current->clear();
 				addDirectory(fileLocation, current);
@@ -70,6 +70,7 @@ void TreeEx::addDirectory(const std::string& dir, aly::TreeItem* parent) {
 		} else {
 			child = TreeItemPtr(new TreeItem(fileName, 0xf016, 18));
 			child->onExpand = [this,fd](TreeItem* current) {
+				//Display file info when expanded.
 				addLeaf(current,fd);
 			};
 		}
