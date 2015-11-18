@@ -3395,20 +3395,19 @@ void ExpandTree::draw(AlloyContext* context) {
 		selectedItem = nullptr;
 	}
 	Composite::draw(context);
-	/*
-	//For debugging
+}
+void ExpandTree::drawDebug(AlloyContext* context) {
 	if (selectedItem) {
 		NVGcontext* nvg = context->nvgContext;
 		nvgStrokeWidth(nvg, 1.0f);
-		nvgStrokeColor(nvg, Color(255, 0, 0));
+		nvgStrokeColor(nvg, Color(220,64, 64));
 		nvgBeginPath(nvg);
 		box2px bounds = selectedItem->getBounds();
-		nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
-				bounds.dimensions.x, bounds.dimensions.y,
-				context->theme.CORNER_RADIUS);
+		nvgRect(nvg, bounds.position.x, bounds.position.y,
+				bounds.dimensions.x, bounds.dimensions.y);
 		nvgStroke(nvg);
 	}
-	*/
+	Composite::drawDebug(context);
 }
 void ExpandTree::update(AlloyContext* context) {
 	if (dirty) {

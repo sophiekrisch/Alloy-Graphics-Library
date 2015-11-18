@@ -738,6 +738,29 @@ void BorderComposite::setCenter(const std::shared_ptr<Region>& region) {
 	centerRegion->parent = this;
 }
 void BorderComposite::draw(AlloyContext* context) {
+	if (context->getCursor() == nullptr) {
+		switch (winPos) {
+		case WindowPosition::Center:
+			//context->setCursor(&Cursor::Normal);break;
+			break;
+		case WindowPosition::Top:
+		case WindowPosition::Bottom:
+			context->setCursor(&Cursor::Vertical);
+			break;
+		case WindowPosition::Left:
+		case WindowPosition::Right:
+			context->setCursor(&Cursor::Horizontal);
+			break;
+		case WindowPosition::TopLeft:
+		case WindowPosition::BottomRight:
+			context->setCursor(&Cursor::SlantDown);
+			break;
+		case WindowPosition::BottomLeft:
+		case WindowPosition::TopRight:
+			context->setCursor(&Cursor::SlantUp);
+			break;
+		}
+	}
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
@@ -796,24 +819,146 @@ void BorderComposite::draw(AlloyContext* context) {
 		popScissor(nvg);
 	}
 }
-BorderComposite::BorderComposite(const std::string& name) :
-		Region(name), northRegion(children[0]), southRegion(children[1]), eastRegion(
-				children[2]), westRegion(children[3]), centerRegion(children[4]) {
-	northFraction = UnitPX(0.0f);
-	southFraction = UnitPX(0.0f);
-	eastFraction = UnitPX(0.0f);
-	westFraction = UnitPX(0.0f);
 
-}
 BorderComposite::BorderComposite(const std::string& name, const AUnit2D& pos,
-		const AUnit2D& dims) :
+		const AUnit2D& dims, bool resizeable) :
 		Region(name, pos, dims), northRegion(children[0]), southRegion(
 				children[1]), eastRegion(children[2]), westRegion(children[3]), centerRegion(
-				children[4]) {
+				children[4]), resizeable(resizeable), winPos(
+				WindowPosition::Center) {
 	northFraction = UnitPX(0.0f);
 	southFraction = UnitPX(0.0f);
 	eastFraction = UnitPX(0.0f);
 	westFraction = UnitPX(0.0f);
+	cellPadding = pixel2(5.0, 5.0f);
+	dragging = false;
+	resizing = false;
+	cursorDownPosition = pixel2(-1, -1);
+	windowInitialBounds.dimensions = float2(-1, -1);
+	if (resizeable) {
+		onEvent =
+				[this](AlloyContext* context, const InputEvent& e) {
+					bool over = context->isMouseOver(this, true);
+					if (e.type == InputType::MouseButton&&e.button == GLFW_MOUSE_BUTTON_LEFT&&e.isDown() && over) {
+						dynamic_cast<Composite*>(this->parent)->putLast(this);
+					}
+					else if (dragging&&e.type == InputType::Cursor&&!resizing) {
+						box2px pbounds = parent->getBounds();
+						this->setDragOffset(pbounds.clamp(e.cursor), cursorDownPosition);
+						this->pack();
+					}
+					else if (e.type == InputType::MouseButton&&e.isUp()) {
+						context->requestPack();
+						dragging = false;
+					}
+					if (!context->isLeftMouseButtonDown()) {
+						resizing = false;
+					}
+					if (e.type == InputType::Cursor) {
+						if (!resizing) {
+							if (over) {
+								winPos = WindowPosition::Center;
+								if(westRegion.get()!=nullptr) {
+									box2px bounds=westRegion->getBounds();
+									if(bounds.contains(e.cursor)) {
+										if (e.cursor.x >= bounds.position.x + bounds.dimensions.x - cellPadding.x) {
+											winPos = WindowPosition::Left;
+										}
+									}
+								}
+								if(eastRegion.get()!=nullptr) {
+									box2px bounds=eastRegion->getBounds();
+									if(bounds.contains(e.cursor)) {
+										if (e.cursor.x <= bounds.position.x + cellPadding.x) {
+											winPos = WindowPosition::Right;
+										}
+									}
+								}
+								if(northRegion.get()!=nullptr) {
+									box2px bounds=northRegion->getBounds();
+									if(bounds.contains(e.cursor)) {
+										if (e.cursor.y >= bounds.position.y + bounds.dimensions.y - cellPadding.y) {
+											winPos = WindowPosition::Top;
+										}
+									}
+								}
+								if(southRegion.get()!=nullptr) {
+									box2px bounds=southRegion->getBounds();
+									if(bounds.contains(e.cursor)) {
+										if (e.cursor.y <= bounds.position.y + cellPadding.y) {
+											winPos = WindowPosition::Bottom;
+										}
+									}
+								}
+							}
+							else {
+								winPos = WindowPosition::Center;
+							}
+						}
+					}
+					if (over&&e.type == InputType::MouseButton&&e.button == GLFW_MOUSE_BUTTON_LEFT&&e.isDown() && winPos != WindowPosition::Center) {
+						if (!resizing) {
+							cursorDownPosition = e.cursor;
+							windowInitialBounds = currentBounds;
+						}
+						resizing = true;
+					}
+					if (resizing&&e.type == InputType::Cursor) {
+						float2 minPt = windowInitialBounds.min();
+						float2 maxPt = windowInitialBounds.max();
+						pixel2 cursor=box2px(pixel2(0.0f,0.0f),pixel2(context->width()-1.0f,context->height()-1.0f)).clamp(e.cursor);
+						switch (winPos) {
+							case WindowPosition::Top:
+							minPt.y += cursor.y - cursorDownPosition.y;
+							break;
+							case WindowPosition::Bottom:
+							maxPt.y += cursor.y - cursorDownPosition.y;
+							break;
+							case WindowPosition::Left:
+							minPt.x += cursor.x - cursorDownPosition.x;
+							break;
+							case WindowPosition::Right:
+							maxPt.x += cursor.x - cursorDownPosition.x;
+							break;
+							default:
+							break;
+						}
+						box2px bounds = getBounds(false);
+						bounds.position-=this->getDragOffset();
+						pixel2 upper=bounds.max()-float2(50.0f,50.0f);
+						pixel2 lower=bounds.min()+float2(50.0f,50.0f);
+						if(minPt.x>maxPt.x) {
+							std::swap(minPt.x,maxPt.x);
+						}
+						if(minPt.y>maxPt.y) {
+							std::swap(minPt.y,maxPt.y);
+						}
+						minPt=aly::max(lower,minPt);
+						maxPt=aly::min(upper,maxPt);
+						box2px nbounds(minPt,maxPt - minPt);
+						switch (winPos) {
+							case WindowPosition::Top:
+							northFraction=UnitPX(nbounds.position.y-bounds.position.y);
+							break;
+							case WindowPosition::Bottom:
+							southFraction=UnitPX(bounds.position.y+bounds.dimensions.y-nbounds.position.y-nbounds.dimensions.y);
+							break;
+							case WindowPosition::Left:
+							westFraction=UnitPX(nbounds.position.x-bounds.position.x);
+							break;
+							case WindowPosition::Right:
+							eastFraction=UnitPX(bounds.position.x+bounds.dimensions.x-nbounds.position.x-nbounds.dimensions.x);
+							break;
+							default:
+							break;
+						}
+						//Create adjustable region component.
+						context->requestPack();
+					}
+					return false;
+				};
+		Application::addListener(this);
+	}
 }
 void BorderComposite::update(CursorLocator* cursorLocator) {
 	if (!ignoreCursorEvents)
@@ -838,13 +983,13 @@ void BorderComposite::pack(const pixel2& pos, const pixel2& dims,
 		const double2& dpmm, double pixelRatio, bool clamp) {
 	Region::pack(pos, dims, dpmm, pixelRatio);
 	box2px bounds = getBounds(false);
+	bounds.position -= this->getDragOffset();
 	pixel north = northFraction.toPixels(bounds.dimensions.y, dpmm.y,
 			pixelRatio);
 	pixel south = southFraction.toPixels(bounds.dimensions.y, dpmm.y,
 			pixelRatio);
 	pixel west = westFraction.toPixels(bounds.dimensions.x, dpmm.x, pixelRatio);
 	pixel east = eastFraction.toPixels(bounds.dimensions.x, dpmm.x, pixelRatio);
-
 	if (northRegion.get() != nullptr) {
 		northRegion->pack(bounds.position, pixel2(bounds.dimensions.x, north),
 				dpmm, pixelRatio);
@@ -867,7 +1012,9 @@ void BorderComposite::pack(const pixel2& pos, const pixel2& dims,
 		centerRegion->pack(bounds.position + pixel2(west, north),
 				pixel2(bounds.dimensions.x - east - west,
 						bounds.dimensions.y - north - south), dpmm, pixelRatio);
-
+	currentBounds = box2px(bounds.position + pixel2(west, north),
+			pixel2(bounds.dimensions.x - east - west,
+					bounds.dimensions.y - north - south));
 	for (std::shared_ptr<Region>& region : children) {
 		if (region.get() == nullptr)
 			continue;
@@ -1018,7 +1165,7 @@ void Region::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp) {
 
 	pixel2 computedPos = position.toPixels(dims, dpmm, pixelRatio);
-	//pixel2 xy = pos + dragOffset + computedPos;
+//pixel2 xy = pos + dragOffset + computedPos;
 	pixel2 xy = pos + computedPos;
 	pixel2 d = dimensions.toPixels(dims, dpmm, pixelRatio);
 	if (aspectRatio < 0) {

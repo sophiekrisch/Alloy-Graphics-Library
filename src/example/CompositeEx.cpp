@@ -28,7 +28,7 @@ CompositeEx::CompositeEx() :
 bool CompositeEx::init(Composite& rootNode) {
 	BorderCompositePtr bcomp = std::shared_ptr<BorderComposite>(
 		new BorderComposite("Border Layout", CoordPX(0, 0),
-			CoordPercent(0.7f, 1.0f)));
+			CoordPercent(0.7f, 1.0f),true));
 	TextLabelPtr label;
 	CompositePtr sidebar = MakeComposite("Side Composite", CoordPercent(0.7f, 0.5f), CoordPercent(0.3f, 0.5f), Color(16, 128, 255), COLOR_NONE, UnitPX(0));
 	sidebar->add(label = MakeTextLabel("Side", CoordPercent(0.5f, 0.5f), CoordPX(100, 30), FontType::Bold, UnitPT(16.0f), COLOR_WHITE, HorizontalAlignment::Center, VerticalAlignment::Middle));

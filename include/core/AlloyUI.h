@@ -333,12 +333,16 @@ protected:
 	std::shared_ptr<Region>& westRegion;
 	AUnit1D northFraction, southFraction, eastFraction, westFraction;
 	std::shared_ptr<Region>& centerRegion;
+	bool resizeable,dragging,resizing;
+	WindowPosition winPos;
+	pixel2 cellPadding;
+	box2px windowInitialBounds;
+	box2px currentBounds;
+	pixel2 cursorDownPosition;
 public:
-	BorderComposite(
-			const std::string& name = MakeString() << "c" << std::setw(8)
-					<< std::setfill('0') << (REGION_COUNTER++));
+
 	BorderComposite(const std::string& name, const AUnit2D& pos,
-			const AUnit2D& dims);
+			const AUnit2D& dims,bool resizeable=false);
 	virtual Region* locate(const pixel2& cursor) override;
 	virtual void draw(AlloyContext* context) override;
 	virtual void drawDebug(AlloyContext* context) override;
