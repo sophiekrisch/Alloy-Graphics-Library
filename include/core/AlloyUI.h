@@ -333,16 +333,18 @@ protected:
 	std::shared_ptr<Region>& westRegion;
 	AUnit1D northFraction, southFraction, eastFraction, westFraction;
 	std::shared_ptr<Region>& centerRegion;
-	bool resizeable,dragging,resizing;
+	bool resizing;
 	WindowPosition winPos;
+	bool resizeable;
 	pixel2 cellPadding;
 	box2px windowInitialBounds;
 	box2px currentBounds;
 	pixel2 cursorDownPosition;
 public:
-
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
+			override;
 	BorderComposite(const std::string& name, const AUnit2D& pos,
-			const AUnit2D& dims,bool resizeable=false);
+			const AUnit2D& dims, bool resizeable = false);
 	virtual Region* locate(const pixel2& cursor) override;
 	virtual void draw(AlloyContext* context) override;
 	virtual void drawDebug(AlloyContext* context) override;
@@ -802,6 +804,27 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(
 	}
 	return ss;
 }
+class AdjustableComposite: public Composite {
+protected:
+	pixel2 cursorDownPosition;
+	box2px windowInitialBounds;
+	bool resizing;
+	WindowPosition winPos;
+	bool resizeable;
+public:
+	bool isResizing() const {
+		return resizing;
+	}
+	bool isResizeable() const {
+		return resizeable;
+	}
+	std::function<void(AdjustableComposite* composite,const box2px& bounds)> onResize;
+	AdjustableComposite(const std::string& name, const AUnit2D& pos,
+			const AUnit2D& dims, bool resizeable = true);
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
+			override;
+	virtual void draw(AlloyContext* context) override;
+};
 typedef std::shared_ptr<TextLabel> TextLabelPtr;
 typedef std::shared_ptr<TextRegion> TextRegionPtr;
 typedef std::shared_ptr<TextField> TextFieldPtr;
@@ -816,5 +839,6 @@ typedef std::shared_ptr<MenuHeader> MenuHeaderPtr;
 typedef std::shared_ptr<MenuBar> MenuBarPtr;
 typedef std::shared_ptr<Draw> DrawPtr;
 typedef std::shared_ptr<NumberField> NumberFieldPtr;
+typedef std::shared_ptr<AdjustableComposite> AdjustableCompositePtr;
 }
 #endif /* ALLOYUI_H_ */

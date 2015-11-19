@@ -682,21 +682,18 @@ public:
 	virtual void draw(AlloyContext* context) override;
 };
 
-class WindowPane: public Composite {
+class WindowPane: public AdjustableComposite {
 protected:
-	pixel2 cursorDownPosition;
-	box2px windowInitialBounds;
 	CompositePtr titleRegion;
 	CompositePtr contentRegion;
 	bool maximized;
 	bool dragging;
-	bool resizing;
-	WindowPosition winPos;
 	std::shared_ptr<IconButton> maximizeIcon;
 public:
 	void setMaximize(bool max);
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
+			override;
 	WindowPane(const RegionPtr& content);
-	virtual void draw(AlloyContext* context) override;
 };
 typedef std::shared_ptr<TextButton> TextButtonPtr;
 typedef std::shared_ptr<HorizontalSlider> HSliderPtr;
