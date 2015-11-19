@@ -87,6 +87,7 @@ enum class FontType {
 };
 const int ALY_NUMBER_OF_FONTS = 9;
 enum WindowPosition {
+	Outside=-1,
 	Center=0, 
 	Top=1, 
 	Bottom=2, 
@@ -114,6 +115,8 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(
 template<class C, class R> std::basic_ostream<C, R> & operator <<(
 	std::basic_ostream<C, R> & ss, const WindowPosition& type) {
 	switch (type) {
+	case WindowPosition::Outside:
+		return ss << "Outside";
 	case WindowPosition::Center:
 		return ss << "Center";
 	case WindowPosition::Top:

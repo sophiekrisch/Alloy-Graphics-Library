@@ -689,11 +689,13 @@ protected:
 	bool maximized;
 	bool dragging;
 	std::shared_ptr<IconButton> maximizeIcon;
+	TextLabelPtr label;
 public:
 	void setMaximize(bool max);
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
 			override;
 	WindowPane(const RegionPtr& content);
+	virtual void draw(AlloyContext* context) override;
 };
 typedef std::shared_ptr<TextButton> TextButtonPtr;
 typedef std::shared_ptr<HorizontalSlider> HSliderPtr;

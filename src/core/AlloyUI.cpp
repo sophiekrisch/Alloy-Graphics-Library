@@ -755,9 +755,6 @@ void BorderComposite::setCenter(const std::shared_ptr<Region>& region) {
 void BorderComposite::draw(AlloyContext* context) {
 	if (context->getCursor() == nullptr) {
 		switch (winPos) {
-		case WindowPosition::Center:
-			//context->setCursor(&Cursor::Normal);break;
-			break;
 		case WindowPosition::Top:
 		case WindowPosition::Bottom:
 			context->setCursor(&Cursor::Vertical);
@@ -773,6 +770,9 @@ void BorderComposite::draw(AlloyContext* context) {
 		case WindowPosition::BottomLeft:
 		case WindowPosition::TopRight:
 			context->setCursor(&Cursor::SlantUp);
+			break;
+
+		default:
 			break;
 		}
 	}
@@ -910,13 +910,13 @@ bool BorderComposite::onEventHandler(AlloyContext* context,
 						}
 					}
 				} else {
-					winPos = WindowPosition::Center;
+					winPos = WindowPosition::Outside;
 				}
 			}
 		}
 		if (over && e.type == InputType::MouseButton
 				&& e.button == GLFW_MOUSE_BUTTON_LEFT && e.isDown()
-				&& winPos != WindowPosition::Center) {
+				&& winPos != WindowPosition::Center&&winPos != WindowPosition::Outside) {
 			if (!resizing) {
 				cursorDownPosition = e.cursor;
 				windowInitialBounds = currentBounds;
@@ -3624,7 +3624,7 @@ void MenuHeader::draw(AlloyContext* context) {
 AdjustableComposite::AdjustableComposite(const std::string& name,
 		const AUnit2D& pos, const AUnit2D& dims, bool resizeable) :
 		Composite(name, pos, dims), resizing(false), winPos(
-				WindowPosition::Center), resizeable(resizeable) {
+				WindowPosition::Outside), resizeable(resizeable) {
 
 	windowInitialBounds.dimensions = float2(-1, -1);
 	cellPadding = pixel2(10, 10);
@@ -3644,7 +3644,9 @@ void AdjustableComposite::draw(AlloyContext* context) {
 	if (context->getCursor() == nullptr) {
 		switch (winPos) {
 		case WindowPosition::Center:
-			//context->setCursor(&Cursor::Normal);break;
+			if(isDragEnabled()&&context->isMouseOver(this)){
+				context->setCursor(&Cursor::Position);
+			}
 			break;
 		case WindowPosition::Top:
 		case WindowPosition::Bottom:
@@ -3662,7 +3664,10 @@ void AdjustableComposite::draw(AlloyContext* context) {
 		case WindowPosition::TopRight:
 			context->setCursor(&Cursor::SlantUp);
 			break;
+			default:
+				break;
 		}
+
 	}
 }
 bool AdjustableComposite::onEventHandler(AlloyContext* context,
@@ -3713,13 +3718,13 @@ bool AdjustableComposite::onEventHandler(AlloyContext* context,
 						winPos = WindowPosition::Bottom;
 					}
 				} else {
-					winPos = WindowPosition::Center;
+					winPos = WindowPosition::Outside;
 				}
 			}
 		}
 		if (over && e.type == InputType::MouseButton
 				&& e.button == GLFW_MOUSE_BUTTON_LEFT && e.isDown()
-				&& winPos != WindowPosition::Center) {
+				&& winPos != WindowPosition::Center&&winPos != WindowPosition::Outside) {
 			if (!resizing) {
 				cursorDownPosition = e.cursor;
 				windowInitialBounds = getBounds(false);
@@ -3765,7 +3770,7 @@ bool AdjustableComposite::onEventHandler(AlloyContext* context,
 				minPt.y += cursor.y - cursorDownPosition.y;
 
 				break;
-			case WindowPosition::Center:
+			default:
 				break;
 			}
 			box2px newBounds(aly::min(minPt, maxPt),

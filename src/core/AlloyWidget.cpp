@@ -2965,7 +2965,14 @@ void WindowPane::setMaximize(bool max) {
 		maximizeIcon->setIcon(0xf065);
 	}
 }
-
+void WindowPane::draw(AlloyContext* context) {
+	AdjustableComposite::draw(context);
+	if (context->getCursor() == nullptr) {
+		if (context->isMouseOver(label.get())) {
+			context->setCursor(&Cursor::Position);
+		}
+	}
+}
 bool WindowPane::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	if (dragging && e.type == InputType::Cursor && !isResizing()) {
 		box2px pbounds = parent->getBounds();
@@ -2989,7 +2996,7 @@ WindowPane::WindowPane(const RegionPtr& content) :
 			new Composite("Title", CoordPX(cellPadding.x, cellPadding.y),
 					CoordPerPX(1.0f, 0.0f, -2.0f * cellPadding.x, 30.0f)));
 	//titleRegion->backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
-	TextLabelPtr label = TextLabelPtr(
+	label = TextLabelPtr(
 			new TextLabel(content->name, CoordPX(0.0f, 0.0f),
 					CoordPerPX(1.0f, 1.0f, 0.0f, 0.0f)));
 	label->textColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
@@ -3038,6 +3045,7 @@ WindowPane::WindowPane(const RegionPtr& content) :
 						this->position = CoordPX(0.0f,0.0f);
 						this->dimensions = CoordPercent(1.0f,1.0f);
 						dynamic_cast<Composite*>(this->parent)->resetScrollPosition();
+						dynamic_cast<Composite*>(this->parent)->putLast(this);
 						context->requestPack();
 					}
 					else {
