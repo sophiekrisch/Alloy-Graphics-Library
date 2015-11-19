@@ -3145,7 +3145,6 @@ MessageDialog::MessageDialog(const std::string& name, const AUnit2D& pos,
 				return true;
 			};
 	containerRegion->add(glyphRegion);
-
 	if (wrap) {
 		TextRegionPtr textLabel = TextRegionPtr(
 				new TextRegion(name, CoordPerPX(0.0f, 0.5f, 60.0f, -50.0f),
@@ -3160,12 +3159,10 @@ MessageDialog::MessageDialog(const std::string& name, const AUnit2D& pos,
 	}
 	add(containerRegion);
 	add(cancelButton);
-	AlloyApplicationContext()->getGlassPanel()->add(this);
 }
 void MessageDialog::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = containerRegion->getBounds();
-
 	NVGpaint shadowPaint = nvgBoxGradient(nvg, bounds.position.x,
 			bounds.position.y, bounds.dimensions.x, bounds.dimensions.y,
 			context->theme.CORNER_RADIUS, 8, context->theme.SHADOW,

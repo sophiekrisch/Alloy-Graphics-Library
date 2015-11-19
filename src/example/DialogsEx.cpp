@@ -73,6 +73,7 @@ bool DialogsEx::init(Composite& rootNode) {
 			new TextIconButton("Information", 0xf05a,
 					CoordPerPX(0.0f, 1.0f, 340.0f, -75.0f), CoordPX(120, 30)));
 
+
 	MessageDialogPtr warningMessage = MessageDialogPtr(new MessageDialog("This is a warning message that continues for multiple lines so you know what it will look like.",true,MessageOption::Okay,MessageType::Warning));
 	warningButton->onMouseDown=[=](AlloyContext* context,const InputEvent& e){
 		warningMessage->setVisible(true);
@@ -96,6 +97,10 @@ bool DialogsEx::init(Composite& rootNode) {
 		infoMessage->setVisible(true);
 		return true;
 	};
+	getContext()->getGlassPanel()->add(warningMessage);
+	getContext()->getGlassPanel()->add(errorMessage);
+	getContext()->getGlassPanel()->add(questionMessage);
+	getContext()->getGlassPanel()->add(infoMessage);
 
 	rootNode.add(warningButton);
 	rootNode.add(errorButton);

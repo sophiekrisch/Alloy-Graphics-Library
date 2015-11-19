@@ -1269,10 +1269,6 @@ void Composite::add(const std::shared_ptr<Region>& region) {
 						<< region->parent->name << "].");
 	region->parent = this;
 }
-
-void Composite::add(Region* region) {
-	add(std::shared_ptr<Region>(region));
-}
 pixel2 TextLabel::getTextDimensions(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();

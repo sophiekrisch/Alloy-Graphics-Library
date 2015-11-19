@@ -1214,8 +1214,8 @@ namespace aly {
 		TextLabel* r1 = new TextLabel();
 		TextLabel* r2 = new TextLabel("region 2");
 		Composite comp;
-		comp.add(r1);
-		comp.add(r2);
+		comp.add(TextLabelPtr(r1));
+		comp.add(TextLabelPtr(r2));
 		return true;
 	}
 
