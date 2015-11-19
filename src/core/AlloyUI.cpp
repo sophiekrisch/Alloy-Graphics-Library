@@ -3614,6 +3614,7 @@ AdjustableComposite::AdjustableComposite(const std::string& name,
 				WindowPosition::Center), resizeable(resizeable) {
 
 	windowInitialBounds.dimensions = float2(-1, -1);
+	cellPadding=pixel2(10,10);
 	if (resizeable) {
 		Application::addListener(this);
 	}

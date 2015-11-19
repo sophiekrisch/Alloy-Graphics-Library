@@ -42,7 +42,7 @@ bool ImageEx::init(Composite& rootNode) {
 	drawRegion->setDragEnabled(true);
 	rootNode.add(drawRegion);
 	//Use nanovg to draw
-	GlyphRegionPtr imageRegion = MakeGlyphRegion(createImageGlyph(getFullPath("images/sfmarket.png")), CoordPX(5.0f, 5.0f), CoordPX(250, 250), AspectRule::FixedHeight,COLOR_NONE, COLOR_NONE, Color(200, 200, 200, 255), UnitPX(1.0f));
+	GlyphRegionPtr imageRegion = MakeGlyphRegion(createImageGlyph(getFullPath("images/sfmarket.png")), CoordPX(0.0f, 0.0f), CoordPX(250, 250), AspectRule::FixedHeight,COLOR_NONE, COLOR_NONE, Color(200, 200, 200, 255), UnitPX(1.0f));
 	imageRegion->setDragEnabled(true);
 	rootNode.add(imageRegion);
 	//getContext()->setDebug(true);

@@ -35,9 +35,14 @@ bool EventsEx::init(Composite& rootNode) {
 			CoordPercent(0.6f, 0.333333f), CoordPercent(0.3f, 0.333333f),
 			FontType::Bold, UnitPT(16.0f), COLOR_WHITE,
 			HorizontalAlignment::Center, VerticalAlignment::Middle);
-	TextLabelPtr labelC = MakeTextLabel("Event", CoordPX(5.0f, 5.0f),
-			CoordPercent(1.0f, 0.3f), FontType::Bold, UnitPT(16.0f),
+	TextLabelPtr labelC = MakeTextLabel("Resize Region", CoordPercent(0.5f, 0.5f),
+			CoordPX(0,0), FontType::Bold, UnitPT(16.0f),
 			COLOR_WHITE, HorizontalAlignment::Left, VerticalAlignment::Top);
+	labelC->setAlignment(HorizontalAlignment::Center,VerticalAlignment::Middle);
+	AdjustableCompositePtr resizeRegion=AdjustableCompositePtr(new AdjustableComposite("Resize Region",CoordPerPX(0.5f,0.0f,-250.0f,40.0f), CoordPX(500, 100)));
+	resizeRegion->setDragEnabled(true);
+	resizeRegion->backgroundColor=MakeColor(Color(64,192,64));
+	resizeRegion->add(labelC);
 
 	labelA->backgroundColor = MakeColor(255, 128, 64);
 	labelB->backgroundColor = MakeColor(64, 128, 255);
@@ -91,10 +96,9 @@ bool EventsEx::init(Composite& rootNode) {
 	};
 	//Don't forget to do this if you decide to use the onEvent() method! onEvent() catches all events, regardless of the selected component.
 	addListener(&rootNode);
-
 	rootNode.add(labelA);
 	rootNode.add(labelB);
-	rootNode.add(labelC);
+	rootNode.add(resizeRegion);
 	return true;
 }
 

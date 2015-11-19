@@ -43,6 +43,7 @@ struct Region: public EventHandler {
 private:
 	box2px bounds;
 	pixel2 dragOffset = pixel2(0, 0);
+
 protected:
 	void drawBoundsLabel(AlloyContext* context, const std::string& name,
 			int font);
@@ -50,12 +51,11 @@ protected:
 	Region* mouseDownRegion = nullptr;
 	static uint64_t REGION_COUNTER;
 	bool visible = true;
-	bool dragEnabled = false;
 	bool ignoreCursorEvents = false;
 	Origin origin = Origin::TopLeft;
 	AspectRule aspectRule = AspectRule::Unspecified;
 	double aspectRatio = -1.0; //Less than zero indicates undetermined. Will be computed at next pack() event.
-
+	bool dragEnabled = false;
 	bool roundCorners = false;
 	bool detached = false;
 	bool clampToParentBounds = false;
@@ -141,7 +141,7 @@ public:
 	inline void setOrigin(const Origin& org) {
 		origin = org;
 	}
-	bool isDragEnabled() const {
+	virtual bool isDragEnabled() const {
 		return dragEnabled;
 	}
 	virtual box2px getBounds(bool includeOffset = true) const;
@@ -413,7 +413,11 @@ public:
 	AUnit1D fontSize = UnitPX(24);
 	AColor textColor = MakeColor(Theme::Default.LIGHT_TEXT);
 	AColor textAltColor = MakeColor(Theme::Default.DARK_TEXT);
-	void setLabel(const std::string& labels) {
+	void setAlignment(const HorizontalAlignment& horizontalAlignment,const VerticalAlignment& verticalAlignment){
+		this->horizontalAlignment=horizontalAlignment;
+		this->verticalAlignment=verticalAlignment;
+	}
+	void setLabel(const std::string& label) {
 		this->label = label;
 	}
 	TextLabel(
@@ -818,7 +822,14 @@ public:
 	bool isResizeable() const {
 		return resizeable;
 	}
-	std::function<void(AdjustableComposite* composite,const box2px& bounds)> onResize;
+	virtual bool isDragEnabled() const override {
+		if (resizeable) {
+			return (dragEnabled && winPos == WindowPosition::Center);
+		} else {
+			return dragEnabled;
+		}
+	}
+	std::function<void(AdjustableComposite* composite, const box2px& bounds)> onResize;
 	AdjustableComposite(const std::string& name, const AUnit2D& pos,
 			const AUnit2D& dims, bool resizeable = true);
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
