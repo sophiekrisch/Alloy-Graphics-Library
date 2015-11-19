@@ -1146,7 +1146,7 @@ ColorSelector::ColorSelector(const std::string& name, const AUnit2D& pos,
 						colorWheel->reset();
 					}
 					colorSelectionPanel->setVisible(true);
-					context->getGlassPanel()->setVisible(true);
+					context->getGlassPane()->setVisible(true);
 					return true;
 				}
 				return false;
@@ -1158,7 +1158,7 @@ ColorSelector::ColorSelector(const std::string& name, const AUnit2D& pos,
 						colorWheel->reset();
 					}
 					colorSelectionPanel->setVisible(true);
-					context->getGlassPanel()->setVisible(true);
+					context->getGlassPane()->setVisible(true);
 					return true;
 				}
 				return false;
@@ -1278,7 +1278,7 @@ ColorSelector::ColorSelector(const std::string& name, const AUnit2D& pos,
 	cancelButton->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& event) {
 				colorSelectionPanel->setVisible(false);
-				context->getGlassPanel()->setVisible(false);
+				context->getGlassPane()->setVisible(false);
 				return true;
 			};
 	CompositePtr hContainer = MakeComposite("Horizontal Layout",
@@ -1299,7 +1299,7 @@ ColorSelector::ColorSelector(const std::string& name, const AUnit2D& pos,
 				if (colorSelectionPanel->isVisible()) {
 					if (e.type == InputType::MouseButton&&e.isDown() && !context->isMouseContainedIn(hContainer->getBounds())) {
 						colorSelectionPanel->setVisible(false);
-						context->getGlassPanel()->setVisible(false);
+						context->getGlassPane()->setVisible(false);
 						return true;
 					}
 				}
@@ -1309,7 +1309,7 @@ ColorSelector::ColorSelector(const std::string& name, const AUnit2D& pos,
 	Application::addListener(colorSelectionPanel.get());
 	add(textLabel);
 	add(colorLabel);
-	AlloyApplicationContext()->getGlassPanel()->add(colorSelectionPanel);
+	AlloyApplicationContext()->getGlassPane()->add(colorSelectionPanel);
 	setColor(*colorLabel->foregroundColor);
 }
 void ColorSelector::updateColorSliders(const Color& c) {
@@ -1752,7 +1752,7 @@ FileSelector::FileSelector(const std::string& name, const AUnit2D& pos,
 
 	setRoundCorners(true);
 	std::shared_ptr<Composite> &glassPanel =
-			AlloyApplicationContext()->getGlassPanel();
+			AlloyApplicationContext()->getGlassPane();
 
 	fileDialog = std::shared_ptr<FileDialog>(
 			new FileDialog("Open File",
@@ -1805,10 +1805,10 @@ void FileSelector::openFileDialog(AlloyContext* context,
 		const std::string& workingDirectory) {
 	if (!fileDialog->isVisible()) {
 		fileDialog->setVisible(true);
-		context->getGlassPanel()->setVisible(true);
+		context->getGlassPane()->setVisible(true);
 	} else {
 		fileDialog->setVisible(false);
-		context->getGlassPanel()->setVisible(false);
+		context->getGlassPane()->setVisible(false);
 	}
 	fileDialog->setValue(workingDirectory);
 }
@@ -1819,7 +1819,7 @@ FileButton::FileButton(const std::string& name, const AUnit2D& pos,
 				dims) {
 	setRoundCorners(true);
 	std::shared_ptr<Composite> &glassPanel =
-			AlloyApplicationContext()->getGlassPanel();
+			AlloyApplicationContext()->getGlassPane();
 	fileDialog = std::shared_ptr<FileDialog>(
 			new FileDialog("File Dialog",
 					CoordPerPX(0.5, 0.5, -350 + 7.5f, -250 - 7.5f),
@@ -1868,10 +1868,10 @@ void FileButton::openFileDialog(AlloyContext* context,
 		const std::string& workingDirectory) {
 	if (!fileDialog->isVisible()) {
 		fileDialog->setVisible(true);
-		context->getGlassPanel()->setVisible(true);
+		context->getGlassPane()->setVisible(true);
 	} else {
 		fileDialog->setVisible(false);
-		context->getGlassPanel()->setVisible(false);
+		context->getGlassPane()->setVisible(false);
 	}
 	fileDialog->setValue(workingDirectory);
 }
@@ -2153,7 +2153,7 @@ void FileDialog::setSelectedFile(const std::string& file) {
 	if (!AlloyApplicationContext()->hasDeferredTasks()) {
 		directoryList->clearEntries();
 		//Fixes bug in padding out entry width.
-		AlloyApplicationContext()->getGlassPanel()->pack();
+		AlloyApplicationContext()->getGlassPane()->pack();
 		for (FileDescription& fd : descriptions) {
 			if (rule != nullptr && fd.fileType == FileType::File
 					&& !rule->accept(fd.fileLocation)) {
@@ -2347,7 +2347,7 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 							if (files.size() > 0)this->onSelect(files);
 						}
 						this->setVisible(false);
-						context->getGlassPanel()->setVisible(false);
+						context->getGlassPane()->setVisible(false);
 						return true;
 					}
 					else {
@@ -2407,7 +2407,7 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	cancelButton->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& event) {
 				this->setVisible(false);
-				context->getGlassPanel()->setVisible(false);
+				context->getGlassPane()->setVisible(false);
 				return true;
 			};
 	CompositePtr southRegion = MakeComposite("File Options", CoordPX(0, 0),
@@ -3198,10 +3198,10 @@ void MessageDialog::draw(AlloyContext* context) {
 void MessageDialog::setVisible(bool visible) {
 	if (!Composite::isVisible()) {
 		Composite::setVisible(true);
-		AlloyApplicationContext()->getGlassPanel()->setVisible(true);
+		AlloyApplicationContext()->getGlassPane()->setVisible(true);
 	} else {
 		Composite::setVisible(false);
-		AlloyApplicationContext()->getGlassPanel()->setVisible(false);
+		AlloyApplicationContext()->getGlassPane()->setVisible(false);
 	}
 }
 MessageDialog::MessageDialog(const std::string& name, bool wrap,

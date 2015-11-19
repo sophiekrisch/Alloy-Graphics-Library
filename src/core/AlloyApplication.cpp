@@ -514,7 +514,7 @@ void Application::run(int swapInterval) {
 	if (!init(rootRegion)) {
 		throw std::runtime_error("Error occurred in application init()");
 	}
-	rootRegion.add(getContext()->getGlassPanel());
+	rootRegion.add(getContext()->getGlassPane());
 	if (showDebugIcon) {
 		GlyphRegionPtr debug = MakeGlyphRegion(
 				createAwesomeGlyph(0xf188, FontStyle::Outline, 20),
@@ -537,7 +537,7 @@ void Application::run(int swapInterval) {
 
 	//First pack triggers computation of aspect ratios  for components.
 	rootRegion.pack(context.get());
-	context->getGlassPanel()->setVisible(false);
+	context->getGlassPane()->setVisible(false);
 	context->requestPack();
 	glfwSwapInterval(swapInterval);
 	glfwSetTime(0);

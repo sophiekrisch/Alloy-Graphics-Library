@@ -520,15 +520,15 @@ namespace aly {
 			return (mouseDownRegion == region);
 		}
 	}
-	std::shared_ptr<Composite>& AlloyContext::getGlassPanel() {
-		if (glassPanel.get() == nullptr) {
-			glassPanel = std::shared_ptr<Composite>(
+	std::shared_ptr<Composite>& AlloyContext::getGlassPane() {
+		if (glassPane.get() == nullptr) {
+			glassPane = std::shared_ptr<Composite>(
 				new Composite("Glass Pane", CoordPX(0, 0),
 					CoordPercent(1.0f, 1.0f)));
-			glassPanel->backgroundColor = MakeColor(
+			glassPane->backgroundColor = MakeColor(
 				theme.SHADOW.toSemiTransparent(0.5f));
 		}
-		return glassPanel;
+		return glassPane;
 	}
 	void AlloyContext::clearEvents(Region* region) {
 		if (mouseOverRegion == region)

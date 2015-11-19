@@ -218,7 +218,7 @@ private:
 	Region* onTopRegion = nullptr;
 	const Cursor* cursor = nullptr;
 	std::list<EventHandler*> listeners;
-	std::shared_ptr<Composite> glassPanel;
+	std::shared_ptr<Composite> glassPane;
 	std::list<std::function<void()>> deferredTasks;
 	static std::shared_ptr<AlloyContext> defaultContext;
 	int2 viewSize;
@@ -266,7 +266,7 @@ public:
 		return (deferredTasks.size() > 0);
 	}
 	bool executeDeferredTasks();
-	std::shared_ptr<Composite>& getGlassPanel();
+	std::shared_ptr<Composite>& getGlassPane();
 
 	inline pixel2 getRelativeCursorDownPosition() const {
 		return cursorDownPosition;

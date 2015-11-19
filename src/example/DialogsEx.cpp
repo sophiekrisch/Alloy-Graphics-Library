@@ -97,10 +97,10 @@ bool DialogsEx::init(Composite& rootNode) {
 		infoMessage->setVisible(true);
 		return true;
 	};
-	getGlassPanel()->add(warningMessage);
-	getGlassPanel()->add(errorMessage);
-	getGlassPanel()->add(questionMessage);
-	getGlassPanel()->add(infoMessage);
+	getGlassPane()->add(warningMessage);
+	getGlassPane()->add(errorMessage);
+	getGlassPane()->add(questionMessage);
+	getGlassPane()->add(infoMessage);
 
 	rootNode.add(warningButton);
 	rootNode.add(errorButton);

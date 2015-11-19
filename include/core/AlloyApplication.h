@@ -130,8 +130,8 @@ public:
 			const FontStyle& style = FontStyle::Normal, pixel height = 32) {
 		return context->createAwesomeGlyph(codePoint, style, height);
 	}
-	inline std::shared_ptr<Composite> getGlassPanel(){
-		return getContext()->getGlassPanel();
+	inline std::shared_ptr<Composite> getGlassPane(){
+		return getContext()->getGlassPane();
 	}
 	virtual void onWindowRefresh() {
 	}
