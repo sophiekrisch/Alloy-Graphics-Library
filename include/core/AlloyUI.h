@@ -341,6 +341,15 @@ protected:
 	box2px currentBounds;
 	pixel2 cursorDownPosition;
 public:
+	bool isResizeable() const {
+		return resizeable;
+	}
+	bool isResizing() const {
+		return resizing;
+	}
+	void setCellPadding(const pixel2& padding){
+		cellPadding=padding;
+	}
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
 			override;
 	BorderComposite(const std::string& name, const AUnit2D& pos,
@@ -413,9 +422,10 @@ public:
 	AUnit1D fontSize = UnitPX(24);
 	AColor textColor = MakeColor(Theme::Default.LIGHT_TEXT);
 	AColor textAltColor = MakeColor(Theme::Default.DARK_TEXT);
-	void setAlignment(const HorizontalAlignment& horizontalAlignment,const VerticalAlignment& verticalAlignment){
-		this->horizontalAlignment=horizontalAlignment;
-		this->verticalAlignment=verticalAlignment;
+	void setAlignment(const HorizontalAlignment& horizontalAlignment,
+			const VerticalAlignment& verticalAlignment) {
+		this->horizontalAlignment = horizontalAlignment;
+		this->verticalAlignment = verticalAlignment;
 	}
 	void setLabel(const std::string& label) {
 		this->label = label;
