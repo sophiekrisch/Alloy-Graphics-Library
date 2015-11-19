@@ -3644,7 +3644,7 @@ void AdjustableComposite::draw(AlloyContext* context) {
 	if (context->getCursor() == nullptr) {
 		switch (winPos) {
 		case WindowPosition::Center:
-			if(isDragEnabled()&&context->isMouseOver(this)){
+			if(isDragEnabled()){
 				context->setCursor(&Cursor::Position);
 			}
 			break;
