@@ -19,13 +19,14 @@
  * THE SOFTWARE.
  */
 
+#include "../../include/example/ExpandTreeEx.h"
+
 #include "Alloy.h"
-#include "../../include/example/TreeEx.h"
 using namespace aly;
-TreeEx::TreeEx() :
+ExpandTreeEx::ExpandTreeEx() :
 		Application(800, 600, "Expand Tree Example") {
 }
-void TreeEx::addLeaf(TreeItem* item, const FileDescription& fd) {
+void ExpandTreeEx::addLeaf(TreeItem* item, const FileDescription& fd) {
 	const float fontSize = 14;
 	if (!item->hasChildren()) {
 		item->add(
@@ -53,7 +54,7 @@ void TreeEx::addLeaf(TreeItem* item, const FileDescription& fd) {
 								}, pixel2(180, 4 * (fontSize + 2) + 2))));
 	}
 }
-void TreeEx::addDirectory(const std::string& dir, aly::TreeItem* parent) {
+void ExpandTreeEx::addDirectory(const std::string& dir, aly::TreeItem* parent) {
 	for (FileDescription fd : GetDirectoryDescriptionListing(dir)) {
 		std::string fileName = GetFileName(fd.fileLocation);
 		if (fileName.length() > 0 && fileName[0] == '.')
@@ -79,7 +80,7 @@ void TreeEx::addDirectory(const std::string& dir, aly::TreeItem* parent) {
 		parent->add(child);
 	}
 }
-bool TreeEx::init(Composite& rootNode) {
+bool ExpandTreeEx::init(Composite& rootNode) {
 	ExpandTreePtr tree = ExpandTreePtr(
 			new ExpandTree("Tree", CoordPercent(0.0f, 0.0f),
 					CoordPercent(0.35f, 1.0f)));

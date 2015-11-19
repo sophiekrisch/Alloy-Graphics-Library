@@ -24,12 +24,12 @@
 
 #include "AlloyApplication.h"
 #include "AlloyWidget.h"
-class TreeEx: public aly::Application {
+class ExpandTreeEx: public aly::Application {
 protected:
 	void addDirectory(const std::string& dir, aly::TreeItem* item);
 	void addLeaf(aly::TreeItem* item,const aly::FileDescription& fd);
 public:
-	TreeEx();
+	ExpandTreeEx();
 	bool init(aly::Composite& rootNode);
 };
 

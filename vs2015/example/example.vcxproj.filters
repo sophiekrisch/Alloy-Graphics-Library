@@ -100,7 +100,7 @@
     <ClCompile Include="..\..\src\example\DistanceFieldEx.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\example\TreeEx.cpp">
+    <ClCompile Include="..\..\src\example\ExpandTreeEx.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -204,7 +204,7 @@
     <ClInclude Include="..\..\include\example\DistanceFieldEx.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\TreeEx.h">
+    <ClInclude Include="..\..\include\example\ExpandTreeEx.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

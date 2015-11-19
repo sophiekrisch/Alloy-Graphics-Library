@@ -51,8 +51,9 @@
 #include "../../include/example/IntersectorEx.h"
 #include "../../include/example/WindowPaneEx.h"
 #include "../../include/example/DistanceFieldEx.h"
-#include "../../include/example/TreeEx.h"
 #include <cstring>
+
+#include "../../include/example/ExpandTreeEx.h"
 /*
  For simple execution, main method should look like:
 
@@ -143,7 +144,7 @@ int main(int argc, char *argv[]) {
 			MAKE_EXAMPLE(MeshPrimitivesEx), MAKE_EXAMPLE(MenuEx), MAKE_EXAMPLE(
 					LocatorEx), MAKE_EXAMPLE(GraphEx), MAKE_EXAMPLE(
 					WindowPaneEx), MAKE_EXAMPLE(SplineEx), MAKE_EXAMPLE(
-					DistanceFieldEx), MAKE_EXAMPLE(TreeEx) };
+					DistanceFieldEx), MAKE_EXAMPLE(ExpandTreeEx) };
 	try {
 		//Example name is specified in a makefile at compile time so 
 		//all example applications are compiled to seperate exe targets.
