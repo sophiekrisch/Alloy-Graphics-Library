@@ -1648,35 +1648,9 @@ void ColorSelector::draw(AlloyContext* context) {
 void ExpandRegion::setExpanded(bool expanded) {
 	if (this->expanded != expanded) {
 		if (expanded) {
-			for (std::shared_ptr<Region>& child : contentRegion->getChildren()) {
-				child->setVisible(false);
-			}
-			AlloyApplicationContext()->addTween(contentRegion->dimensions,
-					CoordPerPX(1.0f, 0.0f, -Composite::scrollBarSize, 0.0f),
-					CoordPerPX(1.0f, 0.0f, -Composite::scrollBarSize,
-							(float) expandHeight), 0.3, SineOut())->onComplete =
-					[this](Tweenable*) {
-						for (std::shared_ptr<Region>& child : contentRegion->getChildren()) {
-							child->setVisible(true);
-						}
-						contentRegion->pack();
-					};
+		    contentRegion->dimensions=CoordPerPX(1.0f, 0.0f, -Composite::scrollBarSize,(float) expandHeight);
 		} else {
-			for (std::shared_ptr<Region>& child : contentRegion->getChildren()) {
-				child->setVisible(false);
-			}
-			AlloyApplicationContext()->addTween(contentRegion->dimensions,
-					CoordPerPX(1.0f, 0.0f, -Composite::scrollBarSize,
-							(float) expandHeight),
-					CoordPerPX(1.0f, 0.0f, -Composite::scrollBarSize, 0.0f),
-					0.3, SineOut())->onComplete =
-					[this](Tweenable*) {
-						for (std::shared_ptr<Region>& child : contentRegion->getChildren()) {
-							child->setVisible(true);
-						}
-
-						contentRegion->pack();
-					};
+		    contentRegion->dimensions=CoordPerPX(1.0f, 0.0f, -Composite::scrollBarSize, 0.0f);
 		}
 	}
 	this->expanded = expanded;
