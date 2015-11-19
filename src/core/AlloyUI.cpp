@@ -991,7 +991,7 @@ BorderComposite::BorderComposite(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims, bool resizeable) :
 		Region(name, pos, dims), northRegion(children[0]), southRegion(
 				children[1]), eastRegion(children[2]), westRegion(children[3]), centerRegion(
-				children[4]), winPos(WindowPosition::Center), resizeable(
+				children[4]), winPos(WindowPosition::Outside), resizeable(
 				resizeable) {
 	northFraction = UnitPX(0.0f);
 	southFraction = UnitPX(0.0f);
