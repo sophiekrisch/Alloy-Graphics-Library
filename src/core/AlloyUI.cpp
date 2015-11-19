@@ -370,31 +370,22 @@ void Composite::draw(AlloyContext* context) {
 		}
 	}
 
-	if (isScrollEnabled() && verticalScrollTrack.get() != nullptr) {
-		if (scrollExtent.y > h) {
-			verticalScrollTrack->setVisible(true);
-			verticalScrollHandle->setVisible(true);
-			verticalScrollTrack->draw(context);
-			verticalScrollHandle->draw(context);
-		} else {
-			verticalScrollTrack->setVisible(alwaysShowVerticalScrollBar);
-			if (alwaysShowVerticalScrollBar)
+	if (verticalScrollTrack.get() != nullptr) {
+		if (isScrollEnabled()) {
+			if (scrollExtent.y > h) {
 				verticalScrollTrack->draw(context);
-			verticalScrollHandle->setVisible(false);
-		}
-		if (scrollExtent.x > w) {
-			horizontalScrollTrack->setVisible(true);
-			horizontalScrollHandle->setVisible(true);
-			horizontalScrollTrack->draw(context);
-			horizontalScrollHandle->draw(context);
-		} else {
-			horizontalScrollTrack->setVisible(alwaysShowHorizontalScrollBar);
-			if (alwaysShowHorizontalScrollBar)
+				verticalScrollHandle->draw(context);
+			} else {
+				verticalScrollTrack->draw(context);
+			}
+			if (scrollExtent.x > w) {
 				horizontalScrollTrack->draw(context);
-			horizontalScrollHandle->setVisible(false);
+				horizontalScrollHandle->draw(context);
+			} else {
+				horizontalScrollTrack->draw(context);
+			}
 		}
 	}
-
 	if (isScrollEnabled()) {
 		popScissor(nvg);
 	}
@@ -599,7 +590,6 @@ void Composite::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 					bounds.dimensions.y,
 					offset.y - cellSpacing.y + cellPadding.y);
 	}
-
 	if (verticalScrollTrack.get() != nullptr
 			|| horizontalScrollTrack.get() != nullptr) {
 		bool showY = scrollExtent.y > bounds.dimensions.y
@@ -653,6 +643,31 @@ void Composite::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 						/ std::max(1.0f,
 								(float) this->horizontalScrollTrack->getBoundsDimensionsX()
 										- (float) this->horizontalScrollHandle->getBoundsDimensionsX());
+
+
+		if (isScrollEnabled()) {
+			if (this->verticalScrollHandle->getBoundsDimensionsY()
+					< this->verticalScrollTrack->getBoundsDimensionsY()-1) {//subtract one to avoid round off error in determination track bar size!
+				verticalScrollTrack->setVisible(true);
+				verticalScrollHandle->setVisible(true);
+			} else {
+				verticalScrollTrack->setVisible(alwaysShowVerticalScrollBar);
+				verticalScrollHandle->setVisible(false);
+			}
+			if (this->horizontalScrollHandle->getBoundsDimensionsX()
+					< this->horizontalScrollTrack->getBoundsDimensionsX()-1) {//subtract one to avoid round off error in determination track bar size!
+				horizontalScrollTrack->setVisible(true);
+				horizontalScrollHandle->setVisible(true);
+			} else {
+				horizontalScrollTrack->setVisible(alwaysShowHorizontalScrollBar);
+				horizontalScrollHandle->setVisible(false);
+			}
+		} else {
+			horizontalScrollHandle->setVisible(false);
+			verticalScrollHandle->setVisible(false);
+			horizontalScrollTrack->setVisible(alwaysShowHorizontalScrollBar);
+			verticalScrollTrack->setVisible(alwaysShowVerticalScrollBar);
+		}
 	}
 	for (std::shared_ptr<Region>& region : children) {
 		if (region->onPack)
@@ -1059,6 +1074,7 @@ void BorderComposite::draw() {
 }
 
 void ScrollHandle::draw(AlloyContext* context) {
+	if(!visible)return;
 	box2px bounds = getBounds();
 	float x = bounds.position.x;
 	float y = bounds.position.y;
@@ -1093,6 +1109,7 @@ void ScrollHandle::draw(AlloyContext* context) {
 }
 
 void ScrollTrack::draw(AlloyContext* context) {
+	if(!visible)return;
 	box2px bounds = getBounds();
 	float x = bounds.position.x;
 	float y = bounds.position.y;
@@ -3610,7 +3627,7 @@ AdjustableComposite::AdjustableComposite(const std::string& name,
 				WindowPosition::Center), resizeable(resizeable) {
 
 	windowInitialBounds.dimensions = float2(-1, -1);
-	cellPadding=pixel2(10,10);
+	cellPadding = pixel2(10, 10);
 	if (resizeable) {
 		Application::addListener(this);
 	}
@@ -3751,11 +3768,12 @@ bool AdjustableComposite::onEventHandler(AlloyContext* context,
 			case WindowPosition::Center:
 				break;
 			}
-			box2px newBounds(aly::min(minPt, maxPt),aly::max(maxPt - minPt, float2(50, 50)));
+			box2px newBounds(aly::min(minPt, maxPt),
+					aly::max(maxPt - minPt, float2(50, 50)));
 			this->position = CoordPX(newBounds.position);
 			this->dimensions = CoordPX(newBounds.dimensions);
 			if (onResize) {
-				onResize(this,newBounds);
+				onResize(this, newBounds);
 			}
 			context->requestPack();
 		}
