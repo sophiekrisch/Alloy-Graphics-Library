@@ -1646,13 +1646,9 @@ void ColorSelector::draw(AlloyContext* context) {
 }
 
 void ExpandRegion::setExpanded(bool expanded) {
-	if (this->expanded != expanded) {
-		if (expanded) {
-		    contentRegion->dimensions=CoordPerPX(1.0f, 0.0f, -Composite::scrollBarSize,(float) expandHeight);
-		} else {
-		    contentRegion->dimensions=CoordPerPX(1.0f, 0.0f, -Composite::scrollBarSize, 0.0f);
-		}
-		AlloyApplicationContext()->requestPack();
+	contentRegion->setVisible(expanded);
+        if (this->expanded != expanded) {
+	    AlloyApplicationContext()->requestPack();
 	}
 	this->expanded = expanded;
 	arrowIcon->setLabel(
@@ -1712,13 +1708,9 @@ ExpandRegion::ExpandRegion(const std::string& name,
 			};
 	arrowIcon->setLabel(
 			(expanded) ? CodePointToUTF8(0xf056) : CodePointToUTF8(0xf055));
-	if (expanded) {
-		contentRegion->dimensions = CoordPerPX(1.0f, 0.0f,
+	contentRegion->dimensions = CoordPerPX(1.0f, 0.0f,
 				-Composite::scrollBarSize, (float) expandHeight);
-	} else {
-		contentRegion->dimensions = CoordPerPX(1.0f, 0.0f,
-				-Composite::scrollBarSize, 0.0f);
-	}
+	contentRegion->setVisible(expanded);
 }
 FileSelector::FileSelector(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims) :
