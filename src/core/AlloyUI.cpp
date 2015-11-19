@@ -855,9 +855,11 @@ BorderComposite::BorderComposite(const std::string& name, const AUnit2D& pos,
 						resizing = false;
 					}
 					if (e.type == InputType::Cursor) {
+						//Add center component to this!
 						if (!resizing) {
 							if (over) {
 								winPos = WindowPosition::Center;
+
 								if(westRegion.get()!=nullptr) {
 									box2px bounds=westRegion->getBounds();
 									if(bounds.contains(e.cursor)) {
@@ -890,23 +892,42 @@ BorderComposite::BorderComposite(const std::string& name, const AUnit2D& pos,
 										}
 									}
 								}
+								if(centerRegion.get()!=nullptr) {
+									box2px bounds=centerRegion->getBounds();
+									if(bounds.contains(e.cursor)) {
+										if (e.cursor.x >= bounds.position.x + bounds.dimensions.x - cellPadding.x) {
+											winPos = WindowPosition::Right;
+										} else if (e.cursor.x <= bounds.position.x + cellPadding.x) {
+											winPos = WindowPosition::Left;
+										} else if (e.cursor.y >= bounds.position.y + bounds.dimensions.y - cellPadding.y) {
+											winPos = WindowPosition::Bottom;
+										} else if (e.cursor.y <= bounds.position.y + cellPadding.y) {
+											winPos = WindowPosition::Top;
+										}
+									}
+								}
 							}
 							else {
 								winPos = WindowPosition::Center;
 							}
 						}
 					}
-					if (over&&e.type == InputType::MouseButton&&e.button == GLFW_MOUSE_BUTTON_LEFT&&e.isDown() && winPos != WindowPosition::Center) {
+					if (over && e.type == InputType::MouseButton
+							&& e.button == GLFW_MOUSE_BUTTON_LEFT && e.isDown()
+							&& winPos != WindowPosition::Center) {
 						if (!resizing) {
 							cursorDownPosition = e.cursor;
 							windowInitialBounds = currentBounds;
 						}
 						resizing = true;
 					}
-					if (resizing&&e.type == InputType::Cursor) {
+					if (resizing && e.type == InputType::Cursor) {
 						float2 minPt = windowInitialBounds.min();
 						float2 maxPt = windowInitialBounds.max();
-						pixel2 cursor=box2px(pixel2(0.0f,0.0f),pixel2(context->width()-1.0f,context->height()-1.0f)).clamp(e.cursor);
+						pixel2 cursor =
+						box2px(pixel2(0.0f, 0.0f),
+								pixel2(context->width() - 1.0f,
+										context->height() - 1.0f)).clamp(e.cursor);
 						switch (winPos) {
 							case WindowPosition::Top:
 							minPt.y += cursor.y - cursorDownPosition.y;
@@ -924,30 +945,34 @@ BorderComposite::BorderComposite(const std::string& name, const AUnit2D& pos,
 							break;
 						}
 						box2px bounds = getBounds(false);
-						bounds.position-=this->getDragOffset();
-						pixel2 upper=bounds.max()-float2(50.0f,50.0f);
-						pixel2 lower=bounds.min()+float2(50.0f,50.0f);
-						if(minPt.x>maxPt.x) {
-							std::swap(minPt.x,maxPt.x);
+						bounds.position -= this->getDragOffset();
+						pixel2 upper = bounds.max() - float2(50.0f, 50.0f);
+						pixel2 lower = bounds.min() + float2(50.0f, 50.0f);
+						if (minPt.x > maxPt.x) {
+							std::swap(minPt.x, maxPt.x);
 						}
-						if(minPt.y>maxPt.y) {
-							std::swap(minPt.y,maxPt.y);
+						if (minPt.y > maxPt.y) {
+							std::swap(minPt.y, maxPt.y);
 						}
-						minPt=aly::max(lower,minPt);
-						maxPt=aly::min(upper,maxPt);
-						box2px nbounds(minPt,maxPt - minPt);
+						minPt = aly::max(lower, minPt);
+						maxPt = aly::min(upper, maxPt);
+						box2px nbounds(minPt, maxPt - minPt);
 						switch (winPos) {
 							case WindowPosition::Top:
-							northFraction=UnitPX(nbounds.position.y-bounds.position.y);
+							northFraction = UnitPX(nbounds.position.y - bounds.position.y);
 							break;
 							case WindowPosition::Bottom:
-							southFraction=UnitPX(bounds.position.y+bounds.dimensions.y-nbounds.position.y-nbounds.dimensions.y);
+							southFraction = UnitPX(
+									bounds.position.y + bounds.dimensions.y
+									- nbounds.position.y - nbounds.dimensions.y);
 							break;
 							case WindowPosition::Left:
-							westFraction=UnitPX(nbounds.position.x-bounds.position.x);
+							westFraction = UnitPX(nbounds.position.x - bounds.position.x);
 							break;
 							case WindowPosition::Right:
-							eastFraction=UnitPX(bounds.position.x+bounds.dimensions.x-nbounds.position.x-nbounds.dimensions.x);
+							eastFraction = UnitPX(
+									bounds.position.x + bounds.dimensions.x
+									- nbounds.position.x - nbounds.dimensions.x);
 							break;
 							default:
 							break;
