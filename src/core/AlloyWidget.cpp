@@ -1652,6 +1652,7 @@ void ExpandRegion::setExpanded(bool expanded) {
 		} else {
 		    contentRegion->dimensions=CoordPerPX(1.0f, 0.0f, -Composite::scrollBarSize, 0.0f);
 		}
+		AlloyApplicationContext()->requestPack();
 	}
 	this->expanded = expanded;
 	arrowIcon->setLabel(
