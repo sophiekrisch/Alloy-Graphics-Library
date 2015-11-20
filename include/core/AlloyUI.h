@@ -133,7 +133,7 @@ public:
 	void setDragOffset(const pixel2& cursor, const pixel2& delta);
 	bool addDragOffset(const pixel2& delta);
 
-	inline void setDragEnabled(bool enabled) {
+	virtual void setDragEnabled(bool enabled) {
 		dragEnabled = enabled;
 		if (dragEnabled)
 			clampToParentBounds = true;

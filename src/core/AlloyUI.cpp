@@ -3779,17 +3779,37 @@ bool AdjustableComposite::onEventHandler(AlloyContext* context,
 			box2px newBounds(aly::min(minPt, maxPt),
 					aly::max(maxPt - minPt, float2(50, 50)));
 			pixel2 d = newBounds.dimensions;
-
-			switch (aspectRule) {
-			case AspectRule::FixedWidth:
-				newBounds.dimensions = pixel2(d.x, d.x / (float) aspectRatio);
-				break;
-			case AspectRule::FixedHeight:
-				newBounds.dimensions = pixel2(d.y * (float) aspectRatio, d.y);
-				break;
-			case AspectRule::Unspecified:
-			default:
-				break;
+			pixel2 d1, d2;
+			if (aspectRule != AspectRule::Unspecified) {
+				switch (winPos) {
+				case WindowPosition::Left:
+				case WindowPosition::Right:
+					newBounds.dimensions = pixel2(d.x,
+							d.x / (float) aspectRatio);
+					break;
+				case WindowPosition::Top:
+				case WindowPosition::Bottom:
+					newBounds.dimensions = pixel2(d.y * (float) aspectRatio,
+							d.y);
+					break;
+				case WindowPosition::TopLeft:
+				case WindowPosition::TopRight:
+				case WindowPosition::BottomLeft:
+				case WindowPosition::BottomRight:
+					d1 = pixel2(d.x, d.x / (float) aspectRatio);
+					d2 = pixel2(d.y * (float) aspectRatio, d.y);
+					if (d1.x * d1.y > d2.x * d2.y) {
+						newBounds.dimensions = d1;
+					} else {
+						newBounds.dimensions = d2;
+					}
+					break;
+				default:
+					break;
+				}
+			}
+			if(clampToParentBounds){
+				newBounds.clamp(parent->getBounds());
 			}
 			this->position = CoordPX(newBounds.position);
 			this->dimensions = CoordPX(newBounds.dimensions);
