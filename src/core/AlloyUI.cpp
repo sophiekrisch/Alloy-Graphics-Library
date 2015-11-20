@@ -3808,8 +3808,12 @@ bool AdjustableComposite::onEventHandler(AlloyContext* context,
 					break;
 				}
 			}
+
 			if(clampToParentBounds){
+				pixel2 offset=getDragOffset();
+				newBounds.position+=offset;
 				newBounds.clamp(parent->getBounds());
+				newBounds.position-=offset;
 			}
 			this->position = CoordPX(newBounds.position);
 			this->dimensions = CoordPX(newBounds.dimensions);
