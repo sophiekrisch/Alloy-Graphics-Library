@@ -19,8 +19,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef TREE_EX_H_
-#define TREE_EX_H_
+#ifndef EXPANDTREE_EX_H_
+#define EXPANDTREE_EX_H_
 
 #include "AlloyApplication.h"
 #include "AlloyWidget.h"

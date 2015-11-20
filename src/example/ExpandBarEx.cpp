@@ -19,13 +19,14 @@
  * THE SOFTWARE.
  */
 
+#include "../../include/example/ExpandBarEx.h"
+
 #include "Alloy.h"
-#include "../../include/example/ExpandEx.h"
 using namespace aly;
-ExpandEx::ExpandEx() :
+ExpandBarEx::ExpandBarEx() :
 		Application(800, 600, "Expand Bar Example") {
 }
-bool ExpandEx::init(Composite& rootNode) {
+bool ExpandBarEx::init(Composite& rootNode) {
 	ExpandBarPtr expandBar = ExpandBarPtr(
 			new ExpandBar("exapander", CoordPercent(0.7f, 0.0f),
 					CoordPercent(0.3f, 1.0f)));

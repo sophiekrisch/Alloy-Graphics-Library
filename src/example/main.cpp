@@ -27,7 +27,6 @@
 #include "../../include/example/ImageEx.h"
 #include "../../include/example/ControlsEx.h"
 #include "../../include/example/DialogsEx.h"
-#include "../../include/example/ExpandEx.h"
 #include "../../include/example/MeshMatcapEx.h"
 #include "../../include/example/MeshWireframeEx.h"
 #include "../../include/example/MeshSubdivideEx.h"
@@ -53,6 +52,7 @@
 #include "../../include/example/DistanceFieldEx.h"
 #include <cstring>
 
+#include "../../include/example/ExpandBarEx.h"
 #include "../../include/example/ExpandTreeEx.h"
 /*
  For simple execution, main method should look like:
@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
 	ExamplePtr apps[N] = { MAKE_EXAMPLE(UnitsEx), MAKE_EXAMPLE(CompositeEx),
 			MAKE_EXAMPLE(EventsEx), MAKE_EXAMPLE(DragEx), MAKE_EXAMPLE(TweenEx),
 			MAKE_EXAMPLE(ImageEx), MAKE_EXAMPLE(ControlsEx), MAKE_EXAMPLE(
-					DialogsEx), MAKE_EXAMPLE(ExpandEx), MAKE_EXAMPLE(
+					DialogsEx), MAKE_EXAMPLE(ExpandBarEx), MAKE_EXAMPLE(
 					MeshMatcapEx), MAKE_EXAMPLE(MeshWireframeEx), MAKE_EXAMPLE(
 					MeshSubdivideEx), MAKE_EXAMPLE(MeshTextureEx), MAKE_EXAMPLE(
 					MeshVertexColorEx), MAKE_EXAMPLE(MeshParticleEx),

@@ -19,13 +19,13 @@
  * THE SOFTWARE.
  */
 
-#ifndef EXPAND_EX_H_
-#define EXPAND_EX_H_
+#ifndef EXPANDBAR_EX_H_
+#define EXPANDBAR_EX_H_
 
 #include "AlloyApplication.h"
-class ExpandEx: public aly::Application {
+class ExpandBarEx: public aly::Application {
 public:
-	ExpandEx();
+	ExpandBarEx();
 	bool init(aly::Composite& rootNode);
 };
 

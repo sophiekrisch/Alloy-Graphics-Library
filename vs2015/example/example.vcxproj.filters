@@ -28,7 +28,7 @@
     <ClCompile Include="..\..\src\example\DialogsEx.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\example\ExpandEx.cpp">
+    <ClCompile Include="..\..\src\example\ExpandBarEx.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\example\MeshMatcapEx.cpp">
@@ -129,7 +129,7 @@
     <ClInclude Include="..\..\include\example\DialogsEx.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\ExpandEx.h">
+    <ClInclude Include="..\..\include\example\ExpandBarEx.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\example\MeshMatcapEx.h">
