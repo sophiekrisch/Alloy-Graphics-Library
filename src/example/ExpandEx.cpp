@@ -33,23 +33,17 @@ bool ExpandEx::init(Composite& rootNode) {
 	CompositePtr geomRegion = CompositePtr(
 			new aly::Composite("Geometry", CoordPX(0, 0),
 					CoordPerPX(1.0f, 0.0f, 0.0f, 400.0f)));
-
-	CompositePtr scrollRegion = CompositePtr(
-			new aly::Composite("Scroll", CoordPX(0, 0),
-					CoordPerPX(1.0f, 0.0f, 0.0f, 200.0f)));
-	scrollRegion->setScrollEnabled(true);
-	scrollRegion->setOrientation(Orientation::Vertical);
-	scrollRegion->add(
+	geomRegion->setScrollEnabled(true);
+	geomRegion->setOrientation(Orientation::Vertical);
+	geomRegion->add(
 			MakeRegion("Region 1", CoordPX(0, 0),
 					CoordPerPX(1.0f, 0.0f, 0.0f, 300.0f), Color(255, 0, 0)));
-	scrollRegion->add(
+	geomRegion->add(
 			MakeRegion("Region 2", CoordPX(0, 0),
 					CoordPerPX(1.0f, 0.0f, 0.0f, 300.0f), Color(0, 255, 0)));
 	expandBar->add(geomRegion, 400, false);
 	std::string exampleFile = getContext()->getFullPath(
 			"models" + ALY_PATH_SEPARATOR+"monkey.ply");
-	geomRegion->setOrientation(Orientation::Vertical);
-	geomRegion->add(scrollRegion);
 	RegionPtr apprRegion = RegionPtr(
 			new aly::Region("Appearance", CoordPX(0, 0),
 					CoordPerPX(1.0f, 0.0f, 0.0f, 3000.0f)));

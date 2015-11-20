@@ -166,8 +166,10 @@ void Application::drawDebugUI() {
 	}
 	float cr = context->theme.CORNER_RADIUS;
 	if (context->getViewport().contains(context->cursorPosition)) {
-		nvgFontSize(nvg, 22);
+		nvgFontSize(nvg, 15);
 		nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold));
+
+		/*
 		int alignment = 0;
 		if (context->cursorPosition.x < context->width() * 0.5f) {
 			alignment = NVG_ALIGN_LEFT;
@@ -187,9 +189,10 @@ void Application::drawDebugUI() {
 			drawText(nvg, context->cursorPosition, txt, FontStyle::Outline,
 					Color(255), Color(64, 64, 64));
 		}
+		*/
 		nvgTextAlign(nvg, NVG_ALIGN_TOP);
 		float yoffset = 5;
-		txt = context->hasFocus ? "Window Has Focus" : "Window Lost Focus";
+		std::string txt = context->hasFocus ? "Window Has Focus" : "Window Lost Focus";
 		drawText(nvg, 5, yoffset, txt.c_str(), FontStyle::Outline, Color(255),
 				Color(64, 64, 64));
 		yoffset += 16;

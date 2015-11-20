@@ -449,7 +449,6 @@ private:
 	std::list<std::shared_ptr<ExpandRegion>> expandRegions;
 	std::list<std::shared_ptr<Region>> contentRegions;
 public:
-	CompositePtr add(Region* region, pixel expandHeight, bool expanded);
 	CompositePtr add(const std::shared_ptr<Region>&, pixel expandHeight,
 			bool expanded);
 

@@ -28,7 +28,7 @@
 namespace aly {
 uint64_t Region::REGION_COUNTER = 0;
 const RGBA DEBUG_STROKE_COLOR = RGBA(32, 32, 200, 255);
-const RGBA DEBUG_HIDDEN_COLOR = RGBA(128, 128, 128, 32);
+const RGBA DEBUG_HIDDEN_COLOR = RGBA(128, 128, 128, 0);
 const RGBA DEBUG_HOVER_COLOR = RGBA(32, 200, 32, 255);
 const RGBA DEBUG_DOWN_COLOR = RGBA(200, 64, 32, 255);
 const RGBA DEBUG_ON_TOP_COLOR = RGBA(120, 120, 0, 255);
@@ -62,7 +62,6 @@ Region* Region::locate(const pixel2& cursor) {
 		return nullptr;
 	}
 }
-
 void Region::pack(AlloyContext* context) {
 	if (parent == nullptr) {
 		pack(pixel2(0, 0), pixel2(context->dimensions()), context->dpmm,
@@ -170,24 +169,30 @@ void Region::drawBoundsLabel(AlloyContext* context, const std::string& name,
 	nvgStrokeWidth(nvg, 1.0f);
 	nvgStroke(nvg);
 
-	nvgLineJoin(nvg, NVG_MITER);
-	nvgFontSize(nvg, (float) FONT_SIZE_PX);
-	nvgFontFaceId(nvg, font);
-	nvgTextAlign(nvg, NVG_ALIGN_TOP | NVG_ALIGN_LEFT);
-	float twidth = std::ceil(
-			nvgTextBounds(nvg, 0, 0, name.c_str(), nullptr, nullptr));
-	float xoffset = (bounds.dimensions.x - twidth - 2 * FONT_PADDING) * 0.5f;
-	if (twidth <= bounds.dimensions.x && FONT_SIZE_PX <= bounds.dimensions.y) {
-		nvgBeginPath(nvg);
-		nvgFillColor(nvg, c);
-		nvgRoundedRect(nvg, bounds.position.x + xoffset, bounds.position.y - 4,
-				twidth + 2 * FONT_PADDING, FONT_SIZE_PX + FONT_PADDING + 5, 5);
-		nvgFill(nvg);
+	/*
+		nvgLineJoin(nvg, NVG_MITER);
+		nvgFontSize(nvg, (float) FONT_SIZE_PX);
+		nvgFontFaceId(nvg, font);
+		nvgTextAlign(nvg, NVG_ALIGN_TOP | NVG_ALIGN_LEFT);
+		float twidth = std::ceil(
+				nvgTextBounds(nvg, 0, 0, name.c_str(), nullptr, nullptr));
+		float xoffset = (bounds.dimensions.x - twidth - 2 * FONT_PADDING)
+				* 0.5f;
+		if (twidth <= bounds.dimensions.x
+				&& FONT_SIZE_PX <= bounds.dimensions.y) {
+			nvgBeginPath(nvg);
+			nvgFillColor(nvg, c);
+			nvgRoundedRect(nvg, bounds.position.x + xoffset,
+					bounds.position.y - 4, twidth + 2 * FONT_PADDING,
+					FONT_SIZE_PX + FONT_PADDING + 5, 5);
+			nvgFill(nvg);
 
-		nvgFillColor(nvg, Color(COLOR_WHITE));
-		nvgText(nvg, bounds.position.x + FONT_PADDING + xoffset,
-				bounds.position.y + 1 + FONT_PADDING, name.c_str(), nullptr);
-	}
+			nvgFillColor(nvg, Color(COLOR_WHITE));
+			nvgText(nvg, bounds.position.x + FONT_PADDING + xoffset,
+					bounds.position.y + 1 + FONT_PADDING, name.c_str(),
+					nullptr);
+		}
+	*/
 	popScissor(nvg);
 }
 void Region::setDragOffset(const pixel2& cursor, const pixel2& delta) {
@@ -416,17 +421,19 @@ void Composite::drawDebug(AlloyContext* context) {
 	for (std::shared_ptr<Region>& region : children) {
 		region->drawDebug(context);
 	}
-	if (verticalScrollTrack.get()) {
-		verticalScrollTrack->drawDebug(context);
-	}
-	if (verticalScrollHandle.get()) {
-		verticalScrollHandle->drawDebug(context);
-	}
-	if (horizontalScrollTrack.get()) {
-		horizontalScrollTrack->drawDebug(context);
-	}
-	if (horizontalScrollHandle.get()) {
-		horizontalScrollHandle->drawDebug(context);
+	if (isVisible()) {
+		if (verticalScrollTrack.get()) {
+			verticalScrollTrack->drawDebug(context);
+		}
+		if (verticalScrollHandle.get()) {
+			verticalScrollHandle->drawDebug(context);
+		}
+		if (horizontalScrollTrack.get()) {
+			horizontalScrollTrack->drawDebug(context);
+		}
+		if (horizontalScrollHandle.get()) {
+			horizontalScrollHandle->drawDebug(context);
+		}
 	}
 }
 

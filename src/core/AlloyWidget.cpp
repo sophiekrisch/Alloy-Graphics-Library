@@ -2626,7 +2626,7 @@ CompositePtr ExpandBar::add(const std::shared_ptr<Region>& region,
 	CompositePtr container = MakeComposite(
 			MakeString() << region->name << " content", CoordPX(0.0f, 0.0f),
 			CoordPerPX(1.0f, 0.0f, -Composite::scrollBarSize, expandHeight));
-	container->setScrollEnabled(true);
+	container->setScrollEnabled(!region->isScrollEnabled());
 	region->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	region->borderColor = MakeColor(AlloyApplicationContext()->theme.NEUTRAL);
 	region->borderWidth = UnitPX(2.0f);
@@ -2640,9 +2640,6 @@ CompositePtr ExpandBar::add(const std::shared_ptr<Region>& region,
 	Composite::add(eregion);
 	Composite::add(container);
 	return container;
-}
-CompositePtr ExpandBar::add(Region* region, pixel expandHeight, bool expanded) {
-	return add(std::shared_ptr<Region>(region), expandHeight, expanded);
 }
 Graph::Graph(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
 		Region(name, pos, dims) {
