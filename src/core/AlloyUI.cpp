@@ -472,7 +472,6 @@ void Composite::resetScrollPosition() {
 void Composite::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp) {
 	Region::pack(pos, dims, dpmm, pixelRatio);
-	box2px bounds = getBounds(false);
 
 	if (verticalScrollTrack.get() == nullptr && isScrollEnabled()) {
 		verticalScrollTrack = std::shared_ptr<ScrollTrack>(
@@ -582,11 +581,11 @@ void Composite::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 	}
 	if (!isScrollEnabled()) {
 		if (orientation == Orientation::Horizontal)
-			this->bounds.dimensions.x = bounds.dimensions.x = std::max(
+			bounds.dimensions.x = std::max(
 					bounds.dimensions.x,
 					offset.x - cellSpacing.x + cellPadding.x);
 		if (orientation == Orientation::Vertical)
-			this->bounds.dimensions.y = bounds.dimensions.y = std::max(
+			bounds.dimensions.y = std::max(
 					bounds.dimensions.y,
 					offset.y - cellSpacing.y + cellPadding.y);
 	}
@@ -644,10 +643,9 @@ void Composite::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 								(float) this->horizontalScrollTrack->getBoundsDimensionsX()
 										- (float) this->horizontalScrollHandle->getBoundsDimensionsX());
 
-
 		if (isScrollEnabled()) {
 			if (this->verticalScrollHandle->getBoundsDimensionsY()
-					< this->verticalScrollTrack->getBoundsDimensionsY()-1) {//subtract one to avoid round off error in determination track bar size!
+					< this->verticalScrollTrack->getBoundsDimensionsY() - 1) { //subtract one to avoid round off error in determination track bar size!
 				verticalScrollTrack->setVisible(true);
 				verticalScrollHandle->setVisible(true);
 			} else {
@@ -655,11 +653,12 @@ void Composite::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 				verticalScrollHandle->setVisible(false);
 			}
 			if (this->horizontalScrollHandle->getBoundsDimensionsX()
-					< this->horizontalScrollTrack->getBoundsDimensionsX()-1) {//subtract one to avoid round off error in determination track bar size!
+					< this->horizontalScrollTrack->getBoundsDimensionsX() - 1) { //subtract one to avoid round off error in determination track bar size!
 				horizontalScrollTrack->setVisible(true);
 				horizontalScrollHandle->setVisible(true);
 			} else {
-				horizontalScrollTrack->setVisible(alwaysShowHorizontalScrollBar);
+				horizontalScrollTrack->setVisible(
+						alwaysShowHorizontalScrollBar);
 				horizontalScrollHandle->setVisible(false);
 			}
 		} else {
@@ -916,7 +915,8 @@ bool BorderComposite::onEventHandler(AlloyContext* context,
 		}
 		if (over && e.type == InputType::MouseButton
 				&& e.button == GLFW_MOUSE_BUTTON_LEFT && e.isDown()
-				&& winPos != WindowPosition::Center&&winPos != WindowPosition::Outside) {
+				&& winPos != WindowPosition::Center
+				&& winPos != WindowPosition::Outside) {
 			if (!resizing) {
 				cursorDownPosition = e.cursor;
 				windowInitialBounds = currentBounds;
@@ -1074,7 +1074,8 @@ void BorderComposite::draw() {
 }
 
 void ScrollHandle::draw(AlloyContext* context) {
-	if(!visible)return;
+	if (!visible)
+		return;
 	box2px bounds = getBounds();
 	float x = bounds.position.x;
 	float y = bounds.position.y;
@@ -1109,7 +1110,8 @@ void ScrollHandle::draw(AlloyContext* context) {
 }
 
 void ScrollTrack::draw(AlloyContext* context) {
-	if(!visible)return;
+	if (!visible)
+		return;
 	box2px bounds = getBounds();
 	float x = bounds.position.x;
 	float y = bounds.position.y;
@@ -3644,7 +3646,7 @@ void AdjustableComposite::draw(AlloyContext* context) {
 	if (context->getCursor() == nullptr) {
 		switch (winPos) {
 		case WindowPosition::Center:
-			if(isDragEnabled()){
+			if (isDragEnabled()) {
 				context->setCursor(&Cursor::Position);
 			}
 			break;
@@ -3664,8 +3666,8 @@ void AdjustableComposite::draw(AlloyContext* context) {
 		case WindowPosition::TopRight:
 			context->setCursor(&Cursor::SlantUp);
 			break;
-			default:
-				break;
+		default:
+			break;
 		}
 
 	}
@@ -3724,7 +3726,8 @@ bool AdjustableComposite::onEventHandler(AlloyContext* context,
 		}
 		if (over && e.type == InputType::MouseButton
 				&& e.button == GLFW_MOUSE_BUTTON_LEFT && e.isDown()
-				&& winPos != WindowPosition::Center&&winPos != WindowPosition::Outside) {
+				&& winPos != WindowPosition::Center
+				&& winPos != WindowPosition::Outside) {
 			if (!resizing) {
 				cursorDownPosition = e.cursor;
 				windowInitialBounds = getBounds(false);
@@ -3775,6 +3778,19 @@ bool AdjustableComposite::onEventHandler(AlloyContext* context,
 			}
 			box2px newBounds(aly::min(minPt, maxPt),
 					aly::max(maxPt - minPt, float2(50, 50)));
+			pixel2 d = newBounds.dimensions;
+
+			switch (aspectRule) {
+			case AspectRule::FixedWidth:
+				newBounds.dimensions = pixel2(d.x, d.x / (float) aspectRatio);
+				break;
+			case AspectRule::FixedHeight:
+				newBounds.dimensions = pixel2(d.y * (float) aspectRatio, d.y);
+				break;
+			case AspectRule::Unspecified:
+			default:
+				break;
+			}
 			this->position = CoordPX(newBounds.position);
 			this->dimensions = CoordPX(newBounds.dimensions);
 			if (onResize) {

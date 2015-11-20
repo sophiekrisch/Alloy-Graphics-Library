@@ -224,8 +224,8 @@ protected:
 	std::shared_ptr<ScrollHandle> verticalScrollHandle, horizontalScrollHandle;
 	std::vector<std::shared_ptr<Region>> children;
 	typedef std::shared_ptr<Region> ValueType;
-	pixel2 cellPadding;
-	pixel2 cellSpacing;
+	pixel2 cellPadding = pixel2(0, 0);
+	pixel2 cellSpacing = pixel2(0, 0);
 public:
 	bool isVerticalScrollVisible() const {
 		if (verticalScrollTrack.get() == nullptr) {

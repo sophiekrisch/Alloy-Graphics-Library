@@ -40,8 +40,8 @@ bool EventsEx::init(Composite& rootNode) {
 			COLOR_WHITE, HorizontalAlignment::Left, VerticalAlignment::Top);
 	labelC->setAlignment(HorizontalAlignment::Center,VerticalAlignment::Middle);
 	AdjustableCompositePtr resizeRegion=AdjustableCompositePtr(new AdjustableComposite("Resize Region",CoordPerPX(0.5f,0.0f,-250.0f,40.0f), CoordPX(500, 100)));
-	resizeRegion->setDragEnabled(true);
 	resizeRegion->backgroundColor=MakeColor(Color(64,192,64));
+
 	resizeRegion->add(labelC);
 
 	labelA->backgroundColor = MakeColor(255, 128, 64);

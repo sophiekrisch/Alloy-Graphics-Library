@@ -59,7 +59,7 @@ template<typename T> T sign(const T& a) {
 
 template<class T, int M> struct vec;
 template<class T> struct vec<T, 1> {
-	T x;
+	T x=T(0);
 
 	vec(T x, T y) :
 			x(x) {
