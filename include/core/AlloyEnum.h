@@ -85,7 +85,7 @@ enum class FontType {
 	CodeItalic = 7,
 	CodeBoldItalic = 8
 };
-const int ALY_NUMBER_OF_FONTS = 9;
+//const int ALY_NUMBER_OF_FONTS = 9;
 enum WindowPosition {
 	Outside=-1,
 	Center=0, 

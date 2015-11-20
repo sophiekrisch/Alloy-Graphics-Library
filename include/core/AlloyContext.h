@@ -192,7 +192,7 @@ private:
 	std::thread::id threadId;
 	std::mutex taskLock;
 	std::list<std::string> assetDirectories;
-	std::shared_ptr<Font> fonts[ALY_NUMBER_OF_FONTS];
+	std::vector<std::shared_ptr<Font>> fonts;
 	std::list<GLFWwindow*> windowHistory;
 	bool dirtyLayout = false;
 	bool dirtyUI = true;
@@ -202,8 +202,8 @@ private:
 	Animator animator;
 	CursorLocator cursorLocator;
 	const double ANIMATE_INTERVAL_SEC = 1.0 / 30.0;
-	const double UPDATE_LOCATOR_INTERVAL_SEC = 1.0 / 15.0;
-	const double UPDATE_CURSOR_INTERVAL_SEC = 1.0 / 30.0;
+	const double UPDATE_LOCATOR_INTERVAL_SEC = 1.0 / 30.0;
+	const double UPDATE_CURSOR_INTERVAL_SEC = 1.0 / 90.0;
 	bool leftMouseButton = false;
 	bool rightMouseButton = false;
 	std::chrono::steady_clock::time_point endTime;
@@ -339,6 +339,10 @@ public:
 	}
 	void addAssetDirectory(const std::string& dir);
 	std::shared_ptr<Font>& loadFont(FontType type, const std::string& name,
+			const std::string& partialFile);
+	std::shared_ptr<Font>& loadFont(int idx, const std::string& name,
+			const std::string& partialFile);
+	std::shared_ptr<Font>& loadFont(const std::string& name,
 			const std::string& partialFile);
 	std::string getFullPath(const std::string& partialFile);
 	inline int width() const {

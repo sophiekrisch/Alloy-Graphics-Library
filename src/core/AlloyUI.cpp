@@ -157,8 +157,7 @@ void Region::drawBoundsLabel(AlloyContext* context, const std::string& name,
 	} else {
 		c = DEBUG_HIDDEN_COLOR;
 	}
-	const int FONT_PADDING = 2;
-	const int FONT_SIZE_PX = 16;
+
 
 	nvgBeginPath(nvg);
 
@@ -170,6 +169,8 @@ void Region::drawBoundsLabel(AlloyContext* context, const std::string& name,
 	nvgStroke(nvg);
 
 	/*
+	 	const int FONT_PADDING = 2;
+		const int FONT_SIZE_PX = 16;
 		nvgLineJoin(nvg, NVG_MITER);
 		nvgFontSize(nvg, (float) FONT_SIZE_PX);
 		nvgFontFaceId(nvg, font);
