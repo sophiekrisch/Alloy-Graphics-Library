@@ -1154,6 +1154,16 @@ Composite::Composite(const std::string& name, const AUnit2D& pos,
 		Region(name, pos, dims), cellPadding(0, 0), cellSpacing(5, 5) {
 }
 bool Composite::onEventHandler(AlloyContext* context, const InputEvent& event) {
+	if (isVisible() && isDragEnabled()) {
+		//Steal dragging priority.
+		Region* mouseDownRegion = context->getMouseDownObject();
+		if (mouseDownRegion != nullptr && !mouseDownRegion->isDragEnabled()) {
+			if (mouseDownRegion->hasParent(this)) {
+				context->setMouseDownObject(this);
+
+			}
+		}
+	}
 	if (isVisible() && event.type == InputType::Scroll && isScrollEnabled()) {
 		box2px bounds = getBounds();
 		if (bounds.contains(event.cursor)) {
@@ -3809,11 +3819,11 @@ bool AdjustableComposite::onEventHandler(AlloyContext* context,
 				}
 			}
 
-			if(clampToParentBounds){
-				pixel2 offset=getDragOffset();
-				newBounds.position+=offset;
+			if (clampToParentBounds) {
+				pixel2 offset = getDragOffset();
+				newBounds.position += offset;
 				newBounds.clamp(parent->getBounds());
-				newBounds.position-=offset;
+				newBounds.position -= offset;
 			}
 			this->position = CoordPX(newBounds.position);
 			this->dimensions = CoordPX(newBounds.dimensions);

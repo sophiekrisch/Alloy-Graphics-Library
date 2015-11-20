@@ -35,8 +35,8 @@ bool EventsEx::init(Composite& rootNode) {
 			CoordPercent(0.6f, 0.333333f), CoordPercent(0.3f, 0.333333f),
 			FontType::Bold, UnitPT(16.0f), COLOR_WHITE,
 			HorizontalAlignment::Center, VerticalAlignment::Middle);
-	TextLabelPtr labelC = MakeTextLabel("Resize Region", CoordPercent(0.5f, 0.5f),
-			CoordPX(0,0), FontType::Bold, UnitPT(16.0f),
+	TextLabelPtr labelC = MakeTextLabel("Resize Region", CoordPerPX(0.5f, 0.5f,-200,-20),
+			CoordPX(400,40), FontType::Bold, UnitPT(16.0f),
 			COLOR_WHITE, HorizontalAlignment::Left, VerticalAlignment::Top);
 	labelC->setAlignment(HorizontalAlignment::Center,VerticalAlignment::Middle);
 	AdjustableCompositePtr resizeRegion=AdjustableCompositePtr(new AdjustableComposite("Resize Region",CoordPerPX(0.5f,0.0f,-250.0f,40.0f), CoordPX(500, 100)));

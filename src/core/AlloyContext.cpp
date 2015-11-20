@@ -512,6 +512,14 @@ namespace aly {
 			return (mouseOverRegion == region);
 		}
 	}
+	void  AlloyContext::setMouseDownObject(Region* region) {
+		if (region != nullptr && mouseDownRegion != nullptr) {
+			cursorDownPosition = cursorDownPosition
+					+ mouseDownRegion->getBoundsPosition()
+					- region->getBoundsPosition();
+		}
+		mouseDownRegion = region;
+	}
 	bool AlloyContext::isMouseDown(Region* region, bool includeParent) const {
 		if (includeParent) {
 			return (mouseDownRegion == region || (mouseDownRegion != nullptr&&mouseDownRegion->hasParent(region)));

@@ -100,7 +100,7 @@ struct ImageGlyph: public Glyph {
 			bool mipmap = false);
 	void draw(const box2px& bounds, const Color& fgColor, const Color& bgColor,
 			AlloyContext* context) override;
-	void set(const ImageRGBA& rgba,AlloyContext* context);
+	void set(const ImageRGBA& rgba, AlloyContext* context);
 	~ImageGlyph();
 };
 struct CheckerboardGlyph: public Glyph {
@@ -170,18 +170,17 @@ struct EventHandler {
 	virtual ~EventHandler();
 };
 struct Cursor {
-	static const Cursor Normal, Horizontal, Vertical, Position, Hand, SlantUp, SlantDown,TextInsert;
+	static const Cursor Normal, Horizontal, Vertical, Position, Hand, SlantUp,
+			SlantDown, TextInsert;
 	std::string codeString;
 	FontType fontType;
 	float fontSize;
 	float angle;
 	int align;
-	Cursor(int code, float fontSize,int align= NVG_ALIGN_TOP | NVG_ALIGN_LEFT, const FontType& fontType = FontType::Icon, float angle = 0.0f) :
-		codeString(CodePointToUTF8(code)),
-		fontType(fontType),
-		fontSize(fontSize),
-		angle(angle),
-		align(align){
+	Cursor(int code, float fontSize, int align = NVG_ALIGN_TOP | NVG_ALIGN_LEFT,
+			const FontType& fontType = FontType::Icon, float angle = 0.0f) :
+			codeString(CodePointToUTF8(code)), fontType(fontType), fontSize(
+					fontSize), angle(angle), align(align) {
 	}
 	void draw(AlloyContext* context) const;
 };
@@ -261,7 +260,7 @@ public:
 	int getScreenHeight() {
 		return screenSize.y;
 	}
-	void addDeferredTask(const std::function<void()>& func,bool block=false);
+	void addDeferredTask(const std::function<void()>& func, bool block = false);
 	bool hasDeferredTasks() const {
 		return (deferredTasks.size() > 0);
 	}
@@ -277,11 +276,15 @@ public:
 	bool isMouseOver(Region* region, bool includeParent = false) const;
 	bool isMouseDown(Region* region, bool includeParent = false) const;
 	bool isFocused(Region* region);
-	inline void setMouseDownObject(Region* region) {
-		mouseDownRegion = region;
+	void setMouseDownObject(Region* region);
+	Region* getMouseDownObject() const {
+		return mouseDownRegion;
 	}
 	inline void setMouseFocusObject(Region* region) {
 		mouseFocusRegion = region;
+	}
+	Region* getMouseFocusObject() const {
+		return mouseFocusRegion;
 	}
 	void setOnTopRegion(Region* region);
 	void removeOnTopRegion(Region* region);
