@@ -2945,7 +2945,7 @@ bool WindowPane::onEventHandler(AlloyContext* context, const InputEvent& e) {
 		box2px pbounds = parent->getBounds();
 		this->setDragOffset(pbounds.clamp(e.cursor), cursorDownPosition);
 		setMaximize(false);
-		this->pack();
+		context->requestPack();
 	} else if (e.type == InputType::MouseButton && e.isUp()) {
 		context->requestPack();
 		dragging = false;
