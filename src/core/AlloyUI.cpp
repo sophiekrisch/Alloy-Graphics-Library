@@ -472,7 +472,7 @@ void Composite::resetScrollPosition() {
 void Composite::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp) {
 	Region::pack(pos, dims, dpmm, pixelRatio);
-
+	box2px bounds = getBounds(false);
 	if (verticalScrollTrack.get() == nullptr && isScrollEnabled()) {
 		verticalScrollTrack = std::shared_ptr<ScrollTrack>(
 				new ScrollTrack("Vert Track", Orientation::Vertical));
@@ -581,11 +581,11 @@ void Composite::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 	}
 	if (!isScrollEnabled()) {
 		if (orientation == Orientation::Horizontal)
-			bounds.dimensions.x = std::max(
+			this->bounds.dimensions.x = bounds.dimensions.x = std::max(
 					bounds.dimensions.x,
 					offset.x - cellSpacing.x + cellPadding.x);
 		if (orientation == Orientation::Vertical)
-			bounds.dimensions.y = std::max(
+			this->bounds.dimensions.y = bounds.dimensions.y = std::max(
 					bounds.dimensions.y,
 					offset.y - cellSpacing.y + cellPadding.y);
 	}
