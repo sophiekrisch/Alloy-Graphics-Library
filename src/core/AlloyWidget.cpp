@@ -2623,13 +2623,21 @@ ExpandBar::ExpandBar(const std::string& name, const AUnit2D& pos,
 CompositePtr ExpandBar::add(const std::shared_ptr<Region>& region,
 		pixel expandHeight,
 		bool expanded) {
-	CompositePtr container = MakeComposite(
-			MakeString() << region->name << " content", CoordPX(0.0f, 0.0f),
-			CoordPerPX(1.0f, 0.0f, -Composite::scrollBarSize, expandHeight));
-	container->setScrollEnabled(!region->isScrollEnabled());
-	region->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
-	region->borderColor = MakeColor(AlloyApplicationContext()->theme.NEUTRAL);
-	region->borderWidth = UnitPX(2.0f);
+        CompositePtr container= MakeComposite(
+                                MakeString() << region->name << " content", CoordPX(0.0f, 0.0f),
+                                CoordPerPX(1.0f, 0.0f, -Composite::scrollBarSize, expandHeight));
+	if(dynamic_cast<ExpandBar*>(region.get())!=nullptr){
+	    region->borderColor = MakeColor(AlloyApplicationContext()->theme.NEUTRAL);
+	    region->borderWidth = UnitPX(2.0f);
+	    region->position=CoordPX(0.0f, 0.0f);
+	    region->dimensions=CoordPerPX(1.0f, 0.0f, 0.0f, expandHeight);
+	    container->setScrollEnabled(false);
+	} else {
+	    region->borderColor = MakeColor(AlloyApplicationContext()->theme.NEUTRAL);
+	    region->borderWidth = UnitPX(2.0f);
+	    region->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	    container->setScrollEnabled(!region->isScrollEnabled());
+	}
 	container->add(region);
 	std::shared_ptr<ExpandRegion> eregion = std::shared_ptr<ExpandRegion>(
 			new ExpandRegion(region->name, container, CoordPX(0.0f, 0.0f),
