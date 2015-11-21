@@ -319,7 +319,7 @@ void Application::fireEvent(const InputEvent& event) {
 					event);
 		} else {
 			if (context->leftMouseButton) {
-				context->setOnTopRegion(context->mouseDownRegion);
+				//context->setOnTopRegion(context->mouseDownRegion);
 				context->mouseDownRegion->setDragOffset(context->cursorPosition,
 						context->cursorDownPosition);
 			}
@@ -332,7 +332,7 @@ void Application::fireEvent(const InputEvent& event) {
 					consumed |= context->mouseOverRegion->onMouseDown(
 							context.get(), event);
 				} else if (context->mouseDownRegion->isDragEnabled()) {
-					context->setOnTopRegion(context->mouseDownRegion);
+					//context->setOnTopRegion(context->mouseDownRegion);
 					context->mouseDownRegion->setDragOffset(
 							context->cursorPosition,
 							context->cursorDownPosition);

@@ -58,10 +58,31 @@ bool ExpandBarEx::init(Composite& rootNode) {
 			new aly::Region("Rendering", CoordPX(0, 0),
 					CoordPerPX(1.0f, 0.0f, 0.0f, 300.0f)));
 	expandBar->add(renderingRegion, 300, true);
-	RegionPtr filterRegion = RegionPtr(
-			new aly::Region("Filtering", CoordPX(0, 0),
-					CoordPerPX(1.0f, 0.0f, 0.0f, 300.0f)));
-	expandBar->add(filterRegion, 300, false);
+	ExpandBarPtr childBar = ExpandBarPtr(
+			new ExpandBar("Filtering", CoordPercent(0.0f, 0.0f),
+					CoordPerPX(1.0f, 0.0f,0.0f,400.0f)));
+	CompositePtr motionBlurRegion = CompositePtr(
+			new aly::Composite("Motion Blur", CoordPX(0, 0),
+					CoordPerPX(1.0f, 0.0f, 0.0f,200.0f)));
+	childBar->add(motionBlurRegion,200, false);
+	CompositePtr lensBlurRegion = CompositePtr(
+			new aly::Composite("Lens Blur", CoordPX(0, 0),
+					CoordPerPX(1.0f, 0.0f, 0.0f, 200.0f)));
+	childBar->add(lensBlurRegion, 200, false);
+	CompositePtr gaussianBlurRegion = CompositePtr(
+			new aly::Composite("Gaussian Blur", CoordPX(0, 0),
+					CoordPerPX(1.0f, 0.0f, 0.0f, 200.0f)));
+	childBar->add(gaussianBlurRegion, 200, false);
+	CompositePtr sharpenRegion = CompositePtr(
+			new aly::Composite("Sharpen", CoordPX(0, 0),
+					CoordPerPX(1.0f, 0.0f, 0.0f, 200.0f)));
+	childBar->add(sharpenRegion, 200, false);
+
+	motionBlurRegion->setOrientation(Orientation::Vertical,pixel2(2.0f,2.0f),pixel2(2.0f,2.0f));
+	for(int i=0;i<8;i++){
+		motionBlurRegion->add(ToggleBoxPtr(new ToggleBox(MakeString()<<"Option "<<i,CoordPX(2.0f,0.0f),CoordPerPX(1.0f,0.0f,-Composite::scrollBarSize-2.0f,30.0f))));
+	}
+	expandBar->add(childBar, 200, false);
 	rootNode.backgroundColor = MakeColor(getContext()->theme.LIGHT);
 	rootNode.add(expandBar);
 	return true;

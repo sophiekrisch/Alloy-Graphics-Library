@@ -42,6 +42,7 @@ struct BorderComposite;
 struct Region: public EventHandler {
 private:
 	box2px bounds;
+	box2px extents;
 	pixel2 dragOffset = pixel2(0, 0);
 
 protected:
@@ -95,6 +96,7 @@ public:
 	virtual inline bool isScrollEnabled() const {
 		return false;
 	}
+
 	virtual inline pixel2 drawOffset() const {
 		if (parent != nullptr) {
 			return parent->drawOffset();
@@ -102,6 +104,7 @@ public:
 			return pixel2(0, 0);
 		}
 	}
+
 	virtual Region* locate(const pixel2& cursor);
 	inline void setAspectRule(const AspectRule& aspect) {
 		aspectRule = aspect;
@@ -145,6 +148,7 @@ public:
 		return dragEnabled;
 	}
 	virtual box2px getBounds(bool includeOffset = true) const;
+	virtual box2px getExtents() const;
 	virtual box2px getCursorBounds(bool includeOffset = true) const;
 	pixel2 getBoundsPosition(bool includeOffset = true) const {
 		return getBounds(includeOffset).position;
@@ -217,7 +221,6 @@ protected:
 	bool alwaysShowVerticalScrollBar = false;
 	bool alwaysShowHorizontalScrollBar = false;
 
-	pixel2 scrollExtent = pixel2(0, 0);
 	float horizontalScrollExtent = 0;
 	pixel2 scrollPosition = pixel2(0, 0);
 	std::shared_ptr<ScrollTrack> verticalScrollTrack, horizontalScrollTrack;
@@ -226,6 +229,7 @@ protected:
 	typedef std::shared_ptr<Region> ValueType;
 	pixel2 cellPadding = pixel2(0, 0);
 	pixel2 cellSpacing = pixel2(0, 0);
+	void updateExtents();
 public:
 	bool isVerticalScrollVisible() const {
 		if (verticalScrollTrack.get() == nullptr) {
@@ -274,6 +278,7 @@ public:
 	void putFirst(const std::shared_ptr<Region>& region);
 	void putLast(Region* region);
 	void putFirst(Region* region);
+
 	Composite(
 			const std::string& name = MakeString() << "c" << std::setw(8)
 					<< std::setfill('0') << (REGION_COUNTER++));
@@ -295,13 +300,9 @@ public:
 		scrollEnabled = enabled;
 	}
 
+
 	virtual inline pixel2 drawOffset() const {
-		pixel2 offset(0, 0);
-		if (isScrollEnabled()) {
-			offset = -scrollPosition
-					* aly::max(pixel2(0, 0),
-							scrollExtent - getBoundsDimensions());
-		}
+		pixel2 offset=getExtents().position;
 		if (parent != nullptr)
 			offset += parent->drawOffset();
 		return offset;
