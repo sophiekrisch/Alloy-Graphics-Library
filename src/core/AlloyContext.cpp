@@ -682,6 +682,7 @@ void AlloyContext::update(Composite& rootNode) {
 		}
 	}
 	if (dirtyLayout) {
+		rootNode.doLayout(this);
 		rootNode.pack(this);
 		animator.firePostEvents();
 		dirtyCursorLocator = true;

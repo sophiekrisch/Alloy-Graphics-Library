@@ -175,8 +175,12 @@ public:
 	Region(const std::string& name, const AUnit2D& pos, const AUnit2D& dims);
 	virtual void pack(const pixel2& pos, const pixel2& dims,
 			const double2& dpmm, double pixelRatio, bool clamp = false);
+	virtual box2px doLayout(const box2px& parentBounds,
+			const double2& dpmm, double pixelRatio);
 	virtual void pack(AlloyContext* context);
+	virtual void doLayout(AlloyContext* context);
 	virtual void pack();
+	virtual void doLayout();
 	virtual void draw(AlloyContext* context);
 	virtual void update(CursorLocator* cursorLocator);
 	virtual void drawDebug(AlloyContext* context);
@@ -218,6 +222,7 @@ protected:
 	bool alwaysShowHorizontalScrollBar = false;
 
 	pixel2 scrollExtent = pixel2(0, 0);
+	pixel2 windowExtent = pixel2(0, 0);
 	float horizontalScrollExtent = 0;
 	pixel2 scrollPosition = pixel2(0, 0);
 	std::shared_ptr<ScrollTrack> verticalScrollTrack, horizontalScrollTrack;
@@ -310,9 +315,11 @@ public:
 	virtual void draw(AlloyContext* context) override;
 	virtual void drawDebug(AlloyContext* context) override;
 	virtual void update(CursorLocator* cursorLocator) override;
-	void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
-			double pixelRatio, bool clamp = false) override;
-
+	virtual void pack(const pixel2& pos, const pixel2& dims,
+			const double2& dpmm, double pixelRatio, bool clamp = false)
+					override;
+	virtual box2px doLayout(const box2px& parentBounds,
+			const double2& dpmm, double pixelRatio) override;
 	virtual void add(const std::shared_ptr<Region>& region);
 	void add(Region* region); //After add(), composite will own region and be responsible for destroying it.
 	virtual void pack() override {
@@ -320,6 +327,12 @@ public:
 	}
 	virtual void pack(AlloyContext* context) override {
 		Region::pack(context);
+	}
+	virtual void doLayout() override {
+		Region::doLayout();
+	}
+	virtual void doLayout(AlloyContext* context) override {
+		Region::doLayout(context);
 	}
 	void draw();
 };
@@ -347,8 +360,8 @@ public:
 	bool isResizing() const {
 		return resizing;
 	}
-	void setCellPadding(const pixel2& padding){
-		cellPadding=padding;
+	void setCellPadding(const pixel2& padding) {
+		cellPadding = padding;
 	}
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
 			override;
