@@ -2615,6 +2615,7 @@ ExpandBar::ExpandBar(const std::string& name, const AUnit2D& pos,
 		Composite(name, pos, dims) {
 	setOrientation(Orientation::Vertical);
 	setScrollEnabled(true);
+	setRoundCorners(true);
 	setAlwaysShowVerticalScrollBar(true);
 	cellPadding.y = 2;
 
@@ -2629,19 +2630,23 @@ CompositePtr ExpandBar::add(const std::shared_ptr<Region>& region,
 	if(dynamic_cast<ExpandBar*>(region.get())!=nullptr){
 	    region->borderColor = MakeColor(AlloyApplicationContext()->theme.NEUTRAL);
 	    region->borderWidth = UnitPX(1.0f);
-	    region->position=CoordPX(0.0f, 0.0f);
-	    region->dimensions=CoordPerPX(1.0f, 0.0f, 0.0f, expandHeight);
+	    region->position=CoordPX(2.0f, 0.0f);
+	    region->dimensions=CoordPerPX(1.0f, 0.0f,-2.0f, expandHeight);
+	    region->setRoundCorners(true);
 	    container->setScrollEnabled(false);
 	} else {
 	    region->borderColor = MakeColor(AlloyApplicationContext()->theme.NEUTRAL);
 	    region->borderWidth = UnitPX(1.0f);
 	    region->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	    region->position=CoordPX(2.0f, 0.0f);
+	    region->dimensions=CoordPerPX(1.0f, 0.0f,-2.0f, expandHeight);
+	    region->setRoundCorners(true);
 	    container->setScrollEnabled(!region->isScrollEnabled());
 	}
 	container->add(region);
 	std::shared_ptr<ExpandRegion> eregion = std::shared_ptr<ExpandRegion>(
-			new ExpandRegion(region->name, container, CoordPX(0.0f, 0.0f),
-					CoordPerPX(1.0f, 0.0f, -Composite::scrollBarSize, 30.0f),
+			new ExpandRegion(region->name, container, CoordPX(2.0f, 0.0f),
+					CoordPerPX(1.0f, 0.0f, -Composite::scrollBarSize-2.0f, 30.0f),
 					expandHeight, expanded));
 	expandRegions.push_back(eregion);
 	contentRegions.push_back(container);
