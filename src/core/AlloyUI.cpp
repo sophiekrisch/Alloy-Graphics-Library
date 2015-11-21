@@ -71,20 +71,8 @@ void Region::pack(AlloyContext* context) {
 				context->dpmm, context->pixelRatio);
 	}
 }
-void Region::doLayout(AlloyContext* context) {
-	if (parent == nullptr) {
-		doLayout(box2px(pixel2(0, 0), pixel2(context->dimensions())), context->dpmm,
-				context->pixelRatio);
-	} else {
-		doLayout(parent->bounds,
-				context->dpmm, context->pixelRatio);
-	}
-}
 void Region::pack() {
 	pack(AlloyApplicationContext().get());
-}
-void Region::doLayout() {
-	doLayout(AlloyApplicationContext().get());
 }
 void Region::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
@@ -170,6 +158,7 @@ void Region::drawBoundsLabel(AlloyContext* context, const std::string& name,
 		c = DEBUG_HIDDEN_COLOR;
 	}
 
+
 	nvgBeginPath(nvg);
 
 	nvgLineJoin(nvg, NVG_ROUND);
@@ -180,31 +169,31 @@ void Region::drawBoundsLabel(AlloyContext* context, const std::string& name,
 	nvgStroke(nvg);
 
 	/*
-	 const int FONT_PADDING = 2;
-	 const int FONT_SIZE_PX = 16;
-	 nvgLineJoin(nvg, NVG_MITER);
-	 nvgFontSize(nvg, (float) FONT_SIZE_PX);
-	 nvgFontFaceId(nvg, font);
-	 nvgTextAlign(nvg, NVG_ALIGN_TOP | NVG_ALIGN_LEFT);
-	 float twidth = std::ceil(
-	 nvgTextBounds(nvg, 0, 0, name.c_str(), nullptr, nullptr));
-	 float xoffset = (bounds.dimensions.x - twidth - 2 * FONT_PADDING)
-	 * 0.5f;
-	 if (twidth <= bounds.dimensions.x
-	 && FONT_SIZE_PX <= bounds.dimensions.y) {
-	 nvgBeginPath(nvg);
-	 nvgFillColor(nvg, c);
-	 nvgRoundedRect(nvg, bounds.position.x + xoffset,
-	 bounds.position.y - 4, twidth + 2 * FONT_PADDING,
-	 FONT_SIZE_PX + FONT_PADDING + 5, 5);
-	 nvgFill(nvg);
+	 	const int FONT_PADDING = 2;
+		const int FONT_SIZE_PX = 16;
+		nvgLineJoin(nvg, NVG_MITER);
+		nvgFontSize(nvg, (float) FONT_SIZE_PX);
+		nvgFontFaceId(nvg, font);
+		nvgTextAlign(nvg, NVG_ALIGN_TOP | NVG_ALIGN_LEFT);
+		float twidth = std::ceil(
+				nvgTextBounds(nvg, 0, 0, name.c_str(), nullptr, nullptr));
+		float xoffset = (bounds.dimensions.x - twidth - 2 * FONT_PADDING)
+				* 0.5f;
+		if (twidth <= bounds.dimensions.x
+				&& FONT_SIZE_PX <= bounds.dimensions.y) {
+			nvgBeginPath(nvg);
+			nvgFillColor(nvg, c);
+			nvgRoundedRect(nvg, bounds.position.x + xoffset,
+					bounds.position.y - 4, twidth + 2 * FONT_PADDING,
+					FONT_SIZE_PX + FONT_PADDING + 5, 5);
+			nvgFill(nvg);
 
-	 nvgFillColor(nvg, Color(COLOR_WHITE));
-	 nvgText(nvg, bounds.position.x + FONT_PADDING + xoffset,
-	 bounds.position.y + 1 + FONT_PADDING, name.c_str(),
-	 nullptr);
-	 }
-	 */
+			nvgFillColor(nvg, Color(COLOR_WHITE));
+			nvgText(nvg, bounds.position.x + FONT_PADDING + xoffset,
+					bounds.position.y + 1 + FONT_PADDING, name.c_str(),
+					nullptr);
+		}
+	*/
 	popScissor(nvg);
 }
 void Region::setDragOffset(const pixel2& cursor, const pixel2& delta) {
@@ -488,47 +477,9 @@ void Composite::resetScrollPosition() {
 		horizontalScrollHandle->setDragOffset(pixel2(0, 0));
 	}
 }
-box2px Composite::doLayout(const box2px& parentBounds,const double2& dpmm, double pixelRatio) {
-	//box2px bounds = Region::doLayout(parentBounds, dpmm, pixelRatio);
-	Region::pack(parentBounds.position,parentBounds.dimensions,dpmm,pixelRatio,false);
-	box2px bounds=getBounds(false);
-	windowExtent = cellPadding;
-	scrollExtent = pixel2(0, 0);
-	for (std::shared_ptr<Region>& region : children) {
-		if (!region->isVisible()) {
-			continue;
-		}
-		if (orientation == Orientation::Vertical) {
-			pixel2 pix = region->position.toPixels(bounds.dimensions, dpmm,
-					pixelRatio);
-			region->position = CoordPX(pix.x, windowExtent.y);
-		}
-		if (orientation == Orientation::Horizontal) {
-			pixel2 pix = region->position.toPixels(bounds.dimensions, dpmm,
-					pixelRatio);
-			region->position = CoordPX(windowExtent.x, pix.y);
-		}
-		box2px cbounds = region->doLayout(bounds, dpmm, pixelRatio);
-		//std::cout<<"Child ["<<region->name<<"]"<<cbounds<<std::endl;
-		if (orientation == Orientation::Horizontal) {
-			windowExtent.x += cellSpacing.x + cbounds.dimensions.x;
-		}
-		if (orientation == Orientation::Vertical) {
-			windowExtent.y += cellSpacing.y + cbounds.dimensions.y;
-		}
-		scrollExtent = aly::max(cbounds.dimensions + cbounds.position-bounds.position,
-				scrollExtent);
-	}
-	//std::cout<<"Bounds ["<<name<<"]"<<bounds.dimensions<<" Scroll Extent "<<scrollExtent<<std::endl;
-	//if(!isScrollEnabled()){
-	//	bounds.dimensions=aly::max(scrollExtent,bounds.dimensions);
-	//}
-
-	return bounds;
-}
 void Composite::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp) {
-	Region::pack(pos, dims, dpmm, pixelRatio,clamp);
+	Region::pack(pos, dims, dpmm, pixelRatio);
 	box2px bounds = getBounds(false);
 	if (verticalScrollTrack.get() == nullptr && isScrollEnabled()) {
 		verticalScrollTrack = std::shared_ptr<ScrollTrack>(
@@ -545,6 +496,7 @@ void Composite::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 				scrollBarSize);
 		verticalScrollHandle->parent = verticalScrollTrack.get();
 		verticalScrollHandle->setDragEnabled(true);
+
 		verticalScrollTrack->onMouseDown =
 				[this](AlloyContext* context, const InputEvent& event) {
 					if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
@@ -606,21 +558,44 @@ void Composite::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 				};
 		Application::addListener(this);
 	}
+	pixel2 offset = cellPadding;
+	scrollExtent = pixel2(0, 0);
 	for (std::shared_ptr<Region>& region : children) {
 		if (!region->isVisible()) {
 			continue;
 		}
+		if (orientation == Orientation::Vertical) {
+			pixel2 pix = region->position.toPixels(bounds.dimensions, dpmm,
+					pixelRatio);
+			region->position = CoordPX(pix.x, offset.y);
+		}
+		if (orientation == Orientation::Horizontal) {
+			pixel2 pix = region->position.toPixels(bounds.dimensions, dpmm,
+					pixelRatio);
+			region->position = CoordPX(offset.x, pix.y);
+		}
 		region->pack(bounds.position, bounds.dimensions, dpmm, pixelRatio);
+		box2px cbounds = region->getBounds();
+		if (orientation == Orientation::Horizontal) {
+			offset.x += cellSpacing.x + cbounds.dimensions.x;
+
+		}
+		if (orientation == Orientation::Vertical) {
+			offset.y += cellSpacing.y + cbounds.dimensions.y;
+		}
+		scrollExtent = aly::max(
+				cbounds.dimensions + cbounds.position - bounds.position
+						- this->drawOffset(), scrollExtent);
 	}
 	if (!isScrollEnabled()) {
 		if (orientation == Orientation::Horizontal)
 			this->bounds.dimensions.x = bounds.dimensions.x = std::max(
 					bounds.dimensions.x,
-					windowExtent.x - cellSpacing.x + cellPadding.x);
+					offset.x - cellSpacing.x + cellPadding.x);
 		if (orientation == Orientation::Vertical)
 			this->bounds.dimensions.y = bounds.dimensions.y = std::max(
 					bounds.dimensions.y,
-					windowExtent.y - cellSpacing.y + cellPadding.y);
+					offset.y - cellSpacing.y + cellPadding.y);
 	}
 	if (verticalScrollTrack.get() != nullptr
 			|| horizontalScrollTrack.get() != nullptr) {
@@ -1253,63 +1228,6 @@ void Region::update(CursorLocator* cursorLocator) {
 	if (!ignoreCursorEvents)
 		cursorLocator->add(this);
 }
-box2px Region::doLayout(const box2px& parentBounds,
-		const double2& dpmm, double pixelRatio) {
-	pixel2 pos=parentBounds.position;
-	pixel2 dims=parentBounds.dimensions;
-	pixel2 computedPos = position.toPixels(dims, dpmm, pixelRatio);
-	pixel2 xy = pos + computedPos;
-	pixel2 d = dimensions.toPixels(dims, dpmm, pixelRatio);
-	box2px bounds;
-	if (aspectRatio < 0) {
-		aspectRatio = d.x / std::max((float) d.y, 0.0f);
-	}
-	switch (aspectRule) {
-	case AspectRule::FixedWidth:
-		bounds.dimensions = pixel2(d.x, d.x / (float) aspectRatio);
-		break;
-	case AspectRule::FixedHeight:
-		bounds.dimensions = pixel2(d.y * (float) aspectRatio, d.y);
-		break;
-	case AspectRule::Unspecified:
-	default:
-		bounds.dimensions = d;
-	}
-	bounds.position = xy;
-	switch (origin) {
-	case Origin::TopLeft:
-		bounds.position = xy;
-		break;
-	case Origin::BottomRight:
-		bounds.position = xy - bounds.dimensions;
-		break;
-	case Origin::MiddleCenter:
-		bounds.position = xy - bounds.dimensions / (pixel) 2;
-		break;
-	case Origin::TopRight:
-		bounds.position = xy - pixel2(bounds.dimensions.x, 0);
-		break;
-	case Origin::BottomLeft:
-		bounds.position = xy - pixel2(0, bounds.dimensions.y);
-		break;
-	case Origin::MiddleLeft:
-		bounds.position = xy - pixel2(0, bounds.dimensions.y / (pixel) 2);
-		break;
-	case Origin::MiddleRight:
-		bounds.position = xy
-				- pixel2(bounds.dimensions.x, bounds.dimensions.y / (pixel) 2);
-		break;
-	case Origin::TopCenter:
-		bounds.position = xy - pixel2(bounds.dimensions.x / (pixel) 2, 0);
-		break;
-	case Origin::BottomCenter:
-		bounds.position = xy
-				- pixel2(bounds.dimensions.x / (pixel) 2, bounds.dimensions.y);
-		break;
-	}
-	bounds.position+=dragOffset;
-	return bounds;
-}
 void Region::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp) {
 
@@ -1369,6 +1287,7 @@ void Region::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 				- pixel2(bounds.dimensions.x / (pixel) 2, bounds.dimensions.y);
 		break;
 	}
+
 	if (clamp && parent != nullptr && !parent->isScrollEnabled()) {
 		pixel2 ppos = parent->getBoundsPosition();
 		pixel2 dims = parent->bounds.dimensions;

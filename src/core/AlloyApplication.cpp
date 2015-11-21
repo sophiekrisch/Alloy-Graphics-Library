@@ -539,7 +539,6 @@ void Application::run(int swapInterval) {
 	}
 
 	//First pack triggers computation of aspect ratios  for components.
-	rootRegion.doLayout(context.get());
 	rootRegion.pack(context.get());
 	context->getGlassPane()->setVisible(false);
 	context->requestPack();
