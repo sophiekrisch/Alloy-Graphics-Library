@@ -129,7 +129,7 @@ bool SANITY_CHECK() {
 }
 int main(int argc, char *argv[]) {
 	const int N = 33;
-	ExamplePtr apps[N] = { MAKE_EXAMPLE(UnitsEx), MAKE_EXAMPLE(CompositeEx),
+	std::array<ExamplePtr,N> apps = { MAKE_EXAMPLE(UnitsEx), MAKE_EXAMPLE(CompositeEx),
 			MAKE_EXAMPLE(EventsEx), MAKE_EXAMPLE(DragEx), MAKE_EXAMPLE(TweenEx),
 			MAKE_EXAMPLE(ImageEx), MAKE_EXAMPLE(ControlsEx), MAKE_EXAMPLE(
 					DialogsEx), MAKE_EXAMPLE(ExpandBarEx), MAKE_EXAMPLE(
@@ -145,6 +145,9 @@ int main(int argc, char *argv[]) {
 					LocatorEx), MAKE_EXAMPLE(GraphEx), MAKE_EXAMPLE(
 					WindowPaneEx), MAKE_EXAMPLE(SplineEx), MAKE_EXAMPLE(
 					DistanceFieldEx), MAKE_EXAMPLE(ExpandTreeEx) };
+	std::sort(apps.begin(),apps.end(),[=](const ExamplePtr& a,const ExamplePtr& b){
+		return std::lexicographical_compare(a->name.begin(), a->name.end(), b->name.begin(), b->name.end());
+	});
 	try {
 		//Example name is specified in a makefile at compile time so 
 		//all example applications are compiled to seperate exe targets.
