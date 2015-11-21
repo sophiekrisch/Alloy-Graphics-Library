@@ -351,6 +351,7 @@ private:
 	std::shared_ptr<TextLabel> selectionLabel;
 	std::shared_ptr<TextLabel> arrowIcon;
 	std::shared_ptr<Composite> contentRegion;
+	std::shared_ptr<Composite> titleContainer;
 	bool expanded;
 public:
 	pixel expandHeight;
@@ -358,6 +359,7 @@ public:
 	ExpandRegion(const std::string& name,
 			const std::shared_ptr<Composite>& region, const AUnit2D& pos,
 			const AUnit2D& dims, pixel expandHeight, bool expanded);
+	virtual void draw(AlloyContext* context) override;
 };
 class ExpandTree;
 class TreeItem {

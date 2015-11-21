@@ -1655,6 +1655,16 @@ void ExpandRegion::setExpanded(bool expanded) {
 			(expanded) ? CodePointToUTF8(0xf056) : CodePointToUTF8(0xf055));
 
 }
+void ExpandRegion::draw(AlloyContext* context) {
+	if(context->isMouseOver(titleContainer.get(),true)){
+		selectionLabel->textColor=MakeColor(context->theme.HIGHLIGHT);
+		arrowIcon->textColor=MakeColor(context->theme.HIGHLIGHT);
+	} else {
+		selectionLabel->textColor=MakeColor(context->theme.LIGHT_TEXT);
+		arrowIcon->textColor=MakeColor(context->theme.LIGHT_TEXT);
+	}
+	Composite::draw(context);
+}
 ExpandRegion::ExpandRegion(const std::string& name,
 		const std::shared_ptr<Composite>& region, const AUnit2D& pos,
 		const AUnit2D& dims, pixel expandHeight, bool expanded) :
@@ -1663,7 +1673,7 @@ ExpandRegion::ExpandRegion(const std::string& name,
 	this->contentRegion = region;
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	setRoundCorners(true);
-	CompositePtr valueContainer = MakeComposite(
+	titleContainer = MakeComposite(
 			MakeString() << name << "_container",
 			CoordPerPX(0.0f, 0.0f, 5.0f, 5.0f),
 			CoordPerPX(1.0f, 1.0f, -10.0f, -10.0f));
@@ -1680,9 +1690,9 @@ ExpandRegion::ExpandRegion(const std::string& name,
 	arrowIcon->setAspectRatio(1.0f);
 	arrowIcon->setOrigin(Origin::TopRight);
 	arrowIcon->setAspectRule(AspectRule::FixedHeight);
-	valueContainer->add(selectionLabel);
-	valueContainer->add(arrowIcon);
-	add(valueContainer);
+	titleContainer->add(selectionLabel);
+	titleContainer->add(arrowIcon);
+	add(titleContainer);
 	selectionLabel->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& event) {
 				if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
