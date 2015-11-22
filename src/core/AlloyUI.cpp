@@ -67,7 +67,8 @@ void Region::pack(AlloyContext* context) {
 		pack(pixel2(0, 0), pixel2(context->dimensions()), context->dpmm,
 				context->pixelRatio);
 	} else {
-		pack(parent->getBoundsPosition(), parent->getBoundsDimensions(),
+		box2px bounds = parent->getBounds(false);
+		pack(bounds.position,bounds.dimensions,
 				context->dpmm, context->pixelRatio);
 	}
 }

@@ -321,9 +321,11 @@ void Application::fireEvent(const InputEvent& event) {
 		} else {
 			if (context->leftMouseButton) {
 				//context->setOnTopRegion(context->mouseDownRegion);
-				context->mouseDownRegion->setDragOffset(context->cursorPosition,
+				box2px bounds=context->mouseDownRegion->parent->getBounds(false);
+				context->mouseDownRegion->setDragOffset(
+						context->cursorPosition,
 						context->cursorDownPosition);
-				context->mouseDownRegion->pack(context.get());
+				context->mouseDownRegion->pack(bounds.position,bounds.dimensions,context->dpmm,context->pixelRatio);
 			}
 		}
 		context->requestPack();
@@ -335,10 +337,11 @@ void Application::fireEvent(const InputEvent& event) {
 							context.get(), event);
 				} else if (context->mouseDownRegion->isDragEnabled()) {
 					//context->setOnTopRegion(context->mouseDownRegion);
+					box2px bounds=context->mouseDownRegion->parent->getBounds(false);
 					context->mouseDownRegion->setDragOffset(
 							context->cursorPosition,
 							context->cursorDownPosition);
-					context->mouseDownRegion->pack(context.get());
+					context->mouseDownRegion->pack(bounds.position,bounds.dimensions,context->dpmm,context->pixelRatio);
 				}
 			}
 			if (context->mouseOverRegion->onMouseUp && event.isUp())

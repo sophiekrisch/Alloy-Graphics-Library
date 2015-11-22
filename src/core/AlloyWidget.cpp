@@ -1647,8 +1647,8 @@ void ColorSelector::draw(AlloyContext* context) {
 
 void ExpandRegion::setExpanded(bool expanded) {
 	contentRegion->setVisible(expanded);
-        if (this->expanded != expanded) {
-	    AlloyApplicationContext()->requestPack();
+	if (this->expanded != expanded) {
+		AlloyApplicationContext()->requestPack();
 	}
 	this->expanded = expanded;
 	arrowIcon->setLabel(
@@ -1656,12 +1656,12 @@ void ExpandRegion::setExpanded(bool expanded) {
 
 }
 void ExpandRegion::draw(AlloyContext* context) {
-	if(context->isMouseOver(titleContainer.get(),true)){
-		selectionLabel->textColor=MakeColor(context->theme.HIGHLIGHT);
-		arrowIcon->textColor=MakeColor(context->theme.HIGHLIGHT);
+	if (context->isMouseOver(titleContainer.get(), true)) {
+		selectionLabel->textColor = MakeColor(context->theme.HIGHLIGHT);
+		arrowIcon->textColor = MakeColor(context->theme.HIGHLIGHT);
 	} else {
-		selectionLabel->textColor=MakeColor(context->theme.LIGHT_TEXT);
-		arrowIcon->textColor=MakeColor(context->theme.LIGHT_TEXT);
+		selectionLabel->textColor = MakeColor(context->theme.LIGHT_TEXT);
+		arrowIcon->textColor = MakeColor(context->theme.LIGHT_TEXT);
 	}
 	Composite::draw(context);
 }
@@ -1673,8 +1673,7 @@ ExpandRegion::ExpandRegion(const std::string& name,
 	this->contentRegion = region;
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	setRoundCorners(true);
-	titleContainer = MakeComposite(
-			MakeString() << name << "_container",
+	titleContainer = MakeComposite(MakeString() << name << "_container",
 			CoordPerPX(0.0f, 0.0f, 5.0f, 5.0f),
 			CoordPerPX(1.0f, 1.0f, -10.0f, -10.0f));
 	selectionLabel = MakeTextLabel(name, CoordPX(0.0f, 0.0f),
@@ -1719,7 +1718,7 @@ ExpandRegion::ExpandRegion(const std::string& name,
 	arrowIcon->setLabel(
 			(expanded) ? CodePointToUTF8(0xf056) : CodePointToUTF8(0xf055));
 	contentRegion->dimensions = CoordPerPX(1.0f, 0.0f,
-				-Composite::scrollBarSize, (float) expandHeight);
+			-Composite::scrollBarSize, (float) expandHeight);
 	contentRegion->setVisible(expanded);
 }
 FileSelector::FileSelector(const std::string& name, const AUnit2D& pos,
@@ -2634,30 +2633,33 @@ ExpandBar::ExpandBar(const std::string& name, const AUnit2D& pos,
 CompositePtr ExpandBar::add(const std::shared_ptr<Region>& region,
 		pixel expandHeight,
 		bool expanded) {
-        CompositePtr container= MakeComposite(
-                                MakeString() << region->name << " content", CoordPX(0.0f, 0.0f),
-                                CoordPerPX(1.0f, 0.0f, -Composite::scrollBarSize, expandHeight));
-	if(dynamic_cast<ExpandBar*>(region.get())!=nullptr){
-	    region->borderColor = MakeColor(AlloyApplicationContext()->theme.NEUTRAL);
-	    region->borderWidth = UnitPX(1.0f);
-	    region->position=CoordPX(2.0f, 0.0f);
-	    region->dimensions=CoordPerPX(1.0f, 0.0f,-2.0f, expandHeight);
-	    region->setRoundCorners(true);
-	    container->setScrollEnabled(false);
+	CompositePtr container = MakeComposite(
+			MakeString() << region->name << " content", CoordPX(0.0f, 0.0f),
+			CoordPerPX(1.0f, 0.0f, -Composite::scrollBarSize, expandHeight));
+	if (dynamic_cast<ExpandBar*>(region.get()) != nullptr) {
+		region->borderColor = MakeColor(
+				AlloyApplicationContext()->theme.NEUTRAL);
+		region->borderWidth = UnitPX(1.0f);
+		region->position = CoordPX(2.0f, 0.0f);
+		region->dimensions = CoordPerPX(1.0f, 0.0f, -2.0f, expandHeight);
+		region->setRoundCorners(true);
+		container->setScrollEnabled(false);
 	} else {
-	    region->borderColor = MakeColor(AlloyApplicationContext()->theme.NEUTRAL);
-	    region->borderWidth = UnitPX(1.0f);
-	    region->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
-	    region->position=CoordPX(2.0f, 0.0f);
-	    region->dimensions=CoordPerPX(1.0f, 0.0f,-2.0f, expandHeight);
-	    region->setRoundCorners(true);
-	    container->setScrollEnabled(!region->isScrollEnabled());
+		region->borderColor = MakeColor(
+				AlloyApplicationContext()->theme.NEUTRAL);
+		region->borderWidth = UnitPX(1.0f);
+		region->backgroundColor = MakeColor(
+				AlloyApplicationContext()->theme.DARK);
+		region->position = CoordPX(2.0f, 0.0f);
+		region->dimensions = CoordPerPX(1.0f, 0.0f, -2.0f, expandHeight);
+		region->setRoundCorners(true);
+		container->setScrollEnabled(!region->isScrollEnabled());
 	}
 	container->add(region);
 	std::shared_ptr<ExpandRegion> eregion = std::shared_ptr<ExpandRegion>(
 			new ExpandRegion(region->name, container, CoordPX(2.0f, 0.0f),
-					CoordPerPX(1.0f, 0.0f, -Composite::scrollBarSize-2.0f, 30.0f),
-					expandHeight, expanded));
+					CoordPerPX(1.0f, 0.0f, -Composite::scrollBarSize - 2.0f,
+							30.0f), expandHeight, expanded));
 	expandRegions.push_back(eregion);
 	contentRegions.push_back(container);
 	Composite::add(eregion);
@@ -2964,7 +2966,6 @@ bool WindowPane::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	if (dragging && e.type == InputType::Cursor && !isResizing()) {
 		box2px pbounds = parent->getBounds();
 		this->setDragOffset(pbounds.clamp(e.cursor), cursorDownPosition);
-		this->pack(context);
 		setMaximize(false);
 		context->requestPack();
 	} else if (e.type == InputType::MouseButton && e.isUp()) {
