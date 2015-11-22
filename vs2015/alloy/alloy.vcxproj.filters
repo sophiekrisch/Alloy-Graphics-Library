@@ -138,6 +138,9 @@
     <ClCompile Include="..\..\src\core\AlloyIsoContour.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\core\AlloyDataFlow.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\core\Alloy.h">
@@ -330,6 +333,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\core\AlloyIsoContour.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\core\AlloyDataFlow.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
