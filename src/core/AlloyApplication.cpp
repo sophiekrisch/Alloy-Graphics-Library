@@ -565,6 +565,8 @@ void Application::run(int swapInterval) {
 		//Events could have modified layout! Pack before draw to make sure things are correctly positioned.
 		if (context->dirtyLayout) {
 			rootRegion.pack();
+			context->dirtyCursorLocator = true;
+			context->dirtyLayout = false;
 		}
 		draw();
 		context->update(rootRegion);
