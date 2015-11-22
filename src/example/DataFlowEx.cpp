@@ -30,7 +30,7 @@ bool DataFlowEx::init(Composite& rootNode) {
 	graph = DataFlowPtr(
 			new DataFlow("Data Flow", CoordPX(10, 10),
 					CoordPerPX(1.0f, 1.0f, -20.0f, -20.0f)));
-	graph->add(MakeComputeNode("Node 1"));
+	graph->add(MakeComputeNode("Node 1", pixel2(10, 10)));
 	rootNode.add(graph);
 	return true;
 }

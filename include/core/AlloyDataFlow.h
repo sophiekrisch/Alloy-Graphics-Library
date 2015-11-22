@@ -219,6 +219,7 @@ class Node: public Composite {
 protected:
 	std::string label;
 public:
+	static const pixel2 DEFAULT_NODE_DIMENSIONS;
 	virtual NodeType getType() const {
 		return NodeType::Unknown;
 	}
@@ -456,25 +457,23 @@ std::shared_ptr<Relationship> MakeRelationship(
 		const std::shared_ptr<Node>& subject);
 
 std::shared_ptr<Data> MakeDataNode(const std::string& name,
-		const std::string& label, const AUnit2D& pos, const AUnit2D& dims);
-std::shared_ptr<Data> MakeDataNode(const std::string& name, const AUnit2D& pos,
-		const AUnit2D& dims);
+		const std::string& label, const pixel2& pos);
+std::shared_ptr<Data> MakeDataNode(const std::string& name, const pixel2& pos);
 std::shared_ptr<Data> MakeDataNode(const std::string& name,
 		const std::string& label);
 std::shared_ptr<Data> MakeDataNode(const std::string& name);
 
 std::shared_ptr<Compute> MakeComputeNode(const std::string& name,
-		const std::string& label, const AUnit2D& pos, const AUnit2D& dims);
+		const std::string& label, const pixel2& pos);
 std::shared_ptr<Compute> MakeComputeNode(const std::string& name,
-		const AUnit2D& pos, const AUnit2D& dims);
+		const pixel2& pos);
 std::shared_ptr<Compute> MakeComputeNode(const std::string& name,
 		const std::string& label);
 std::shared_ptr<Compute> MakeComputeNode(const std::string& name);
 
 std::shared_ptr<View> MakeViewNode(const std::string& name,
-		const std::string& label, const AUnit2D& pos, const AUnit2D& dims);
-std::shared_ptr<View> MakeViewNode(const std::string& name, const AUnit2D& pos,
-		const AUnit2D& dims);
+		const std::string& label, const pixel2& pos);
+std::shared_ptr<View> MakeViewNode(const std::string& name, const pixel2& pos);
 std::shared_ptr<View> MakeViewNode(const std::string& name,
 		const std::string& label);
 std::shared_ptr<View> MakeViewNode(const std::string& name);

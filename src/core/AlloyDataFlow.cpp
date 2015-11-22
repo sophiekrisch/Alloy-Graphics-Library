@@ -23,6 +23,7 @@ namespace aly {
 namespace dataflow {
 const int MultiPort::FrontIndex = std::numeric_limits<int>::min();
 const int MultiPort::BackIndex = std::numeric_limits<int>::max();
+const pixel2 Node::DEFAULT_NODE_DIMENSIONS = pixel2(256, 256);
 std::shared_ptr<Connection> MakeConnection(
 		const std::shared_ptr<OutputPort>& source,
 		const std::shared_ptr<InputPort>& destination) {
@@ -35,12 +36,15 @@ std::shared_ptr<Relationship> MakeRelationship(
 	return RelationshipPtr(new Relationship(object, predicate, subject));
 }
 std::shared_ptr<Data> MakeDataNode(const std::string& name,
-		const std::string& label, const AUnit2D& pos, const AUnit2D& dims) {
-	return DataPtr(new Data(name, label, pos, dims));
+		const std::string& label, const pixel2& pos) {
+	return DataPtr(
+			new Data(name, label, CoordPX(pos),
+					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
 }
-std::shared_ptr<Data> MakeDataNode(const std::string& name, const AUnit2D& pos,
-		const AUnit2D& dims) {
-	return DataPtr(new Data(name, pos, dims));
+std::shared_ptr<Data> MakeDataNode(const std::string& name, const pixel2& pos) {
+	return DataPtr(
+			new Data(name, CoordPX(pos),
+					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
 }
 std::shared_ptr<Data> MakeDataNode(const std::string& name,
 		const std::string& label) {
@@ -51,12 +55,15 @@ std::shared_ptr<Data> MakeDataNode(const std::string& name) {
 }
 
 std::shared_ptr<View> MakeViewNode(const std::string& name,
-		const std::string& label, const AUnit2D& pos, const AUnit2D& dims) {
-	return ViewPtr(new View(name, label, pos, dims));
+		const std::string& label, const pixel2& pos) {
+	return ViewPtr(
+			new View(name, label, CoordPX(pos),
+					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
 }
-std::shared_ptr<View> MakeViewNode(const std::string& name, const AUnit2D& pos,
-		const AUnit2D& dims) {
-	return ViewPtr(new View(name, pos, dims));
+std::shared_ptr<View> MakeViewNode(const std::string& name, const pixel2& pos) {
+	return ViewPtr(
+			new View(name, CoordPX(pos),
+					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
 }
 std::shared_ptr<View> MakeViewNode(const std::string& name,
 		const std::string& label) {
@@ -67,12 +74,16 @@ std::shared_ptr<View> MakeViewNode(const std::string& name) {
 }
 
 std::shared_ptr<Compute> MakeComputeNode(const std::string& name,
-		const std::string& label, const AUnit2D& pos, const AUnit2D& dims) {
-	return ComputePtr(new Compute(name, label, pos, dims));
+		const std::string& label, const pixel2& pos) {
+	return ComputePtr(
+			new Compute(name, label, CoordPX(pos),
+					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
 }
-std::shared_ptr<Compute> MakeComputeNode(const std::string& name, const AUnit2D& pos,
-		const AUnit2D& dims) {
-	return ComputePtr(new Compute(name, pos, dims));
+std::shared_ptr<Compute> MakeComputeNode(const std::string& name,
+		const pixel2& pos) {
+	return ComputePtr(
+			new Compute(name, CoordPX(pos),
+					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
 }
 std::shared_ptr<Compute> MakeComputeNode(const std::string& name,
 		const std::string& label) {
