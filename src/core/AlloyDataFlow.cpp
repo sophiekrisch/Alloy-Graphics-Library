@@ -18,9 +18,125 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include <AlloyDataFlow.h>
-namespace aly{
-
+#include "AlloyDataFlow.h"
+namespace aly {
+namespace dataflow {
+const int MultiPort::FrontIndex = std::numeric_limits<int>::min();
+const int MultiPort::BackIndex = std::numeric_limits<int>::max();
+std::shared_ptr<Connection> MakeConnection(
+		const std::shared_ptr<OutputPort>& source,
+		const std::shared_ptr<InputPort>& destination) {
+	return ConnectionPtr(new Connection(source, destination));
+}
+std::shared_ptr<Relationship> MakeRelationship(
+		const std::shared_ptr<Node>& object,
+		const std::shared_ptr<Predicate>& predicate,
+		const std::shared_ptr<Node>& subject) {
+	return RelationshipPtr(new Relationship(object, predicate, subject));
+}
+std::shared_ptr<Data> MakeDataNode(const std::string& name,
+		const std::string& label, const AUnit2D& pos, const AUnit2D& dims) {
+	return DataPtr(new Data(name, label, pos, dims));
+}
+std::shared_ptr<Data> MakeDataNode(const std::string& name, const AUnit2D& pos,
+		const AUnit2D& dims) {
+	return DataPtr(new Data(name, pos, dims));
+}
+std::shared_ptr<Data> MakeDataNode(const std::string& name,
+		const std::string& label) {
+	return DataPtr(new Data(name, label));
+}
+std::shared_ptr<Data> MakeDataNode(const std::string& name) {
+	return DataPtr(new Data(name));
 }
 
+std::shared_ptr<View> MakeViewNode(const std::string& name,
+		const std::string& label, const AUnit2D& pos, const AUnit2D& dims) {
+	return ViewPtr(new View(name, label, pos, dims));
+}
+std::shared_ptr<View> MakeViewNode(const std::string& name, const AUnit2D& pos,
+		const AUnit2D& dims) {
+	return ViewPtr(new View(name, pos, dims));
+}
+std::shared_ptr<View> MakeViewNode(const std::string& name,
+		const std::string& label) {
+	return ViewPtr(new View(name, label));
+}
+std::shared_ptr<View> MakeViewNode(const std::string& name) {
+	return ViewPtr(new View(name));
+}
+
+std::shared_ptr<Compute> MakeComputeNode(const std::string& name,
+		const std::string& label, const AUnit2D& pos, const AUnit2D& dims) {
+	return ComputePtr(new Compute(name, label, pos, dims));
+}
+std::shared_ptr<Compute> MakeComputeNode(const std::string& name, const AUnit2D& pos,
+		const AUnit2D& dims) {
+	return ComputePtr(new Compute(name, pos, dims));
+}
+std::shared_ptr<Compute> MakeComputeNode(const std::string& name,
+		const std::string& label) {
+	return ComputePtr(new Compute(name, label));
+}
+std::shared_ptr<Compute> MakeComputeNode(const std::string& name) {
+	return ComputePtr(new Compute(name));
+}
+void OutputMultiPort::insertValue(const std::shared_ptr<Packet>& packet,
+		int index) {
+	if (index == FrontIndex) {
+		value.insert(value.begin(), packet);
+	} else if (index == BackIndex) {
+		value.push_back(packet);
+	} else {
+		if (index >= (int) value.size()) {
+			value.push_back(packet);
+		} else {
+			value.insert(value.begin() + (size_t) index, packet);
+		}
+	}
+}
+void OutputMultiPort::setValue(const std::shared_ptr<Packet>& packet,
+		int index) {
+	if (index < 0) {
+		throw std::runtime_error("Cannot set port value. Index out of range.");
+	} else {
+		if (index >= (int) value.size()) {
+			value.resize(index + 1);
+		}
+		value[index] = packet;
+	}
+}
+void InputMultiPort::insertValue(const std::shared_ptr<Packet>& packet,
+		int index) {
+	if (index == FrontIndex) {
+		value.insert(value.begin(), packet);
+	} else if (index == BackIndex) {
+		value.push_back(packet);
+	} else {
+		if (index >= (int) value.size()) {
+			value.push_back(packet);
+		} else {
+			value.insert(value.begin() + (size_t) index, packet);
+		}
+	}
+}
+void InputMultiPort::setValue(const std::shared_ptr<Packet>& packet,
+		int index) {
+	if (index < 0) {
+		throw std::runtime_error("Cannot set port value. Index out of range.");
+	} else {
+		if (index >= (int) value.size()) {
+			value.resize(index + 1);
+		}
+		value[index] = packet;
+	}
+}
+void InputMultiPort::setValue(const std::shared_ptr<Packet>& packet) {
+	insertAtBack(packet);
+}
+void OutputMultiPort::setValue(const std::shared_ptr<Packet>& packet) {
+	insertAtBack(packet);
+}
+}
+}
 

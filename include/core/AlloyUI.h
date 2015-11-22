@@ -96,7 +96,9 @@ public:
 	virtual inline bool isScrollEnabled() const {
 		return false;
 	}
-
+	std::string getName() const {
+		return name;
+	}
 	virtual inline pixel2 drawOffset() const {
 		if (parent != nullptr) {
 			return parent->drawOffset();
@@ -300,9 +302,8 @@ public:
 		scrollEnabled = enabled;
 	}
 
-
 	virtual inline pixel2 drawOffset() const {
-		pixel2 offset=getExtents().position;
+		pixel2 offset = getExtents().position;
 		if (parent != nullptr)
 			offset += parent->drawOffset();
 		return offset;
@@ -348,8 +349,8 @@ public:
 	bool isResizing() const {
 		return resizing;
 	}
-	void setCellPadding(const pixel2& padding){
-		cellPadding=padding;
+	void setCellPadding(const pixel2& padding) {
+		cellPadding = padding;
 	}
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
 			override;

@@ -23,7 +23,10 @@
 #define DATAFLOW_EX_H_
 
 #include "AlloyApplication.h"
+#include "AlloyDataFlow.h"
 class DataFlowEx: public aly::Application {
+protected:
+	aly::dataflow::DataFlowPtr graph;
 public:
 	DataFlowEx();
 	bool init(aly::Composite& rootNode);
