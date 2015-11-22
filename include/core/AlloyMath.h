@@ -576,7 +576,7 @@ template<class T, int M> vec<T, M> floor(const vec<T, M> & v) {
 template<class T, int M> vec<T, M> round(const vec<T, M> & v) {
 	vec<T, M> result;
 	for (int m = 0; m < M; m++)
-		result[m] = std::floor(v[m] + 0.5);
+		result[m] = std::floor(v[m] + T(0.5));
 	return result;
 }
 template<class T, int M> vec<T, M> exp(const vec<T, M> & v) {
