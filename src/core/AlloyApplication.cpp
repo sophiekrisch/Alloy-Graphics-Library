@@ -321,11 +321,9 @@ void Application::fireEvent(const InputEvent& event) {
 		} else {
 			if (context->leftMouseButton) {
 				//context->setOnTopRegion(context->mouseDownRegion);
-				box2px bounds=context->mouseDownRegion->parent->getBounds(false);
 				context->mouseDownRegion->setDragOffset(
 						context->cursorPosition,
 						context->cursorDownPosition);
-				context->mouseDownRegion->pack(bounds.position,bounds.dimensions,context->dpmm,context->pixelRatio);
 			}
 		}
 		context->requestPack();
@@ -337,11 +335,9 @@ void Application::fireEvent(const InputEvent& event) {
 							context.get(), event);
 				} else if (context->mouseDownRegion->isDragEnabled()) {
 					//context->setOnTopRegion(context->mouseDownRegion);
-					box2px bounds=context->mouseDownRegion->parent->getBounds(false);
 					context->mouseDownRegion->setDragOffset(
 							context->cursorPosition,
 							context->cursorDownPosition);
-					context->mouseDownRegion->pack(bounds.position,bounds.dimensions,context->dpmm,context->pixelRatio);
 				}
 			}
 			if (context->mouseOverRegion->onMouseUp && event.isUp())
@@ -566,6 +562,10 @@ void Application::run(int swapInterval) {
 		context->dirtyLayout = true;
 	}
 	do {
+		//Events could have modified draw! Repack to make sure things are correctly positioned.
+		if (context->dirtyLayout) {
+			rootRegion.pack();
+		}
 		draw();
 		context->update(rootRegion);
 		double elapsed =
