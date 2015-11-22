@@ -562,7 +562,7 @@ void Application::run(int swapInterval) {
 		context->dirtyLayout = true;
 	}
 	do {
-		//Events could have modified draw! Repack to make sure things are correctly positioned.
+		//Events could have modified layout! Pack before draw to make sure things are correctly positioned.
 		if (context->dirtyLayout) {
 			rootRegion.pack();
 		}
