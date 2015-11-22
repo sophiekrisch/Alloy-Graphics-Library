@@ -38,19 +38,67 @@ enum class NodeType {
 enum class PortType {
 	Unknown = 0, Input = 1, Output = 2
 };
-class Packet {
+struct PacketInterface: public AnyInterface {
+protected:
+	virtual void setValueImpl(Any const & value) = 0;
+	virtual Any getValueImpl() const = 0;
+};
+template<class T> class Packet: public PacketInterface {
+protected:
+	T value;
+	std::string name;
+	virtual void setValueImpl(Any const & val) override {
+		value = AnyCast<T>(val);
+	}
+	virtual Any getValueImpl() const override {
+		return value;
+	}
 public:
-	Packet() {
+	Packet(const std::string& name, const T& value) :
+			value(value), name(name) {
+	}
+	Packet(const std::string& name = "") :
+			name(name) {
+	}
+	std::string getName() const {
+		return name;
+	}
+	void setName(const std::string& name) {
+		this->name = name;
 	}
 };
 class Port: public Region {
-
-public:
-	friend class Connection;
+protected:
 	std::string name;
 	std::string label;
+public:
+	friend class Connection;
+	Port(const std::string& name, const std::string& label) :
+			name(name), label(label) {
+
+	}
+	Port(const std::string& name = "") :
+			name(name), label(name) {
+
+	}
+	Port() :
+			name(""), label("") {
+
+	}
 	virtual PortType getType() const {
 		return PortType::Unknown;
+	}
+	std::string getName() const {
+		return name;
+	}
+	std::string getLabel() const {
+		return label;
+	}
+	void setName(const std::string& name) {
+		this->name = name;
+	}
+	void setLabel(const std::string& label) {
+		this->label = label;
 	}
 };
 struct MultiPort {
@@ -79,8 +127,8 @@ class Connection {
 
 class ConnectionBundle: public std::map<int, std::shared_ptr<Connection>> {
 public:
-	ConnectionBundle(size_t size) :
-			std::map<int, std::shared_ptr < Connection>(size) {
+	ConnectionBundle() :
+			std::map<int, std::shared_ptr<Connection>>() {
 
 	}
 };
@@ -120,7 +168,12 @@ public:
 	}
 	Node(const std::string& name) :
 			name(name) {
-
+	}
+	std::string getName() const {
+		return name;
+	}
+	void setName(const std::string& name) {
+		this->name = name;
 	}
 };
 class Data: public Node {
