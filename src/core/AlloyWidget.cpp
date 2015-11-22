@@ -2964,6 +2964,7 @@ bool WindowPane::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	if (dragging && e.type == InputType::Cursor && !isResizing()) {
 		box2px pbounds = parent->getBounds();
 		this->setDragOffset(pbounds.clamp(e.cursor), cursorDownPosition);
+		this->pack(context);
 		setMaximize(false);
 		context->requestPack();
 	} else if (e.type == InputType::MouseButton && e.isUp()) {

@@ -291,6 +291,7 @@ void Application::fireEvent(const InputEvent& event) {
 			context->mouseOverRegion = context->mouseFocusRegion =
 					context->mouseDownRegion = context->locate(
 							context->cursorPosition);
+
 			if (context->mouseDownRegion != nullptr) {
 				context->cursorDownPosition = event.cursor
 						- context->mouseDownRegion->getBoundsPosition();
@@ -322,6 +323,7 @@ void Application::fireEvent(const InputEvent& event) {
 				//context->setOnTopRegion(context->mouseDownRegion);
 				context->mouseDownRegion->setDragOffset(context->cursorPosition,
 						context->cursorDownPosition);
+				context->mouseDownRegion->pack(context.get());
 			}
 		}
 		context->requestPack();
@@ -336,6 +338,7 @@ void Application::fireEvent(const InputEvent& event) {
 					context->mouseDownRegion->setDragOffset(
 							context->cursorPosition,
 							context->cursorDownPosition);
+					context->mouseDownRegion->pack(context.get());
 				}
 			}
 			if (context->mouseOverRegion->onMouseUp && event.isUp())
