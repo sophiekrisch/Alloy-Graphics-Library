@@ -173,7 +173,7 @@ void Node::setup() {
 }
 bool Node::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	bool ret = Composite::onEventHandler(context, e);
-	if (e.type == InputType::MouseButton && e.button == GLFW_MOUSE_BUTTON_LEFT) {
+	if (e.type == InputType::MouseButton && e.button == GLFW_MOUSE_BUTTON_LEFT&& context->isMouseDown(this)) {
 		dynamic_cast<Composite*>(parent)->putLast(this);
 	}
 	return ret;
