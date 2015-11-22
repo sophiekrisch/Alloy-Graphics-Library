@@ -477,7 +477,8 @@ std::shared_ptr<View> MakeViewNode(const std::string& name, const pixel2& pos);
 std::shared_ptr<View> MakeViewNode(const std::string& name,
 		const std::string& label);
 std::shared_ptr<View> MakeViewNode(const std::string& name);
-
+std::shared_ptr<DataFlow> MakeDataFlow(const std::string& name,
+		const AUnit2D& pos, const AUnit2D& dims);
 typedef std::shared_ptr<Node> NodePtr;
 typedef std::shared_ptr<View> ViewPtr;
 typedef std::shared_ptr<Compute> ComputePtr;

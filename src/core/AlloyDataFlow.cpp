@@ -24,6 +24,11 @@ namespace dataflow {
 const int MultiPort::FrontIndex = std::numeric_limits<int>::min();
 const int MultiPort::BackIndex = std::numeric_limits<int>::max();
 const pixel2 Node::DEFAULT_NODE_DIMENSIONS = pixel2(256, 256);
+
+std::shared_ptr<DataFlow> MakeDataFlow(const std::string& name, const AUnit2D& pos,
+		const AUnit2D& dims) {
+	return DataFlowPtr(new DataFlow(name, pos, dims));
+}
 std::shared_ptr<Connection> MakeConnection(
 		const std::shared_ptr<OutputPort>& source,
 		const std::shared_ptr<InputPort>& destination) {
