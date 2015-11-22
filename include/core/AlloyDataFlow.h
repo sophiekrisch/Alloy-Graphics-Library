@@ -76,10 +76,17 @@ public:
 class Port: public Region {
 protected:
 	std::string label;
+	void setup();
 public:
 	friend class Connection;
+	static const pixel2 DEFAULT_PORT_DIMENSIONS;
 	Port(const std::string& name, const std::string& label) :
 			Region(name), label(label) {
+		setup();
+	}
+	Port(const std::string& name) :
+			Region(name), label(name) {
+		setup();
 	}
 	virtual PortType getType() const {
 		return PortType::Unknown;
@@ -90,6 +97,7 @@ public:
 	void setLabel(const std::string& label) {
 		this->label = label;
 	}
+	virtual void draw(AlloyContext* context) override;
 	virtual void setValue(const std::shared_ptr<Packet>& packet)=0;
 	virtual ~Port() {
 	}
@@ -116,14 +124,24 @@ protected:
 	std::vector<std::shared_ptr<Connection>> connections;
 	std::shared_ptr<Packet> value;
 public:
+	InputPort(const std::string& name) :
+			Port(name) {
+
+	}
+	InputPort(const std::string& name, const std::string& label) :
+			Port(name, label) {
+
+	}
 	virtual PortType getType() const override {
 		return PortType::Input;
 	}
 	virtual void setValue(const std::shared_ptr<Packet>& packet) override {
 		this->value = packet;
 	}
+
 	virtual ~InputPort() {
 	}
+	virtual void draw(AlloyContext* context) override;
 };
 
 class OutputPort: public Port {
@@ -131,6 +149,14 @@ protected:
 	std::vector<std::shared_ptr<Connection>> connections;
 	std::shared_ptr<Packet> value;
 public:
+	OutputPort(const std::string& name) :
+			Port(name) {
+
+	}
+	OutputPort(const std::string& name, const std::string& label) :
+			Port(name, label) {
+
+	}
 	virtual PortType getType() const override {
 		return PortType::Output;
 	}
@@ -139,6 +165,7 @@ public:
 	}
 	virtual ~OutputPort() {
 	}
+	virtual void draw(AlloyContext* context) override;
 };
 class Connection {
 public:
@@ -218,6 +245,12 @@ public:
 class Node: public Composite {
 protected:
 	std::string label;
+	Color color;
+	std::vector<std::shared_ptr<InputPort>> inputPort;
+	std::vector<std::shared_ptr<OutputPort>> outputPort;
+	CompositePtr inputPortComposite;
+	CompositePtr outputPortComposite;
+
 	virtual void setup();
 public:
 	static const pixel2 DEFAULT_NODE_DIMENSIONS;
@@ -237,12 +270,24 @@ public:
 	Node(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
 			Composite(name, pos, dims), label(name) {
 	}
+	void add(const std::shared_ptr<Region>& region) {
+		Composite::add(region);
+	}
+	void add(const std::shared_ptr<InputPort>& port) {
+		inputPortComposite->add(port);
+		inputPort.push_back(port);
+	}
+	void add(const std::shared_ptr<OutputPort>& port) {
+		outputPortComposite->add(port);
+		outputPort.push_back(port);
+	}
 	std::string getLabel() const {
 		return label;
 	}
 	void setLabel(const std::string& label) {
 		this->label = label;
 	}
+	virtual void draw(AlloyContext* context) override;
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
 			override;
 };
@@ -270,6 +315,7 @@ public:
 			Node(name, pos, dims) {
 		setup();
 	}
+	virtual void draw(AlloyContext* context) override;
 };
 class View: public Node {
 protected:
@@ -295,6 +341,7 @@ public:
 			Node(name, pos, dims) {
 		setup();
 	}
+	virtual void draw(AlloyContext* context) override;
 };
 class Compute: public Node {
 protected:
@@ -320,6 +367,7 @@ public:
 			Node(name, pos, dims) {
 		setup();
 	}
+	virtual void draw(AlloyContext* context) override;
 };
 class Source: public Node {
 protected:
@@ -345,6 +393,7 @@ public:
 			Node(name, pos, dims) {
 		setup();
 	}
+	virtual void draw(AlloyContext* context) override;
 };
 
 class Destination: public Node {
@@ -372,6 +421,7 @@ public:
 			Node(name, pos, dims) {
 		setup();
 	}
+	virtual void draw(AlloyContext* context) override;
 };
 class DataFlow: public Composite {
 protected:
@@ -386,6 +436,9 @@ public:
 	DataFlow(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
 			Composite(name, pos, dims) {
 		setup();
+	}
+	void add(const std::shared_ptr<Region>& region) {
+		Composite::add(region);
 	}
 	void add(const std::shared_ptr<Source>& node) {
 		Composite::add(node);
@@ -525,6 +578,9 @@ std::shared_ptr<Source> MakeSourceNode(const std::string& name);
 
 std::shared_ptr<DataFlow> MakeDataFlow(const std::string& name,
 		const AUnit2D& pos, const AUnit2D& dims);
+
+std::shared_ptr<InputPort> MakeInputPort(const std::string& name);
+std::shared_ptr<OutputPort> MakeOutputPort(const std::string& name);
 typedef std::shared_ptr<Node> NodePtr;
 typedef std::shared_ptr<View> ViewPtr;
 typedef std::shared_ptr<Compute> ComputePtr;

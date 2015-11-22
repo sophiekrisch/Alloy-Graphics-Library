@@ -24,8 +24,14 @@ namespace aly {
 namespace dataflow {
 const int MultiPort::FrontIndex = std::numeric_limits<int>::min();
 const int MultiPort::BackIndex = std::numeric_limits<int>::max();
-const pixel2 Node::DEFAULT_NODE_DIMENSIONS = pixel2(64, 64);
-
+const pixel2 Node::DEFAULT_NODE_DIMENSIONS = pixel2(128, 64);
+const pixel2 Port::DEFAULT_PORT_DIMENSIONS = pixel2(12, 12);
+std::shared_ptr<InputPort> MakeInputPort(const std::string& name){
+	return InputPortPtr(new InputPort(name));
+}
+std::shared_ptr<OutputPort> MakeOutputPort(const std::string& name){
+	return OutputPortPtr(new OutputPort(name));
+}
 std::shared_ptr<DataFlow> MakeDataFlow(const std::string& name,
 		const AUnit2D& pos, const AUnit2D& dims) {
 	return DataFlowPtr(new DataFlow(name, pos, dims));
@@ -160,13 +166,20 @@ std::shared_ptr<Destination> MakeDestinationNode(const std::string& name) {
 }
 void Node::setup() {
 	TextLabelPtr textLabel = TextLabelPtr(
-			new TextLabel(label, CoordPX(0.0f, 0.0f),
-					CoordPercent(1.0f, 1.0f)));
-	textLabel->setAlignment(HorizontalAlignment::Center,
+			new TextLabel(label, CoordPX(Node::DEFAULT_NODE_DIMENSIONS.y,0.0f),
+					CoordPerPX(1.0f, 1.0f,-Node::DEFAULT_NODE_DIMENSIONS.y,0.0f)));
+	textLabel->setAlignment(HorizontalAlignment::Left,
 			VerticalAlignment::Middle);
 	textLabel->fontSize = UnitPX(24.0f);
 	textLabel->fontType = FontType::Bold;
-	add(textLabel);
+	Composite::add(textLabel);
+	inputPortComposite=CompositePtr(new Composite("Input Ports",CoordPX(Node::DEFAULT_NODE_DIMENSIONS.y,0.0f),CoordPX(0.0f,Port::DEFAULT_PORT_DIMENSIONS.y)));
+	outputPortComposite=CompositePtr(new Composite("Output Ports",CoordPX(Node::DEFAULT_NODE_DIMENSIONS.y,Node::DEFAULT_NODE_DIMENSIONS.y-Port::DEFAULT_PORT_DIMENSIONS.y),CoordPX(0.0f,Port::DEFAULT_PORT_DIMENSIONS.y)));
+	inputPortComposite->setOrientation(Orientation::Horizontal,pixel2(2,2));
+	outputPortComposite->setOrientation(Orientation::Horizontal,pixel2(2,2));
+
+	Composite::add(inputPortComposite);
+	Composite::add(outputPortComposite);
 	setRoundCorners(true);
 	setDragEnabled(true);
 	Application::addListener(this);
@@ -180,23 +193,23 @@ bool Node::onEventHandler(AlloyContext* context, const InputEvent& e) {
 }
 void View::setup() {
 	Node::setup();
-	backgroundColor = MakeColor(192, 64, 64);
+	color = Color(192, 64, 64);
 }
 void Data::setup() {
 	Node::setup();
-	backgroundColor = MakeColor(64, 192, 64);
+	color = Color(64, 192, 64);
 }
 void Compute::setup() {
 	Node::setup();
-	backgroundColor = MakeColor(192, 64, 192);
+	color = Color(192, 64, 192);
 }
 void Source::setup() {
 	Node::setup();
-	backgroundColor = MakeColor(192, 128, 64);
+	color = Color(192, 128, 64);
 }
 void Destination::setup() {
 	Node::setup();
-	backgroundColor = MakeColor(64, 128, 192);
+	color = Color(64, 128, 192);
 }
 void DataFlow::setup() {
 	setRoundCorners(true);
@@ -257,6 +270,95 @@ void InputMultiPort::setValue(const std::shared_ptr<Packet>& packet) {
 }
 void OutputMultiPort::setValue(const std::shared_ptr<Packet>& packet) {
 	insertAtBack(packet);
+}
+void Port::setup(){
+	dimensions=CoordPX(DEFAULT_PORT_DIMENSIONS);
+	position=CoordPX(0.0f,0.0f);
+}
+void Port::draw(AlloyContext* context){
+	NVGcontext* nvg=context->nvgContext;
+	box2px bounds=getBounds();
+	nvgFillColor(nvg,Color(context->theme.LIGHT));
+	nvgBeginPath(nvg);
+	nvgEllipse(nvg,bounds.position.x+bounds.dimensions.x*0.5f,bounds.position.y+bounds.dimensions.y*0.5f,bounds.dimensions.x*0.5f,bounds.dimensions.y*0.5f);
+	nvgFill(nvg);
+}
+void InputPort::draw(AlloyContext* context){
+	NVGcontext* nvg=context->nvgContext;
+	box2px bounds=getBounds();
+	nvgFillColor(nvg,Color(context->theme.LIGHT));
+	nvgBeginPath(nvg);
+	nvgEllipse(nvg,bounds.position.x+bounds.dimensions.x*0.5f,bounds.position.y+bounds.dimensions.y*0.5f,bounds.dimensions.x*0.5f-1.0f,bounds.dimensions.y*0.5f-1.0f);
+	nvgFill(nvg);
+}
+void OutputPort::draw(AlloyContext* context){
+	NVGcontext* nvg=context->nvgContext;
+	box2px bounds=getBounds();
+	nvgLineCap(nvg,NVG_ROUND);
+	nvgLineJoin(nvg,NVG_BEVEL);
+	nvgStrokeWidth(nvg,1.0f);
+	nvgFillColor(nvg,Color(context->theme.LIGHT));
+	nvgStrokeColor(nvg,Color(context->theme.LIGHT));
+
+	nvgBeginPath(nvg);
+	nvgMoveTo(nvg,bounds.position.x+bounds.dimensions.x*0.5f,bounds.position.y+bounds.dimensions.y-2);
+	nvgLineTo(nvg,bounds.position.x+2,					  bounds.position.y+2);
+	nvgLineTo(nvg,bounds.position.x+bounds.dimensions.x-2,bounds.position.y+2);
+	nvgLineTo(nvg,bounds.position.x+bounds.dimensions.x*0.5f,bounds.position.y+bounds.dimensions.y-2);
+	nvgFill(nvg);
+
+	nvgBeginPath(nvg);
+	nvgMoveTo(nvg,bounds.position.x+bounds.dimensions.x*0.5f,bounds.position.y+bounds.dimensions.y-2);
+	nvgLineTo(nvg,bounds.position.x+2,bounds.position.y+2);
+	nvgLineTo(nvg,bounds.position.x+bounds.dimensions.x-2,bounds.position.y+2);
+	nvgLineTo(nvg,bounds.position.x+bounds.dimensions.x*0.5f,bounds.position.y+bounds.dimensions.y-2);
+	nvgStroke(nvg);
+
+}
+void Node::draw(AlloyContext* context){
+	NVGcontext* nvg=context->nvgContext;
+
+	nvgStrokeColor(nvg,context->theme.LIGHT_TEXT);
+	nvgStrokeWidth(nvg,4.0f);
+	nvgLineCap(nvg,NVG_ROUND);
+	box2px bounds=getBounds();
+	box2px ibounds=inputPortComposite->getBounds();
+	box2px obounds=outputPortComposite->getExtents();
+	nvgBeginPath(nvg);
+	nvgMoveTo(nvg,bounds.position.x+Node::DEFAULT_NODE_DIMENSIONS.y*0.5f,bounds.position.y+Port::DEFAULT_PORT_DIMENSIONS.y+2.0f);
+	nvgLineTo(nvg,bounds.position.x+Node::DEFAULT_NODE_DIMENSIONS.y+ibounds.dimensions.x,bounds.position.y+Port::DEFAULT_PORT_DIMENSIONS.y+2.0f);
+
+	nvgMoveTo(nvg,bounds.position.x+Node::DEFAULT_NODE_DIMENSIONS.y*0.5f,bounds.position.y+bounds.dimensions.y-Port::DEFAULT_PORT_DIMENSIONS.y-2.0f);
+	nvgLineTo(nvg,bounds.position.x+Node::DEFAULT_NODE_DIMENSIONS.y+obounds.dimensions.x,bounds.position.y+bounds.dimensions.y-Port::DEFAULT_PORT_DIMENSIONS.y-2.0f);
+	nvgStroke(nvg);
+
+
+	bounds.dimensions=pixel2(DEFAULT_NODE_DIMENSIONS.y);
+
+	Composite::draw(context);
+	nvgFillColor(nvg,color);
+	nvgStrokeColor(nvg,context->theme.LIGHT_TEXT);
+	nvgStrokeWidth(nvg,4.0f);
+	nvgBeginPath(nvg);
+	nvgEllipse(nvg,bounds.position.x+bounds.dimensions.x*0.5f,bounds.position.y+bounds.dimensions.y*0.5f,bounds.dimensions.x*0.5f,bounds.dimensions.y*0.5f);
+	nvgFill(nvg);
+	nvgStroke(nvg);
+
+}
+void View::draw(AlloyContext* context){
+	Node::draw(context);
+}
+void Compute::draw(AlloyContext* context){
+	Node::draw(context);
+}
+void Data::draw(AlloyContext* context){
+	Node::draw(context);
+}
+void Source::draw(AlloyContext* context){
+	Node::draw(context);
+}
+void Destination::draw(AlloyContext* context){
+	Node::draw(context);
 }
 }
 }
