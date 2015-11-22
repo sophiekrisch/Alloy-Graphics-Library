@@ -218,6 +218,7 @@ public:
 class Node: public Composite {
 protected:
 	std::string label;
+	virtual void setup();
 public:
 	static const pixel2 DEFAULT_NODE_DIMENSIONS;
 	virtual NodeType getType() const {
@@ -242,144 +243,174 @@ public:
 	void setLabel(const std::string& label) {
 		this->label = label;
 	}
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
+			override;
 };
 class Data: public Node {
+protected:
+	virtual void setup() override;
 public:
 	virtual NodeType getType() const override {
 		return NodeType::Data;
 	}
 	Data(const std::string& name) :
 			Node(name) {
+		setup();
 	}
 	Data(const std::string& name, const std::string& label) :
 			Node(name, label) {
+		setup();
 	}
 	Data(const std::string& name, const std::string& label, const AUnit2D& pos,
 			const AUnit2D& dims) :
 			Node(name, label, pos, dims) {
+		setup();
 	}
 	Data(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
 			Node(name, pos, dims) {
+		setup();
 	}
 };
 class View: public Node {
+protected:
+	virtual void setup() override;
 public:
 	virtual NodeType getType() const override {
 		return NodeType::View;
 	}
 	View(const std::string& name) :
 			Node(name) {
+		setup();
 	}
 	View(const std::string& name, const std::string& label) :
 			Node(name, label) {
+		setup();
 	}
 	View(const std::string& name, const std::string& label, const AUnit2D& pos,
 			const AUnit2D& dims) :
 			Node(name, label, pos, dims) {
+		setup();
 	}
 	View(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
 			Node(name, pos, dims) {
+		setup();
 	}
 };
 class Compute: public Node {
+protected:
+	virtual void setup() override;
 public:
 	virtual NodeType getType() const override {
 		return NodeType::Compute;
 	}
 	Compute(const std::string& name) :
 			Node(name) {
+		setup();
 	}
 	Compute(const std::string& name, const std::string& label) :
 			Node(name, label) {
+		setup();
 	}
 	Compute(const std::string& name, const std::string& label,
 			const AUnit2D& pos, const AUnit2D& dims) :
 			Node(name, label, pos, dims) {
+		setup();
 	}
 	Compute(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
 			Node(name, pos, dims) {
+		setup();
 	}
 };
 class Source: public Node {
+protected:
+	virtual void setup() override;
 public:
 	virtual NodeType getType() const override {
 		return NodeType::Source;
 	}
 	Source(const std::string& name) :
 			Node(name) {
+		setup();
 	}
 	Source(const std::string& name, const std::string& label) :
 			Node(name, label) {
+		setup();
 	}
 	Source(const std::string& name, const std::string& label,
 			const AUnit2D& pos, const AUnit2D& dims) :
 			Node(name, label, pos, dims) {
+		setup();
 	}
 	Source(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
 			Node(name, pos, dims) {
+		setup();
 	}
 };
 
 class Destination: public Node {
+protected:
+	virtual void setup() override;
 public:
 	virtual NodeType getType() const override {
 		return NodeType::Destination;
 	}
 	Destination(const std::string& name) :
 			Node(name) {
+		setup();
 	}
 	Destination(const std::string& name, const std::string& label) :
 			Node(name, label) {
+		setup();
 	}
 	Destination(const std::string& name, const std::string& label,
 			const AUnit2D& pos, const AUnit2D& dims) :
 			Node(name, label, pos, dims) {
+		setup();
 	}
 	Destination(const std::string& name, const AUnit2D& pos,
 			const AUnit2D& dims) :
 			Node(name, pos, dims) {
+		setup();
 	}
 };
 class DataFlow: public Composite {
 protected:
-	std::vector<std::shared_ptr<Node>> nodes;
 	std::vector<std::shared_ptr<View>> viewNodes;
 	std::vector<std::shared_ptr<Data>> dataNodes;
 	std::vector<std::shared_ptr<Compute>> computeNodes;
 	std::vector<std::shared_ptr<Source>> sourceNodes;
 	std::vector<std::shared_ptr<Destination>> destinationNodes;
 	std::vector<std::shared_ptr<Connection>> connections;
+	void setup();
 public:
 	DataFlow(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
 			Composite(name, pos, dims) {
+		setup();
 	}
 	void add(const std::shared_ptr<Source>& node) {
-		nodes.push_back(std::dynamic_pointer_cast<Node>(node));
+		Composite::add(node);
 		sourceNodes.push_back(node);
 	}
 	void add(const std::shared_ptr<Destination>& node) {
-		nodes.push_back(std::dynamic_pointer_cast<Node>(node));
+		Composite::add(node);
 		destinationNodes.push_back(node);
 	}
 	void add(const std::shared_ptr<Data>& node) {
-		nodes.push_back(std::dynamic_pointer_cast<Node>(node));
+		Composite::add(node);
 		dataNodes.push_back(node);
 	}
 	void add(const std::shared_ptr<View>& node) {
-		nodes.push_back(std::dynamic_pointer_cast<Node>(node));
+		Composite::add(node);
 		viewNodes.push_back(node);
 	}
 	void add(const std::shared_ptr<Compute>& node) {
-		nodes.push_back(std::dynamic_pointer_cast<Node>(node));
+		Composite::add(node);
 		computeNodes.push_back(node);
 	}
 	void add(const std::shared_ptr<Connection>& node) {
 		connections.push_back(node);
 	}
 
-	const std::vector<std::shared_ptr<Node>>& getNodes() const {
-		return nodes;
-	}
 	const std::vector<std::shared_ptr<Data>>& getDataNodes() const {
 		return dataNodes;
 	}
@@ -395,9 +426,7 @@ public:
 	const std::vector<std::shared_ptr<Destination>>& getDestinationNodes() const {
 		return destinationNodes;
 	}
-	std::vector<std::shared_ptr<Node>> getNodes() {
-		return nodes;
-	}
+
 	std::vector<std::shared_ptr<Data>> getDataNodes() {
 		return dataNodes;
 	}
@@ -477,6 +506,23 @@ std::shared_ptr<View> MakeViewNode(const std::string& name, const pixel2& pos);
 std::shared_ptr<View> MakeViewNode(const std::string& name,
 		const std::string& label);
 std::shared_ptr<View> MakeViewNode(const std::string& name);
+
+std::shared_ptr<Destination> MakeDestinationNode(const std::string& name,
+		const std::string& label, const pixel2& pos);
+std::shared_ptr<Destination> MakeDestinationNode(const std::string& name,
+		const pixel2& pos);
+std::shared_ptr<Destination> MakeDestinationNode(const std::string& name,
+		const std::string& label);
+std::shared_ptr<Destination> MakeDestinationNode(const std::string& name);
+
+std::shared_ptr<Source> MakeSourceNode(const std::string& name,
+		const std::string& label, const pixel2& pos);
+std::shared_ptr<Source> MakeSourceNode(const std::string& name,
+		const pixel2& pos);
+std::shared_ptr<Source> MakeSourceNode(const std::string& name,
+		const std::string& label);
+std::shared_ptr<Source> MakeSourceNode(const std::string& name);
+
 std::shared_ptr<DataFlow> MakeDataFlow(const std::string& name,
 		const AUnit2D& pos, const AUnit2D& dims);
 typedef std::shared_ptr<Node> NodePtr;

@@ -29,6 +29,10 @@ DataFlowEx::DataFlowEx() :
 bool DataFlowEx::init(Composite& rootNode) {
 	graph = MakeDataFlow("Data Flow", CoordPX(10, 10),CoordPerPX(1.0f, 1.0f, -20.0f, -20.0f));
 	graph->add(MakeComputeNode("Node 1", pixel2(10, 10)));
+	graph->add(MakeViewNode("Node 2", pixel2(120, 10)));
+	graph->add(MakeDataNode("Node 3", pixel2(230, 10)));
+	graph->add(MakeSourceNode("Node 4", pixel2(340, 10)));
+	graph->add(MakeDestinationNode("Node 5", pixel2(450, 10)));
 	rootNode.add(graph);
 	return true;
 }
