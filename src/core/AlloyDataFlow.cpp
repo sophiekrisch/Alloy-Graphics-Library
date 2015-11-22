@@ -48,10 +48,14 @@ std::shared_ptr<Data> MakeDataNode(const std::string& name, const pixel2& pos) {
 }
 std::shared_ptr<Data> MakeDataNode(const std::string& name,
 		const std::string& label) {
-	return DataPtr(new Data(name, label));
+	return DataPtr(
+			new Data(name, label, CoordPX(0, 0),
+					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
 }
 std::shared_ptr<Data> MakeDataNode(const std::string& name) {
-	return DataPtr(new Data(name));
+	return DataPtr(
+			new Data(name, CoordPX(0, 0),
+					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
 }
 
 std::shared_ptr<View> MakeViewNode(const std::string& name,
@@ -67,10 +71,14 @@ std::shared_ptr<View> MakeViewNode(const std::string& name, const pixel2& pos) {
 }
 std::shared_ptr<View> MakeViewNode(const std::string& name,
 		const std::string& label) {
-	return ViewPtr(new View(name, label));
+	return ViewPtr(
+			new View(name, label, CoordPX(0, 0),
+					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
 }
 std::shared_ptr<View> MakeViewNode(const std::string& name) {
-	return ViewPtr(new View(name));
+	return ViewPtr(
+			new View(name, CoordPX(0, 0),
+					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
 }
 
 std::shared_ptr<Compute> MakeComputeNode(const std::string& name,
@@ -87,10 +95,14 @@ std::shared_ptr<Compute> MakeComputeNode(const std::string& name,
 }
 std::shared_ptr<Compute> MakeComputeNode(const std::string& name,
 		const std::string& label) {
-	return ComputePtr(new Compute(name, label));
+	return ComputePtr(
+			new Compute(name, label, CoordPX(0, 0),
+					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
 }
 std::shared_ptr<Compute> MakeComputeNode(const std::string& name) {
-	return ComputePtr(new Compute(name));
+	return ComputePtr(
+			new Compute(name, CoordPX(0, 0),
+					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
 }
 void OutputMultiPort::insertValue(const std::shared_ptr<Packet>& packet,
 		int index) {
