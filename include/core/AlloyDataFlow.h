@@ -31,9 +31,9 @@ class Node;
 class Data;
 class Compute;
 class View;
-
+class Connection;
 enum class NodeType {
-	Unknown = 0, Node = 1, Data = 2, View = 3, Compute = 4, Group = 5
+	Unknown = 0, Data = 1, View = 2, Compute = 3, Group = 4
 };
 enum class PortType {
 	Unknown = 0, Input = 1, Output = 2
@@ -44,17 +44,20 @@ public:
 	}
 };
 class Port: public Region {
+
 public:
+	friend class Connection;
 	std::string name;
 	std::string label;
 	virtual PortType getType() const {
 		return PortType::Unknown;
 	}
 };
-struct VectorPort {
+struct MultiPort {
 };
-
 class InputPort: public Port {
+protected:
+	std::vector<std::shared_ptr<Connection>> connections;
 public:
 	virtual PortType getType() const override {
 		return PortType::Input;
@@ -62,27 +65,58 @@ public:
 };
 
 class OutputPort: public Port {
+protected:
+	std::vector<std::shared_ptr<Connection>> connections;
 public:
 	virtual PortType getType() const override {
 		return PortType::Output;
 	}
 };
-class InputMultiPort: public InputPort, VectorPort {
-
-};
-class OutputMultiPort: public OutputPort, VectorPort {
-
-};
-class Path {
+class Connection {
 	std::shared_ptr<OutputPort> source;
 	std::shared_ptr<InputPort> destination;
+};
+
+class ConnectionBundle: public std::map<int, std::shared_ptr<Connection>> {
+public:
+	ConnectionBundle(size_t size) :
+			std::map<int, std::shared_ptr < Connection>(size) {
+
+	}
+};
+class InputMultiPort: public Port, MultiPort {
+protected:
+	ConnectionBundle connections;
+public:
+	virtual PortType getType() const override {
+		return PortType::Input;
+	}
+};
+class OutputMultiPort: public Port, MultiPort {
+protected:
+	ConnectionBundle connections;
+public:
+	virtual PortType getType() const override {
+		return PortType::Output;
+	}
+};
+
+class Predicate {
+public:
+	std::string name;
+};
+class Relationship {
+public:
+	std::shared_ptr<Node> subject;
+	std::shared_ptr<Node> object;
+	std::shared_ptr<Predicate> predicate;
 };
 class Node: public Composite {
 protected:
 	std::string name;
 public:
 	virtual NodeType getType() const {
-		return NodeType::Node;
+		return NodeType::Unknown;
 	}
 	Node(const std::string& name) :
 			name(name) {
