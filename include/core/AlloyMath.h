@@ -1953,7 +1953,7 @@ struct TemporalFilter {
                 if(xfilt_.hadprev)
                         dx = (x - xfilt_.xprev) * T(frequency);
                 vec<T,C> edx = dxfilt_(dx, alpha(derivativeCutoff));
-                T cutoff = minCutoff + beta * aly::lengthL1(edx);
+                T cutoff = minCutoff + beta * aly::length(edx);
                 return xfilt_(x, alpha(cutoff));
         }
         double getFrequency() const {
