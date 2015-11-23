@@ -1894,4 +1894,92 @@ double RandomUniform(double min, double max);
 double RandomGaussian(double mean, double stddev);
 }
 
+
+/*
+ *
+ * OneEuroFilter.cc -
+ *
+ * Author: Nicolas Roussel (nicolas.roussel@inria.fr)
+ *
+ */
+namespace detail{
+    template <class T, int C>
+    struct low_pass_filter {
+            low_pass_filter() : hatxprev(T(0)), xprev(T(0)), hadprev(false) {}
+            void reset(){
+                hatxprev=vec<T,C>(T(0));
+                xprev=vec<T,C>(T(0));
+                hadprev=false;
+            }
+            vec<T,C> operator()(const vec<T,C>& x, T alpha) {
+                    vec<T,C> hatx;
+                    if(hadprev) {
+                            hatx = alpha * x + (T(1.0)-alpha) * hatxprev;
+                    } else {
+                            hatx = x;
+                            hadprev = true;
+                    }
+                    hatxprev = hatx;
+                    xprev = x;
+                    return hatx;
+            }
+            vec<T,C> hatxprev;
+            vec<T,C> xprev;
+            bool hadprev;
+    };
+}
+template<class T,int C>
+struct TemporalFilter {
+    private:
+            double last_time_;
+            double frequency;
+            T alpha(T cutoff) {
+                    double tau = 1.0 / (2 * M_PI * cutoff);
+                    double te =1.0 / frequency;
+                    return T(1.0 / (1.0 + tau / te));
+            }
+            detail::low_pass_filter<T,C> xfilt_, dxfilt_;
+
+            T minCutoff, beta, derivativeCutoff;
+    public:
+        TemporalFilter(double _freq, T _mincutoff, T _beta, T _dcutoff) :
+            frequency(_freq), minCutoff(_mincutoff), beta(_beta), derivativeCutoff(_dcutoff), last_time_(std::numeric_limits<double>::min()) {}
+        vec<T,C> evaluate(const vec<T,C>& x, double t = std::numeric_limits<double>::min()) {
+                vec<T,C> dx(T(0));
+                if(last_time_ != std::numeric_limits<double>::min() && t != std::numeric_limits<double>::min() && t != last_time_) {
+                        frequency = 1.0 / (t - last_time_);
+                }
+                last_time_ = t;
+                if(xfilt_.hadprev)
+                        dx = (x - xfilt_.xprev) * T(frequency);
+                vec<T,C> edx = dxfilt_(dx, alpha(derivativeCutoff));
+                T cutoff = minCutoff + beta * aly::lengthL1(edx);
+                return xfilt_(x, alpha(cutoff));
+        }
+        double getFrequency() const {
+            return frequency;
+        }
+        void setMinCutoff(const T& val){
+            minCutoff=val;
+        }
+        void setDerivativeCutoff(const T& val){
+            derivativeCutoff=val;
+        }
+        void setBeta(const T& val){
+            beta=val;
+        }
+        void reset(){
+            last_time_=(std::numeric_limits<double>::min());
+            xfilt_.reset();
+            dxfilt_.reset();
+        }
+};
+typedef TemporalFilter<float,1> TemporalFilter1f;
+typedef TemporalFilter<float,2> TemporalFilter2f;
+typedef TemporalFilter<float,3> TemporalFilter3f;
+typedef TemporalFilter<float,4> TemporalFilter4f;
+typedef TemporalFilter<double,1> TemporalFilter1d;
+typedef TemporalFilter<double,2> TemporalFilter2d;
+typedef TemporalFilter<double,3> TemporalFilter3d;
+typedef TemporalFilter<double,4> TemporalFilter4d;
 #endif
