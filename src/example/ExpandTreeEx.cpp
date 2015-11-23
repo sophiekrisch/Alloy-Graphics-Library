@@ -34,7 +34,6 @@ void ExpandTreeEx::addLeaf(TreeItem* item, const FileDescription& fd) {
 						new LeafItem(
 								[this,fontSize,fd](AlloyContext* context,const box2px& bounds) {
 									NVGcontext* nvg=context->nvgContext;
-									pushScissor(nvg,bounds);
 									float yoff=2+bounds.position.y;
 									nvgFontSize(nvg,fontSize);
 									nvgFontFaceId(nvg,context->getFontHandle(FontType::Normal));
@@ -50,7 +49,6 @@ void ExpandTreeEx::addLeaf(TreeItem* item, const FileDescription& fd) {
 									yoff+=fontSize+2;
 									label=MakeString()<<"Accessed: "<<FormatDateAndTime(fd.lastAccessTime);
 									drawText(nvg,bounds.position.x,yoff,label.c_str(),FontStyle::Normal,context->theme.LIGHT_TEXT);
-									popScissor(nvg);
 								}, pixel2(180, 4 * (fontSize + 2) + 2))));
 	}
 }
