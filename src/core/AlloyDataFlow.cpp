@@ -24,7 +24,7 @@ namespace aly {
 namespace dataflow {
 const int MultiPort::FrontIndex = std::numeric_limits<int>::min();
 const int MultiPort::BackIndex = std::numeric_limits<int>::max();
-const pixel2 Node::DEFAULT_DIMENSIONS = pixel2(128, 64+12+11);
+const pixel2 Node::DEFAULT_DIMENSIONS = pixel2(160, 88);
 const pixel2 InputPort::DEFAULT_DIMENSIONS = pixel2(12, 12);
 const pixel2 OutputPort::DEFAULT_DIMENSIONS = pixel2(12, 11);
 std::shared_ptr<InputPort> MakeInputPort(const std::string& name) {
@@ -166,7 +166,7 @@ void Node::setup() {
 					CoordPerPX(1.0f, 1.0f, -2.0f*radius,
 							-2*OutputPort::DEFAULT_DIMENSIONS.y
 									- 2*InputPort::DEFAULT_DIMENSIONS.y - 2.0f)));
-	labelRegion->setAlignment(HorizontalAlignment::Center,
+	labelRegion->setAlignment(HorizontalAlignment::Left,
 			VerticalAlignment::Middle);
 	labelRegion->setAspectRule(AspectRule::Unspecified);
 	labelRegion->fontSize = UnitPX(20.0f);
@@ -387,13 +387,19 @@ void Node::draw(AlloyContext* context) {
 
 	pixel2 labelStart = aly::min(aly::min(lbounds.min(), inStart), outStart);
 	pixel2 labelEnd = aly::max(aly::max(lbounds.max(), inEnd), outEnd);
-	nvgStrokeWidth(nvg, lineWidth*0.5f);
-	nvgStrokeColor(nvg, Color(context->theme.LIGHT));
-	nvgFillColor(nvg, color);
+	nvgStrokeWidth(nvg, 2.0f);
+	if(inputPorts.size()>0||outputPorts.size()>0){
+		nvgStrokeColor(nvg, Color(context->theme.LIGHT_TEXT.toSemiTransparent(0.5f)));
+		nvgFillColor(nvg, color.toSemiTransparent(0.5f));
+	} else {
+		nvgStrokeColor(nvg,Color( COLOR_NONE));//Color(context->theme.LIGHT_TEXT.toSemiTransparent(0.5f))
+		nvgFillColor(nvg, Color(context->theme.DARK.toSemiTransparent(0.5f)));
+	}
 	nvgBeginPath(nvg);
-	nvgRoundedRect(nvg, labelStart.x+1.0f, labelStart.y+1.0f, labelEnd.x - labelStart.x-2.0f,
-			labelEnd.y - labelStart.y-2.0f, context->theme.CORNER_RADIUS);
+	nvgRoundedRect(nvg, labelStart.x, labelStart.y, labelEnd.x - labelStart.x,labelEnd.y - labelStart.y, context->theme.CORNER_RADIUS);
 	nvgFill(nvg);
+	nvgBeginPath(nvg);
+	nvgRoundedRect(nvg, labelStart.x+1.0f, labelStart.y+1.0f, labelEnd.x - labelStart.x-2.0f,labelEnd.y - labelStart.y-2.0f, context->theme.CORNER_RADIUS);
 	nvgStroke(nvg);
 
 	nvgStrokeWidth(nvg, lineWidth);
