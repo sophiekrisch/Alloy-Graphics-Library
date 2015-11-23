@@ -3267,6 +3267,7 @@ void ExpandTree::drawDebug(AlloyContext* context) {
 		nvgStrokeColor(nvg, Color(220, 64, 64));
 		nvgBeginPath(nvg);
 		box2px bounds = selectedItem->getBounds();
+		bounds.position+=drawRegion->drawOffset();
 		nvgRect(nvg, bounds.position.x, bounds.position.y, bounds.dimensions.x,
 				bounds.dimensions.y);
 		nvgStroke(nvg);
