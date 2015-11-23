@@ -24,14 +24,22 @@ namespace aly {
 namespace dataflow {
 const int MultiPort::FrontIndex = std::numeric_limits<int>::min();
 const int MultiPort::BackIndex = std::numeric_limits<int>::max();
-const pixel2 Node::DEFAULT_DIMENSIONS = pixel2(160, 88);
-const pixel2 InputPort::DEFAULT_DIMENSIONS = pixel2(12, 12);
-const pixel2 OutputPort::DEFAULT_DIMENSIONS = pixel2(12, 11);
+const pixel2 Node::DIMENSIONS = pixel2(80, 80);
+const pixel2 InputPort::DIMENSIONS = pixel2(12, 12);
+const pixel2 OutputPort::DIMENSIONS = pixel2(12, 11);
+const pixel2 ParentPort::DIMENSIONS = pixel2(12, 12);
+const pixel2 ChildPort::DIMENSIONS = pixel2(11, 12);
 std::shared_ptr<InputPort> MakeInputPort(const std::string& name) {
 	return InputPortPtr(new InputPort(name));
 }
 std::shared_ptr<OutputPort> MakeOutputPort(const std::string& name) {
 	return OutputPortPtr(new OutputPort(name));
+}
+std::shared_ptr<ParentPort> MakeParentPort(const std::string& name) {
+	return ParentPortPtr(new ParentPort(name));
+}
+std::shared_ptr<ChildPort> MakeChildPort(const std::string& name) {
+	return ChildPortPtr(new ChildPort(name));
 }
 std::shared_ptr<DataFlow> MakeDataFlow(const std::string& name,
 		const AUnit2D& pos, const AUnit2D& dims) {
@@ -51,158 +59,141 @@ std::shared_ptr<Relationship> MakeRelationship(
 std::shared_ptr<Data> MakeDataNode(const std::string& name,
 		const std::string& label, const pixel2& pos) {
 	return DataPtr(
-			new Data(name, label, CoordPX(pos),
-					CoordPX(Node::DEFAULT_DIMENSIONS)));
+			new Data(name, label, CoordPX(pos), CoordPX(Node::DIMENSIONS)));
 }
 std::shared_ptr<Data> MakeDataNode(const std::string& name, const pixel2& pos) {
-	return DataPtr(
-			new Data(name, CoordPX(pos), CoordPX(Node::DEFAULT_DIMENSIONS)));
+	return DataPtr(new Data(name, CoordPX(pos), CoordPX(Node::DIMENSIONS)));
 }
 std::shared_ptr<Data> MakeDataNode(const std::string& name,
 		const std::string& label) {
 	return DataPtr(
-			new Data(name, label, CoordPX(0, 0),
-					CoordPX(Node::DEFAULT_DIMENSIONS)));
+			new Data(name, label, CoordPX(0, 0), CoordPX(Node::DIMENSIONS)));
 }
 std::shared_ptr<Data> MakeDataNode(const std::string& name) {
-	return DataPtr(
-			new Data(name, CoordPX(0, 0), CoordPX(Node::DEFAULT_DIMENSIONS)));
+	return DataPtr(new Data(name, CoordPX(0, 0), CoordPX(Node::DIMENSIONS)));
 }
 
 std::shared_ptr<View> MakeViewNode(const std::string& name,
 		const std::string& label, const pixel2& pos) {
 	return ViewPtr(
-			new View(name, label, CoordPX(pos),
-					CoordPX(Node::DEFAULT_DIMENSIONS)));
+			new View(name, label, CoordPX(pos), CoordPX(Node::DIMENSIONS)));
 }
 std::shared_ptr<View> MakeViewNode(const std::string& name, const pixel2& pos) {
-	return ViewPtr(
-			new View(name, CoordPX(pos), CoordPX(Node::DEFAULT_DIMENSIONS)));
+	return ViewPtr(new View(name, CoordPX(pos), CoordPX(Node::DIMENSIONS)));
 }
 std::shared_ptr<View> MakeViewNode(const std::string& name,
 		const std::string& label) {
 	return ViewPtr(
-			new View(name, label, CoordPX(0, 0),
-					CoordPX(Node::DEFAULT_DIMENSIONS)));
+			new View(name, label, CoordPX(0, 0), CoordPX(Node::DIMENSIONS)));
 }
 std::shared_ptr<View> MakeViewNode(const std::string& name) {
-	return ViewPtr(
-			new View(name, CoordPX(0, 0), CoordPX(Node::DEFAULT_DIMENSIONS)));
+	return ViewPtr(new View(name, CoordPX(0, 0), CoordPX(Node::DIMENSIONS)));
 }
 
 std::shared_ptr<Compute> MakeComputeNode(const std::string& name,
 		const std::string& label, const pixel2& pos) {
 	return ComputePtr(
-			new Compute(name, label, CoordPX(pos),
-					CoordPX(Node::DEFAULT_DIMENSIONS)));
+			new Compute(name, label, CoordPX(pos), CoordPX(Node::DIMENSIONS)));
 }
 std::shared_ptr<Compute> MakeComputeNode(const std::string& name,
 		const pixel2& pos) {
 	return ComputePtr(
-			new Compute(name, CoordPX(pos), CoordPX(Node::DEFAULT_DIMENSIONS)));
+			new Compute(name, CoordPX(pos), CoordPX(Node::DIMENSIONS)));
 }
 std::shared_ptr<Compute> MakeComputeNode(const std::string& name,
 		const std::string& label) {
 	return ComputePtr(
-			new Compute(name, label, CoordPX(0, 0),
-					CoordPX(Node::DEFAULT_DIMENSIONS)));
+			new Compute(name, label, CoordPX(0, 0), CoordPX(Node::DIMENSIONS)));
 }
 std::shared_ptr<Compute> MakeComputeNode(const std::string& name) {
 	return ComputePtr(
-			new Compute(name, CoordPX(0, 0), CoordPX(Node::DEFAULT_DIMENSIONS)));
+			new Compute(name, CoordPX(0, 0), CoordPX(Node::DIMENSIONS)));
 }
 
 std::shared_ptr<Source> MakeSourceNode(const std::string& name,
 		const std::string& label, const pixel2& pos) {
 	return SourcePtr(
-			new Source(name, label, CoordPX(pos),
-					CoordPX(Node::DEFAULT_DIMENSIONS)));
+			new Source(name, label, CoordPX(pos), CoordPX(Node::DIMENSIONS)));
 }
 std::shared_ptr<Source> MakeSourceNode(const std::string& name,
 		const pixel2& pos) {
-	return SourcePtr(
-			new Source(name, CoordPX(pos), CoordPX(Node::DEFAULT_DIMENSIONS)));
+	return SourcePtr(new Source(name, CoordPX(pos), CoordPX(Node::DIMENSIONS)));
 }
 std::shared_ptr<Source> MakeSourceNode(const std::string& name,
 		const std::string& label) {
 	return SourcePtr(
-			new Source(name, label, CoordPX(0, 0),
-					CoordPX(Node::DEFAULT_DIMENSIONS)));
+			new Source(name, label, CoordPX(0, 0), CoordPX(Node::DIMENSIONS)));
 }
 std::shared_ptr<Source> MakeSourceNode(const std::string& name) {
-	return SourcePtr(
-			new Source(name, CoordPX(0, 0), CoordPX(Node::DEFAULT_DIMENSIONS)));
+	return SourcePtr(new Source(name, CoordPX(0, 0), CoordPX(Node::DIMENSIONS)));
 }
 
 std::shared_ptr<Destination> MakeDestinationNode(const std::string& name,
 		const std::string& label, const pixel2& pos) {
 	return DestinationPtr(
 			new Destination(name, label, CoordPX(pos),
-					CoordPX(Node::DEFAULT_DIMENSIONS)));
+					CoordPX(Node::DIMENSIONS)));
 }
 std::shared_ptr<Destination> MakeDestinationNode(const std::string& name,
 		const pixel2& pos) {
 	return DestinationPtr(
-			new Destination(name, CoordPX(pos),
-					CoordPX(Node::DEFAULT_DIMENSIONS)));
+			new Destination(name, CoordPX(pos), CoordPX(Node::DIMENSIONS)));
 }
 std::shared_ptr<Destination> MakeDestinationNode(const std::string& name,
 		const std::string& label) {
 	return DestinationPtr(
 			new Destination(name, label, CoordPX(0, 0),
-					CoordPX(Node::DEFAULT_DIMENSIONS)));
+					CoordPX(Node::DIMENSIONS)));
 }
 std::shared_ptr<Destination> MakeDestinationNode(const std::string& name) {
 	return DestinationPtr(
-			new Destination(name, CoordPX(0, 0),
-					CoordPX(Node::DEFAULT_DIMENSIONS)));
+			new Destination(name, CoordPX(0, 0), CoordPX(Node::DIMENSIONS)));
+}
+void NodeIcon::draw(AlloyContext* context) {
+	NVGcontext* nvg = context->nvgContext;
+	box2px bounds = getBounds();
+	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
+			context->pixelRatio);
+	nvgStrokeWidth(nvg, lineWidth);
+	if (context->isMouseOver(this)) {
+		nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+		nvgFillColor(nvg, backgroundColor->toLighter(0.25f));
+	} else {
+		nvgStrokeColor(nvg, Color(context->theme.LIGHT_TEXT));
+		nvgFillColor(nvg, *backgroundColor);
+	}
+
+	nvgStrokeWidth(nvg, lineWidth);
+
+	nvgBeginPath(nvg);
+
+	if (shape == NodeShape::Circle) {
+		nvgEllipse(nvg, bounds.position.x + bounds.dimensions.x * 0.5f,
+				bounds.position.y + bounds.dimensions.y * 0.5f,
+				0.5f * bounds.dimensions.y - lineWidth * 0.5f,
+				0.5f * bounds.dimensions.y - lineWidth * 0.5f);
+	} else if (shape == NodeShape::Square) {
+		nvgRoundedRect(nvg, bounds.position.x + lineWidth * 0.5f,
+				bounds.position.y + lineWidth * 0.5f,
+				bounds.dimensions.x - lineWidth,
+				bounds.dimensions.y - lineWidth, bounds.dimensions.x * 0.25f);
+	}
+	if (shape == NodeShape::Triangle) {
+		nvgLineJoin(nvg, NVG_ROUND);
+		nvgMoveTo(nvg, bounds.position.x + bounds.dimensions.x * 0.5f,
+				bounds.position.y + bounds.dimensions.y - lineWidth);
+		nvgLineTo(nvg, bounds.position.x + lineWidth * 0.5f,
+				bounds.position.y + lineWidth * 0.5f);
+		nvgLineTo(nvg, bounds.position.x + bounds.dimensions.x - lineWidth,
+				bounds.position.y + lineWidth * 0.5f);
+		nvgClosePath(nvg);
+	}
+	nvgFill(nvg);
+	nvgStroke(nvg);
 }
 void Node::setup() {
-	radius = 0.5f * (Node::DEFAULT_DIMENSIONS.y- OutputPort::DEFAULT_DIMENSIONS.y-InputPort::DEFAULT_DIMENSIONS.y);
-	labelRegion = TextLabelPtr(
-			new TextLabel(label,
-					CoordPX(radius*2.0f,
-							2*InputPort::DEFAULT_DIMENSIONS.y + 1.0f),
-					CoordPerPX(1.0f, 1.0f, -2.0f*radius,
-							-2*OutputPort::DEFAULT_DIMENSIONS.y
-									- 2*InputPort::DEFAULT_DIMENSIONS.y - 2.0f)));
-	labelRegion->setAlignment(HorizontalAlignment::Left,
-			VerticalAlignment::Middle);
-	labelRegion->setAspectRule(AspectRule::Unspecified);
-	labelRegion->fontSize = UnitPX(20.0f);
-	labelRegion->fontType = FontType::Bold;
-	borderWidth = UnitPX(3.0f);
-	Composite::add(labelRegion);
-	inputPortComposite = CompositePtr(
-			new Composite("Input Ports",
-					CoordPX(2*radius, InputPort::DEFAULT_DIMENSIONS.y),
-					CoordPX(0.0f,InputPort::DEFAULT_DIMENSIONS.y)));
-	outputPortComposite = CompositePtr(
-			new Composite("Output Ports",
-					CoordPX(2*radius,Node::DEFAULT_DIMENSIONS.y - 2*OutputPort::DEFAULT_DIMENSIONS.y),
-					CoordPX(0.0f, OutputPort::DEFAULT_DIMENSIONS.y)));
-
-	inputPort = MakeInputPort("Input");
-	outputPort = MakeOutputPort("Output");
-
-	inputPort->position = CoordPX(
-			radius - InputPort::DEFAULT_DIMENSIONS.x * 0.5f, 0.0f);
-	outputPort->position = CoordPerPX(0.0f, 1.0f,
-			radius - InputPort::DEFAULT_DIMENSIONS.x * 0.5f,
-			-OutputPort::DEFAULT_DIMENSIONS.y);
-
-	inputPortComposite->setOrientation(Orientation::Horizontal, pixel2(2, 0),
-			pixel2(2, 0));
-	outputPortComposite->setOrientation(Orientation::Horizontal, pixel2(2, 0),
-			pixel2(2, 0));
-
-	Composite::add(inputPortComposite);
-	Composite::add(outputPortComposite);
-	Composite::add(inputPort);
-	Composite::add(outputPort);
-	setRoundCorners(true);
-	setDragEnabled(true);
-	Application::addListener(this);
+	borderWidth = UnitPX(4.0f);
+	fontSize = 20.0f;
 }
 bool Node::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	bool ret = Composite::onEventHandler(context, e);
@@ -213,24 +204,285 @@ bool Node::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	return ret;
 }
 void View::setup() {
-	Node::setup();
-	color = Color(192, 64, 64);
+	setOrientation(Orientation::Horizontal, pixel2(0, 0));
+	CompositePtr iconContainer = MakeComposite("Icon Container",
+			CoordPX(0.0f, 0.0f),
+			CoordPX(
+					Node::DIMENSIONS.x - InputPort::DIMENSIONS.x
+							- OutputPort::DIMENSIONS.x, Node::DIMENSIONS.y));
+
+	CompositePtr labelContainer = MakeComposite("label Container",
+			CoordPX(0.0f, 0.0f),
+			CoordPerPX(1.0, 0.0f, 0.0f, Node::DIMENSIONS.y));
+	labelContainer->setAspectRule(AspectRule::FixedHeight);
+
+	nodeIcon = NodeIconPtr(
+			new NodeIcon("Icon", CoordPX(0.0f, InputPort::DIMENSIONS.y + 1.0f),
+					CoordPerPX(1.0f, 1.0f, 0.0f,
+							-OutputPort::DIMENSIONS.y - InputPort::DIMENSIONS.y
+									- 2.0f)));
+	nodeIcon->setAspectRule(AspectRule::FixedHeight);
+	nodeIcon->setAspectRatio(1.0f);
+	iconContainer->add(nodeIcon);
+	NVGcontext* nvg = AlloyApplicationContext()->nvgContext;
+	nvgFontSize(nvg, fontSize);
+	nvgFontFaceId(nvg,
+			AlloyApplicationContext()->getFont(FontType::Bold)->handle);
+	float tw = nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
+	labelRegion = TextLabelPtr(
+			new TextLabel(label, CoordPX(0.0f, 2 * InputPort::DIMENSIONS.y),
+					CoordPerPX(0.0f, 1.0f, tw + 10.0f,
+							-2 * OutputPort::DIMENSIONS.y
+									- 2 * InputPort::DIMENSIONS.y - 2.0f)));
+	labelRegion->setAlignment(HorizontalAlignment::Left,
+			VerticalAlignment::Middle);
+	labelRegion->setAspectRule(AspectRule::FixedHeight);
+	labelRegion->fontSize = UnitPX(fontSize);
+	labelRegion->fontType = FontType::Bold;
+	labelContainer->add(labelRegion);
+
+	inputPortComposite = CompositePtr(
+			new Composite("Input Ports", CoordPX(0.0f, InputPort::DIMENSIONS.y),
+					CoordPX(0.0f, InputPort::DIMENSIONS.y)));
+	outputPortComposite = CompositePtr(
+			new Composite("Output Ports",
+					CoordPerPX(0.0f, 1.0f, 0.0f, -2 * OutputPort::DIMENSIONS.y),
+					CoordPX(0.0f, OutputPort::DIMENSIONS.y)));
+
+	inputPortComposite->setOrientation(Orientation::Horizontal, pixel2(2, 0),
+			pixel2(2, 0));
+	outputPortComposite->setOrientation(Orientation::Horizontal, pixel2(2, 0),
+			pixel2(2, 0));
+
+	labelContainer->add(inputPortComposite);
+	labelContainer->add(outputPortComposite);
+
+	Composite::add(iconContainer);
+	Composite::add(labelContainer);
+	setRoundCorners(true);
+	setDragEnabled(true);
+	Application::addListener(this);
+	nodeIcon->backgroundColor = MakeColor(192, 192, 64);
+	nodeIcon->setShape(NodeShape::Square);
+	nodeIcon->borderWidth = borderWidth;
 }
 void Data::setup() {
-	Node::setup();
-	color = Color(64, 192, 64);
+	setOrientation(Orientation::Horizontal, pixel2(0, 0));
+	CompositePtr iconContainer = MakeComposite("Icon Container",
+			CoordPX(0.0f, 0.0f),
+			CoordPX(
+					Node::DIMENSIONS.x - InputPort::DIMENSIONS.x
+							- OutputPort::DIMENSIONS.x, Node::DIMENSIONS.y));
+
+	CompositePtr labelContainer = MakeComposite("label Container",
+			CoordPX(0.0f, 0.0f),
+			CoordPerPX(1.0, 0.0f, 0.0f, Node::DIMENSIONS.y));
+	labelContainer->setAspectRule(AspectRule::FixedHeight);
+
+	nodeIcon = NodeIconPtr(
+			new NodeIcon("Icon", CoordPX(0.0f, InputPort::DIMENSIONS.y + 1.0f),
+					CoordPerPX(1.0f, 1.0f, 0.0f,
+							-OutputPort::DIMENSIONS.y - InputPort::DIMENSIONS.y
+									- 2.0f)));
+	nodeIcon->setAspectRule(AspectRule::FixedHeight);
+	nodeIcon->setAspectRatio(1.0f);
+	inputPort = MakeInputPort("Input");
+	outputPort = MakeOutputPort("Output");
+	inputPort->position = CoordPerPX(0.5f, 0.0f,
+			-InputPort::DIMENSIONS.x * 0.5f, 0.0f);
+	outputPort->position = CoordPerPX(0.5f, 1.0f,
+			-OutputPort::DIMENSIONS.x * 0.5f, -OutputPort::DIMENSIONS.y);
+	iconContainer->add(nodeIcon);
+	iconContainer->add(inputPort);
+	iconContainer->add(outputPort);
+	NVGcontext* nvg = AlloyApplicationContext()->nvgContext;
+	nvgFontSize(nvg, fontSize);
+	nvgFontFaceId(nvg,
+			AlloyApplicationContext()->getFont(FontType::Bold)->handle);
+	float tw = nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
+	labelRegion = TextLabelPtr(
+			new TextLabel(label,
+					CoordPX(0.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
+					CoordPerPX(0.0f, 1.0f, tw + 10.0f,
+							-2 * OutputPort::DIMENSIONS.y
+									- 2 * InputPort::DIMENSIONS.y - 2.0f)));
+	labelRegion->setAlignment(HorizontalAlignment::Left,
+			VerticalAlignment::Middle);
+	labelRegion->setAspectRule(AspectRule::FixedHeight);
+	labelRegion->fontSize = UnitPX(fontSize);
+	labelRegion->fontType = FontType::Bold;
+	labelContainer->add(labelRegion);
+	Composite::add(iconContainer);
+	Composite::add(labelContainer);
+	setRoundCorners(true);
+	setDragEnabled(true);
+	Application::addListener(this);
+	nodeIcon->backgroundColor = MakeColor(255, 128, 64);
+	nodeIcon->borderWidth = borderWidth;
 }
 void Compute::setup() {
-	Node::setup();
-	color = Color(192, 64, 192);
+	setOrientation(Orientation::Horizontal, pixel2(0, 0));
+	CompositePtr iconContainer = MakeComposite("Icon Container",
+			CoordPX(0.0f, 0.0f),
+			CoordPX(
+					Node::DIMENSIONS.x - InputPort::DIMENSIONS.x
+							- OutputPort::DIMENSIONS.x, Node::DIMENSIONS.y));
+
+	CompositePtr labelContainer = MakeComposite("label Container",
+			CoordPX(0.0f, 0.0f),
+			CoordPerPX(1.0, 0.0f, 0.0f, Node::DIMENSIONS.y));
+	labelContainer->setAspectRule(AspectRule::FixedHeight);
+
+	nodeIcon = NodeIconPtr(
+			new NodeIcon("Icon", CoordPX(0.0f, InputPort::DIMENSIONS.y + 1.0f),
+					CoordPerPX(1.0f, 1.0f, 0.0f,
+							-OutputPort::DIMENSIONS.y - InputPort::DIMENSIONS.y
+									- 2.0f)));
+	nodeIcon->setAspectRule(AspectRule::FixedHeight);
+	nodeIcon->setAspectRatio(1.0f);
+	inputPort = MakeInputPort("Input");
+	outputPort = MakeOutputPort("Output");
+	inputPort->position = CoordPerPX(0.5f, 0.0f,
+			-InputPort::DIMENSIONS.x * 0.5f, 0.0f);
+	outputPort->position = CoordPerPX(0.5f, 1.0f,
+			-OutputPort::DIMENSIONS.x * 0.5f, -OutputPort::DIMENSIONS.y);
+	iconContainer->add(nodeIcon);
+	iconContainer->add(inputPort);
+	iconContainer->add(outputPort);
+	NVGcontext* nvg = AlloyApplicationContext()->nvgContext;
+	nvgFontSize(nvg, fontSize);
+	nvgFontFaceId(nvg,
+			AlloyApplicationContext()->getFont(FontType::Bold)->handle);
+	float tw = nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
+	labelRegion = TextLabelPtr(
+			new TextLabel(label,
+					CoordPX(0.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
+					CoordPerPX(0.0f, 1.0f, tw + 10.0f,
+							-2 * OutputPort::DIMENSIONS.y
+									- 2 * InputPort::DIMENSIONS.y - 2.0f)));
+	labelRegion->setAlignment(HorizontalAlignment::Left,
+			VerticalAlignment::Middle);
+	labelRegion->setAspectRule(AspectRule::FixedHeight);
+	labelRegion->fontSize = UnitPX(fontSize);
+	labelRegion->fontType = FontType::Bold;
+	labelContainer->add(labelRegion);
+	inputPortComposite = CompositePtr(
+			new Composite("Input Ports", CoordPX(0.0f, InputPort::DIMENSIONS.y),
+					CoordPX(0.0f, InputPort::DIMENSIONS.y)));
+	outputPortComposite = CompositePtr(
+			new Composite("Output Ports",
+					CoordPerPX(0.0f, 1.0f, 0.0f, -2 * OutputPort::DIMENSIONS.y),
+					CoordPX(0.0f, OutputPort::DIMENSIONS.y)));
+
+	inputPortComposite->setOrientation(Orientation::Horizontal, pixel2(2, 0),
+			pixel2(2, 0));
+	outputPortComposite->setOrientation(Orientation::Horizontal, pixel2(2, 0),
+			pixel2(2, 0));
+
+	labelContainer->add(inputPortComposite);
+	labelContainer->add(outputPortComposite);
+
+	Composite::add(iconContainer);
+	Composite::add(labelContainer);
+	setRoundCorners(true);
+	setDragEnabled(true);
+	Application::addListener(this);
+	nodeIcon->backgroundColor = MakeColor(192, 64, 64);
+	nodeIcon->borderWidth = borderWidth;
 }
 void Source::setup() {
-	Node::setup();
-	color = Color(192, 128, 64);
+	setOrientation(Orientation::Vertical, pixel2(0, 0));
+	CompositePtr iconContainer = MakeComposite("Icon Container",
+			CoordPX(0.0f, 0.0f),
+			CoordPX(Node::DIMENSIONS.x,
+					Node::DIMENSIONS.y - InputPort::DIMENSIONS.y));
+
+	//labelContainer->setAspectRatio(1.0f);
+	nodeIcon = NodeIconPtr(
+			new NodeIcon("Icon", CoordPX(ParentPort::DIMENSIONS.x + 1.0f, 1.0f),
+					CoordPerPX(1.0f, 1.0f,
+							-ParentPort::DIMENSIONS.x - ChildPort::DIMENSIONS.x
+									- 2.0f, -OutputPort::DIMENSIONS.y - 2.0f)));
+	nodeIcon->setAspectRatio(1.0f);
+	nodeIcon->setAspectRule(AspectRule::FixedHeight);
+	outputPort = MakeOutputPort("Output");
+	parentPort = MakeParentPort("Parent");
+	childPort = MakeChildPort("Child");
+	outputPort->position = CoordPerPX(0.5f, 1.0f,
+			-OutputPort::DIMENSIONS.x * 0.5f, -OutputPort::DIMENSIONS.y);
+	parentPort->position = CoordPerPX(0.0f, 0.5f, 0.0f,
+			-OutputPort::DIMENSIONS.y);
+	childPort->position = CoordPerPX(1.0f, 0.5f, -ChildPort::DIMENSIONS.x,
+			-OutputPort::DIMENSIONS.y);
+	iconContainer->add(nodeIcon);
+	iconContainer->add(outputPort);
+	iconContainer->add(parentPort);
+	iconContainer->add(childPort);
+	NVGcontext* nvg = AlloyApplicationContext()->nvgContext;
+	nvgFontSize(nvg, fontSize);
+	nvgFontFaceId(nvg,
+			AlloyApplicationContext()->getFont(FontType::Bold)->handle);
+	float tw = nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
+	labelRegion = TextLabelPtr(
+			new TextLabel(label, CoordPercent(0.5f, 0.0f),
+					CoordPX(tw + 10.0f, fontSize)));
+	labelRegion->setOrigin(Origin::TopCenter);
+	labelRegion->setAlignment(HorizontalAlignment::Center,
+			VerticalAlignment::Middle);
+	labelRegion->setAspectRule(AspectRule::FixedHeight);
+	labelRegion->fontSize = UnitPX(fontSize);
+	labelRegion->fontType = FontType::Bold;
+
+	Composite::add(labelRegion);
+	Composite::add(iconContainer);
+	setRoundCorners(true);
+	setDragEnabled(true);
+	Application::addListener(this);
+	nodeIcon->backgroundColor = MakeColor(64, 128, 192);
+	nodeIcon->borderWidth = borderWidth;
 }
 void Destination::setup() {
-	Node::setup();
-	color = Color(64, 128, 192);
+	setOrientation(Orientation::Vertical, pixel2(0, 0));
+	CompositePtr iconContainer = MakeComposite("Icon Container",
+			CoordPX(0.0f, 0.0f),
+			CoordPX(Node::DIMENSIONS.x,
+					Node::DIMENSIONS.y - InputPort::DIMENSIONS.y));
+
+	//labelContainer->setAspectRatio(1.0f);
+	nodeIcon = NodeIconPtr(
+			new NodeIcon("Icon", CoordPX(0.5f*ParentPort::DIMENSIONS.x, InputPort::DIMENSIONS.y + 1.0f),
+					CoordPerPX(1.0f, 1.0f, -ParentPort::DIMENSIONS.x,
+							-OutputPort::DIMENSIONS.y - 2.0f)));
+	//nodeIcon->setAspectRatio(1.0f);
+	//nodeIcon->setAspectRule(AspectRule::FixedWidth);
+	inputPort = MakeInputPort("Input");
+	inputPort->position = CoordPerPX(0.5f, 0.0f,
+			-InputPort::DIMENSIONS.x * 0.5f, 0.0f);
+	iconContainer->add(nodeIcon);
+	iconContainer->add(inputPort);
+	NVGcontext* nvg = AlloyApplicationContext()->nvgContext;
+	nvgFontSize(nvg, fontSize);
+	nvgFontFaceId(nvg,
+			AlloyApplicationContext()->getFont(FontType::Bold)->handle);
+	float tw = nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
+	labelRegion = TextLabelPtr(
+			new TextLabel(label, CoordPercent(0.5f, 0.0f),
+					CoordPX(tw + 10.0f, fontSize)));
+	labelRegion->setOrigin(Origin::TopCenter);
+	labelRegion->setAlignment(HorizontalAlignment::Center,
+			VerticalAlignment::Middle);
+	labelRegion->setAspectRule(AspectRule::FixedHeight);
+	labelRegion->fontSize = UnitPX(fontSize);
+	labelRegion->fontType = FontType::Bold;
+
+	Composite::add(iconContainer);
+	Composite::add(labelRegion);
+	setRoundCorners(true);
+	setDragEnabled(true);
+	Application::addListener(this);
+	nodeIcon->backgroundColor = MakeColor(96, 196, 96);
+	nodeIcon->setShape(NodeShape::Triangle);
+	nodeIcon->borderWidth = borderWidth;
 }
 void DataFlow::setup() {
 	setRoundCorners(true);
@@ -298,11 +550,19 @@ void Port::setup() {
 }
 void InputPort::setup() {
 	position = CoordPX(0.0f, 0.0f);
-	dimensions = CoordPX(InputPort::DEFAULT_DIMENSIONS);
+	dimensions = CoordPX(InputPort::DIMENSIONS);
 }
 void OutputPort::setup() {
 	position = CoordPX(0.0f, 0.0f);
-	dimensions = CoordPX(OutputPort::DEFAULT_DIMENSIONS);
+	dimensions = CoordPX(OutputPort::DIMENSIONS);
+}
+void ParentPort::setup() {
+	position = CoordPX(0.0f, 0.0f);
+	dimensions = CoordPX(OutputPort::DIMENSIONS);
+}
+void ChildPort::setup() {
+	position = CoordPX(0.0f, 0.0f);
+	dimensions = CoordPX(OutputPort::DIMENSIONS);
 }
 void Port::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
@@ -336,6 +596,26 @@ void InputPort::draw(AlloyContext* context) {
 
 	nvgStroke(nvg);
 }
+void ParentPort::draw(AlloyContext* context) {
+	NVGcontext* nvg = context->nvgContext;
+	box2px bounds = getBounds();
+	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
+			context->pixelRatio);
+	if (context->isMouseOver(this)) {
+		nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
+		nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+	} else {
+		nvgFillColor(nvg, Color(context->theme.LIGHT));
+		nvgStrokeColor(nvg, Color(context->theme.LIGHT));
+	}
+	nvgStrokeWidth(nvg, lineWidth);
+	nvgBeginPath(nvg);
+	nvgRect(nvg, bounds.position.x + 0.5f * lineWidth,
+			bounds.position.y + 0.5f * lineWidth,
+			bounds.dimensions.x - lineWidth, bounds.dimensions.y - lineWidth);
+	nvgFill(nvg);
+	nvgStroke(nvg);
+}
 void OutputPort::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
@@ -353,9 +633,41 @@ void OutputPort::draw(AlloyContext* context) {
 	nvgStrokeWidth(nvg, lineWidth);
 	nvgBeginPath(nvg);
 
-	nvgMoveTo(nvg, bounds.position.x + bounds.dimensions.x * 0.5f,bounds.position.y + bounds.dimensions.y - lineWidth);
-	nvgLineTo(nvg, bounds.position.x+0.5f, bounds.position.y + lineWidth * 0.5f);
-	nvgLineTo(nvg, bounds.position.x + bounds.dimensions.x-1.0f,bounds.position.y + lineWidth * 0.5f);
+	nvgMoveTo(nvg, bounds.position.x + bounds.dimensions.x * 0.5f,
+			bounds.position.y + bounds.dimensions.y - lineWidth);
+	nvgLineTo(nvg, bounds.position.x + 0.5f,
+			bounds.position.y + lineWidth * 0.5f);
+	nvgLineTo(nvg, bounds.position.x + bounds.dimensions.x - 1.0f,
+			bounds.position.y + lineWidth * 0.5f);
+	nvgClosePath(nvg);
+	nvgFill(nvg);
+	nvgStroke(nvg);
+
+}
+
+void ChildPort::draw(AlloyContext* context) {
+	NVGcontext* nvg = context->nvgContext;
+	box2px bounds = getBounds();
+	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
+			context->pixelRatio);
+	if (context->isMouseOver(this)) {
+		nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
+		nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+	} else {
+		nvgFillColor(nvg, Color(context->theme.LIGHT));
+		nvgStrokeColor(nvg, Color(context->theme.LIGHT));
+	}
+	nvgLineCap(nvg, NVG_ROUND);
+	nvgLineJoin(nvg, NVG_BEVEL);
+	nvgStrokeWidth(nvg, lineWidth);
+	nvgBeginPath(nvg);
+
+	nvgMoveTo(nvg, bounds.position.x + bounds.dimensions.x - lineWidth,
+			bounds.position.y + bounds.dimensions.y * 0.5f);
+	nvgLineTo(nvg, bounds.position.x + lineWidth * 0.5f,
+			bounds.position.y + 0.5f);
+	nvgLineTo(nvg, bounds.position.x + lineWidth * 0.5f,
+			bounds.position.y + bounds.dimensions.y - 1.0f);
 	nvgClosePath(nvg);
 	nvgFill(nvg);
 	nvgStroke(nvg);
@@ -371,52 +683,37 @@ void Node::draw(AlloyContext* context) {
 	nvgLineCap(nvg, NVG_ROUND);
 	box2px lbounds = labelRegion->getBounds();
 	box2px ibounds = inputPortComposite->getBounds();
-	box2px obounds = outputPortComposite->getExtents();
-	pixel2 inStart = pixel2(
-			bounds.position.x + radius,
-			bounds.position.y+2*InputPort::DEFAULT_DIMENSIONS.y+2);
-	pixel2 inEnd = pixel2(
-			bounds.position.x  + 2*radius
-					+ ibounds.dimensions.x,
-					bounds.position.y+2*InputPort::DEFAULT_DIMENSIONS.y+ 2);
-	pixel2 outStart = pixel2(
-			bounds.position.x + radius,
-			bounds.position.y+bounds.dimensions.y-2*OutputPort::DEFAULT_DIMENSIONS.y - 1);
-	pixel2 outEnd = pixel2(bounds.position.x + 2*radius+ obounds.dimensions.x,
-					bounds.position.y+bounds.dimensions.y-2*OutputPort::DEFAULT_DIMENSIONS.y- 1);
+	box2px obounds = outputPortComposite->getBounds();
+	box2px cbounds = nodeIcon->getBounds();
 
-	pixel2 labelStart = aly::min(aly::min(lbounds.min(), inStart), outStart);
-	pixel2 labelEnd = aly::max(aly::max(lbounds.max(), inEnd), outEnd);
+	pixel2 labelStart = pixel2(cbounds.position.x + cbounds.dimensions.x * 0.5f,
+			lbounds.position.y);
+	pixel2 labelEnd = pixel2(
+			lbounds.position.x
+					+ std::max(
+							std::max(lbounds.dimensions.x,
+									ibounds.dimensions.x),
+							obounds.dimensions.x),
+			lbounds.position.y + lbounds.dimensions.y);
 	nvgStrokeWidth(nvg, 2.0f);
-	if(inputPorts.size()>0||outputPorts.size()>0){
-		nvgStrokeColor(nvg, Color(context->theme.LIGHT_TEXT.toSemiTransparent(0.5f)));
-		nvgFillColor(nvg, color.toSemiTransparent(0.5f));
+	if (inputPorts.size() > 0 || outputPorts.size() > 0) {
+		nvgStrokeColor(nvg,
+				Color(context->theme.LIGHT_TEXT.toSemiTransparent(0.5f)));
+		nvgFillColor(nvg, nodeIcon->backgroundColor->toSemiTransparent(0.5f));
 	} else {
-		nvgStrokeColor(nvg,Color( COLOR_NONE));//Color(context->theme.LIGHT_TEXT.toSemiTransparent(0.5f))
+		nvgStrokeColor(nvg, Color(COLOR_NONE)); //Color(context->theme.LIGHT_TEXT.toSemiTransparent(0.5f))
 		nvgFillColor(nvg, Color(context->theme.DARK.toSemiTransparent(0.5f)));
 	}
 	nvgBeginPath(nvg);
-	nvgRoundedRect(nvg, labelStart.x, labelStart.y, labelEnd.x - labelStart.x,labelEnd.y - labelStart.y, context->theme.CORNER_RADIUS);
+	nvgRoundedRect(nvg, labelStart.x, labelStart.y, labelEnd.x - labelStart.x,
+			labelEnd.y - labelStart.y, context->theme.CORNER_RADIUS);
 	nvgFill(nvg);
 	nvgBeginPath(nvg);
-	nvgRoundedRect(nvg, labelStart.x+1.0f, labelStart.y+1.0f, labelEnd.x - labelStart.x-2.0f,labelEnd.y - labelStart.y-2.0f, context->theme.CORNER_RADIUS);
+	nvgRoundedRect(nvg, labelStart.x + 1.0f, labelStart.y + 1.0f,
+			labelEnd.x - labelStart.x - 2.0f, labelEnd.y - labelStart.y - 2.0f,
+			context->theme.CORNER_RADIUS);
 	nvgStroke(nvg);
 
-	nvgStrokeWidth(nvg, lineWidth);
-	if (context->isMouseOver(this)||context->isMouseOver(labelRegion.get())) {
-		nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
-		nvgFillColor(nvg, color.toLighter(0.25f));
-	} else {
-		nvgStrokeColor(nvg, Color(context->theme.LIGHT_TEXT));
-		nvgFillColor(nvg, color);
-	}
-
-	nvgStrokeWidth(nvg, lineWidth);
-	nvgBeginPath(nvg);
-	nvgCircle(nvg, bounds.position.x + radius,
-			bounds.position.y  + radius + InputPort::DEFAULT_DIMENSIONS.y,radius-lineWidth*0.5f-1);
-	nvgFill(nvg);
-	nvgStroke(nvg);
 	Composite::draw(context);
 }
 void View::draw(AlloyContext* context) {
@@ -426,13 +723,101 @@ void Compute::draw(AlloyContext* context) {
 	Node::draw(context);
 }
 void Data::draw(AlloyContext* context) {
-	Node::draw(context);
+	NVGcontext* nvg = context->nvgContext;
+	box2px bounds = getBounds();
+	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
+			context->pixelRatio);
+	nvgStrokeColor(nvg, context->theme.LIGHT_TEXT);
+	nvgStrokeWidth(nvg, lineWidth);
+	nvgLineCap(nvg, NVG_ROUND);
+	box2px lbounds = labelRegion->getBounds();
+	box2px cbounds = nodeIcon->getBounds();
+	pixel2 labelStart = pixel2(cbounds.position.x + cbounds.dimensions.x * 0.5f,
+			lbounds.position.y);
+	pixel2 labelEnd = pixel2(lbounds.position.x + lbounds.dimensions.x,
+			lbounds.position.y + lbounds.dimensions.y);
+	nvgStrokeWidth(nvg, 2.0f);
+	if (inputPorts.size() > 0 || outputPorts.size() > 0) {
+		nvgStrokeColor(nvg,
+				Color(context->theme.LIGHT_TEXT.toSemiTransparent(0.5f)));
+		nvgFillColor(nvg, nodeIcon->backgroundColor->toSemiTransparent(0.5f));
+	} else {
+		nvgStrokeColor(nvg, Color(COLOR_NONE));
+		nvgFillColor(nvg, Color(context->theme.DARK.toSemiTransparent(0.5f)));
+	}
+	nvgBeginPath(nvg);
+	nvgRoundedRect(nvg, labelStart.x, labelStart.y, labelEnd.x - labelStart.x,
+			labelEnd.y - labelStart.y, context->theme.CORNER_RADIUS);
+	nvgFill(nvg);
+	nvgBeginPath(nvg);
+	nvgRoundedRect(nvg, labelStart.x + 1.0f, labelStart.y + 1.0f,
+			labelEnd.x - labelStart.x - 2.0f, labelEnd.y - labelStart.y - 2.0f,
+			context->theme.CORNER_RADIUS);
+	nvgStroke(nvg);
+
+	Composite::draw(context);
 }
 void Source::draw(AlloyContext* context) {
-	Node::draw(context);
+	NVGcontext* nvg = context->nvgContext;
+	box2px bounds = getBounds();
+	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
+			context->pixelRatio);
+	nvgStrokeColor(nvg, context->theme.LIGHT_TEXT);
+	nvgStrokeWidth(nvg, lineWidth);
+	nvgLineCap(nvg, NVG_ROUND);
+	box2px lbounds = labelRegion->getBounds();
+	nvgStrokeWidth(nvg, 2.0f);
+	if (inputPorts.size() > 0 || outputPorts.size() > 0) {
+		nvgStrokeColor(nvg,
+				Color(context->theme.LIGHT_TEXT.toSemiTransparent(0.5f)));
+		nvgFillColor(nvg, nodeIcon->backgroundColor->toSemiTransparent(0.5f));
+	} else {
+		nvgStrokeColor(nvg, Color(COLOR_NONE)); //Color(context->theme.LIGHT_TEXT.toSemiTransparent(0.5f))
+		nvgFillColor(nvg, Color(context->theme.DARK.toSemiTransparent(0.5f)));
+	}
+	nvgBeginPath(nvg);
+	nvgRoundedRect(nvg, lbounds.position.x, lbounds.position.y,
+			lbounds.dimensions.x, lbounds.dimensions.y,
+			context->theme.CORNER_RADIUS);
+	nvgFill(nvg);
+	nvgBeginPath(nvg);
+	nvgRoundedRect(nvg, lbounds.position.x + 1.0f, lbounds.position.y + 1.0f,
+			lbounds.dimensions.x - 2.0f, lbounds.dimensions.y - 2.0f,
+			context->theme.CORNER_RADIUS);
+	nvgStroke(nvg);
+
+	Composite::draw(context);
 }
 void Destination::draw(AlloyContext* context) {
-	Node::draw(context);
+	NVGcontext* nvg = context->nvgContext;
+	box2px bounds = getBounds();
+	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
+			context->pixelRatio);
+	nvgStrokeColor(nvg, context->theme.LIGHT_TEXT);
+	nvgStrokeWidth(nvg, lineWidth);
+	nvgLineCap(nvg, NVG_ROUND);
+	box2px lbounds = labelRegion->getBounds();
+	nvgStrokeWidth(nvg, 2.0f);
+	if (inputPorts.size() > 0 || outputPorts.size() > 0) {
+		nvgStrokeColor(nvg,
+				Color(context->theme.LIGHT_TEXT.toSemiTransparent(0.5f)));
+		nvgFillColor(nvg, nodeIcon->backgroundColor->toSemiTransparent(0.5f));
+	} else {
+		nvgStrokeColor(nvg, Color(COLOR_NONE)); //Color(context->theme.LIGHT_TEXT.toSemiTransparent(0.5f))
+		nvgFillColor(nvg, Color(context->theme.DARK.toSemiTransparent(0.5f)));
+	}
+	nvgBeginPath(nvg);
+	nvgRoundedRect(nvg, lbounds.position.x, lbounds.position.y,
+			lbounds.dimensions.x, lbounds.dimensions.y,
+			context->theme.CORNER_RADIUS);
+	nvgFill(nvg);
+	nvgBeginPath(nvg);
+	nvgRoundedRect(nvg, lbounds.position.x + 1.0f, lbounds.position.y + 1.0f,
+			lbounds.dimensions.x - 2.0f, lbounds.dimensions.y - 2.0f,
+			context->theme.CORNER_RADIUS);
+	nvgStroke(nvg);
+
+	Composite::draw(context);
 }
 }
 }

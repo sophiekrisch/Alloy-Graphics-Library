@@ -125,7 +125,7 @@ protected:
 	virtual void setup() override;
 public:
 
-	static const pixel2 DEFAULT_DIMENSIONS;
+	static const pixel2 DIMENSIONS;
 	InputPort(const std::string& name) :
 			Port(name) {
 		setup();
@@ -153,7 +153,7 @@ protected:
 	virtual void setup() override;
 public:
 
-	static const pixel2 DEFAULT_DIMENSIONS;
+	static const pixel2 DIMENSIONS;
 	OutputPort(const std::string& name) :
 			Port(name) {
 		setup();
@@ -169,6 +169,34 @@ public:
 		this->value = packet;
 	}
 	virtual ~OutputPort() {
+	}
+	virtual void draw(AlloyContext* context) override;
+};
+
+class ParentPort: public Port {
+protected:
+	std::vector<std::shared_ptr<Connection>> connections;
+	std::shared_ptr<Packet> value;
+	virtual void setup() override;
+public:
+
+	static const pixel2 DIMENSIONS;
+	ParentPort(const std::string& name) :
+			Port(name) {
+		setup();
+	}
+	ParentPort(const std::string& name, const std::string& label) :
+			Port(name, label) {
+		setup();
+	}
+	virtual PortType getType() const override {
+		return PortType::Input;
+	}
+	virtual void setValue(const std::shared_ptr<Packet>& packet) override {
+		this->value = packet;
+	}
+
+	virtual ~ParentPort() {
 	}
 	virtual void draw(AlloyContext* context) override;
 };
@@ -230,6 +258,33 @@ public:
 	}
 };
 
+class ChildPort: public Port {
+protected:
+	std::vector<std::shared_ptr<Connection>> connections;
+	std::shared_ptr<Packet> value;
+	virtual void setup() override;
+public:
+
+	static const pixel2 DIMENSIONS;
+	ChildPort(const std::string& name) :
+			Port(name) {
+		setup();
+	}
+	ChildPort(const std::string& name, const std::string& label) :
+			Port(name, label) {
+		setup();
+	}
+	virtual PortType getType() const override {
+		return PortType::Input;
+	}
+	virtual void setValue(const std::shared_ptr<Packet>& packet) override {
+		this->value = packet;
+	}
+
+	virtual ~ChildPort() {
+	}
+	virtual void draw(AlloyContext* context) override;
+};
 class Predicate {
 public:
 	std::string name;
@@ -247,11 +302,25 @@ public:
 
 	}
 };
+enum class NodeShape {
+	Circle = 0, Triangle = 1, Square = 2
+};
+class NodeIcon: public Region {
+protected:
+	NodeShape shape;
+public:
+	NodeIcon(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
+			Region(name, pos, dims), shape(NodeShape::Circle) {
+	}
+	void setShape(const NodeShape& s) {
+		shape = s;
+	}
+	virtual void draw(AlloyContext* context) override;
+};
 class Node: public Composite {
 protected:
 	std::string label;
-	Color color;
-	float radius;
+	float fontSize;
 	std::vector<std::shared_ptr<InputPort>> inputPorts;
 	std::vector<std::shared_ptr<OutputPort>> outputPorts;
 	std::shared_ptr<InputPort> inputPort;
@@ -259,24 +328,29 @@ protected:
 	CompositePtr inputPortComposite;
 	CompositePtr outputPortComposite;
 	TextLabelPtr labelRegion;
+	std::shared_ptr<NodeIcon> nodeIcon;
 	virtual void setup();
 public:
-	static const pixel2 DEFAULT_DIMENSIONS;
+	static const pixel2 DIMENSIONS;
 	virtual NodeType getType() const {
 		return NodeType::Unknown;
 	}
 	Node(const std::string& name) :
 			Composite(name), label(name) {
+		setup();
 	}
 	Node(const std::string& name, const std::string& label) :
 			Composite(name), label(label) {
+		setup();
 	}
 	Node(const std::string& name, const std::string& label, const AUnit2D& pos,
 			const AUnit2D& dims) :
 			Composite(name, pos, dims), label(label) {
+		setup();
 	}
 	Node(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
 			Composite(name, pos, dims), label(name) {
+		setup();
 	}
 	void add(const std::shared_ptr<Region>& region) {
 		Composite::add(region);
@@ -380,6 +454,8 @@ public:
 class Source: public Node {
 protected:
 	virtual void setup() override;
+	std::shared_ptr<ParentPort> parentPort;
+	std::shared_ptr<ChildPort> childPort;
 public:
 	virtual NodeType getType() const override {
 		return NodeType::Source;
@@ -589,6 +665,8 @@ std::shared_ptr<DataFlow> MakeDataFlow(const std::string& name,
 
 std::shared_ptr<InputPort> MakeInputPort(const std::string& name);
 std::shared_ptr<OutputPort> MakeOutputPort(const std::string& name);
+std::shared_ptr<ParentPort> MakeParentPort(const std::string& name);
+std::shared_ptr<ChildPort> MakeChildPort(const std::string& name);
 typedef std::shared_ptr<Node> NodePtr;
 typedef std::shared_ptr<View> ViewPtr;
 typedef std::shared_ptr<Compute> ComputePtr;
@@ -606,6 +684,9 @@ typedef std::shared_ptr<ConnectionBundle> ConnectionBundlePtr;
 typedef std::shared_ptr<Relationship> RelationshipPtr;
 typedef std::shared_ptr<Predicate> PredicatePtr;
 typedef std::shared_ptr<Packet> PacketPtr;
+typedef std::shared_ptr<NodeIcon> NodeIconPtr;
+typedef std::shared_ptr<ParentPort> ParentPortPtr;
+typedef std::shared_ptr<ChildPort> ChildPortPtr;
 }
 }
 #endif /* INCLUDE_CORE_ALLOYUALGRAPH_H_ */

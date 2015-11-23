@@ -35,7 +35,7 @@ bool DataFlowEx::init(Composite& rootNode) {
 	SourcePtr sourceNode = MakeSourceNode("Source", pixel2(10, 340));
 	DestinationPtr destNode = MakeDestinationNode("Destination", pixel2(10, 450));
 
-	for(int i=0;i<4;i++){
+	for(int i=0;i<6;i++){
 		computeNode->add(MakeInputPort(MakeString()<<"Input "<<i));
 	}
 	for(int i=0;i<2;i++){
@@ -46,13 +46,6 @@ bool DataFlowEx::init(Composite& rootNode) {
 		viewNode->add(MakeInputPort(MakeString()<<"Input "<<i));
 	}
 
-
-
-	sourceNode->add(MakeInputPort("Input"));
-	sourceNode->add(MakeOutputPort("Output"));
-
-	destNode->add(MakeInputPort("Input"));
-	destNode->add(MakeOutputPort("Output"));
 	graph->add(computeNode);
 	graph->add(viewNode);
 	graph->add(dataNode);
