@@ -3217,9 +3217,7 @@ ExpandTree::ExpandTree(const std::string& name, const AUnit2D& pos,
 			new Draw("Tree Region", CoordPX(0.0f, 0.0f),
 					CoordPercent(1.0f, 1.0f)));
 	drawRegion->onDraw = [this](AlloyContext* context,const box2px& bounds) {
-		pushScissor(nvg,bounds);
 		root.draw(this,context,bounds.position);
-		popScissor(nvg);
 	};
 	drawRegion->onMouseOver =
 			[this](AlloyContext* context,const InputEvent& e) {
