@@ -24,12 +24,13 @@ namespace aly {
 namespace dataflow {
 const int MultiPort::FrontIndex = std::numeric_limits<int>::min();
 const int MultiPort::BackIndex = std::numeric_limits<int>::max();
-const pixel2 Node::DEFAULT_NODE_DIMENSIONS = pixel2(128, 64);
-const pixel2 Port::DEFAULT_PORT_DIMENSIONS = pixel2(12, 12);
-std::shared_ptr<InputPort> MakeInputPort(const std::string& name){
+const pixel2 Node::DEFAULT_DIMENSIONS = pixel2(128, 64+12+11);
+const pixel2 InputPort::DEFAULT_DIMENSIONS = pixel2(12, 12);
+const pixel2 OutputPort::DEFAULT_DIMENSIONS = pixel2(12, 11);
+std::shared_ptr<InputPort> MakeInputPort(const std::string& name) {
 	return InputPortPtr(new InputPort(name));
 }
-std::shared_ptr<OutputPort> MakeOutputPort(const std::string& name){
+std::shared_ptr<OutputPort> MakeOutputPort(const std::string& name) {
 	return OutputPortPtr(new OutputPort(name));
 }
 std::shared_ptr<DataFlow> MakeDataFlow(const std::string& name,
@@ -51,142 +52,162 @@ std::shared_ptr<Data> MakeDataNode(const std::string& name,
 		const std::string& label, const pixel2& pos) {
 	return DataPtr(
 			new Data(name, label, CoordPX(pos),
-					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
+					CoordPX(Node::DEFAULT_DIMENSIONS)));
 }
 std::shared_ptr<Data> MakeDataNode(const std::string& name, const pixel2& pos) {
 	return DataPtr(
-			new Data(name, CoordPX(pos),
-					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
+			new Data(name, CoordPX(pos), CoordPX(Node::DEFAULT_DIMENSIONS)));
 }
 std::shared_ptr<Data> MakeDataNode(const std::string& name,
 		const std::string& label) {
 	return DataPtr(
 			new Data(name, label, CoordPX(0, 0),
-					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
+					CoordPX(Node::DEFAULT_DIMENSIONS)));
 }
 std::shared_ptr<Data> MakeDataNode(const std::string& name) {
 	return DataPtr(
-			new Data(name, CoordPX(0, 0),
-					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
+			new Data(name, CoordPX(0, 0), CoordPX(Node::DEFAULT_DIMENSIONS)));
 }
 
 std::shared_ptr<View> MakeViewNode(const std::string& name,
 		const std::string& label, const pixel2& pos) {
 	return ViewPtr(
 			new View(name, label, CoordPX(pos),
-					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
+					CoordPX(Node::DEFAULT_DIMENSIONS)));
 }
 std::shared_ptr<View> MakeViewNode(const std::string& name, const pixel2& pos) {
 	return ViewPtr(
-			new View(name, CoordPX(pos),
-					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
+			new View(name, CoordPX(pos), CoordPX(Node::DEFAULT_DIMENSIONS)));
 }
 std::shared_ptr<View> MakeViewNode(const std::string& name,
 		const std::string& label) {
 	return ViewPtr(
 			new View(name, label, CoordPX(0, 0),
-					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
+					CoordPX(Node::DEFAULT_DIMENSIONS)));
 }
 std::shared_ptr<View> MakeViewNode(const std::string& name) {
 	return ViewPtr(
-			new View(name, CoordPX(0, 0),
-					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
+			new View(name, CoordPX(0, 0), CoordPX(Node::DEFAULT_DIMENSIONS)));
 }
 
 std::shared_ptr<Compute> MakeComputeNode(const std::string& name,
 		const std::string& label, const pixel2& pos) {
 	return ComputePtr(
 			new Compute(name, label, CoordPX(pos),
-					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
+					CoordPX(Node::DEFAULT_DIMENSIONS)));
 }
 std::shared_ptr<Compute> MakeComputeNode(const std::string& name,
 		const pixel2& pos) {
 	return ComputePtr(
-			new Compute(name, CoordPX(pos),
-					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
+			new Compute(name, CoordPX(pos), CoordPX(Node::DEFAULT_DIMENSIONS)));
 }
 std::shared_ptr<Compute> MakeComputeNode(const std::string& name,
 		const std::string& label) {
 	return ComputePtr(
 			new Compute(name, label, CoordPX(0, 0),
-					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
+					CoordPX(Node::DEFAULT_DIMENSIONS)));
 }
 std::shared_ptr<Compute> MakeComputeNode(const std::string& name) {
 	return ComputePtr(
-			new Compute(name, CoordPX(0, 0),
-					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
+			new Compute(name, CoordPX(0, 0), CoordPX(Node::DEFAULT_DIMENSIONS)));
 }
 
 std::shared_ptr<Source> MakeSourceNode(const std::string& name,
 		const std::string& label, const pixel2& pos) {
 	return SourcePtr(
 			new Source(name, label, CoordPX(pos),
-					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
+					CoordPX(Node::DEFAULT_DIMENSIONS)));
 }
 std::shared_ptr<Source> MakeSourceNode(const std::string& name,
 		const pixel2& pos) {
 	return SourcePtr(
-			new Source(name, CoordPX(pos),
-					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
+			new Source(name, CoordPX(pos), CoordPX(Node::DEFAULT_DIMENSIONS)));
 }
 std::shared_ptr<Source> MakeSourceNode(const std::string& name,
 		const std::string& label) {
 	return SourcePtr(
 			new Source(name, label, CoordPX(0, 0),
-					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
+					CoordPX(Node::DEFAULT_DIMENSIONS)));
 }
 std::shared_ptr<Source> MakeSourceNode(const std::string& name) {
 	return SourcePtr(
-			new Source(name, CoordPX(0, 0),
-					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
+			new Source(name, CoordPX(0, 0), CoordPX(Node::DEFAULT_DIMENSIONS)));
 }
 
 std::shared_ptr<Destination> MakeDestinationNode(const std::string& name,
 		const std::string& label, const pixel2& pos) {
 	return DestinationPtr(
 			new Destination(name, label, CoordPX(pos),
-					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
+					CoordPX(Node::DEFAULT_DIMENSIONS)));
 }
 std::shared_ptr<Destination> MakeDestinationNode(const std::string& name,
 		const pixel2& pos) {
 	return DestinationPtr(
 			new Destination(name, CoordPX(pos),
-					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
+					CoordPX(Node::DEFAULT_DIMENSIONS)));
 }
 std::shared_ptr<Destination> MakeDestinationNode(const std::string& name,
 		const std::string& label) {
 	return DestinationPtr(
 			new Destination(name, label, CoordPX(0, 0),
-					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
+					CoordPX(Node::DEFAULT_DIMENSIONS)));
 }
 std::shared_ptr<Destination> MakeDestinationNode(const std::string& name) {
 	return DestinationPtr(
 			new Destination(name, CoordPX(0, 0),
-					CoordPX(Node::DEFAULT_NODE_DIMENSIONS)));
+					CoordPX(Node::DEFAULT_DIMENSIONS)));
 }
 void Node::setup() {
-	TextLabelPtr textLabel = TextLabelPtr(
-			new TextLabel(label, CoordPX(Node::DEFAULT_NODE_DIMENSIONS.y,0.0f),
-					CoordPerPX(1.0f, 1.0f,-Node::DEFAULT_NODE_DIMENSIONS.y,0.0f)));
-	textLabel->setAlignment(HorizontalAlignment::Left,
+	radius = 0.5f * (Node::DEFAULT_DIMENSIONS.y- OutputPort::DEFAULT_DIMENSIONS.y-InputPort::DEFAULT_DIMENSIONS.y);
+	labelRegion = TextLabelPtr(
+			new TextLabel(label,
+					CoordPX(radius*2.0f,
+							2*InputPort::DEFAULT_DIMENSIONS.y + 1.0f),
+					CoordPerPX(1.0f, 1.0f, -2.0f*radius,
+							-2*OutputPort::DEFAULT_DIMENSIONS.y
+									- 2*InputPort::DEFAULT_DIMENSIONS.y - 2.0f)));
+	labelRegion->setAlignment(HorizontalAlignment::Center,
 			VerticalAlignment::Middle);
-	textLabel->fontSize = UnitPX(24.0f);
-	textLabel->fontType = FontType::Bold;
-	Composite::add(textLabel);
-	inputPortComposite=CompositePtr(new Composite("Input Ports",CoordPX(Node::DEFAULT_NODE_DIMENSIONS.y,0.0f),CoordPX(0.0f,Port::DEFAULT_PORT_DIMENSIONS.y)));
-	outputPortComposite=CompositePtr(new Composite("Output Ports",CoordPX(Node::DEFAULT_NODE_DIMENSIONS.y,Node::DEFAULT_NODE_DIMENSIONS.y-Port::DEFAULT_PORT_DIMENSIONS.y),CoordPX(0.0f,Port::DEFAULT_PORT_DIMENSIONS.y)));
-	inputPortComposite->setOrientation(Orientation::Horizontal,pixel2(2,2));
-	outputPortComposite->setOrientation(Orientation::Horizontal,pixel2(2,2));
+	labelRegion->setAspectRule(AspectRule::Unspecified);
+	labelRegion->fontSize = UnitPX(20.0f);
+	labelRegion->fontType = FontType::Bold;
+	borderWidth = UnitPX(3.0f);
+	Composite::add(labelRegion);
+	inputPortComposite = CompositePtr(
+			new Composite("Input Ports",
+					CoordPX(2*radius, InputPort::DEFAULT_DIMENSIONS.y),
+					CoordPX(0.0f,InputPort::DEFAULT_DIMENSIONS.y)));
+	outputPortComposite = CompositePtr(
+			new Composite("Output Ports",
+					CoordPX(2*radius,Node::DEFAULT_DIMENSIONS.y - 2*OutputPort::DEFAULT_DIMENSIONS.y),
+					CoordPX(0.0f, OutputPort::DEFAULT_DIMENSIONS.y)));
+
+	inputPort = MakeInputPort("Input");
+	outputPort = MakeOutputPort("Output");
+
+	inputPort->position = CoordPX(
+			radius - InputPort::DEFAULT_DIMENSIONS.x * 0.5f, 0.0f);
+	outputPort->position = CoordPerPX(0.0f, 1.0f,
+			radius - InputPort::DEFAULT_DIMENSIONS.x * 0.5f,
+			-OutputPort::DEFAULT_DIMENSIONS.y);
+
+	inputPortComposite->setOrientation(Orientation::Horizontal, pixel2(2, 0),
+			pixel2(2, 0));
+	outputPortComposite->setOrientation(Orientation::Horizontal, pixel2(2, 0),
+			pixel2(2, 0));
 
 	Composite::add(inputPortComposite);
 	Composite::add(outputPortComposite);
+	Composite::add(inputPort);
+	Composite::add(outputPort);
 	setRoundCorners(true);
 	setDragEnabled(true);
 	Application::addListener(this);
 }
 bool Node::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	bool ret = Composite::onEventHandler(context, e);
-	if (e.type == InputType::MouseButton && e.button == GLFW_MOUSE_BUTTON_LEFT&& context->isMouseDown(this)) {
+	if (e.type == InputType::MouseButton && e.button == GLFW_MOUSE_BUTTON_LEFT
+			&& context->isMouseDown(this)) {
 		dynamic_cast<Composite*>(parent)->putLast(this);
 	}
 	return ret;
@@ -271,93 +292,140 @@ void InputMultiPort::setValue(const std::shared_ptr<Packet>& packet) {
 void OutputMultiPort::setValue(const std::shared_ptr<Packet>& packet) {
 	insertAtBack(packet);
 }
-void Port::setup(){
-	dimensions=CoordPX(DEFAULT_PORT_DIMENSIONS);
-	position=CoordPX(0.0f,0.0f);
+void Port::setup() {
+	position = CoordPX(0.0f, 0.0f);
+	borderWidth = UnitPX(1.0f);
 }
-void Port::draw(AlloyContext* context){
-	NVGcontext* nvg=context->nvgContext;
-	box2px bounds=getBounds();
-	nvgFillColor(nvg,Color(context->theme.LIGHT));
+void InputPort::setup() {
+	position = CoordPX(0.0f, 0.0f);
+	dimensions = CoordPX(InputPort::DEFAULT_DIMENSIONS);
+}
+void OutputPort::setup() {
+	position = CoordPX(0.0f, 0.0f);
+	dimensions = CoordPX(OutputPort::DEFAULT_DIMENSIONS);
+}
+void Port::draw(AlloyContext* context) {
+	NVGcontext* nvg = context->nvgContext;
+	box2px bounds = getBounds();
+	nvgFillColor(nvg, Color(context->theme.LIGHT));
 	nvgBeginPath(nvg);
-	nvgEllipse(nvg,bounds.position.x+bounds.dimensions.x*0.5f,bounds.position.y+bounds.dimensions.y*0.5f,bounds.dimensions.x*0.5f,bounds.dimensions.y*0.5f);
+	nvgEllipse(nvg, bounds.position.x + bounds.dimensions.x * 0.5f,
+			bounds.position.y + bounds.dimensions.y * 0.5f,
+			bounds.dimensions.x * 0.5f, bounds.dimensions.y * 0.5f);
 	nvgFill(nvg);
 }
-void InputPort::draw(AlloyContext* context){
-	NVGcontext* nvg=context->nvgContext;
-	box2px bounds=getBounds();
-	nvgFillColor(nvg,Color(context->theme.LIGHT));
+void InputPort::draw(AlloyContext* context) {
+	NVGcontext* nvg = context->nvgContext;
+	box2px bounds = getBounds();
+	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
+			context->pixelRatio);
+	if (context->isMouseOver(this)) {
+		nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
+		nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+	} else {
+		nvgFillColor(nvg, Color(context->theme.LIGHT));
+		nvgStrokeColor(nvg, Color(context->theme.LIGHT));
+	}
+	nvgStrokeWidth(nvg, lineWidth);
 	nvgBeginPath(nvg);
-	nvgEllipse(nvg,bounds.position.x+bounds.dimensions.x*0.5f,bounds.position.y+bounds.dimensions.y*0.5f,bounds.dimensions.x*0.5f-1.0f,bounds.dimensions.y*0.5f-1.0f);
+	nvgEllipse(nvg, bounds.position.x + bounds.dimensions.x * 0.5f,
+			bounds.position.y + bounds.dimensions.y * 0.5f,
+			bounds.dimensions.x * 0.5f - 0.5f * lineWidth,
+			bounds.dimensions.y * 0.5f - 0.5f * lineWidth);
 	nvgFill(nvg);
-}
-void OutputPort::draw(AlloyContext* context){
-	NVGcontext* nvg=context->nvgContext;
-	box2px bounds=getBounds();
-	nvgLineCap(nvg,NVG_ROUND);
-	nvgLineJoin(nvg,NVG_BEVEL);
-	nvgStrokeWidth(nvg,1.0f);
-	nvgFillColor(nvg,Color(context->theme.LIGHT));
-	nvgStrokeColor(nvg,Color(context->theme.LIGHT));
 
+	nvgStroke(nvg);
+}
+void OutputPort::draw(AlloyContext* context) {
+	NVGcontext* nvg = context->nvgContext;
+	box2px bounds = getBounds();
+	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
+			context->pixelRatio);
+	if (context->isMouseOver(this)) {
+		nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
+		nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+	} else {
+		nvgFillColor(nvg, Color(context->theme.LIGHT));
+		nvgStrokeColor(nvg, Color(context->theme.LIGHT));
+	}
+	nvgLineCap(nvg, NVG_ROUND);
+	nvgLineJoin(nvg, NVG_BEVEL);
+	nvgStrokeWidth(nvg, lineWidth);
 	nvgBeginPath(nvg);
-	nvgMoveTo(nvg,bounds.position.x+bounds.dimensions.x*0.5f,bounds.position.y+bounds.dimensions.y-2);
-	nvgLineTo(nvg,bounds.position.x+2,					  bounds.position.y+2);
-	nvgLineTo(nvg,bounds.position.x+bounds.dimensions.x-2,bounds.position.y+2);
-	nvgLineTo(nvg,bounds.position.x+bounds.dimensions.x*0.5f,bounds.position.y+bounds.dimensions.y-2);
-	nvgFill(nvg);
 
-	nvgBeginPath(nvg);
-	nvgMoveTo(nvg,bounds.position.x+bounds.dimensions.x*0.5f,bounds.position.y+bounds.dimensions.y-2);
-	nvgLineTo(nvg,bounds.position.x+2,bounds.position.y+2);
-	nvgLineTo(nvg,bounds.position.x+bounds.dimensions.x-2,bounds.position.y+2);
-	nvgLineTo(nvg,bounds.position.x+bounds.dimensions.x*0.5f,bounds.position.y+bounds.dimensions.y-2);
+	nvgMoveTo(nvg, bounds.position.x + bounds.dimensions.x * 0.5f,bounds.position.y + bounds.dimensions.y - lineWidth);
+	nvgLineTo(nvg, bounds.position.x+0.5f, bounds.position.y + lineWidth * 0.5f);
+	nvgLineTo(nvg, bounds.position.x + bounds.dimensions.x-1.0f,bounds.position.y + lineWidth * 0.5f);
+	nvgClosePath(nvg);
+	nvgFill(nvg);
 	nvgStroke(nvg);
 
 }
-void Node::draw(AlloyContext* context){
-	NVGcontext* nvg=context->nvgContext;
+void Node::draw(AlloyContext* context) {
+	NVGcontext* nvg = context->nvgContext;
+	box2px bounds = getBounds();
+	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
+			context->pixelRatio);
+	nvgStrokeColor(nvg, context->theme.LIGHT_TEXT);
+	nvgStrokeWidth(nvg, lineWidth);
+	nvgLineCap(nvg, NVG_ROUND);
+	box2px lbounds = labelRegion->getBounds();
+	box2px ibounds = inputPortComposite->getBounds();
+	box2px obounds = outputPortComposite->getExtents();
+	pixel2 inStart = pixel2(
+			bounds.position.x + radius,
+			bounds.position.y+2*InputPort::DEFAULT_DIMENSIONS.y+2);
+	pixel2 inEnd = pixel2(
+			bounds.position.x  + 2*radius
+					+ ibounds.dimensions.x,
+					bounds.position.y+2*InputPort::DEFAULT_DIMENSIONS.y+ 2);
+	pixel2 outStart = pixel2(
+			bounds.position.x + radius,
+			bounds.position.y+bounds.dimensions.y-2*OutputPort::DEFAULT_DIMENSIONS.y - 1);
+	pixel2 outEnd = pixel2(bounds.position.x + 2*radius+ obounds.dimensions.x,
+					bounds.position.y+bounds.dimensions.y-2*OutputPort::DEFAULT_DIMENSIONS.y- 1);
 
-	nvgStrokeColor(nvg,context->theme.LIGHT_TEXT);
-	nvgStrokeWidth(nvg,4.0f);
-	nvgLineCap(nvg,NVG_ROUND);
-	box2px bounds=getBounds();
-	box2px ibounds=inputPortComposite->getBounds();
-	box2px obounds=outputPortComposite->getExtents();
+	pixel2 labelStart = aly::min(aly::min(lbounds.min(), inStart), outStart);
+	pixel2 labelEnd = aly::max(aly::max(lbounds.max(), inEnd), outEnd);
+	nvgStrokeWidth(nvg, lineWidth*0.5f);
+	nvgStrokeColor(nvg, Color(context->theme.LIGHT));
+	nvgFillColor(nvg, color);
 	nvgBeginPath(nvg);
-	nvgMoveTo(nvg,bounds.position.x+Node::DEFAULT_NODE_DIMENSIONS.y*0.5f,bounds.position.y+Port::DEFAULT_PORT_DIMENSIONS.y+2.0f);
-	nvgLineTo(nvg,bounds.position.x+Node::DEFAULT_NODE_DIMENSIONS.y+ibounds.dimensions.x,bounds.position.y+Port::DEFAULT_PORT_DIMENSIONS.y+2.0f);
-
-	nvgMoveTo(nvg,bounds.position.x+Node::DEFAULT_NODE_DIMENSIONS.y*0.5f,bounds.position.y+bounds.dimensions.y-Port::DEFAULT_PORT_DIMENSIONS.y-2.0f);
-	nvgLineTo(nvg,bounds.position.x+Node::DEFAULT_NODE_DIMENSIONS.y+obounds.dimensions.x,bounds.position.y+bounds.dimensions.y-Port::DEFAULT_PORT_DIMENSIONS.y-2.0f);
+	nvgRoundedRect(nvg, labelStart.x+1.0f, labelStart.y+1.0f, labelEnd.x - labelStart.x-2.0f,
+			labelEnd.y - labelStart.y-2.0f, context->theme.CORNER_RADIUS);
+	nvgFill(nvg);
 	nvgStroke(nvg);
 
+	nvgStrokeWidth(nvg, lineWidth);
+	if (context->isMouseOver(this)||context->isMouseOver(labelRegion.get())) {
+		nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+		nvgFillColor(nvg, color.toLighter(0.25f));
+	} else {
+		nvgStrokeColor(nvg, Color(context->theme.LIGHT_TEXT));
+		nvgFillColor(nvg, color);
+	}
 
-	bounds.dimensions=pixel2(DEFAULT_NODE_DIMENSIONS.y);
-
+	nvgStrokeWidth(nvg, lineWidth);
+	nvgBeginPath(nvg);
+	nvgCircle(nvg, bounds.position.x + radius,
+			bounds.position.y  + radius + InputPort::DEFAULT_DIMENSIONS.y,radius-lineWidth*0.5f-1);
+	nvgFill(nvg);
+	nvgStroke(nvg);
 	Composite::draw(context);
-	nvgFillColor(nvg,color);
-	nvgStrokeColor(nvg,context->theme.LIGHT_TEXT);
-	nvgStrokeWidth(nvg,4.0f);
-	nvgBeginPath(nvg);
-	nvgEllipse(nvg,bounds.position.x+bounds.dimensions.x*0.5f,bounds.position.y+bounds.dimensions.y*0.5f,bounds.dimensions.x*0.5f,bounds.dimensions.y*0.5f);
-	nvgFill(nvg);
-	nvgStroke(nvg);
-
 }
-void View::draw(AlloyContext* context){
+void View::draw(AlloyContext* context) {
 	Node::draw(context);
 }
-void Compute::draw(AlloyContext* context){
+void Compute::draw(AlloyContext* context) {
 	Node::draw(context);
 }
-void Data::draw(AlloyContext* context){
+void Data::draw(AlloyContext* context) {
 	Node::draw(context);
 }
-void Source::draw(AlloyContext* context){
+void Source::draw(AlloyContext* context) {
 	Node::draw(context);
 }
-void Destination::draw(AlloyContext* context){
+void Destination::draw(AlloyContext* context) {
 	Node::draw(context);
 }
 }

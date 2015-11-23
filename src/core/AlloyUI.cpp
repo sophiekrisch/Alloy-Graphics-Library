@@ -122,7 +122,7 @@ void Region::drawBoundsLabel(AlloyContext* context, const std::string& name,
 		int font) {
 	bool ontop = context->isOnTop(this);
 	box2px bounds = getCursorBounds();
-	if ((bounds.dimensions.x <= 20 && bounds.dimensions.y <= 20)
+	if ((bounds.dimensions.x <= 4 && bounds.dimensions.y <= 4)
 			|| bounds.dimensions.x * bounds.dimensions.y == 0) {
 		return;
 	}

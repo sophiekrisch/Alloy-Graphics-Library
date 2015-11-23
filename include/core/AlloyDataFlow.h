@@ -76,10 +76,9 @@ public:
 class Port: public Region {
 protected:
 	std::string label;
-	void setup();
+	virtual void setup();
 public:
 	friend class Connection;
-	static const pixel2 DEFAULT_PORT_DIMENSIONS;
 	Port(const std::string& name, const std::string& label) :
 			Region(name), label(label) {
 		setup();
@@ -123,14 +122,17 @@ class InputPort: public Port {
 protected:
 	std::vector<std::shared_ptr<Connection>> connections;
 	std::shared_ptr<Packet> value;
+	virtual void setup() override;
 public:
+
+	static const pixel2 DEFAULT_DIMENSIONS;
 	InputPort(const std::string& name) :
 			Port(name) {
-
+		setup();
 	}
 	InputPort(const std::string& name, const std::string& label) :
 			Port(name, label) {
-
+		setup();
 	}
 	virtual PortType getType() const override {
 		return PortType::Input;
@@ -148,14 +150,17 @@ class OutputPort: public Port {
 protected:
 	std::vector<std::shared_ptr<Connection>> connections;
 	std::shared_ptr<Packet> value;
+	virtual void setup() override;
 public:
+
+	static const pixel2 DEFAULT_DIMENSIONS;
 	OutputPort(const std::string& name) :
 			Port(name) {
-
+		setup();
 	}
 	OutputPort(const std::string& name, const std::string& label) :
 			Port(name, label) {
-
+		setup();
 	}
 	virtual PortType getType() const override {
 		return PortType::Output;
@@ -246,14 +251,17 @@ class Node: public Composite {
 protected:
 	std::string label;
 	Color color;
-	std::vector<std::shared_ptr<InputPort>> inputPort;
-	std::vector<std::shared_ptr<OutputPort>> outputPort;
+	float radius;
+	std::vector<std::shared_ptr<InputPort>> inputPorts;
+	std::vector<std::shared_ptr<OutputPort>> outputPorts;
+	std::shared_ptr<InputPort> inputPort;
+	std::shared_ptr<OutputPort> outputPort;
 	CompositePtr inputPortComposite;
 	CompositePtr outputPortComposite;
-
+	TextLabelPtr labelRegion;
 	virtual void setup();
 public:
-	static const pixel2 DEFAULT_NODE_DIMENSIONS;
+	static const pixel2 DEFAULT_DIMENSIONS;
 	virtual NodeType getType() const {
 		return NodeType::Unknown;
 	}
@@ -275,11 +283,11 @@ public:
 	}
 	void add(const std::shared_ptr<InputPort>& port) {
 		inputPortComposite->add(port);
-		inputPort.push_back(port);
+		inputPorts.push_back(port);
 	}
 	void add(const std::shared_ptr<OutputPort>& port) {
 		outputPortComposite->add(port);
-		outputPort.push_back(port);
+		outputPorts.push_back(port);
 	}
 	std::string getLabel() const {
 		return label;
