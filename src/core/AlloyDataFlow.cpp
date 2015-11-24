@@ -720,10 +720,10 @@ void Node::draw(AlloyContext* context) {
 									ibounds.dimensions.x),
 							obounds.dimensions.x),
 			lbounds.position.y + lbounds.dimensions.y);
-	nvgStrokeWidth(nvg, 2.0f);
+	nvgStrokeWidth(nvg, 1.0f);
 	if (inputPorts.size() > 0 || outputPorts.size() > 0) {
-		nvgStrokeColor(nvg, Color(context->theme.DARK.toLighter(0.5f)));
-		nvgFillColor(nvg, context->theme.DARK.toSemiTransparent(0.5f));
+		nvgStrokeColor(nvg, Color(context->theme.DARK.toLighter(0.25f)));
+		nvgFillColor(nvg, context->theme.DARK.toLighter(0.25f).toSemiTransparent(0.5f));
 	} else {
 		nvgStrokeColor(nvg, Color(COLOR_NONE)); //Color(context->theme.LIGHT_TEXT.toSemiTransparent(0.5f))
 		nvgFillColor(nvg, Color(context->theme.DARK.toSemiTransparent(0.5f)));
