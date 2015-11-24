@@ -59,7 +59,7 @@ template<typename T> T sign(const T& a) {
 
 template<class T, int M> struct vec;
 template<class T> struct vec<T, 1> {
-	T x=T(0);
+	T x = T(0);
 
 	vec(T x, T y) :
 			x(x) {
@@ -1203,8 +1203,7 @@ template<class C, class R, class T, int M, int N> std::basic_ostream<C, R> & ope
 	}
 	return ss;
 }
-template<class T> matrix<T, 4, 4> MakeRotation(const vec<T, 3>& axis,
-		T angle) {
+template<class T> matrix<T, 4, 4> MakeRotation(const vec<T, 3>& axis, T angle) {
 	matrix<T, 4, 4> M = Identity<T, 4, 4>();
 	T mag = length(axis);
 	if (mag >= 1E-6f) {
@@ -1527,9 +1526,9 @@ template<class T, int M> struct box {
 	box() :
 			position((T) 0), dimensions((T) 0) {
 	}
-        template<class Archive> void serialize(Archive & archive) {
-                archive(CEREAL_NVP(position),CEREAL_NVP(dimensions));
-        }
+	template<class Archive> void serialize(Archive & archive) {
+		archive(CEREAL_NVP(position), CEREAL_NVP(dimensions));
+	}
 	box(vec<T, M> pt, vec<T, M> dims) :
 			position(pt), dimensions(dims) {
 	}
@@ -1557,13 +1556,13 @@ template<class T, int M> struct box {
 	inline bool intersects(const box<T, M>& other) const {
 		vec<T, M> mn = aly::max(position, other.position);
 		vec<T, M> mx = aly::min(max(), other.max());
-		vec<T,M>  dims = mx - mn;
-		T size=1;
+		vec<T, M> dims = mx - mn;
+		T size = 1;
 		for (int m = 0; m < M; m++) {
 			dims[m] = std::max(dims[m], (T) 0);
-			size*=dims[m];
+			size *= dims[m];
 		}
-		return (size>0);
+		return (size > 0);
 	}
 	inline vec<T, M> max() const {
 		return position + dimensions;
@@ -1579,7 +1578,7 @@ template<class T, int M> struct box {
 				parent.position + parent.dimensions - dimensions);
 	}
 	inline vec<T, M> clamp(const vec<T, M>& pt) {
-		return aly::clamp(pt, position,position + dimensions);
+		return aly::clamp(pt, position, position + dimensions);
 	}
 };
 template<class C, class R, class T, int M> std::basic_ostream<C, R> & operator <<(
@@ -1644,31 +1643,33 @@ template<class T> matrix<T, 4, 4> lookAtMatrix(vec<T, 3> eyePosition3D,
 	return transpose(matrix2) * M;
 }
 
-template<class T> vec<T, 3> Transform(const matrix<T, 4, 4>& M, const vec<T, 3>& v) {
-	vec<T, 4> out = M*vec<T, 4>(v, 1.0f);
+template<class T> vec<T, 3> Transform(const matrix<T, 4, 4>& M,
+		const vec<T, 3>& v) {
+	vec<T, 4> out = M * vec<T, 4>(v, 1.0f);
 	return out.xyz() / out.w;
 }
-template<class T> vec<T, 4> Transform(const matrix<T, 3, 3>& M, const vec<T, 4>& v) {
-	vec<T, 3> out = M*v.xyz();
-	return vec<T,4>(out,v.w);
+template<class T> vec<T, 4> Transform(const matrix<T, 3, 3>& M,
+		const vec<T, 4>& v) {
+	vec<T, 3> out = M * v.xyz();
+	return vec<T, 4>(out, v.w);
 }
-template<class T> vec<T, 3> Transform(const matrix<T, 3, 3>& M, const vec<T, 3>& v) {
-	return M*v;
+template<class T> vec<T, 3> Transform(const matrix<T, 3, 3>& M,
+		const vec<T, 3>& v) {
+	return M * v;
 }
-template<class T> vec<T, 4> Transform(const matrix<T, 4, 4>& M, const vec<T, 4>& v) {
-	vec<T, 4> out = M*v;
-	return (out/out.w);
+template<class T> vec<T, 4> Transform(const matrix<T, 4, 4>& M,
+		const vec<T, 4>& v) {
+	vec<T, 4> out = M * v;
+	return (out / out.w);
 }
-template<class T,int C> double LineSearch(
-	vec<T,C>& value, 
-	const vec<T, C>& minValue, 
-	const vec<T, C>& maxValue,
-	const std::function<double(const vec<T,C>& value)>& scoreFunc,
-	double err= 1E-5) {
-	const T tolerance=T(err*lengthL1(maxValue-minValue));
-	const T sqrt5= T(2.236067977499789696);
-	const T lambda= T( 0.5 * (sqrt5 - 1.0));
-	const T mu=T(0.5 * (3.0 - sqrt5));
+template<class T, int C> double LineSearch(vec<T, C>& value,
+		const vec<T, C>& minValue, const vec<T, C>& maxValue,
+		const std::function<double(const vec<T, C>& value)>& scoreFunc,
+		double err = 1E-5) {
+	const T tolerance = T(err * lengthL1(maxValue - minValue));
+	const T sqrt5 = T(2.236067977499789696);
+	const T lambda = T(0.5 * (sqrt5 - 1.0));
+	const T mu = T(0.5 * (3.0 - sqrt5));
 	vec<T, C> x1;
 	vec<T, C> x2;
 	double fx1;
@@ -1682,15 +1683,16 @@ template<class T,int C> double LineSearch(
 	while (lengthL1(b - a) >= tolerance) {
 		if (fx1 > fx2) {
 			a = x1;
-			if (lengthL1(b - a) < tolerance) break;
+			if (lengthL1(b - a) < tolerance)
+				break;
 			x1 = x2;
 			fx1 = fx2;
 			x2 = b - mu * (b - a);
 			fx2 = scoreFunc(x2);
-		}
-		else {
+		} else {
 			b = x2;
-			if (lengthL1(b - a) < tolerance) break;
+			if (lengthL1(b - a) < tolerance)
+				break;
 			x2 = x1;
 			fx2 = fx1;
 			x1 = a + mu * (b - a);
@@ -1700,13 +1702,11 @@ template<class T,int C> double LineSearch(
 	value = a;
 	return scoreFunc(a);
 }
-template<class T> double LineSearch(
-	T& value,
-	const T& minValue,
-	const T& maxValue,
-	const std::function<double(const T& value)>& scoreFunc,
-	double err = 1E-5) {
-	const T tolerance = T(err*(maxValue - minValue));
+template<class T> double LineSearch(T& value, const T& minValue,
+		const T& maxValue,
+		const std::function<double(const T& value)>& scoreFunc, double err =
+				1E-5) {
+	const T tolerance = T(err * (maxValue - minValue));
 	const T sqrt5 = T(2.236067977499789696);
 	const T lambda = T(0.5 * (sqrt5 - 1.0));
 	const T mu = T(0.5 * (3.0 - sqrt5));
@@ -1723,15 +1723,16 @@ template<class T> double LineSearch(
 	while (b - a >= tolerance) {
 		if (fx1 > fx2) {
 			a = x1;
-			if (b - a < tolerance) break;
+			if (b - a < tolerance)
+				break;
 			x1 = x2;
 			fx1 = fx2;
 			x2 = b - mu * (b - a);
 			fx2 = scoreFunc(x2);
-		}
-		else {
+		} else {
 			b = x2;
-			if (b - a < tolerance) break;
+			if (b - a < tolerance)
+				break;
 			x2 = x1;
 			fx2 = fx1;
 			x1 = a + mu * (b - a);
@@ -1838,30 +1839,25 @@ typedef box<uint32_t, 3> box3ui;
 typedef box<uint32_t, 4> box4ui;
 
 inline RGBA ToRGBA(const RGBAf& r) {
-	return RGBA(
-		clamp((int)(r.x*255.0f), 0, 255),
-		clamp((int)(r.y*255.0f), 0, 255),
-		clamp((int)(r.z*255.0f), 0, 255),
-		clamp((int)(r.w*255.0f), 0, 255));
+	return RGBA(clamp((int) (r.x * 255.0f), 0, 255),
+			clamp((int) (r.y * 255.0f), 0, 255),
+			clamp((int) (r.z * 255.0f), 0, 255),
+			clamp((int) (r.w * 255.0f), 0, 255));
 }
 inline RGBA ToRGBA(const RGBf& r) {
-	return RGBA(
-		clamp((int)(r.x*255.0f), 0, 255),
-		clamp((int)(r.y*255.0f), 0, 255),
-		clamp((int)(r.z*255.0f), 0, 255),
-		255);
+	return RGBA(clamp((int) (r.x * 255.0f), 0, 255),
+			clamp((int) (r.y * 255.0f), 0, 255),
+			clamp((int) (r.z * 255.0f), 0, 255), 255);
 }
 inline ubyte3 ToRGB(const RGBf& r) {
-	return ubyte3(
-		clamp((int)(r.x*255.0f), 0, 255),
-		clamp((int)(r.y*255.0f), 0, 255),
-		clamp((int)(r.z*255.0f), 0, 255));
+	return ubyte3(clamp((int) (r.x * 255.0f), 0, 255),
+			clamp((int) (r.y * 255.0f), 0, 255),
+			clamp((int) (r.z * 255.0f), 0, 255));
 }
 inline ubyte3 ToRGB(const RGBAf& r) {
-	return ubyte3(
-		clamp((int)(r.x*255.0f), 0, 255),
-		clamp((int)(r.y*255.0f), 0, 255),
-		clamp((int)(r.z*255.0f), 0, 255));
+	return ubyte3(clamp((int) (r.x * 255.0f), 0, 255),
+			clamp((int) (r.y * 255.0f), 0, 255),
+			clamp((int) (r.z * 255.0f), 0, 255));
 }
 
 inline RGBAf ToRGBAf(const RGBA& r) {
@@ -1888,12 +1884,10 @@ inline aly::ubyte3 ToRGB(const RGBA& r) {
 inline aly::RGBA ToRGBA(const ubyte3& r) {
 	return aly::RGBA(r, 255);
 }
-float RandomUniform(float min,float max);
+float RandomUniform(float min, float max);
 int RandomUniform(int min, int max);
 double RandomUniform(double min, double max);
 double RandomGaussian(double mean, double stddev);
-}
-
 
 /*
  *
@@ -1902,84 +1896,93 @@ double RandomGaussian(double mean, double stddev);
  * Author: Nicolas Roussel (nicolas.roussel@inria.fr)
  *
  */
-namespace detail{
-    template <class T, int C>
-    struct low_pass_filter {
-            low_pass_filter() : hatxprev(T(0)), xprev(T(0)), hadprev(false) {}
-            void reset(){
-                hatxprev=vec<T,C>(T(0));
-                xprev=vec<T,C>(T(0));
-                hadprev=false;
-            }
-            vec<T,C> operator()(const vec<T,C>& x, T alpha) {
-                    vec<T,C> hatx;
-                    if(hadprev) {
-                            hatx = alpha * x + (T(1.0)-alpha) * hatxprev;
-                    } else {
-                            hatx = x;
-                            hadprev = true;
-                    }
-                    hatxprev = hatx;
-                    xprev = x;
-                    return hatx;
-            }
-            vec<T,C> hatxprev;
-            vec<T,C> xprev;
-            bool hadprev;
-    };
-}
-template<class T,int C>
-struct TemporalFilter {
-    private:
-            double last_time_;
-            double frequency;
-            T alpha(T cutoff) {
-                    double tau = 1.0 / (2 * M_PI * cutoff);
-                    double te =1.0 / frequency;
-                    return T(1.0 / (1.0 + tau / te));
-            }
-            detail::low_pass_filter<T,C> xfilt_, dxfilt_;
+namespace detail {
+template<class T, int C>
+struct low_pass_filter {
+	vec<T, C> hatxprev;
+	vec<T, C> xprev;
+	low_pass_filter() :
+			hatxprev(T(0)), xprev(T(0)), hadprev(false) {
+	}
+	void reset() {
+		hatxprev = vec<T, C>(T(0));
+		xprev = vec<T, C>(T(0));
+		hadprev = false;
+	}
+	vec<T, C> operator()(const vec<T, C>& x, T alpha) {
+		vec<T, C> hatx;
+		if (hadprev) {
+			hatx = alpha * x + (T(1.0) - alpha) * hatxprev;
+		} else {
+			hatx = x;
+			hadprev = true;
+		}
+		hatxprev = hatx;
+		xprev = x;
+		return hatx;
+	}
 
-            T minCutoff, beta, derivativeCutoff;
-    public:
-        TemporalFilter(double _freq, T _mincutoff, T _beta, T _dcutoff) :
-            frequency(_freq), minCutoff(_mincutoff), beta(_beta), derivativeCutoff(_dcutoff), last_time_(std::numeric_limits<double>::min()) {}
-        vec<T,C> evaluate(const vec<T,C>& x, double t = std::numeric_limits<double>::min()) {
-                vec<T,C> dx(T(0));
-                if(last_time_ != std::numeric_limits<double>::min() && t != std::numeric_limits<double>::min() && t != last_time_) {
-                        frequency = 1.0 / (t - last_time_);
-                }
-                last_time_ = t;
-                if(xfilt_.hadprev)
-                        dx = (x - xfilt_.xprev) * T(frequency);
-                vec<T,C> edx = dxfilt_(dx, alpha(derivativeCutoff));
-                T cutoff = minCutoff + beta * aly::length(edx);
-                return xfilt_(x, alpha(cutoff));
-        }
-        double getFrequency() const {
-            return frequency;
-        }
-        void setMinCutoff(const T& val){
-            minCutoff=val;
-        }
-        void setDerivativeCutoff(const T& val){
-            derivativeCutoff=val;
-        }
-        void setBeta(const T& val){
-            beta=val;
-        }
-        void reset(){
-            last_time_=(std::numeric_limits<double>::min());
-            xfilt_.reset();
-            dxfilt_.reset();
-        }
+	bool hadprev;
 };
-typedef TemporalFilter<float,1> TemporalFilter1f;
-typedef TemporalFilter<float,2> TemporalFilter2f;
-typedef TemporalFilter<float,3> TemporalFilter3f;
-typedef TemporalFilter<float,4> TemporalFilter4f;
-typedef TemporalFilter<double,1> TemporalFilter1d;
-typedef TemporalFilter<double,2> TemporalFilter2d;
-typedef TemporalFilter<double,3> TemporalFilter3d;
-typedef TemporalFilter<double,4> TemporalFilter4d;
+}
+template<class T, int C>
+struct PointFilter {
+private:
+	double last_time_;
+	double frequency;
+	T alpha(T cutoff) {
+		double tau = 1.0 / (2 * M_PI * cutoff);
+		double te = 1.0 / frequency;
+		return T(1.0 / (1.0 + tau / te));
+	}
+	detail::low_pass_filter<T, C> xfilt_, dxfilt_;
+
+	T minCutoff, beta, derivativeCutoff;
+public:
+	PointFilter(double _freq, T _mincutoff, T _beta, T _dcutoff) :
+			frequency(_freq), minCutoff(_mincutoff), beta(_beta), derivativeCutoff(
+					_dcutoff), last_time_(std::numeric_limits<double>::min()) {
+	}
+	vec<T, C> evaluate(const vec<T, C>& x, double t =
+			std::numeric_limits<double>::min()) {
+		vec<T, C> dx(T(0));
+		if (last_time_ != std::numeric_limits<double>::min()
+				&& t != std::numeric_limits<double>::min() && t != last_time_) {
+			frequency = 1.0 / (t - last_time_);
+		}
+		last_time_ = t;
+		if (xfilt_.hadprev)
+			dx = (x - xfilt_.xprev) * T(frequency);
+		vec<T, C> edx = dxfilt_(dx, alpha(derivativeCutoff));
+		T cutoff = minCutoff + beta * aly::length(edx);
+		return xfilt_(x, alpha(cutoff));
+	}
+	double getFrequency() const {
+		return frequency;
+	}
+	void setMinCutoff(const T& val) {
+		minCutoff = val;
+	}
+	void setDerivativeCutoff(const T& val) {
+		derivativeCutoff = val;
+	}
+	void setBeta(const T& val) {
+		beta = val;
+	}
+	void reset() {
+		last_time_ = (std::numeric_limits<double>::min());
+		xfilt_.reset();
+		dxfilt_.reset();
+	}
+};
+
+typedef PointFilter<float, 1> PointFilter1f;
+typedef PointFilter<float, 2> PointFilter2f;
+typedef PointFilter<float, 3> PointFilter3f;
+typedef PointFilter<float, 4> PointFilter4f;
+typedef PointFilter<double, 1> PointFilter1d;
+typedef PointFilter<double, 2> PointFilter2d;
+typedef PointFilter<double, 3> PointFilter3d;
+typedef PointFilter<double, 4> PointFilter4d;
+}
 #endif
