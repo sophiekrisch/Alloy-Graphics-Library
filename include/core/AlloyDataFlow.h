@@ -335,6 +335,8 @@ protected:
 	std::string label;
 	float fontSize;
 	DataFlow* parent;
+	bool dragging;
+	pixel2 cursorDownPosition;
 	std::vector<std::shared_ptr<InputPort>> inputPorts;
 	std::vector<std::shared_ptr<OutputPort>> outputPorts;
 	std::shared_ptr<InputPort> inputPort;
@@ -350,6 +352,8 @@ public:
 	virtual NodeType getType() const {
 		return NodeType::Unknown;
 	}
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
+			override;
 	bool isMouseOver() const ;
 	pixel2 getCenter() const {
 		return nodeIcon->getBounds().center();
@@ -394,8 +398,6 @@ public:
 		this->label = label;
 	}
 	virtual void draw(AlloyContext* context) override;
-	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
-			override;
 };
 class Data: public Node {
 protected:

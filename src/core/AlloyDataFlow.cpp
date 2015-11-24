@@ -227,17 +227,44 @@ void NodeIcon::draw(AlloyContext* context) {
 void Node::setup() {
 	borderWidth = UnitPX(4.0f);
 	fontSize = 20.0f;
+	cursorDownPosition = pixel2(-1, -1);
+	dragging = false;
+	setClampDragToParentBounds(true);
+	Application::addListener(this);
 }
 bool Node::onEventHandler(AlloyContext* context, const InputEvent& e) {
-	bool ret = Composite::onEventHandler(context, e);
+	if (Composite::onEventHandler(context, e))
+		return true;
+	bool over = context->isMouseOver(nodeIcon.get(), true);
+
 	if (e.type == InputType::MouseButton && e.button == GLFW_MOUSE_BUTTON_LEFT
-			&& context->isMouseDown(this)) {
-		dynamic_cast<Composite*>(parent)->putLast(this);
+			&& e.isDown() && over) {
+		dynamic_cast<Composite*>(this->parent)->putLast(this);
 	}
-	return ret;
+	if (dragging && e.type == InputType::Cursor) {
+		//box2px pbounds = parent->getBounds();
+		this->setDragOffset(e.cursor, cursorDownPosition);
+		context->requestPack();
+	} else if (e.type == InputType::MouseButton && e.isUp()) {
+		context->requestPack();
+		dragging = false;
+	}
+	if (!dragging) {
+		if (over && e.type == InputType::MouseButton
+				&& e.button == GLFW_MOUSE_BUTTON_LEFT && e.isDown()) {
+			cursorDownPosition = e.cursor - getBoundsPosition();
+			dragging = true;
+		}
+	}
+	return false;
 }
 void View::setup() {
 	setOrientation(Orientation::Horizontal, pixel2(0, 0));
+	NVGcontext* nvg = AlloyApplicationContext()->nvgContext;
+	nvgFontSize(nvg, fontSize);
+	nvgFontFaceId(nvg,
+			AlloyApplicationContext()->getFont(FontType::Bold)->handle);
+	float tw = nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
 	CompositePtr iconContainer = MakeComposite("Icon Container",
 			CoordPX(0.0f, 0.0f),
 			CoordPX(
@@ -245,8 +272,7 @@ void View::setup() {
 							- OutputPort::DIMENSIONS.x, Node::DIMENSIONS.y));
 
 	CompositePtr labelContainer = MakeComposite("label Container",
-			CoordPX(0.0f, 0.0f),
-			CoordPerPX(1.0, 0.0f, 0.0f, Node::DIMENSIONS.y));
+			CoordPX(0.0f, 0.0f), CoordPX(tw + 10.0f, Node::DIMENSIONS.y));
 	labelContainer->setAspectRule(AspectRule::FixedHeight);
 
 	nodeIcon = NodeIconPtr(
@@ -257,11 +283,7 @@ void View::setup() {
 	nodeIcon->setAspectRule(AspectRule::FixedHeight);
 	nodeIcon->setAspectRatio(1.0f);
 	iconContainer->add(nodeIcon);
-	NVGcontext* nvg = AlloyApplicationContext()->nvgContext;
-	nvgFontSize(nvg, fontSize);
-	nvgFontFaceId(nvg,
-			AlloyApplicationContext()->getFont(FontType::Bold)->handle);
-	float tw = nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
+
 	labelRegion = TextLabelPtr(
 			new TextLabel(label, CoordPX(0.0f, 2 * InputPort::DIMENSIONS.y),
 					CoordPerPX(0.0f, 1.0f, tw + 10.0f,
@@ -293,8 +315,6 @@ void View::setup() {
 	Composite::add(iconContainer);
 	Composite::add(labelContainer);
 	setRoundCorners(true);
-	setDragEnabled(true);
-	Application::addListener(this);
 	nodeIcon->backgroundColor = MakeColor(COLOR);
 	nodeIcon->setShape(NodeShape::Square);
 	nodeIcon->borderWidth = borderWidth;
@@ -348,13 +368,16 @@ void Data::setup() {
 	Composite::add(iconContainer);
 	Composite::add(labelContainer);
 	setRoundCorners(true);
-	setDragEnabled(true);
-	Application::addListener(this);
 	nodeIcon->backgroundColor = MakeColor(COLOR);
 	nodeIcon->borderWidth = borderWidth;
 }
 void Compute::setup() {
 	setOrientation(Orientation::Horizontal, pixel2(0, 0));
+	NVGcontext* nvg = AlloyApplicationContext()->nvgContext;
+	nvgFontSize(nvg, fontSize);
+	nvgFontFaceId(nvg,
+			AlloyApplicationContext()->getFont(FontType::Bold)->handle);
+	float tw = nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
 	CompositePtr iconContainer = MakeComposite("Icon Container",
 			CoordPX(0.0f, 0.0f),
 			CoordPX(
@@ -362,8 +385,7 @@ void Compute::setup() {
 							- OutputPort::DIMENSIONS.x, Node::DIMENSIONS.y));
 
 	CompositePtr labelContainer = MakeComposite("label Container",
-			CoordPX(0.0f, 0.0f),
-			CoordPerPX(1.0, 0.0f, 0.0f, Node::DIMENSIONS.y));
+			CoordPX(0.0f, 0.0f), CoordPX(tw + 10, Node::DIMENSIONS.y));
 	labelContainer->setAspectRule(AspectRule::FixedHeight);
 
 	nodeIcon = NodeIconPtr(
@@ -382,11 +404,6 @@ void Compute::setup() {
 	iconContainer->add(nodeIcon);
 	iconContainer->add(inputPort);
 	iconContainer->add(outputPort);
-	NVGcontext* nvg = AlloyApplicationContext()->nvgContext;
-	nvgFontSize(nvg, fontSize);
-	nvgFontFaceId(nvg,
-			AlloyApplicationContext()->getFont(FontType::Bold)->handle);
-	float tw = nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
 	labelRegion = TextLabelPtr(
 			new TextLabel(label,
 					CoordPX(4.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
@@ -418,8 +435,6 @@ void Compute::setup() {
 	Composite::add(iconContainer);
 	Composite::add(labelContainer);
 	setRoundCorners(true);
-	setDragEnabled(true);
-	Application::addListener(this);
 	nodeIcon->backgroundColor = MakeColor(COLOR);
 	nodeIcon->borderWidth = borderWidth;
 	nodeIcon->setShape(NodeShape::Hexagon);
@@ -470,8 +485,6 @@ void Source::setup() {
 	Composite::add(labelRegion);
 	Composite::add(iconContainer);
 	setRoundCorners(true);
-	setDragEnabled(true);
-	Application::addListener(this);
 	nodeIcon->backgroundColor = MakeColor(COLOR);
 	nodeIcon->borderWidth = borderWidth;
 }
@@ -514,8 +527,6 @@ void Destination::setup() {
 	Composite::add(iconContainer);
 	Composite::add(labelRegion);
 	setRoundCorners(true);
-	setDragEnabled(true);
-	Application::addListener(this);
 	nodeIcon->backgroundColor = MakeColor(COLOR);
 	nodeIcon->setShape(NodeShape::Triangle);
 	nodeIcon->borderWidth = borderWidth;
