@@ -31,7 +31,11 @@ bool DataFlowEx::init(Composite& rootNode) {
 			CoordPerPX(1.0f, 1.0f, -20.0f, -20.0f));
 	ComputePtr computeNode = MakeComputeNode("Compute", pixel2(10, 10));
 	ViewPtr viewNode = MakeViewNode("View", pixel2(10, 120));
-	DataPtr dataNode = MakeDataNode("Data", pixel2(10, 230));
+	DataPtr dataNode1 = MakeDataNode("Data 1", pixel2(10, 230));
+	DataPtr dataNode2 = MakeDataNode("Data 2", pixel2(10, 230));
+	DataPtr dataNode3 = MakeDataNode("Data 3", pixel2(10, 230));
+	DataPtr dataNode4 = MakeDataNode("Data 4", pixel2(10, 230));
+
 	SourcePtr sourceNode = MakeSourceNode("Source", pixel2(10, 340));
 	DestinationPtr destNode = MakeDestinationNode("Destination", pixel2(10, 450));
 
@@ -48,7 +52,17 @@ bool DataFlowEx::init(Composite& rootNode) {
 
 	graph->add(computeNode);
 	graph->add(viewNode);
-	graph->add(dataNode);
+	graph->add(dataNode1);
+	graph->add(dataNode2);
+	graph->add(dataNode3);
+	graph->add(dataNode4);
+
+	graph->add(MakeRelationship(dataNode1,"uses",dataNode2));
+	graph->add(MakeRelationship(dataNode1,"uses",dataNode3));
+	graph->add(MakeRelationship(dataNode2,"extends",dataNode3));
+	graph->add(MakeRelationship(dataNode4,"extends",dataNode2));
+	graph->add(MakeRelationship(dataNode3,"has",dataNode4));
+
 	graph->add(sourceNode);
 	graph->add(destNode);
 

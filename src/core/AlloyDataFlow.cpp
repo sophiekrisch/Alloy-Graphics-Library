@@ -29,13 +29,19 @@ const pixel2 InputPort::DIMENSIONS = pixel2(12, 12);
 const pixel2 OutputPort::DIMENSIONS = pixel2(12, 11);
 const pixel2 ParentPort::DIMENSIONS = pixel2(12, 12);
 const pixel2 ChildPort::DIMENSIONS = pixel2(11, 12);
-const float NODE_SATURATION=0.6f;
-const float NODE_LUMINANCE=0.65f;
-const Color View::COLOR = HSVAtoColor(HSVA(300 / 360.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
-const Color Compute::COLOR = HSVAtoColor(HSVA(0.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
-const Color Data::COLOR = HSVAtoColor(HSVA(60.0f / 360.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
-const Color Destination::COLOR = HSVAtoColor(HSVA(120.0f / 360.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
-const Color Source::COLOR = HSVAtoColor(HSVA(225.0f / 360.0f,NODE_SATURATION, NODE_LUMINANCE, 1.0f));
+const float NODE_SATURATION = 0.6f;
+const float NODE_LUMINANCE = 0.65f;
+const float NODE_ALPHA = 0.75f;
+const Color View::COLOR = HSVAtoColor(
+		HSVA(300 / 360.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
+const Color Compute::COLOR = HSVAtoColor(
+		HSVA(0.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
+const Color Data::COLOR = HSVAtoColor(
+		HSVA(60.0f / 360.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
+const Color Destination::COLOR = HSVAtoColor(
+		HSVA(120.0f / 360.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
+const Color Source::COLOR = HSVAtoColor(
+		HSVA(225.0f / 360.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
 
 std::shared_ptr<InputPort> MakeInputPort(const std::string& name) {
 	return InputPortPtr(new InputPort(name));
@@ -63,6 +69,13 @@ std::shared_ptr<Relationship> MakeRelationship(
 		const std::shared_ptr<Predicate>& predicate,
 		const std::shared_ptr<Node>& subject) {
 	return RelationshipPtr(new Relationship(object, predicate, subject));
+}
+std::shared_ptr<Relationship> MakeRelationship(
+		const std::shared_ptr<Node>& object, const std::string& name,
+		const std::shared_ptr<Node>& subject) {
+	return RelationshipPtr(
+			new Relationship(object, PredicatePtr(new Predicate(name)),
+					subject));
 }
 std::shared_ptr<Data> MakeDataNode(const std::string& name,
 		const std::string& label, const pixel2& pos) {
@@ -170,11 +183,8 @@ void NodeIcon::draw(AlloyContext* context) {
 		nvgStrokeColor(nvg, Color(context->theme.LIGHT_TEXT));
 		nvgFillColor(nvg, *backgroundColor);
 	}
-
 	nvgStrokeWidth(nvg, lineWidth);
-
 	nvgBeginPath(nvg);
-
 	if (shape == NodeShape::Circle) {
 		nvgEllipse(nvg, bounds.position.x + bounds.dimensions.x * 0.5f,
 				bounds.position.y + bounds.dimensions.y * 0.5f,
@@ -196,18 +206,18 @@ void NodeIcon::draw(AlloyContext* context) {
 		nvgClosePath(nvg);
 	} else if (shape == NodeShape::Hexagon) {
 		nvgLineJoin(nvg, NVG_ROUND);
-		float cx=bounds.position.x + bounds.dimensions.x * 0.5f;
-		float cy=bounds.position.y + bounds.dimensions.y * 0.5f;
-		static const float SCALE=1.0f/std::sqrt(0.75f);
-		float rx=(0.5f*bounds.dimensions.x - lineWidth*0.5f)*SCALE;
-		float ry=(0.5f*bounds.dimensions.y - lineWidth*0.5f);
-		nvgMoveTo(nvg, cx+rx,cy);
-		nvgLineTo(nvg, cx+rx*0.5f,cy-ry);
-		nvgLineTo(nvg, cx-rx*0.5f,cy-ry);
-		nvgLineTo(nvg, cx-rx*0.5f,cy-ry);
-		nvgLineTo(nvg, cx-rx,cy);
-		nvgLineTo(nvg, cx-rx*0.5f,cy+ry);
-		nvgLineTo(nvg, cx+rx*0.5f,cy+ry);
+		float cx = bounds.position.x + bounds.dimensions.x * 0.5f;
+		float cy = bounds.position.y + bounds.dimensions.y * 0.5f;
+		static const float SCALE = 1.0f / std::sqrt(0.75f);
+		float rx = (0.5f * bounds.dimensions.x - lineWidth * 0.5f) * SCALE;
+		float ry = (0.5f * bounds.dimensions.y - lineWidth * 0.5f);
+		nvgMoveTo(nvg, cx + rx, cy);
+		nvgLineTo(nvg, cx + rx * 0.5f, cy - ry);
+		nvgLineTo(nvg, cx - rx * 0.5f, cy - ry);
+		nvgLineTo(nvg, cx - rx * 0.5f, cy - ry);
+		nvgLineTo(nvg, cx - rx, cy);
+		nvgLineTo(nvg, cx - rx * 0.5f, cy + ry);
+		nvgLineTo(nvg, cx + rx * 0.5f, cy + ry);
 		nvgClosePath(nvg);
 	}
 	nvgFill(nvg);
@@ -512,6 +522,15 @@ void Destination::setup() {
 void DataFlow::setup() {
 	setRoundCorners(true);
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	DrawPtr relationshipRegion = DrawPtr(
+			new Draw("Relationships", CoordPX(0.0f, 0.0f),
+					CoordPercent(1.0f, 1.0f),
+					[this](AlloyContext* context,const box2px& bounds) {
+						for(RelationshipPtr& relationship:relationships) {
+							relationship->draw(context);
+						}
+					}));
+	Composite::add(relationshipRegion);
 }
 void OutputMultiPort::insertValue(const std::shared_ptr<Packet>& packet,
 		int index) {
@@ -598,8 +617,11 @@ void Port::draw(AlloyContext* context) {
 			bounds.position.y + bounds.dimensions.y * 0.5f,
 			bounds.dimensions.x * 0.5f, bounds.dimensions.y * 0.5f);
 	nvgFill(nvg);
+
 }
 void InputPort::draw(AlloyContext* context) {
+	if (!isVisible())
+		return;
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
@@ -642,6 +664,8 @@ void ParentPort::draw(AlloyContext* context) {
 	nvgStroke(nvg);
 }
 void OutputPort::draw(AlloyContext* context) {
+	if (!isVisible())
+		return;
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
@@ -723,10 +747,13 @@ void Node::draw(AlloyContext* context) {
 	nvgStrokeWidth(nvg, 1.0f);
 	if (inputPorts.size() > 0 || outputPorts.size() > 0) {
 		nvgStrokeColor(nvg, Color(context->theme.DARK.toLighter(0.25f)));
-		nvgFillColor(nvg, context->theme.DARK.toLighter(0.25f).toSemiTransparent(0.5f));
+		nvgFillColor(nvg,
+				context->theme.DARK.toLighter(0.25f).toSemiTransparent(
+						NODE_ALPHA));
 	} else {
-		nvgStrokeColor(nvg, Color(COLOR_NONE)); //Color(context->theme.LIGHT_TEXT.toSemiTransparent(0.5f))
-		nvgFillColor(nvg, Color(context->theme.DARK.toSemiTransparent(0.5f)));
+		nvgStrokeColor(nvg, Color(COLOR_NONE)); //Color(context->theme.LIGHT_TEXT.toSemiTransparent(NODE_ALPHA))
+		nvgFillColor(nvg,
+				Color(context->theme.DARK.toSemiTransparent(NODE_ALPHA)));
 	}
 	nvgBeginPath(nvg);
 	nvgRoundedRect(nvg, labelStart.x, labelStart.y, labelEnd.x - labelStart.x,
@@ -747,6 +774,14 @@ void Compute::draw(AlloyContext* context) {
 	Node::draw(context);
 }
 void Data::draw(AlloyContext* context) {
+	if (!context->isMouseOver(this, true)) {
+		inputPort->setVisible(false);
+		outputPort->setVisible(false);
+	} else {
+		inputPort->setVisible(true);
+		outputPort->setVisible(true);
+	}
+
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
@@ -762,11 +797,12 @@ void Data::draw(AlloyContext* context) {
 			lbounds.position.y + lbounds.dimensions.y);
 	nvgStrokeWidth(nvg, 2.0f);
 	if (inputPorts.size() > 0 || outputPorts.size() > 0) {
-		nvgStrokeColor(nvg, Color(context->theme.DARK.toLighter(0.5f)));
-		nvgFillColor(nvg, context->theme.DARK.toSemiTransparent(0.5f));
+		nvgStrokeColor(nvg, Color(context->theme.DARK.toLighter(0.75f)));
+		nvgFillColor(nvg, context->theme.DARK.toSemiTransparent(NODE_ALPHA));
 	} else {
 		nvgStrokeColor(nvg, Color(COLOR_NONE));
-		nvgFillColor(nvg, Color(context->theme.DARK.toSemiTransparent(0.5f)));
+		nvgFillColor(nvg,
+				Color(context->theme.DARK.toSemiTransparent(NODE_ALPHA)));
 	}
 	nvgBeginPath(nvg);
 	nvgRoundedRect(nvg, labelStart.x, labelStart.y, labelEnd.x - labelStart.x,
@@ -792,11 +828,13 @@ void Source::draw(AlloyContext* context) {
 	nvgStrokeWidth(nvg, 2.0f);
 	if (inputPorts.size() > 0 || outputPorts.size() > 0) {
 		nvgStrokeColor(nvg,
-				Color(context->theme.LIGHT_TEXT.toSemiTransparent(0.5f)));
-		nvgFillColor(nvg, nodeIcon->backgroundColor->toSemiTransparent(0.5f));
+				Color(context->theme.LIGHT_TEXT.toSemiTransparent(NODE_ALPHA)));
+		nvgFillColor(nvg,
+				nodeIcon->backgroundColor->toSemiTransparent(NODE_ALPHA));
 	} else {
-		nvgStrokeColor(nvg, Color(COLOR_NONE)); //Color(context->theme.LIGHT_TEXT.toSemiTransparent(0.5f))
-		nvgFillColor(nvg, Color(context->theme.DARK.toSemiTransparent(0.5f)));
+		nvgStrokeColor(nvg, Color(COLOR_NONE)); //Color(context->theme.LIGHT_TEXT.toSemiTransparent(NODE_ALPHA))
+		nvgFillColor(nvg,
+				Color(context->theme.DARK.toSemiTransparent(NODE_ALPHA)));
 	}
 	nvgBeginPath(nvg);
 	nvgRoundedRect(nvg, lbounds.position.x, lbounds.position.y,
@@ -823,11 +861,13 @@ void Destination::draw(AlloyContext* context) {
 	nvgStrokeWidth(nvg, 2.0f);
 	if (inputPorts.size() > 0 || outputPorts.size() > 0) {
 		nvgStrokeColor(nvg,
-				Color(context->theme.LIGHT_TEXT.toSemiTransparent(0.5f)));
-		nvgFillColor(nvg, nodeIcon->backgroundColor->toSemiTransparent(0.5f));
+				Color(context->theme.LIGHT_TEXT.toSemiTransparent(NODE_ALPHA)));
+		nvgFillColor(nvg,
+				nodeIcon->backgroundColor->toSemiTransparent(NODE_ALPHA));
 	} else {
-		nvgStrokeColor(nvg, Color(COLOR_NONE)); //Color(context->theme.LIGHT_TEXT.toSemiTransparent(0.5f))
-		nvgFillColor(nvg, Color(context->theme.DARK.toSemiTransparent(0.5f)));
+		nvgStrokeColor(nvg, Color(COLOR_NONE)); //Color(context->theme.LIGHT_TEXT.toSemiTransparent(NODE_ALPHA))
+		nvgFillColor(nvg,
+				Color(context->theme.DARK.toSemiTransparent(NODE_ALPHA)));
 	}
 	nvgBeginPath(nvg);
 	nvgRoundedRect(nvg, lbounds.position.x, lbounds.position.y,
@@ -842,6 +882,44 @@ void Destination::draw(AlloyContext* context) {
 
 	Composite::draw(context);
 }
+void Relationship::draw(AlloyContext* context) {
+	pixel2 scenter = subject->getCenter();
+	pixel2 ocenter = object->getCenter();
+	NVGcontext* nvg = context->nvgContext;
+
+	pixel2 vec = ocenter - scenter;
+	float len = length(vec);
+	const float arrowLength = 10;
+	const float arrowWidth = 10;
+
+	float r = object->getRadius();
+	if (len > r) {
+		vec /= len;
+		pixel2 ortho(-vec.y, vec.x);
+		pixel2 pt1 = ocenter - vec * r;
+
+		nvgStrokeColor(nvg, context->theme.LIGHT_TEXT);
+		nvgStrokeWidth(nvg, 4.0f);
+		nvgLineCap(nvg, NVG_ROUND);
+		nvgBeginPath(nvg);
+		nvgMoveTo(nvg, scenter.x, scenter.y);
+		ocenter = pt1 - arrowLength * vec;
+		nvgLineTo(nvg, ocenter.x, ocenter.y);
+		nvgStroke(nvg);
+
+		pixel2 pt2 = ocenter + ortho * arrowWidth * 0.5f;
+		pixel2 pt3 = ocenter - ortho * arrowWidth * 0.5f;
+		nvgFillColor(nvg, context->theme.LIGHT_TEXT);
+		nvgBeginPath(nvg);
+		nvgMoveTo(nvg, pt1.x, pt1.y);
+		nvgLineTo(nvg, pt2.x, pt2.y);
+		nvgLineTo(nvg, pt3.x, pt3.y);
+		nvgClosePath(nvg);
+		nvgFill(nvg);
+	}
+
+}
+
 }
 }
 

@@ -75,16 +75,19 @@ public:
 };
 class Port: public Region {
 protected:
+	Node* parent;
 	std::string label;
+
 	virtual void setup();
 public:
 	friend class Connection;
+	friend class Node;
 	Port(const std::string& name, const std::string& label) :
-			Region(name), label(label) {
+			Region(name), parent(nullptr),label(label) {
 		setup();
 	}
 	Port(const std::string& name) :
-			Region(name), label(name) {
+			Region(name),  parent(nullptr), label(name) {
 		setup();
 	}
 	virtual PortType getType() const {
@@ -286,9 +289,15 @@ public:
 	virtual void draw(AlloyContext* context) override;
 };
 class Predicate {
+protected:
+	const std::string name;
 public:
-	std::string name;
-
+	Predicate(const std::string& name) :
+			name(name) {
+	}
+	std::string getName() const {
+		return name;
+	}
 };
 class Relationship {
 public:
@@ -299,11 +308,11 @@ public:
 			const std::shared_ptr<Predicate>& predicate,
 			const std::shared_ptr<Node>& subject) :
 			subject(subject), object(object), predicate(predicate) {
-
 	}
+	void draw(AlloyContext* context);
 };
 enum class NodeShape {
-	Circle = 0, Triangle = 1, Square = 2, Hexagon=3
+	Circle = 0, Triangle = 1, Square = 2, Hexagon = 3
 };
 class NodeIcon: public Region {
 protected:
@@ -312,6 +321,7 @@ public:
 	NodeIcon(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
 			Region(name, pos, dims), shape(NodeShape::Circle) {
 	}
+
 	void setShape(const NodeShape& s) {
 		shape = s;
 	}
@@ -334,6 +344,12 @@ public:
 	static const pixel2 DIMENSIONS;
 	virtual NodeType getType() const {
 		return NodeType::Unknown;
+	}
+	pixel2 getCenter() const {
+		return nodeIcon->getBounds().center();
+	}
+	float getRadius() const {
+		return nodeIcon->getBounds().dimensions.y * 0.5f;
 	}
 	Node(const std::string& name) :
 			Composite(name), label(name) {
@@ -358,10 +374,12 @@ public:
 	void add(const std::shared_ptr<InputPort>& port) {
 		inputPortComposite->add(port);
 		inputPorts.push_back(port);
+		port->parent=this;
 	}
 	void add(const std::shared_ptr<OutputPort>& port) {
 		outputPortComposite->add(port);
 		outputPorts.push_back(port);
+		port->parent=this;
 	}
 	std::string getLabel() const {
 		return label;
@@ -520,6 +538,7 @@ protected:
 	std::vector<std::shared_ptr<Source>> sourceNodes;
 	std::vector<std::shared_ptr<Destination>> destinationNodes;
 	std::vector<std::shared_ptr<Connection>> connections;
+	std::vector<std::shared_ptr<Relationship>> relationships;
 	void setup();
 public:
 	DataFlow(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
@@ -532,6 +551,9 @@ public:
 	void add(const std::shared_ptr<Source>& node) {
 		Composite::add(node);
 		sourceNodes.push_back(node);
+	}
+	void add(const std::shared_ptr<Relationship>& relationship) {
+		relationships.push_back(relationship);
 	}
 	void add(const std::shared_ptr<Destination>& node) {
 		Composite::add(node);
@@ -626,7 +648,9 @@ std::shared_ptr<Relationship> MakeRelationship(
 		const std::shared_ptr<Node>& object,
 		const std::shared_ptr<Predicate>& predicate,
 		const std::shared_ptr<Node>& subject);
-
+std::shared_ptr<Relationship> MakeRelationship(
+		const std::shared_ptr<Node>& object, const std::string& predicate,
+		const std::shared_ptr<Node>& subject);
 std::shared_ptr<Data> MakeDataNode(const std::string& name,
 		const std::string& label, const pixel2& pos);
 std::shared_ptr<Data> MakeDataNode(const std::string& name, const pixel2& pos);
