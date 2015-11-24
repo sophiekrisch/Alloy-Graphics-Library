@@ -20,6 +20,7 @@
  */
 #include "AlloyDataFlow.h"
 #include "AlloyApplication.h"
+#include "AlloyDrawUtil.h"
 namespace aly {
 namespace dataflow {
 const int MultiPort::FrontIndex = std::numeric_limits<int>::min();
@@ -519,6 +520,24 @@ void Destination::setup() {
 	nodeIcon->setShape(NodeShape::Triangle);
 	nodeIcon->borderWidth = borderWidth;
 }
+bool Node::isMouseOver() const {
+	if (parent != nullptr)
+		return parent->isMouseOverNode(this);
+	return false;
+}
+void DataFlow::draw(AlloyContext* context) {
+	mouseOverNode = nullptr;
+	for (std::shared_ptr<Region> child : children) {
+		Node* node = dynamic_cast<Node*>(child.get());
+		if (node) {
+			if (context->isMouseOver(node, true)) {
+				mouseOverNode = node;
+				break;
+			}
+		}
+	}
+	Composite::draw(context);
+}
 void DataFlow::setup() {
 	setRoundCorners(true);
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
@@ -528,6 +547,9 @@ void DataFlow::setup() {
 					[this](AlloyContext* context,const box2px& bounds) {
 						for(RelationshipPtr& relationship:relationships) {
 							relationship->draw(context);
+						}
+						for(RelationshipPtr& relationship:relationships) {
+							relationship->drawText(context);
 						}
 					}));
 	Composite::add(relationshipRegion);
@@ -771,15 +793,22 @@ void View::draw(AlloyContext* context) {
 	Node::draw(context);
 }
 void Compute::draw(AlloyContext* context) {
+	if (isMouseOver()) {
+		inputPort->setVisible(true);
+		outputPort->setVisible(true);
+	} else {
+		inputPort->setVisible(false);
+		outputPort->setVisible(false);
+	}
 	Node::draw(context);
 }
 void Data::draw(AlloyContext* context) {
-	if (!context->isMouseOver(this, true)) {
-		inputPort->setVisible(false);
-		outputPort->setVisible(false);
-	} else {
+	if (isMouseOver()) {
 		inputPort->setVisible(true);
 		outputPort->setVisible(true);
+	} else {
+		inputPort->setVisible(false);
+		outputPort->setVisible(false);
 	}
 
 	NVGcontext* nvg = context->nvgContext;
@@ -893,7 +922,8 @@ void Relationship::draw(AlloyContext* context) {
 	const float arrowWidth = 10;
 
 	float r = object->getRadius();
-	if (len > r) {
+	if (len > 2 * r) {
+		pixel2 mid = 0.5f * (scenter + ocenter);
 		vec /= len;
 		pixel2 ortho(-vec.y, vec.x);
 		pixel2 pt1 = ocenter - vec * r;
@@ -916,10 +946,50 @@ void Relationship::draw(AlloyContext* context) {
 		nvgLineTo(nvg, pt3.x, pt3.y);
 		nvgClosePath(nvg);
 		nvgFill(nvg);
+		if (subject->isMouseOver() || object->isMouseOver()) {
+			nvgFontFaceId(nvg, context->getFont(FontType::Bold)->handle);
+			const float th = 20;
+			nvgFontSize(nvg, th - 2);
+			nvgTextAlign(nvg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+			float tw = nvgTextBounds(nvg, 0, 0, predicate->getName().c_str(),
+					nullptr, nullptr) + 2;
+			nvgFillColor(nvg,
+					context->theme.DARK.toSemiTransparent(NODE_ALPHA));
+			nvgBeginPath(nvg);
+			nvgRoundedRect(nvg, mid.x - tw * 0.5f, mid.y - th * 0.5f, tw, th,
+					context->theme.CORNER_RADIUS);
+			nvgFill(nvg);
+			aly::drawText(nvg, mid, predicate->getName(), FontStyle::Normal,
+					context->theme.HIGHLIGHT, context->theme.DARK);
+		}
 	}
-
 }
-
+void Relationship::drawText(AlloyContext* context) {
+	pixel2 scenter = subject->getCenter();
+	pixel2 ocenter = object->getCenter();
+	NVGcontext* nvg = context->nvgContext;
+	float r = object->getRadius();
+	float len = distance(scenter, ocenter);
+	if (len > 2 * r) {
+		pixel2 mid = 0.5f * (scenter + ocenter);
+		if (subject->isMouseOver() || object->isMouseOver()) {
+			nvgFontFaceId(nvg, context->getFont(FontType::Bold)->handle);
+			const float th = 20;
+			nvgFontSize(nvg, th - 2);
+			nvgTextAlign(nvg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+			float tw = nvgTextBounds(nvg, 0, 0, predicate->getName().c_str(),
+					nullptr, nullptr) + 2;
+			nvgFillColor(nvg,
+					context->theme.DARK.toSemiTransparent(NODE_ALPHA));
+			nvgBeginPath(nvg);
+			nvgRoundedRect(nvg, mid.x - tw * 0.5f, mid.y - th * 0.5f, tw, th,
+					context->theme.CORNER_RADIUS);
+			nvgFill(nvg);
+			aly::drawText(nvg, mid, predicate->getName(), FontStyle::Normal,
+					context->theme.HIGHLIGHT, context->theme.DARK);
+		}
+	}
+}
 }
 }
 

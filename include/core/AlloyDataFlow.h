@@ -31,6 +31,7 @@ class Node;
 class Data;
 class Compute;
 class View;
+class DataFlow;
 class Connection;
 enum class NodeType {
 	Unknown = 0,
@@ -83,11 +84,11 @@ public:
 	friend class Connection;
 	friend class Node;
 	Port(const std::string& name, const std::string& label) :
-			Region(name), parent(nullptr),label(label) {
+			Region(name), parent(nullptr), label(label) {
 		setup();
 	}
 	Port(const std::string& name) :
-			Region(name),  parent(nullptr), label(name) {
+			Region(name), parent(nullptr), label(name) {
 		setup();
 	}
 	virtual PortType getType() const {
@@ -310,7 +311,9 @@ public:
 			subject(subject), object(object), predicate(predicate) {
 	}
 	void draw(AlloyContext* context);
+	void drawText(AlloyContext* context);
 };
+
 enum class NodeShape {
 	Circle = 0, Triangle = 1, Square = 2, Hexagon = 3
 };
@@ -331,6 +334,7 @@ class Node: public Composite {
 protected:
 	std::string label;
 	float fontSize;
+	DataFlow* parent;
 	std::vector<std::shared_ptr<InputPort>> inputPorts;
 	std::vector<std::shared_ptr<OutputPort>> outputPorts;
 	std::shared_ptr<InputPort> inputPort;
@@ -341,10 +345,12 @@ protected:
 	std::shared_ptr<NodeIcon> nodeIcon;
 	virtual void setup();
 public:
+	friend class DataFlow;
 	static const pixel2 DIMENSIONS;
 	virtual NodeType getType() const {
 		return NodeType::Unknown;
 	}
+	bool isMouseOver() const ;
 	pixel2 getCenter() const {
 		return nodeIcon->getBounds().center();
 	}
@@ -352,20 +358,20 @@ public:
 		return nodeIcon->getBounds().dimensions.y * 0.5f;
 	}
 	Node(const std::string& name) :
-			Composite(name), label(name) {
+			Composite(name), label(name), parent(nullptr) {
 		setup();
 	}
 	Node(const std::string& name, const std::string& label) :
-			Composite(name), label(label) {
+			Composite(name), label(label), parent(nullptr) {
 		setup();
 	}
 	Node(const std::string& name, const std::string& label, const AUnit2D& pos,
 			const AUnit2D& dims) :
-			Composite(name, pos, dims), label(label) {
+			Composite(name, pos, dims), label(label), parent(nullptr) {
 		setup();
 	}
 	Node(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
-			Composite(name, pos, dims), label(name) {
+			Composite(name, pos, dims), label(name), parent(nullptr) {
 		setup();
 	}
 	void add(const std::shared_ptr<Region>& region) {
@@ -374,12 +380,12 @@ public:
 	void add(const std::shared_ptr<InputPort>& port) {
 		inputPortComposite->add(port);
 		inputPorts.push_back(port);
-		port->parent=this;
+		port->parent = this;
 	}
 	void add(const std::shared_ptr<OutputPort>& port) {
 		outputPortComposite->add(port);
 		outputPorts.push_back(port);
-		port->parent=this;
+		port->parent = this;
 	}
 	std::string getLabel() const {
 		return label;
@@ -539,37 +545,47 @@ protected:
 	std::vector<std::shared_ptr<Destination>> destinationNodes;
 	std::vector<std::shared_ptr<Connection>> connections;
 	std::vector<std::shared_ptr<Relationship>> relationships;
+	Node* mouseOverNode;
 	void setup();
 public:
+	virtual void draw(AlloyContext* context) override;
 	DataFlow(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
-			Composite(name, pos, dims) {
+			Composite(name, pos, dims), mouseOverNode(nullptr) {
 		setup();
+	}
+	bool isMouseOverNode(const Node* node) const {
+		return (node != nullptr && node == mouseOverNode);
 	}
 	void add(const std::shared_ptr<Region>& region) {
 		Composite::add(region);
 	}
+	void add(const std::shared_ptr<Relationship>& relationship) {
+		relationships.push_back(relationship);
+	}
 	void add(const std::shared_ptr<Source>& node) {
 		Composite::add(node);
 		sourceNodes.push_back(node);
-	}
-	void add(const std::shared_ptr<Relationship>& relationship) {
-		relationships.push_back(relationship);
+		node->parent = this;
 	}
 	void add(const std::shared_ptr<Destination>& node) {
 		Composite::add(node);
 		destinationNodes.push_back(node);
+		node->parent = this;
 	}
 	void add(const std::shared_ptr<Data>& node) {
 		Composite::add(node);
 		dataNodes.push_back(node);
+		node->parent = this;
 	}
 	void add(const std::shared_ptr<View>& node) {
 		Composite::add(node);
 		viewNodes.push_back(node);
+		node->parent = this;
 	}
 	void add(const std::shared_ptr<Compute>& node) {
 		Composite::add(node);
 		computeNodes.push_back(node);
+		node->parent = this;
 	}
 	void add(const std::shared_ptr<Connection>& node) {
 		connections.push_back(node);
