@@ -29,6 +29,14 @@ const pixel2 InputPort::DIMENSIONS = pixel2(12, 12);
 const pixel2 OutputPort::DIMENSIONS = pixel2(12, 11);
 const pixel2 ParentPort::DIMENSIONS = pixel2(12, 12);
 const pixel2 ChildPort::DIMENSIONS = pixel2(11, 12);
+const float NODE_SATURATION=0.6f;
+const float NODE_LUMINANCE=0.65f;
+const Color View::COLOR = HSVAtoColor(HSVA(300 / 360.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
+const Color Compute::COLOR = HSVAtoColor(HSVA(0.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
+const Color Data::COLOR = HSVAtoColor(HSVA(60.0f / 360.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
+const Color Destination::COLOR = HSVAtoColor(HSVA(120.0f / 360.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
+const Color Source::COLOR = HSVAtoColor(HSVA(225.0f / 360.0f,NODE_SATURATION, NODE_LUMINANCE, 1.0f));
+
 std::shared_ptr<InputPort> MakeInputPort(const std::string& name) {
 	return InputPortPtr(new InputPort(name));
 }
@@ -177,8 +185,7 @@ void NodeIcon::draw(AlloyContext* context) {
 				bounds.position.y + lineWidth * 0.5f,
 				bounds.dimensions.x - lineWidth,
 				bounds.dimensions.y - lineWidth, bounds.dimensions.x * 0.25f);
-	}
-	if (shape == NodeShape::Triangle) {
+	} else if (shape == NodeShape::Triangle) {
 		nvgLineJoin(nvg, NVG_ROUND);
 		nvgMoveTo(nvg, bounds.position.x + bounds.dimensions.x * 0.5f,
 				bounds.position.y + bounds.dimensions.y - lineWidth);
@@ -186,6 +193,21 @@ void NodeIcon::draw(AlloyContext* context) {
 				bounds.position.y + lineWidth * 0.5f);
 		nvgLineTo(nvg, bounds.position.x + bounds.dimensions.x - lineWidth,
 				bounds.position.y + lineWidth * 0.5f);
+		nvgClosePath(nvg);
+	} else if (shape == NodeShape::Hexagon) {
+		nvgLineJoin(nvg, NVG_ROUND);
+		float cx=bounds.position.x + bounds.dimensions.x * 0.5f;
+		float cy=bounds.position.y + bounds.dimensions.y * 0.5f;
+		static const float SCALE=1.0f/std::sqrt(0.75f);
+		float rx=(0.5f*bounds.dimensions.x - lineWidth*0.5f)*SCALE;
+		float ry=(0.5f*bounds.dimensions.y - lineWidth*0.5f);
+		nvgMoveTo(nvg, cx+rx,cy);
+		nvgLineTo(nvg, cx+rx*0.5f,cy-ry);
+		nvgLineTo(nvg, cx-rx*0.5f,cy-ry);
+		nvgLineTo(nvg, cx-rx*0.5f,cy-ry);
+		nvgLineTo(nvg, cx-rx,cy);
+		nvgLineTo(nvg, cx-rx*0.5f,cy+ry);
+		nvgLineTo(nvg, cx+rx*0.5f,cy+ry);
 		nvgClosePath(nvg);
 	}
 	nvgFill(nvg);
@@ -262,7 +284,7 @@ void View::setup() {
 	setRoundCorners(true);
 	setDragEnabled(true);
 	Application::addListener(this);
-	nodeIcon->backgroundColor = MakeColor(192, 192, 64);
+	nodeIcon->backgroundColor = MakeColor(COLOR);
 	nodeIcon->setShape(NodeShape::Square);
 	nodeIcon->borderWidth = borderWidth;
 }
@@ -317,7 +339,7 @@ void Data::setup() {
 	setRoundCorners(true);
 	setDragEnabled(true);
 	Application::addListener(this);
-	nodeIcon->backgroundColor = MakeColor(255, 128, 64);
+	nodeIcon->backgroundColor = MakeColor(COLOR);
 	nodeIcon->borderWidth = borderWidth;
 }
 void Compute::setup() {
@@ -356,8 +378,8 @@ void Compute::setup() {
 	float tw = nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
 	labelRegion = TextLabelPtr(
 			new TextLabel(label,
-					CoordPX(0.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
-					CoordPerPX(0.0f, 1.0f, tw + 10.0f,
+					CoordPX(4.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
+					CoordPerPX(0.0f, 1.0f, tw + 6.0f,
 							-2 * OutputPort::DIMENSIONS.y
 									- 2 * InputPort::DIMENSIONS.y - 2.0f)));
 	labelRegion->setAlignment(HorizontalAlignment::Left,
@@ -387,8 +409,9 @@ void Compute::setup() {
 	setRoundCorners(true);
 	setDragEnabled(true);
 	Application::addListener(this);
-	nodeIcon->backgroundColor = MakeColor(192, 64, 64);
+	nodeIcon->backgroundColor = MakeColor(COLOR);
 	nodeIcon->borderWidth = borderWidth;
+	nodeIcon->setShape(NodeShape::Hexagon);
 }
 void Source::setup() {
 	setOrientation(Orientation::Vertical, pixel2(0, 0));
@@ -438,7 +461,7 @@ void Source::setup() {
 	setRoundCorners(true);
 	setDragEnabled(true);
 	Application::addListener(this);
-	nodeIcon->backgroundColor = MakeColor(64, 128, 192);
+	nodeIcon->backgroundColor = MakeColor(COLOR);
 	nodeIcon->borderWidth = borderWidth;
 }
 void Destination::setup() {
@@ -450,7 +473,9 @@ void Destination::setup() {
 
 	//labelContainer->setAspectRatio(1.0f);
 	nodeIcon = NodeIconPtr(
-			new NodeIcon("Icon", CoordPX(0.5f*ParentPort::DIMENSIONS.x, InputPort::DIMENSIONS.y + 1.0f),
+			new NodeIcon("Icon",
+					CoordPX(0.5f * ParentPort::DIMENSIONS.x,
+							InputPort::DIMENSIONS.y + 1.0f),
 					CoordPerPX(1.0f, 1.0f, -ParentPort::DIMENSIONS.x,
 							-OutputPort::DIMENSIONS.y - 2.0f)));
 	//nodeIcon->setAspectRatio(1.0f);
@@ -480,7 +505,7 @@ void Destination::setup() {
 	setRoundCorners(true);
 	setDragEnabled(true);
 	Application::addListener(this);
-	nodeIcon->backgroundColor = MakeColor(96, 196, 96);
+	nodeIcon->backgroundColor = MakeColor(COLOR);
 	nodeIcon->setShape(NodeShape::Triangle);
 	nodeIcon->borderWidth = borderWidth;
 }
@@ -697,9 +722,8 @@ void Node::draw(AlloyContext* context) {
 			lbounds.position.y + lbounds.dimensions.y);
 	nvgStrokeWidth(nvg, 2.0f);
 	if (inputPorts.size() > 0 || outputPorts.size() > 0) {
-		nvgStrokeColor(nvg,
-				Color(context->theme.LIGHT_TEXT.toSemiTransparent(0.5f)));
-		nvgFillColor(nvg, nodeIcon->backgroundColor->toSemiTransparent(0.5f));
+		nvgStrokeColor(nvg, Color(context->theme.DARK.toLighter(0.5f)));
+		nvgFillColor(nvg, context->theme.DARK.toSemiTransparent(0.5f));
 	} else {
 		nvgStrokeColor(nvg, Color(COLOR_NONE)); //Color(context->theme.LIGHT_TEXT.toSemiTransparent(0.5f))
 		nvgFillColor(nvg, Color(context->theme.DARK.toSemiTransparent(0.5f)));
@@ -738,9 +762,8 @@ void Data::draw(AlloyContext* context) {
 			lbounds.position.y + lbounds.dimensions.y);
 	nvgStrokeWidth(nvg, 2.0f);
 	if (inputPorts.size() > 0 || outputPorts.size() > 0) {
-		nvgStrokeColor(nvg,
-				Color(context->theme.LIGHT_TEXT.toSemiTransparent(0.5f)));
-		nvgFillColor(nvg, nodeIcon->backgroundColor->toSemiTransparent(0.5f));
+		nvgStrokeColor(nvg, Color(context->theme.DARK.toLighter(0.5f)));
+		nvgFillColor(nvg, context->theme.DARK.toSemiTransparent(0.5f));
 	} else {
 		nvgStrokeColor(nvg, Color(COLOR_NONE));
 		nvgFillColor(nvg, Color(context->theme.DARK.toSemiTransparent(0.5f)));

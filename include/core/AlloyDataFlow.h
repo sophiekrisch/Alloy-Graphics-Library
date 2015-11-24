@@ -303,7 +303,7 @@ public:
 	}
 };
 enum class NodeShape {
-	Circle = 0, Triangle = 1, Square = 2
+	Circle = 0, Triangle = 1, Square = 2, Hexagon=3
 };
 class NodeIcon: public Region {
 protected:
@@ -375,6 +375,7 @@ public:
 };
 class Data: public Node {
 protected:
+	static const Color COLOR;
 	virtual void setup() override;
 public:
 	virtual NodeType getType() const override {
@@ -403,6 +404,7 @@ class View: public Node {
 protected:
 	virtual void setup() override;
 public:
+	static const Color COLOR;
 	virtual NodeType getType() const override {
 		return NodeType::View;
 	}
@@ -429,6 +431,7 @@ class Compute: public Node {
 protected:
 	virtual void setup() override;
 public:
+	static const Color COLOR;
 	virtual NodeType getType() const override {
 		return NodeType::Compute;
 	}
@@ -453,6 +456,7 @@ public:
 };
 class Source: public Node {
 protected:
+	static const Color COLOR;
 	virtual void setup() override;
 	std::shared_ptr<ParentPort> parentPort;
 	std::shared_ptr<ChildPort> childPort;
@@ -482,6 +486,7 @@ public:
 
 class Destination: public Node {
 protected:
+	static const Color COLOR;
 	virtual void setup() override;
 public:
 	virtual NodeType getType() const override {
