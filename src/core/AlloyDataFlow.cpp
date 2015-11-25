@@ -706,27 +706,20 @@ void DataFlow::startConnection(Port* port) {
 void DataFlow::setup() {
 	setRoundCorners(true);
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
-	DrawPtr relationshipRegion = DrawPtr(
-			new Draw("Relationships", CoordPX(0.0f, 0.0f),
-					CoordPercent(1.0f, 1.0f),
+	DrawPtr pathsRegion = DrawPtr(
+			new Draw("Paths", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f),
 					[this](AlloyContext* context,const box2px& bounds) {
 						for(RelationshipPtr& relationship:relationships) {
 							relationship->draw(context);
+						}
+						for(ConnectionPtr& connection:connections) {
+							connection->draw(context);
 						}
 						for(RelationshipPtr& relationship:relationships) {
 							relationship->drawText(context);
 						}
 					}));
-	Composite::add(relationshipRegion);
-	DrawPtr connectionRegion = DrawPtr(
-			new Draw("Connections", CoordPX(0.0f, 0.0f),
-					CoordPercent(1.0f, 1.0f),
-					[this](AlloyContext* context,const box2px& bounds) {
-						for(ConnectionPtr& connection:connections) {
-							connection->draw(context);
-						}
-					}));
-	Composite::add(connectionRegion);
+	Composite::add(pathsRegion);
 	Application::addListener(this);
 }
 void OutputMultiPort::insertValue(const std::shared_ptr<Packet>& packet,
