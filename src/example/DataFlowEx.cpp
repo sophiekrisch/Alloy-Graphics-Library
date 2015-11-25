@@ -41,8 +41,11 @@ bool DataFlowEx::init(Composite& rootNode) {
 	DataPtr dataNode3 = MakeDataNode("Data 3", pixel2(230, 230));
 	DataPtr dataNode4 = MakeDataNode("Data 4", pixel2(340, 230));
 
-	SourcePtr sourceNode = MakeSourceNode("Source", pixel2(10, 340));
-	DestinationPtr destNode = MakeDestinationNode("Destination", pixel2(10, 450));
+	SourcePtr sourceNode1 = MakeSourceNode("Source 1", pixel2(10, 340));
+	SourcePtr sourceNode2 = MakeSourceNode("Source 2", pixel2(120, 340));
+
+	DestinationPtr destNode1 = MakeDestinationNode("Destination 1", pixel2(10, 450));
+	DestinationPtr destNode2 = MakeDestinationNode("Destination 2", pixel2(120, 450));
 
 
 	for(int i=0;i<5;i++){
@@ -91,9 +94,10 @@ bool DataFlowEx::init(Composite& rootNode) {
 	graph->add(MakeRelationship(dataNode4,"extends",dataNode2));
 	graph->add(MakeRelationship(dataNode3,"has",dataNode4));
 
-	graph->add(sourceNode);
-	graph->add(destNode);
-
+	graph->add(sourceNode1);
+	graph->add(sourceNode2);
+	graph->add(destNode1);
+	graph->add(destNode2);
 	rootNode.add(graph);
 	return true;
 }

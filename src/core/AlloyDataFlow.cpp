@@ -647,22 +647,22 @@ void Connection::draw(AlloyContext* context) {
 	box2px bounds = source->getBounds();
 	pixel2 start;
 	pixel2 end;
-	float nudge=4.0f;
+	float nudge = 4.0f;
 	switch (source->getType()) {
 	case PortType::Input:
 		start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
-				bounds.position.y+nudge);
+				bounds.position.y + nudge);
 		break;
 	case PortType::Output:
 		start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
-				bounds.position.y + bounds.dimensions.y-nudge);
+				bounds.position.y + bounds.dimensions.y - nudge);
 		break;
 	case PortType::Child:
-		start = pixel2(bounds.position.x + bounds.dimensions.x-nudge,
+		start = pixel2(bounds.position.x + bounds.dimensions.x - nudge,
 				bounds.position.y + bounds.dimensions.y * 0.5f);
 		break;
 	case PortType::Parent:
-		start = pixel2(bounds.position.x+nudge,
+		start = pixel2(bounds.position.x + nudge,
 				bounds.position.y + bounds.dimensions.y * 0.5f);
 		break;
 	case PortType::Unknown:
@@ -696,7 +696,7 @@ void Connection::draw(AlloyContext* context) {
 	pixel2 k1 = pixel2(start.x, start.y + 0.5f * dy);
 	pixel2 k2 = pixel2(end.x, end.y - 0.5f * dy);
 	nvgMoveTo(nvg, start.x, start.y);
-	nvgLineCap(nvg,NVG_ROUND);
+	nvgLineCap(nvg, NVG_ROUND);
 	nvgBezierTo(nvg, k1.x, k1.y, k2.x, k2.y, end.x, end.y);
 	nvgStroke(nvg);
 }
@@ -866,8 +866,13 @@ void InputPort::draw(AlloyContext* context) {
 		getGraph()->setCurrentPort(this);
 		over = true;
 	} else {
-		nvgFillColor(nvg, Color(context->theme.LIGHT));
-		nvgStrokeColor(nvg, Color(context->theme.LIGHT));
+		if (isConnected()) {
+			nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
+			nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+		} else {
+			nvgFillColor(nvg, Color(context->theme.LIGHT));
+			nvgStrokeColor(nvg, Color(context->theme.LIGHT));
+		}
 	}
 	nvgStrokeWidth(nvg, lineWidth);
 	nvgBeginPath(nvg);
@@ -903,8 +908,13 @@ void ParentPort::draw(AlloyContext* context) {
 		getGraph()->setCurrentPort(this);
 		over = true;
 	} else {
-		nvgFillColor(nvg, Color(context->theme.LIGHT));
-		nvgStrokeColor(nvg, Color(context->theme.LIGHT));
+		if (isConnected()) {
+			nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
+			nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+		} else {
+			nvgFillColor(nvg, Color(context->theme.LIGHT));
+			nvgStrokeColor(nvg, Color(context->theme.LIGHT));
+		}
 	}
 	nvgStrokeWidth(nvg, lineWidth);
 	nvgBeginPath(nvg);
@@ -940,8 +950,13 @@ void OutputPort::draw(AlloyContext* context) {
 		getGraph()->setCurrentPort(this);
 		over = true;
 	} else {
-		nvgFillColor(nvg, Color(context->theme.LIGHT));
-		nvgStrokeColor(nvg, Color(context->theme.LIGHT));
+		if (isConnected()) {
+			nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
+			nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+		} else {
+			nvgFillColor(nvg, Color(context->theme.LIGHT));
+			nvgStrokeColor(nvg, Color(context->theme.LIGHT));
+		}
 	}
 	nvgLineCap(nvg, NVG_ROUND);
 	nvgLineJoin(nvg, NVG_BEVEL);
@@ -984,8 +999,13 @@ void ChildPort::draw(AlloyContext* context) {
 		getGraph()->setCurrentPort(this);
 		over = true;
 	} else {
-		nvgFillColor(nvg, Color(context->theme.LIGHT));
-		nvgStrokeColor(nvg, Color(context->theme.LIGHT));
+		if (isConnected()) {
+			nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
+			nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+		} else {
+			nvgFillColor(nvg, Color(context->theme.LIGHT));
+			nvgStrokeColor(nvg, Color(context->theme.LIGHT));
+		}
 	}
 	nvgLineCap(nvg, NVG_ROUND);
 	nvgLineJoin(nvg, NVG_BEVEL);
@@ -1220,7 +1240,7 @@ void Relationship::draw(AlloyContext* context) {
 		pixel2 ortho(-vec.y, vec.x);
 		pixel2 pt1 = ocenter - vec * r;
 
-		nvgStrokeColor(nvg, context->theme.LIGHT);
+		nvgStrokeColor(nvg, context->theme.NEUTRAL);
 		nvgStrokeWidth(nvg, 4.0f);
 		nvgLineCap(nvg, NVG_ROUND);
 		nvgBeginPath(nvg);
@@ -1231,7 +1251,7 @@ void Relationship::draw(AlloyContext* context) {
 
 		pixel2 pt2 = ocenter + ortho * arrowWidth * 0.5f;
 		pixel2 pt3 = ocenter - ortho * arrowWidth * 0.5f;
-		nvgFillColor(nvg, context->theme.LIGHT);
+		nvgFillColor(nvg, context->theme.NEUTRAL);
 		nvgBeginPath(nvg);
 		nvgMoveTo(nvg, pt1.x, pt1.y);
 		nvgLineTo(nvg, pt2.x, pt2.y);
