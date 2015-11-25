@@ -326,16 +326,23 @@ void View::setup() {
 	nodeIcon->borderWidth = borderWidth;
 }
 void Data::setup() {
+
 	setOrientation(Orientation::Horizontal, pixel2(0, 0));
+	NVGcontext* nvg = AlloyApplicationContext()->nvgContext;
+	nvgFontSize(nvg, fontSize);
+	nvgFontFaceId(nvg,
+			AlloyApplicationContext()->getFont(FontType::Bold)->handle);
+	textWidth = nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
 	CompositePtr iconContainer = MakeComposite("Icon Container",
 			CoordPX(0.0f, 0.0f),
 			CoordPX(
 					Node::DIMENSIONS.x - InputPort::DIMENSIONS.x
 							- OutputPort::DIMENSIONS.x, Node::DIMENSIONS.y));
 
-	//CompositePtr labelContainer = MakeComposite("label Container",
-	//		CoordPX(0.0f, 0.0f),
-	//		CoordPerPX(1.0, 0.0f, 0.0f, Node::DIMENSIONS.y));
+	CompositePtr labelContainer = MakeComposite("label Container",
+			CoordPX(Node::DIMENSIONS.x, 0.0f),
+			CoordPerPX(1.0f, 0.0f, 0.0f, Node::DIMENSIONS.y));
+
 	nodeIcon = NodeIconPtr(
 			new NodeIcon("Icon", CoordPX(0.0f, InputPort::DIMENSIONS.y + 1.0f),
 					CoordPerPX(1.0f, 1.0f, 0.0f,
@@ -343,27 +350,22 @@ void Data::setup() {
 									- 2.0f)));
 	nodeIcon->setAspectRule(AspectRule::FixedHeight);
 	nodeIcon->setAspectRatio(1.0f);
+
 	inputPort = MakeInputPort("Input");
 	outputPort = MakeOutputPort("Output");
 	inputPort->position = CoordPerPX(0.5f, 0.0f,
 			-InputPort::DIMENSIONS.x * 0.5f, 0.0f);
-
 	outputPort->position = CoordPerPX(0.5f, 1.0f,
 			-OutputPort::DIMENSIONS.x * 0.5f, -OutputPort::DIMENSIONS.y);
 	inputPort->setParent(this);
 	outputPort->setParent(this);
-	iconContainer->add(nodeIcon);
 	iconContainer->add(inputPort);
 	iconContainer->add(outputPort);
-	NVGcontext* nvg = AlloyApplicationContext()->nvgContext;
-	nvgFontSize(nvg, fontSize);
-	nvgFontFaceId(nvg,
-			AlloyApplicationContext()->getFont(FontType::Bold)->handle);
-	textWidth = nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
+	iconContainer->add(nodeIcon);
 	labelRegion = TextLabelPtr(
 			new TextLabel(label,
-					CoordPX(0.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
-					CoordPerPX(0.0f, 1.0f, textWidth + 4.0f,
+					CoordPX(4.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
+					CoordPerPX(0.0f, 1.0f, textWidth + 6.0f,
 							-2 * OutputPort::DIMENSIONS.y
 									- 2 * InputPort::DIMENSIONS.y - 2.0f)));
 	labelRegion->setAlignment(HorizontalAlignment::Left,
@@ -371,9 +373,24 @@ void Data::setup() {
 	labelRegion->setAspectRule(AspectRule::FixedHeight);
 	labelRegion->fontSize = UnitPX(fontSize);
 	labelRegion->fontType = FontType::Bold;
-	//labelContainer->add(labelRegion);
+	labelContainer->add(labelRegion);
+	inputPortComposite = CompositePtr(
+			new Composite("Input Ports", CoordPX(0.0f, InputPort::DIMENSIONS.y),
+					CoordPX(0.0f, InputPort::DIMENSIONS.y)));
+	outputPortComposite = CompositePtr(
+			new Composite("Output Ports",
+					CoordPerPX(0.0f, 1.0f, 0.0f, -2 * OutputPort::DIMENSIONS.y),
+					CoordPX(0.0f, OutputPort::DIMENSIONS.y)));
+
+	inputPortComposite->setOrientation(Orientation::Horizontal, pixel2(2, 0),
+			pixel2(2, 0));
+	outputPortComposite->setOrientation(Orientation::Horizontal, pixel2(2, 0),
+			pixel2(2, 0));
+	labelContainer->add(inputPortComposite);
+	labelContainer->add(outputPortComposite);
+
 	Composite::add(iconContainer);
-	Composite::add(labelRegion);
+	Composite::add(labelContainer);
 	setRoundCorners(true);
 	nodeIcon->backgroundColor = MakeColor(COLOR);
 	nodeIcon->borderWidth = borderWidth;
@@ -611,12 +628,12 @@ void DataFlow::draw(AlloyContext* context) {
 			nvgBezierTo(nvg, k1.x, k1.y, k2.x, k2.y, cursor.x, cursor.y);
 			nvgStroke(nvg);
 			/*
-			nvgFillColor(nvg, Color(220, 0, 0));
-			nvgBeginPath(nvg);
-			nvgCircle(nvg, k1.x, k1.y, 5.0f);
-			nvgCircle(nvg, k2.x, k2.y, 5.0f);
-			nvgFill(nvg);
-			*/
+			 nvgFillColor(nvg, Color(220, 0, 0));
+			 nvgBeginPath(nvg);
+			 nvgCircle(nvg, k1.x, k1.y, 5.0f);
+			 nvgCircle(nvg, k2.x, k2.y, 5.0f);
+			 nvgFill(nvg);
+			 */
 		}
 
 	}
@@ -624,27 +641,28 @@ void DataFlow::draw(AlloyContext* context) {
 void Connection::draw(AlloyContext* context) {
 
 	NVGcontext* nvg = context->nvgContext;
-	nvgStrokeWidth(nvg, 2.0f);
+	nvgStrokeWidth(nvg, 4.0f);
 	nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
 
 	box2px bounds = source->getBounds();
 	pixel2 start;
 	pixel2 end;
+	float nudge=4.0f;
 	switch (source->getType()) {
 	case PortType::Input:
 		start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
-				bounds.position.y);
+				bounds.position.y+nudge);
 		break;
 	case PortType::Output:
 		start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
-				bounds.position.y + bounds.dimensions.y);
+				bounds.position.y + bounds.dimensions.y-nudge);
 		break;
 	case PortType::Child:
-		start = pixel2(bounds.position.x + bounds.dimensions.x,
+		start = pixel2(bounds.position.x + bounds.dimensions.x-nudge,
 				bounds.position.y + bounds.dimensions.y * 0.5f);
 		break;
 	case PortType::Parent:
-		start = pixel2(bounds.position.x,
+		start = pixel2(bounds.position.x+nudge,
 				bounds.position.y + bounds.dimensions.y * 0.5f);
 		break;
 	case PortType::Unknown:
@@ -678,15 +696,9 @@ void Connection::draw(AlloyContext* context) {
 	pixel2 k1 = pixel2(start.x, start.y + 0.5f * dy);
 	pixel2 k2 = pixel2(end.x, end.y - 0.5f * dy);
 	nvgMoveTo(nvg, start.x, start.y);
+	nvgLineCap(nvg,NVG_ROUND);
 	nvgBezierTo(nvg, k1.x, k1.y, k2.x, k2.y, end.x, end.y);
 	nvgStroke(nvg);
-/*
-	nvgFillColor(nvg, Color(220, 0, 0));
-	nvgBeginPath(nvg);
-	nvgCircle(nvg, k1.x, k1.y, 5.0f);
-	nvgCircle(nvg, k2.x, k2.y, 5.0f);
-	nvgFill(nvg);
-	*/
 }
 void DataFlow::startConnection(Port* port) {
 	connectingPort = port;
@@ -1099,40 +1111,7 @@ void Compute::draw(AlloyContext* context) {
 	}
 }
 void Data::draw(AlloyContext* context) {
-	box2px bounds = getBounds();
-
-	NVGcontext* nvg = context->nvgContext;
-
-	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
-			context->pixelRatio);
-	nvgStrokeColor(nvg, context->theme.LIGHT_TEXT);
-	nvgStrokeWidth(nvg, lineWidth);
-	nvgLineCap(nvg, NVG_ROUND);
-	box2px lbounds = labelRegion->getBounds();
-	box2px cbounds = nodeIcon->getBounds();
-	pixel2 labelStart = pixel2(cbounds.position.x + cbounds.dimensions.x * 0.5f,
-			lbounds.position.y);
-	pixel2 labelEnd = pixel2(lbounds.position.x + lbounds.dimensions.x,
-			lbounds.position.y + lbounds.dimensions.y);
-	nvgStrokeWidth(nvg, 2.0f);
-	if (inputPorts.size() > 0 || outputPorts.size() > 0) {
-		nvgStrokeColor(nvg, Color(context->theme.DARK.toLighter(0.75f)));
-		nvgFillColor(nvg, context->theme.DARK.toSemiTransparent(NODE_ALPHA));
-	} else {
-		nvgStrokeColor(nvg, Color(COLOR_NONE));
-		nvgFillColor(nvg,
-				Color(context->theme.DARK.toSemiTransparent(NODE_ALPHA)));
-	}
-	nvgBeginPath(nvg);
-	nvgRoundedRect(nvg, labelStart.x, labelStart.y, labelEnd.x - labelStart.x,
-			labelEnd.y - labelStart.y, context->theme.CORNER_RADIUS);
-	nvgFill(nvg);
-	nvgBeginPath(nvg);
-	nvgRoundedRect(nvg, labelStart.x + 1.0f, labelStart.y + 1.0f,
-			labelEnd.x - labelStart.x - 2.0f, labelEnd.y - labelStart.y - 2.0f,
-			context->theme.CORNER_RADIUS);
-	nvgStroke(nvg);
-	Composite::draw(context);
+	Node::draw(context);
 	Port* p = getGraph()->getConnectingPort();
 	if (p == inputPort.get()) {
 		inputPort->setVisible(true);
@@ -1241,7 +1220,7 @@ void Relationship::draw(AlloyContext* context) {
 		pixel2 ortho(-vec.y, vec.x);
 		pixel2 pt1 = ocenter - vec * r;
 
-		nvgStrokeColor(nvg, context->theme.LIGHT_TEXT);
+		nvgStrokeColor(nvg, context->theme.LIGHT);
 		nvgStrokeWidth(nvg, 4.0f);
 		nvgLineCap(nvg, NVG_ROUND);
 		nvgBeginPath(nvg);
@@ -1252,7 +1231,7 @@ void Relationship::draw(AlloyContext* context) {
 
 		pixel2 pt2 = ocenter + ortho * arrowWidth * 0.5f;
 		pixel2 pt3 = ocenter - ortho * arrowWidth * 0.5f;
-		nvgFillColor(nvg, context->theme.LIGHT_TEXT);
+		nvgFillColor(nvg, context->theme.LIGHT);
 		nvgBeginPath(nvg);
 		nvgMoveTo(nvg, pt1.x, pt1.y);
 		nvgLineTo(nvg, pt2.x, pt2.y);

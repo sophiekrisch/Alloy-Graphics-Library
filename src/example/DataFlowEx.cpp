@@ -29,29 +29,57 @@ DataFlowEx::DataFlowEx() :
 bool DataFlowEx::init(Composite& rootNode) {
 	graph = MakeDataFlow("Data Flow", CoordPX(10, 10),
 			CoordPerPX(1.0f, 1.0f, -20.0f, -20.0f));
-	ComputePtr computeNode = MakeComputeNode("Compute", pixel2(10, 10));
-	ViewPtr viewNode = MakeViewNode("View", pixel2(10, 120));
+	ComputePtr computeNode1 = MakeComputeNode("Compute 1", pixel2(10, 10));
+	ComputePtr computeNode2 = MakeComputeNode("Compute 2", pixel2(120, 10));
+	ComputePtr computeNode3 = MakeComputeNode("Compute 3", pixel2(230, 10));
+
+	ViewPtr viewNode1 = MakeViewNode("View 1", pixel2(10, 120));
+	ViewPtr viewNode2 = MakeViewNode("View 2", pixel2(120, 120));
+
 	DataPtr dataNode1 = MakeDataNode("Data 1", pixel2(10, 230));
-	DataPtr dataNode2 = MakeDataNode("Data 2", pixel2(10, 230));
-	DataPtr dataNode3 = MakeDataNode("Data 3", pixel2(10, 230));
-	DataPtr dataNode4 = MakeDataNode("Data 4", pixel2(10, 230));
+	DataPtr dataNode2 = MakeDataNode("Data 2", pixel2(120, 230));
+	DataPtr dataNode3 = MakeDataNode("Data 3", pixel2(230, 230));
+	DataPtr dataNode4 = MakeDataNode("Data 4", pixel2(340, 230));
 
 	SourcePtr sourceNode = MakeSourceNode("Source", pixel2(10, 340));
 	DestinationPtr destNode = MakeDestinationNode("Destination", pixel2(10, 450));
 
+
+	for(int i=0;i<5;i++){
+		dataNode1->add(MakeInputPort(MakeString()<<"Input "<<i));
+		dataNode2->add(MakeInputPort(MakeString()<<"Input "<<i));
+		dataNode3->add(MakeInputPort(MakeString()<<"Input "<<i));
+		dataNode4->add(MakeInputPort(MakeString()<<"Input "<<i));
+
+	}
+	for(int i=0;i<3;i++){
+		dataNode1->add(MakeOutputPort(MakeString()<<"Output "<<i));
+		dataNode2->add(MakeOutputPort(MakeString()<<"Output "<<i));
+		dataNode3->add(MakeOutputPort(MakeString()<<"Output "<<i));
+		dataNode4->add(MakeOutputPort(MakeString()<<"Output "<<i));
+
+	}
 	for(int i=0;i<6;i++){
-		computeNode->add(MakeInputPort(MakeString()<<"Input "<<i));
+		computeNode1->add(MakeInputPort(MakeString()<<"Input "<<i));
+		computeNode2->add(MakeInputPort(MakeString()<<"Input "<<i));
+		computeNode3->add(MakeInputPort(MakeString()<<"Input "<<i));
 	}
 	for(int i=0;i<2;i++){
-		computeNode->add(MakeOutputPort(MakeString()<<"Output "<<i));
+		computeNode1->add(MakeOutputPort(MakeString()<<"Output "<<i));
+		computeNode2->add(MakeOutputPort(MakeString()<<"Output "<<i));
+		computeNode3->add(MakeOutputPort(MakeString()<<"Output "<<i));
 	}
 
-	for(int i=0;i<2;i++){
-		viewNode->add(MakeInputPort(MakeString()<<"Input "<<i));
+	for(int i=0;i<3;i++){
+		viewNode1->add(MakeInputPort(MakeString()<<"Input "<<i));
+		viewNode2->add(MakeInputPort(MakeString()<<"Input "<<i));
 	}
 
-	graph->add(computeNode);
-	graph->add(viewNode);
+	graph->add(computeNode1);
+	graph->add(computeNode2);
+	graph->add(computeNode3);
+	graph->add(viewNode1);
+	graph->add(viewNode2);
 	graph->add(dataNode1);
 	graph->add(dataNode2);
 	graph->add(dataNode3);
