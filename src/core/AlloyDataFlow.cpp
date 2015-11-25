@@ -292,7 +292,7 @@ void View::setup() {
 
 	labelRegion = TextLabelPtr(
 			new TextLabel(label, CoordPX(0.0f, 2 * InputPort::DIMENSIONS.y),
-					CoordPerPX(0.0f, 1.0f, textWidth + 10.0f,
+					CoordPerPX(1.0f, 1.0f, 0.0f,
 							-2 * OutputPort::DIMENSIONS.y
 									- 2 * InputPort::DIMENSIONS.y - 2.0f)));
 	labelRegion->setAlignment(HorizontalAlignment::Left,
@@ -364,8 +364,8 @@ void Data::setup() {
 	iconContainer->add(nodeIcon);
 	labelRegion = TextLabelPtr(
 			new TextLabel(label,
-					CoordPX(4.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
-					CoordPerPX(0.0f, 1.0f, textWidth + 6.0f,
+					CoordPX(0.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
+					CoordPerPX(1.0f, 1.0f,0.0f,
 							-2 * OutputPort::DIMENSIONS.y
 									- 2 * InputPort::DIMENSIONS.y - 2.0f)));
 	labelRegion->setAlignment(HorizontalAlignment::Left,
@@ -428,7 +428,7 @@ void Compute::setup() {
 	labelRegion = TextLabelPtr(
 			new TextLabel(label,
 					CoordPX(4.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
-					CoordPerPX(0.0f, 1.0f, textWidth + 6.0f,
+					CoordPerPX(1.0f, 1.0f, -4.0f,
 							-2 * OutputPort::DIMENSIONS.y
 									- 2 * InputPort::DIMENSIONS.y - 2.0f)));
 	labelRegion->setAlignment(HorizontalAlignment::Left,
@@ -1029,7 +1029,7 @@ void Data::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp) {
 	this->dimensions = CoordPX(
 			std::max(
-					std::max(textWidth + 10.0f,
+					std::max(textWidth +10.0f,
 							2.0f
 									+ inputPorts.size()
 											* (InputPort::DIMENSIONS.x + 2.0f)),
@@ -1057,7 +1057,7 @@ void Compute::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp) {
 	this->dimensions = CoordPX(
 			std::max(
-					std::max(textWidth + 10.0f,
+					std::max(textWidth + 14.0f,
 							2.0f
 									+ inputPorts.size()
 											* (InputPort::DIMENSIONS.x + 2.0f)),
