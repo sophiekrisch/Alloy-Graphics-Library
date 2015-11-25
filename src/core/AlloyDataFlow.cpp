@@ -60,9 +60,8 @@ std::shared_ptr<DataFlow> MakeDataFlow(const std::string& name,
 		const AUnit2D& pos, const AUnit2D& dims) {
 	return DataFlowPtr(new DataFlow(name, pos, dims));
 }
-std::shared_ptr<Connection> MakeConnection(
-		const std::shared_ptr<OutputPort>& source,
-		const std::shared_ptr<InputPort>& destination) {
+std::shared_ptr<Connection> MakeConnection(const std::shared_ptr<Port>& source,
+		const std::shared_ptr<Port>& destination) {
 	return ConnectionPtr(new Connection(source, destination));
 }
 std::shared_ptr<Relationship> MakeRelationship(
@@ -287,6 +286,7 @@ void View::setup() {
 	inputPort = MakeInputPort("Input");
 	inputPort->position = CoordPerPX(0.5f, 0.0f,
 			-InputPort::DIMENSIONS.x * 0.5f, 0.0f);
+	inputPort->setParent(this);
 	iconContainer->add(inputPort);
 	iconContainer->add(nodeIcon);
 
@@ -347,8 +347,11 @@ void Data::setup() {
 	outputPort = MakeOutputPort("Output");
 	inputPort->position = CoordPerPX(0.5f, 0.0f,
 			-InputPort::DIMENSIONS.x * 0.5f, 0.0f);
+
 	outputPort->position = CoordPerPX(0.5f, 1.0f,
 			-OutputPort::DIMENSIONS.x * 0.5f, -OutputPort::DIMENSIONS.y);
+	inputPort->setParent(this);
+	outputPort->setParent(this);
 	iconContainer->add(nodeIcon);
 	iconContainer->add(inputPort);
 	iconContainer->add(outputPort);
@@ -402,6 +405,7 @@ void Compute::setup() {
 	inputPort = MakeInputPort("Input");
 	inputPort->position = CoordPerPX(0.5f, 0.0f,
 			-InputPort::DIMENSIONS.x * 0.5f, 0.0f);
+	inputPort->setParent(this);
 	iconContainer->add(inputPort);
 	iconContainer->add(nodeIcon);
 	labelRegion = TextLabelPtr(
@@ -454,6 +458,7 @@ void Source::setup() {
 	nodeIcon->setAspectRatio(1.0f);
 	nodeIcon->setAspectRule(AspectRule::FixedHeight);
 	outputPort = MakeOutputPort("Output");
+	outputPort->setParent(this);
 	parentPort = MakeParentPort("Parent");
 	childPort = MakeChildPort("Child");
 	outputPort->position = CoordPerPX(0.5f, 1.0f,
@@ -462,6 +467,8 @@ void Source::setup() {
 			-OutputPort::DIMENSIONS.y);
 	childPort->position = CoordPerPX(1.0f, 0.5f, -ChildPort::DIMENSIONS.x,
 			-OutputPort::DIMENSIONS.y);
+	childPort->setParent(this);
+	parentPort->setParent(this);
 	iconContainer->add(nodeIcon);
 	iconContainer->add(outputPort);
 	iconContainer->add(parentPort);
@@ -506,6 +513,7 @@ void Destination::setup() {
 	inputPort = MakeInputPort("Input");
 	inputPort->position = CoordPerPX(0.5f, 0.0f,
 			-InputPort::DIMENSIONS.x * 0.5f, 0.0f);
+	inputPort->setParent(this);
 	iconContainer->add(nodeIcon);
 	iconContainer->add(inputPort);
 	NVGcontext* nvg = AlloyApplicationContext()->nvgContext;
@@ -535,6 +543,23 @@ bool Node::isMouseOver() const {
 		return parent->isMouseOverNode(this);
 	return false;
 }
+void DataFlow::setCurrentPort(Port* currentPort) {
+	this->currentPort = currentPort;
+}
+bool DataFlow::onEventHandler(AlloyContext* context, const InputEvent& e) {
+	if (connectingPort != nullptr && e.type == InputType::MouseButton
+			&& e.isUp()) {
+		if (currentPort != nullptr && currentPort != connectingPort
+				&& context->isMouseOver(currentPort)) {
+			add(
+					MakeConnection(connectingPort->getReference(),
+							currentPort->getReference()));
+		}
+		connectingPort = nullptr;
+	}
+	return Composite::onEventHandler(context, e);
+}
+
 void DataFlow::draw(AlloyContext* context) {
 	mouseOverNode = nullptr;
 	for (std::shared_ptr<Region> child : children) {
@@ -547,6 +572,124 @@ void DataFlow::draw(AlloyContext* context) {
 		}
 	}
 	Composite::draw(context);
+	if (connectingPort) {
+
+		pixel2 cursor = context->cursorPosition;
+		if (getBounds().contains(cursor)) {
+			NVGcontext* nvg = context->nvgContext;
+			nvgStrokeWidth(nvg, 2.0f);
+			nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
+
+			box2px bounds = connectingPort->getBounds();
+			pixel2 start;
+			switch (connectingPort->getType()) {
+			case PortType::Input:
+				start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
+						bounds.position.y);
+				break;
+			case PortType::Output:
+				start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
+						bounds.position.y + bounds.dimensions.y);
+				break;
+			case PortType::Child:
+				start = pixel2(bounds.position.x + bounds.dimensions.x,
+						bounds.position.y + bounds.dimensions.y * 0.5f);
+				break;
+			case PortType::Parent:
+				start = pixel2(bounds.position.x,
+						bounds.position.y + bounds.dimensions.y * 0.5f);
+				break;
+			case PortType::Unknown:
+				start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
+						bounds.position.y + bounds.dimensions.y * 0.5f);
+			}
+			nvgBeginPath(nvg);
+			float dy = cursor.y - start.y;
+			pixel2 k1 = pixel2(start.x, start.y + 0.5f * dy);
+			pixel2 k2 = pixel2(cursor.x, cursor.y - 0.5f * dy);
+			nvgMoveTo(nvg, start.x, start.y);
+			nvgBezierTo(nvg, k1.x, k1.y, k2.x, k2.y, cursor.x, cursor.y);
+			nvgStroke(nvg);
+			/*
+			nvgFillColor(nvg, Color(220, 0, 0));
+			nvgBeginPath(nvg);
+			nvgCircle(nvg, k1.x, k1.y, 5.0f);
+			nvgCircle(nvg, k2.x, k2.y, 5.0f);
+			nvgFill(nvg);
+			*/
+		}
+
+	}
+}
+void Connection::draw(AlloyContext* context) {
+
+	NVGcontext* nvg = context->nvgContext;
+	nvgStrokeWidth(nvg, 2.0f);
+	nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
+
+	box2px bounds = source->getBounds();
+	pixel2 start;
+	pixel2 end;
+	switch (source->getType()) {
+	case PortType::Input:
+		start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
+				bounds.position.y);
+		break;
+	case PortType::Output:
+		start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
+				bounds.position.y + bounds.dimensions.y);
+		break;
+	case PortType::Child:
+		start = pixel2(bounds.position.x + bounds.dimensions.x,
+				bounds.position.y + bounds.dimensions.y * 0.5f);
+		break;
+	case PortType::Parent:
+		start = pixel2(bounds.position.x,
+				bounds.position.y + bounds.dimensions.y * 0.5f);
+		break;
+	case PortType::Unknown:
+		start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
+				bounds.position.y + bounds.dimensions.y * 0.5f);
+	}
+	bounds = destination->getBounds();
+	switch (destination->getType()) {
+	case PortType::Input:
+		end = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
+				bounds.position.y);
+		break;
+	case PortType::Output:
+		end = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
+				bounds.position.y + bounds.dimensions.y);
+		break;
+	case PortType::Child:
+		end = pixel2(bounds.position.x + bounds.dimensions.x,
+				bounds.position.y + bounds.dimensions.y * 0.5f);
+		break;
+	case PortType::Parent:
+		end = pixel2(bounds.position.x,
+				bounds.position.y + bounds.dimensions.y * 0.5f);
+		break;
+	case PortType::Unknown:
+		end = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
+				bounds.position.y + bounds.dimensions.y * 0.5f);
+	}
+	nvgBeginPath(nvg);
+	float dy = end.y - start.y;
+	pixel2 k1 = pixel2(start.x, start.y + 0.5f * dy);
+	pixel2 k2 = pixel2(end.x, end.y - 0.5f * dy);
+	nvgMoveTo(nvg, start.x, start.y);
+	nvgBezierTo(nvg, k1.x, k1.y, k2.x, k2.y, end.x, end.y);
+	nvgStroke(nvg);
+/*
+	nvgFillColor(nvg, Color(220, 0, 0));
+	nvgBeginPath(nvg);
+	nvgCircle(nvg, k1.x, k1.y, 5.0f);
+	nvgCircle(nvg, k2.x, k2.y, 5.0f);
+	nvgFill(nvg);
+	*/
+}
+void DataFlow::startConnection(Port* port) {
+	connectingPort = port;
 }
 void DataFlow::setup() {
 	setRoundCorners(true);
@@ -563,6 +706,16 @@ void DataFlow::setup() {
 						}
 					}));
 	Composite::add(relationshipRegion);
+	DrawPtr connectionRegion = DrawPtr(
+			new Draw("Connections", CoordPX(0.0f, 0.0f),
+					CoordPercent(1.0f, 1.0f),
+					[this](AlloyContext* context,const box2px& bounds) {
+						for(ConnectionPtr& connection:connections) {
+							connection->draw(context);
+						}
+					}));
+	Composite::add(connectionRegion);
+	Application::addListener(this);
 }
 void OutputMultiPort::insertValue(const std::shared_ptr<Packet>& packet,
 		int index) {
@@ -620,10 +773,43 @@ void InputMultiPort::setValue(const std::shared_ptr<Packet>& packet) {
 void OutputMultiPort::setValue(const std::shared_ptr<Packet>& packet) {
 	insertAtBack(packet);
 }
+std::shared_ptr<Port> Port::getReference() {
+	if (parent->inputPort.get() == this) {
+		return parent->inputPort;
+	}
+	if (parent->outputPort.get() == this) {
+		return parent->outputPort;
+	}
+	if (parent->childPort.get() == this) {
+		return parent->childPort;
+	}
+	if (parent->parentPort.get() == this) {
+		return parent->parentPort;
+	}
+	for (std::shared_ptr<Port> port : parent->inputPorts) {
+		if (port.get() == this)
+			return port;
+	}
+	for (std::shared_ptr<Port> port : parent->outputPorts) {
+		if (port.get() == this)
+			return port;
+	}
+	return std::shared_ptr<Port>();
+
+}
 void Port::setup() {
 	position = CoordPX(0.0f, 0.0f);
 	borderWidth = UnitPX(1.0f);
-	;
+	onMouseDown = [this](AlloyContext* context,const InputEvent& e) {
+		if(e.button==GLFW_MOUSE_BUTTON_LEFT&&e.isDown()) {
+			getGraph()->startConnection(this);
+			return true;
+		}
+		return false;
+	};
+}
+DataFlow* Port::getGraph() const {
+	return (parent != nullptr) ? parent->parent : nullptr;
 }
 void InputPort::setup() {
 	position = CoordPX(0.0f, 0.0f);
@@ -660,12 +846,13 @@ void InputPort::draw(AlloyContext* context) {
 	box2px bounds = getBounds();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
-	bool over=false;
+	bool over = false;
 	if (context->isMouseOver(this)) {
 		nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
 		nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
 		context->setCursor(&portCursor);
-		over=true;
+		getGraph()->setCurrentPort(this);
+		over = true;
 	} else {
 		nvgFillColor(nvg, Color(context->theme.LIGHT));
 		nvgStrokeColor(nvg, Color(context->theme.LIGHT));
@@ -678,14 +865,16 @@ void InputPort::draw(AlloyContext* context) {
 			bounds.dimensions.y * 0.5f - 0.5f * lineWidth);
 	nvgFill(nvg);
 	nvgStroke(nvg);
-	if(over){
-		nvgFontFaceId(nvg,context->getFontHandle(FontType::Normal));
-		nvgFontSize(nvg,18.0f);
-		nvgTextAlign(nvg,NVG_ALIGN_BOTTOM|NVG_ALIGN_LEFT);
+	if (over) {
+		nvgFontFaceId(nvg, context->getFontHandle(FontType::Normal));
+		nvgFontSize(nvg, 18.0f);
+		nvgTextAlign(nvg, NVG_ALIGN_BOTTOM | NVG_ALIGN_LEFT);
 		nvgSave(nvg);
-		nvgTranslate(nvg,bounds.position.x+bounds.dimensions.x,bounds.position.y);
+		nvgTranslate(nvg, bounds.position.x + bounds.dimensions.x,
+				bounds.position.y);
 		nvgRotate(nvg, -ALY_PI * 0.25f);
-		aly::drawText(nvg,0.0f,0.0f,name.c_str(),FontStyle::Outline,context->theme.HIGHLIGHT,context->theme.DARK,nullptr);
+		aly::drawText(nvg, 0.0f, 0.0f, name.c_str(), FontStyle::Outline,
+				context->theme.HIGHLIGHT, context->theme.DARK, nullptr);
 		nvgRestore(nvg);
 	}
 }
@@ -694,12 +883,13 @@ void ParentPort::draw(AlloyContext* context) {
 	box2px bounds = getBounds();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
-	bool over=false;
+	bool over = false;
 	if (context->isMouseOver(this)) {
 		nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
 		nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
 		context->setCursor(&portCursor);
-		over=true;
+		getGraph()->setCurrentPort(this);
+		over = true;
 	} else {
 		nvgFillColor(nvg, Color(context->theme.LIGHT));
 		nvgStrokeColor(nvg, Color(context->theme.LIGHT));
@@ -711,13 +901,15 @@ void ParentPort::draw(AlloyContext* context) {
 			bounds.dimensions.x - lineWidth, bounds.dimensions.y - lineWidth);
 	nvgFill(nvg);
 	nvgStroke(nvg);
-	if(over){
-		nvgFontFaceId(nvg,context->getFontHandle(FontType::Normal));
-		nvgFontSize(nvg,18.0f);
-		nvgTextAlign(nvg,NVG_ALIGN_BOTTOM|NVG_ALIGN_RIGHT);
+	if (over) {
+		nvgFontFaceId(nvg, context->getFontHandle(FontType::Normal));
+		nvgFontSize(nvg, 18.0f);
+		nvgTextAlign(nvg, NVG_ALIGN_BOTTOM | NVG_ALIGN_RIGHT);
 		nvgSave(nvg);
-		nvgTranslate(nvg,bounds.position.x+bounds.dimensions.x,bounds.position.y);
-		aly::drawText(nvg,0.0f,0.0f,name.c_str(),FontStyle::Outline,context->theme.HIGHLIGHT,context->theme.DARK,nullptr);
+		nvgTranslate(nvg, bounds.position.x + bounds.dimensions.x,
+				bounds.position.y);
+		aly::drawText(nvg, 0.0f, 0.0f, name.c_str(), FontStyle::Outline,
+				context->theme.HIGHLIGHT, context->theme.DARK, nullptr);
 		nvgRestore(nvg);
 	}
 }
@@ -728,12 +920,13 @@ void OutputPort::draw(AlloyContext* context) {
 	box2px bounds = getBounds();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
-	bool over=false;
+	bool over = false;
 	if (context->isMouseOver(this)) {
 		nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
 		nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
 		context->setCursor(&portCursor);
-		over=true;
+		getGraph()->setCurrentPort(this);
+		over = true;
 	} else {
 		nvgFillColor(nvg, Color(context->theme.LIGHT));
 		nvgStrokeColor(nvg, Color(context->theme.LIGHT));
@@ -752,14 +945,16 @@ void OutputPort::draw(AlloyContext* context) {
 	nvgClosePath(nvg);
 	nvgFill(nvg);
 	nvgStroke(nvg);
-	if(over){
-		nvgFontFaceId(nvg,context->getFontHandle(FontType::Normal));
-		nvgFontSize(nvg,18.0f);
-		nvgTextAlign(nvg,NVG_ALIGN_TOP|NVG_ALIGN_LEFT);
+	if (over) {
+		nvgFontFaceId(nvg, context->getFontHandle(FontType::Normal));
+		nvgFontSize(nvg, 18.0f);
+		nvgTextAlign(nvg, NVG_ALIGN_TOP | NVG_ALIGN_LEFT);
 		nvgSave(nvg);
-		nvgTranslate(nvg,bounds.position.x+bounds.dimensions.x,bounds.position.y+bounds.dimensions.y);
+		nvgTranslate(nvg, bounds.position.x + bounds.dimensions.x,
+				bounds.position.y + bounds.dimensions.y);
 		nvgRotate(nvg, ALY_PI * 0.25f);
-		aly::drawText(nvg,0.0f,0.0f,name.c_str(),FontStyle::Outline,context->theme.HIGHLIGHT,context->theme.DARK,nullptr);
+		aly::drawText(nvg, 0.0f, 0.0f, name.c_str(), FontStyle::Outline,
+				context->theme.HIGHLIGHT, context->theme.DARK, nullptr);
 		nvgRestore(nvg);
 	}
 }
@@ -769,12 +964,13 @@ void ChildPort::draw(AlloyContext* context) {
 	box2px bounds = getBounds();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
-	bool over=false;
+	bool over = false;
 	if (context->isMouseOver(this)) {
 		nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
 		nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
 		context->setCursor(&portCursor);
-		over=true;
+		getGraph()->setCurrentPort(this);
+		over = true;
 	} else {
 		nvgFillColor(nvg, Color(context->theme.LIGHT));
 		nvgStrokeColor(nvg, Color(context->theme.LIGHT));
@@ -793,13 +989,14 @@ void ChildPort::draw(AlloyContext* context) {
 	nvgClosePath(nvg);
 	nvgFill(nvg);
 	nvgStroke(nvg);
-	if(over){
-		nvgFontFaceId(nvg,context->getFontHandle(FontType::Normal));
-		nvgFontSize(nvg,18.0f);
-		nvgTextAlign(nvg,NVG_ALIGN_BOTTOM|NVG_ALIGN_LEFT);
+	if (over) {
+		nvgFontFaceId(nvg, context->getFontHandle(FontType::Normal));
+		nvgFontSize(nvg, 18.0f);
+		nvgTextAlign(nvg, NVG_ALIGN_BOTTOM | NVG_ALIGN_LEFT);
 		nvgSave(nvg);
-		nvgTranslate(nvg,bounds.position.x,bounds.position.y);
-		aly::drawText(nvg,0.0f,0.0f,name.c_str(),FontStyle::Outline,context->theme.HIGHLIGHT,context->theme.DARK,nullptr);
+		nvgTranslate(nvg, bounds.position.x, bounds.position.y);
+		aly::drawText(nvg, 0.0f, 0.0f, name.c_str(), FontStyle::Outline,
+				context->theme.HIGHLIGHT, context->theme.DARK, nullptr);
 		nvgRestore(nvg);
 	}
 }
@@ -871,22 +1068,34 @@ void Node::draw(AlloyContext* context) {
 }
 void View::draw(AlloyContext* context) {
 	Node::draw(context);
-	if (isMouseOver()) {
-		if (!inputPort->isVisible()) {
-			inputPort->setVisible(true);
-		}
+	Port* p = getGraph()->getConnectingPort();
+	if (p == inputPort.get()) {
+		inputPort->setVisible(true);
 	} else {
-		inputPort->setVisible(false);
+		if (isMouseOver()) {
+			if (!inputPort->isVisible()) {
+				inputPort->setVisible(true);
+			}
+		} else {
+			if (!inputPort->isConnected())
+				inputPort->setVisible(false);
+		}
 	}
 }
 void Compute::draw(AlloyContext* context) {
 	Node::draw(context);
-	if (isMouseOver() ) {
-		if (!inputPort->isVisible()) {
-			inputPort->setVisible(true);
-		}
+	Port* p = getGraph()->getConnectingPort();
+	if (p == inputPort.get()) {
+		inputPort->setVisible(true);
 	} else {
-		inputPort->setVisible(false);
+		if (isMouseOver()) {
+			if (!inputPort->isVisible()) {
+				inputPort->setVisible(true);
+			}
+		} else {
+			if (!inputPort->isConnected())
+				inputPort->setVisible(false);
+		}
 	}
 }
 void Data::draw(AlloyContext* context) {
@@ -924,14 +1133,29 @@ void Data::draw(AlloyContext* context) {
 			context->theme.CORNER_RADIUS);
 	nvgStroke(nvg);
 	Composite::draw(context);
-	if (isMouseOver()) {
-		if (!inputPort->isVisible()) {
-			inputPort->setVisible(true);
-			outputPort->setVisible(true);
-		}
+	Port* p = getGraph()->getConnectingPort();
+	if (p == inputPort.get()) {
+		inputPort->setVisible(true);
+		if (!outputPort->isConnected())
+			outputPort->setVisible(false);
+	} else if (p == outputPort.get()) {
+		if (!inputPort->isConnected())
+			inputPort->setVisible(false);
+		outputPort->setVisible(true);
 	} else {
-		inputPort->setVisible(false);
-		outputPort->setVisible(false);
+		if (isMouseOver()) {
+
+			if (!inputPort->isVisible()) {
+				inputPort->setVisible(true);
+				outputPort->setVisible(true);
+			}
+		} else {
+			if (!inputPort->isConnected())
+				inputPort->setVisible(false);
+
+			if (!outputPort->isConnected())
+				outputPort->setVisible(false);
+		}
 	}
 }
 void Source::draw(AlloyContext* context) {

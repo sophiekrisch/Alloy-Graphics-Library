@@ -249,6 +249,9 @@ public:
 	static inline std::shared_ptr<AlloyContext>& getDefaultContext() {
 		return defaultContext;
 	}
+	pixel2 getCursorPosition() const {
+		return cursorPosition;
+	}
 	box2px getViewport() const {
 		return box2px(pixel2(0.0f, 0.0f), pixel2(viewSize));
 	}

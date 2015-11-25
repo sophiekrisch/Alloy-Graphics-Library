@@ -43,7 +43,7 @@ enum class NodeType {
 	Destination = 6
 };
 enum class PortType {
-	Unknown = 0, Input = 1, Output = 2
+	Unknown = 0, Input = 1, Output = 2, Child = 3, Parent = 4
 };
 struct Packet: public AnyInterface {
 protected:
@@ -79,16 +79,36 @@ protected:
 	Node* parent;
 	std::string label;
 	Cursor portCursor;
+	Connection* connection;
 	virtual void setup();
+
 public:
 	friend class Connection;
 	friend class Node;
+	DataFlow* getGraph() const;
+	inline Node* getNode() const {
+		return parent;
+	}
+	void setConnection(Connection* connect) {
+		connection = connect;
+	}
+	bool isConnected() const {
+		return (connection != nullptr);
+	}
+	void setParent(Node* parent) {
+		this->parent = parent;
+	}
+	std::shared_ptr<Port> getReference();
 	Port(const std::string& name, const std::string& label) :
-			Region(name), parent(nullptr), label(label),portCursor(0xf05b, 16.0f,NVG_ALIGN_MIDDLE|NVG_ALIGN_CENTER, FontType::Icon,0.0f,pixel2(-0.25f,-0.25f)) {
+			Region(name), parent(nullptr), label(label), portCursor(0xf05b,
+					16.0f, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER, FontType::Icon,
+					0.0f, pixel2(-0.25f, -0.25f)), connection(nullptr) {
 		setup();
 	}
 	Port(const std::string& name) :
-			Region(name), parent(nullptr), label(name),portCursor(0xf05b, 16.0f,NVG_ALIGN_MIDDLE|NVG_ALIGN_CENTER, FontType::Icon,0.0f,pixel2(-0.25f,-0.25f)){
+			Region(name), parent(nullptr), label(name), portCursor(0xf05b,
+					16.0f, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER, FontType::Icon,
+					0.0f, pixel2(-0.25f, -0.25f)), connection(nullptr) {
 		setup();
 	}
 	virtual PortType getType() const {
@@ -101,7 +121,9 @@ public:
 		this->label = label;
 	}
 	virtual void draw(AlloyContext* context) override;
-	virtual void setValue(const std::shared_ptr<Packet>& packet)=0;
+	virtual void setValue(const std::shared_ptr<Packet>& packet) {
+	}
+	;
 	virtual ~Port() {
 	}
 };
@@ -194,7 +216,7 @@ public:
 		setup();
 	}
 	virtual PortType getType() const override {
-		return PortType::Input;
+		return PortType::Parent;
 	}
 	virtual void setValue(const std::shared_ptr<Packet>& packet) override {
 		this->value = packet;
@@ -206,12 +228,15 @@ public:
 };
 class Connection {
 public:
-	std::shared_ptr<OutputPort> source;
-	std::shared_ptr<InputPort> destination;
-	Connection(const std::shared_ptr<OutputPort>& source,
-			const std::shared_ptr<InputPort>& destination) :
+	std::shared_ptr<Port> source;
+	std::shared_ptr<Port> destination;
+	Connection(const std::shared_ptr<Port>& source,
+			const std::shared_ptr<Port>& destination) :
 			source(source), destination(destination) {
+		source->setConnection(this);
+		destination->setConnection(this);
 	}
+	void draw(AlloyContext* context);
 };
 
 class ConnectionBundle: public std::vector<std::shared_ptr<Connection>> {
@@ -279,7 +304,7 @@ public:
 		setup();
 	}
 	virtual PortType getType() const override {
-		return PortType::Input;
+		return PortType::Child;
 	}
 	virtual void setValue(const std::shared_ptr<Packet>& packet) override {
 		this->value = packet;
@@ -341,6 +366,8 @@ protected:
 	std::vector<std::shared_ptr<OutputPort>> outputPorts;
 	std::shared_ptr<InputPort> inputPort;
 	std::shared_ptr<OutputPort> outputPort;
+	std::shared_ptr<ParentPort> parentPort;
+	std::shared_ptr<ChildPort> childPort;
 	CompositePtr inputPortComposite;
 	CompositePtr outputPortComposite;
 	TextLabelPtr labelRegion;
@@ -349,13 +376,20 @@ protected:
 	virtual void setup();
 public:
 	friend class DataFlow;
+	friend class Port;
 	static const pixel2 DIMENSIONS;
+	void setParent(DataFlow* parent) {
+		this->parent = parent;
+	}
+	DataFlow* getGraph() const {
+		return parent;
+	}
 	virtual NodeType getType() const {
 		return NodeType::Unknown;
 	}
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
 			override;
-	bool isMouseOver() const ;
+	bool isMouseOver() const;
 	pixel2 getCenter() const {
 		return nodeIcon->getBounds().center();
 	}
@@ -453,8 +487,9 @@ public:
 			Node(name, pos, dims) {
 		setup();
 	}
-	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
-			double pixelRatio, bool clamp = false) override;
+	virtual void pack(const pixel2& pos, const pixel2& dims,
+			const double2& dpmm, double pixelRatio, bool clamp = false)
+					override;
 	virtual void draw(AlloyContext* context) override;
 };
 class Compute: public Node {
@@ -482,16 +517,16 @@ public:
 			Node(name, pos, dims) {
 		setup();
 	}
-	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
-			double pixelRatio, bool clamp = false) override;
+	virtual void pack(const pixel2& pos, const pixel2& dims,
+			const double2& dpmm, double pixelRatio, bool clamp = false)
+					override;
 	virtual void draw(AlloyContext* context) override;
 };
 class Source: public Node {
 protected:
 	static const Color COLOR;
 	virtual void setup() override;
-	std::shared_ptr<ParentPort> parentPort;
-	std::shared_ptr<ChildPort> childPort;
+
 public:
 	virtual NodeType getType() const override {
 		return NodeType::Source;
@@ -554,11 +589,24 @@ protected:
 	std::vector<std::shared_ptr<Connection>> connections;
 	std::vector<std::shared_ptr<Relationship>> relationships;
 	Node* mouseOverNode;
+	Port* connectingPort;
+	Port* currentPort;
 	void setup();
 public:
+	bool isConnecting() const {
+		return (connectingPort != nullptr);
+	}
+	Port* getConnectingPort() const {
+		return connectingPort;
+	}
+	void startConnection(Port* port);
+	void setCurrentPort(Port* currentPort);
 	virtual void draw(AlloyContext* context) override;
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
+			override;
 	DataFlow(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
-			Composite(name, pos, dims), mouseOverNode(nullptr) {
+			Composite(name, pos, dims), mouseOverNode(nullptr), connectingPort(
+					nullptr), currentPort(nullptr) {
 		setup();
 	}
 	bool isMouseOverNode(const Node* node) const {
