@@ -1025,6 +1025,20 @@ void ChildPort::draw(AlloyContext* context) {
 		nvgRestore(nvg);
 	}
 }
+void Data::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
+		double pixelRatio, bool clamp) {
+	this->dimensions = CoordPX(
+			std::max(
+					std::max(textWidth + 10.0f,
+							2.0f
+									+ inputPorts.size()
+											* (InputPort::DIMENSIONS.x + 2.0f)),
+					2.0f
+							+ outputPorts.size()
+									* (OutputPort::DIMENSIONS.x + 2.0f)),
+			Node::DIMENSIONS.y);
+	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
+}
 void View::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp) {
 	this->dimensions = CoordPX(

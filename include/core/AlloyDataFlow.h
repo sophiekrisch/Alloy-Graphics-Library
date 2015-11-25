@@ -461,6 +461,9 @@ public:
 		setup();
 	}
 	virtual void draw(AlloyContext* context) override;
+	virtual void pack(const pixel2& pos, const pixel2& dims,
+			const double2& dpmm, double pixelRatio, bool clamp = false)
+					override;
 };
 class View: public Node {
 protected:
