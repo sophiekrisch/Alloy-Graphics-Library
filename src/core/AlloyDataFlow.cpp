@@ -691,12 +691,13 @@ void Connection::draw(AlloyContext* context) {
 		end = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
 				bounds.position.y + bounds.dimensions.y * 0.5f);
 	}
+	nvgLineCap(nvg, NVG_ROUND);
+	nvgLineJoin(nvg, NVG_BEVEL);
 	nvgBeginPath(nvg);
 	float dy = end.y - start.y;
 	pixel2 k1 = pixel2(start.x, start.y + 0.5f * dy);
 	pixel2 k2 = pixel2(end.x, end.y - 0.5f * dy);
 	nvgMoveTo(nvg, start.x, start.y);
-	nvgLineCap(nvg, NVG_ROUND);
 	nvgBezierTo(nvg, k1.x, k1.y, k2.x, k2.y, end.x, end.y);
 	nvgStroke(nvg);
 }
