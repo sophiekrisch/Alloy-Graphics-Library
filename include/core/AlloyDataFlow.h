@@ -345,6 +345,7 @@ protected:
 	CompositePtr outputPortComposite;
 	TextLabelPtr labelRegion;
 	std::shared_ptr<NodeIcon> nodeIcon;
+	float textWidth;
 	virtual void setup();
 public:
 	friend class DataFlow;
@@ -397,6 +398,7 @@ public:
 	void setLabel(const std::string& label) {
 		this->label = label;
 	}
+
 	virtual void draw(AlloyContext* context) override;
 };
 class Data: public Node {
@@ -451,6 +453,8 @@ public:
 			Node(name, pos, dims) {
 		setup();
 	}
+	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
+			double pixelRatio, bool clamp = false) override;
 	virtual void draw(AlloyContext* context) override;
 };
 class Compute: public Node {
@@ -478,6 +482,8 @@ public:
 			Node(name, pos, dims) {
 		setup();
 	}
+	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
+			double pixelRatio, bool clamp = false) override;
 	virtual void draw(AlloyContext* context) override;
 };
 class Source: public Node {
