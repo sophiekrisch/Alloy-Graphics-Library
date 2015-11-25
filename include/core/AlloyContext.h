@@ -171,16 +171,17 @@ struct EventHandler {
 };
 struct Cursor {
 	static const Cursor Normal, Horizontal, Vertical, Position, Hand, SlantUp,
-			SlantDown, TextInsert;
+			SlantDown, TextInsert,CrossHairs;
 	std::string codeString;
 	FontType fontType;
 	float fontSize;
 	float angle;
 	int align;
+	pixel2 nudge;
 	Cursor(int code, float fontSize, int align = NVG_ALIGN_TOP | NVG_ALIGN_LEFT,
-			const FontType& fontType = FontType::Icon, float angle = 0.0f) :
+			const FontType& fontType = FontType::Icon, float angle = 0.0f,const pixel2& nudge=pixel2(0.0f)) :
 			codeString(CodePointToUTF8(code)), fontType(fontType), fontSize(
-					fontSize), angle(angle), align(align) {
+					fontSize), angle(angle), align(align),nudge(nudge) {
 	}
 	void draw(AlloyContext* context) const;
 };

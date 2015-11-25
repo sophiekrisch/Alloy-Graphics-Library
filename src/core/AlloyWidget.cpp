@@ -2736,6 +2736,7 @@ void Graph::draw(AlloyContext* context) {
 		nvgStroke(nvg);
 	}
 	if (gbounds.contains(cursorPosition)) {
+		context->setCursor(&Cursor::CrossHairs);
 		gpos = (cursorPosition - gbounds.position) / gbounds.dimensions;
 		gpos.y = 1 - gpos.y;
 		gpos = gpos * graphBounds.dimensions + graphBounds.position;

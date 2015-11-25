@@ -55,7 +55,7 @@ namespace aly {
 
 std::shared_ptr<AlloyContext> AlloyContext::defaultContext;
 const Cursor Cursor::Normal(0xf245, 24.0f);
-const Cursor Cursor::Hand(0xf25a, 24.0f);
+const Cursor Cursor::Hand(0xf25a, 24.0f, NVG_ALIGN_TOP | NVG_ALIGN_LEFT, FontType::Icon,0.0f,pixel2(-8.0f,0.0f));
 const Cursor Cursor::Horizontal(0xf07e, 24.0f,
 		NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
 const Cursor Cursor::Vertical(0xf07d, 24.0f,
@@ -68,6 +68,7 @@ const Cursor Cursor::SlantDown(0xf07d, 24.0f,
 		NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER, FontType::Icon, -ALY_PI_4);
 const Cursor Cursor::SlantUp(0xf07d, 24.0f, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER,
 		FontType::Icon, ALY_PI_4);
+const Cursor Cursor::CrossHairs(0xf05b, 24.0f,NVG_ALIGN_MIDDLE|NVG_ALIGN_CENTER, FontType::Icon,0.0f,pixel2(-0.25f,-0.25f));
 void Cursor::draw(AlloyContext* context) const {
 	pixel2 cursor = context->cursorPosition;
 	if (fontSize > 0.0f && context->hasFocus && cursor.x >= 0 && cursor.y >= 0
@@ -78,7 +79,7 @@ void Cursor::draw(AlloyContext* context) const {
 		nvgFontFaceId(nvg, context->getFontHandle(fontType));
 		nvgFontSize(nvg, fontSize);
 		nvgFillColor(nvg, Color(255, 255, 255));
-		nvgTranslate(nvg, cursor.x, cursor.y);
+		nvgTranslate(nvg, cursor.x+nudge.x, cursor.y+nudge.y);
 		nvgRotate(nvg, angle);
 		const float shift = 1.0f;
 		const char* txt = codeString.c_str();

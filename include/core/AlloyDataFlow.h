@@ -78,17 +78,17 @@ class Port: public Region {
 protected:
 	Node* parent;
 	std::string label;
-
+	Cursor portCursor;
 	virtual void setup();
 public:
 	friend class Connection;
 	friend class Node;
 	Port(const std::string& name, const std::string& label) :
-			Region(name), parent(nullptr), label(label) {
+			Region(name), parent(nullptr), label(label),portCursor(0xf05b, 16.0f,NVG_ALIGN_MIDDLE|NVG_ALIGN_CENTER, FontType::Icon,0.0f,pixel2(-0.25f,-0.25f)) {
 		setup();
 	}
 	Port(const std::string& name) :
-			Region(name), parent(nullptr), label(name) {
+			Region(name), parent(nullptr), label(name),portCursor(0xf05b, 16.0f,NVG_ALIGN_MIDDLE|NVG_ALIGN_CENTER, FontType::Icon,0.0f,pixel2(-0.25f,-0.25f)){
 		setup();
 	}
 	virtual PortType getType() const {

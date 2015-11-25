@@ -180,6 +180,7 @@ void NodeIcon::draw(AlloyContext* context) {
 	if (context->isMouseOver(this)) {
 		nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
 		nvgFillColor(nvg, backgroundColor->toLighter(0.25f));
+		//context->setCursor(&Cursor::Position);
 	} else {
 		nvgStrokeColor(nvg, Color(context->theme.LIGHT_TEXT));
 		nvgFillColor(nvg, *backgroundColor);
@@ -622,6 +623,7 @@ void OutputMultiPort::setValue(const std::shared_ptr<Packet>& packet) {
 void Port::setup() {
 	position = CoordPX(0.0f, 0.0f);
 	borderWidth = UnitPX(1.0f);
+	;
 }
 void InputPort::setup() {
 	position = CoordPX(0.0f, 0.0f);
@@ -653,13 +655,17 @@ void Port::draw(AlloyContext* context) {
 void InputPort::draw(AlloyContext* context) {
 	if (!isVisible())
 		return;
+
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
+	bool over=false;
 	if (context->isMouseOver(this)) {
 		nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
 		nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+		context->setCursor(&portCursor);
+		over=true;
 	} else {
 		nvgFillColor(nvg, Color(context->theme.LIGHT));
 		nvgStrokeColor(nvg, Color(context->theme.LIGHT));
@@ -671,17 +677,29 @@ void InputPort::draw(AlloyContext* context) {
 			bounds.dimensions.x * 0.5f - 0.5f * lineWidth,
 			bounds.dimensions.y * 0.5f - 0.5f * lineWidth);
 	nvgFill(nvg);
-
 	nvgStroke(nvg);
+	if(over){
+		nvgFontFaceId(nvg,context->getFontHandle(FontType::Normal));
+		nvgFontSize(nvg,18.0f);
+		nvgTextAlign(nvg,NVG_ALIGN_BOTTOM|NVG_ALIGN_LEFT);
+		nvgSave(nvg);
+		nvgTranslate(nvg,bounds.position.x+bounds.dimensions.x,bounds.position.y);
+		nvgRotate(nvg, -ALY_PI * 0.25f);
+		aly::drawText(nvg,0.0f,0.0f,name.c_str(),FontStyle::Outline,context->theme.HIGHLIGHT,context->theme.DARK,nullptr);
+		nvgRestore(nvg);
+	}
 }
 void ParentPort::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
+	bool over=false;
 	if (context->isMouseOver(this)) {
 		nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
 		nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+		context->setCursor(&portCursor);
+		over=true;
 	} else {
 		nvgFillColor(nvg, Color(context->theme.LIGHT));
 		nvgStrokeColor(nvg, Color(context->theme.LIGHT));
@@ -693,6 +711,15 @@ void ParentPort::draw(AlloyContext* context) {
 			bounds.dimensions.x - lineWidth, bounds.dimensions.y - lineWidth);
 	nvgFill(nvg);
 	nvgStroke(nvg);
+	if(over){
+		nvgFontFaceId(nvg,context->getFontHandle(FontType::Normal));
+		nvgFontSize(nvg,18.0f);
+		nvgTextAlign(nvg,NVG_ALIGN_BOTTOM|NVG_ALIGN_RIGHT);
+		nvgSave(nvg);
+		nvgTranslate(nvg,bounds.position.x+bounds.dimensions.x,bounds.position.y);
+		aly::drawText(nvg,0.0f,0.0f,name.c_str(),FontStyle::Outline,context->theme.HIGHLIGHT,context->theme.DARK,nullptr);
+		nvgRestore(nvg);
+	}
 }
 void OutputPort::draw(AlloyContext* context) {
 	if (!isVisible())
@@ -701,9 +728,12 @@ void OutputPort::draw(AlloyContext* context) {
 	box2px bounds = getBounds();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
+	bool over=false;
 	if (context->isMouseOver(this)) {
 		nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
 		nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+		context->setCursor(&portCursor);
+		over=true;
 	} else {
 		nvgFillColor(nvg, Color(context->theme.LIGHT));
 		nvgStrokeColor(nvg, Color(context->theme.LIGHT));
@@ -722,7 +752,16 @@ void OutputPort::draw(AlloyContext* context) {
 	nvgClosePath(nvg);
 	nvgFill(nvg);
 	nvgStroke(nvg);
-
+	if(over){
+		nvgFontFaceId(nvg,context->getFontHandle(FontType::Normal));
+		nvgFontSize(nvg,18.0f);
+		nvgTextAlign(nvg,NVG_ALIGN_TOP|NVG_ALIGN_LEFT);
+		nvgSave(nvg);
+		nvgTranslate(nvg,bounds.position.x+bounds.dimensions.x,bounds.position.y+bounds.dimensions.y);
+		nvgRotate(nvg, ALY_PI * 0.25f);
+		aly::drawText(nvg,0.0f,0.0f,name.c_str(),FontStyle::Outline,context->theme.HIGHLIGHT,context->theme.DARK,nullptr);
+		nvgRestore(nvg);
+	}
 }
 
 void ChildPort::draw(AlloyContext* context) {
@@ -730,9 +769,12 @@ void ChildPort::draw(AlloyContext* context) {
 	box2px bounds = getBounds();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
+	bool over=false;
 	if (context->isMouseOver(this)) {
 		nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
 		nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+		context->setCursor(&portCursor);
+		over=true;
 	} else {
 		nvgFillColor(nvg, Color(context->theme.LIGHT));
 		nvgStrokeColor(nvg, Color(context->theme.LIGHT));
@@ -751,7 +793,15 @@ void ChildPort::draw(AlloyContext* context) {
 	nvgClosePath(nvg);
 	nvgFill(nvg);
 	nvgStroke(nvg);
-
+	if(over){
+		nvgFontFaceId(nvg,context->getFontHandle(FontType::Normal));
+		nvgFontSize(nvg,18.0f);
+		nvgTextAlign(nvg,NVG_ALIGN_BOTTOM|NVG_ALIGN_LEFT);
+		nvgSave(nvg);
+		nvgTranslate(nvg,bounds.position.x,bounds.position.y);
+		aly::drawText(nvg,0.0f,0.0f,name.c_str(),FontStyle::Outline,context->theme.HIGHLIGHT,context->theme.DARK,nullptr);
+		nvgRestore(nvg);
+	}
 }
 void View::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp) {
@@ -821,10 +871,9 @@ void Node::draw(AlloyContext* context) {
 }
 void View::draw(AlloyContext* context) {
 	Node::draw(context);
-	if (isMouseOver() && !dragging) {
+	if (isMouseOver()) {
 		if (!inputPort->isVisible()) {
 			inputPort->setVisible(true);
-			context->requestPack();
 		}
 	} else {
 		inputPort->setVisible(false);
@@ -832,10 +881,9 @@ void View::draw(AlloyContext* context) {
 }
 void Compute::draw(AlloyContext* context) {
 	Node::draw(context);
-	if (isMouseOver() && !dragging) {
+	if (isMouseOver() ) {
 		if (!inputPort->isVisible()) {
 			inputPort->setVisible(true);
-			context->requestPack();
 		}
 	} else {
 		inputPort->setVisible(false);
@@ -876,11 +924,10 @@ void Data::draw(AlloyContext* context) {
 			context->theme.CORNER_RADIUS);
 	nvgStroke(nvg);
 	Composite::draw(context);
-	if (isMouseOver() && !dragging) {
+	if (isMouseOver()) {
 		if (!inputPort->isVisible()) {
 			inputPort->setVisible(true);
 			outputPort->setVisible(true);
-			context->requestPack();
 		}
 	} else {
 		inputPort->setVisible(false);
