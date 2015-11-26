@@ -98,6 +98,9 @@ public:
 	void setParent(Node* parent) {
 		this->parent = parent;
 	}
+	float2 getLocation() const {
+		return getBounds(false).center();
+	}
 	std::shared_ptr<Port> getReference();
 	Port(const std::string& name, const std::string& label) :
 			Region(name), parent(nullptr), label(label), portCursor(0xf05b,
@@ -230,6 +233,7 @@ class Connection {
 public:
 	std::shared_ptr<Port> source;
 	std::shared_ptr<Port> destination;
+	std::vector<float2> path;
 	Connection(const std::shared_ptr<Port>& source,
 			const std::shared_ptr<Port>& destination) :
 			source(source), destination(destination) {

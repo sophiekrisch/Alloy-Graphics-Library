@@ -47,6 +47,7 @@
     <ClCompile Include="..\..\src\core\AlloyVolume.cpp" />
     <ClCompile Include="..\..\src\core\AlloyWidget.cpp" />
     <ClCompile Include="..\..\src\core\AlloyWorker.cpp" />
+    <ClCompile Include="..\..\src\core\AvoidanceRouting.cpp" />
     <ClCompile Include="..\..\src\core\CommonShaders.cpp" />
     <ClCompile Include="..\..\src\core\GLComponent.cpp" />
     <ClCompile Include="..\..\src\core\GLFrameBuffer.cpp" />
@@ -100,6 +101,7 @@
     <ClInclude Include="..\..\include\core\AlloyVolume.h" />
     <ClInclude Include="..\..\include\core\AlloyWidget.h" />
     <ClInclude Include="..\..\include\core\AlloyWorker.h" />
+    <ClInclude Include="..\..\include\core\AvoidanceRouting.h" />
     <ClInclude Include="..\..\include\core\BinaryMinHeap.h" />
     <ClInclude Include="..\..\include\core\CommonShaders.h" />
     <ClInclude Include="..\..\include\core\fontstash.h" />
