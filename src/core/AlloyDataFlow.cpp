@@ -628,7 +628,7 @@ void DataFlow::draw(AlloyContext* context) {
 			}
 			float2& end = cursor;
 			std::vector<float2> path;
-			router.computeRoute(path,start,end,dir);
+			router.evaluate(path,start,end,dir);
 			nvgBeginPath(nvg);
 			float dy = cursor.y - start.y;
 			pixel2 k1 = pixel2(start.x, start.y + 0.5f * dy);
@@ -719,7 +719,7 @@ void DataFlow::setup() {
 	setRoundCorners(true);
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	onPack = [this]() {
-		router.updateObstacles();
+		router.update();
 	};
 	DrawPtr pathsRegion = DrawPtr(
 			new Draw("Paths", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f),

@@ -23,6 +23,22 @@
 namespace aly {
 	namespace dataflow {
 
+		bool operator==(const std::shared_ptr<AvoidancePath>& a, const std::shared_ptr<AvoidancePath>& b) {
+			return (a->path.start == b->path.start&&a->path.end == b->path.end);
+		}
+		bool operator< (const std::shared_ptr<AvoidancePath>& a, const std::shared_ptr<AvoidancePath>& b) {
+			if (a->distToDest == b->distToDest) {
+				if (a->pathLength == b->pathLength) {
+					return (a->depth < b->depth);
+				}
+				else {
+					return (a->pathLength < b->pathLength);
+				}
+			}
+			else {
+				return (a->distToDest < b->distToDest);
+			}
+		}
 		const float AvoidancePath::BORDER_SPACE = 10.0f;
 		AvoidancePath::AvoidancePath(std::vector<box2px>& obstacles, const float2& from, const float2& to, Direction direction, AvoidancePath* parent) :obstacles(obstacles), direction(direction), parent(parent), path(from, to) {
 			distToDest = std::numeric_limits<float>::max();
@@ -225,10 +241,10 @@ namespace aly {
 			updatePathLength();
 			return path;
 		}
-		void AvoidanceRouting::updateObstacles() {
+		void AvoidanceRouting::update() {
 			getObstacles(obstacles);
 		}
-		void AvoidanceRouting::computeRoute(std::vector<float2>& path, float2 from, float2 to, Direction direction) {
+		void AvoidanceRouting::evaluate(std::vector<float2>& path, float2 from, float2 to, Direction direction) {
 			path.clear();
 			float2 origFrom = from;
 			float2 origTo = to;
@@ -339,7 +355,7 @@ namespace aly {
 			float2 maxPt = aly::max(from, to);
 			return box2px(minPt, maxPt - minPt);
 		}
-		void AvoidanceRouting::routeEdge(std::vector<float2>& path, const std::shared_ptr<Connection>& edge) {
+		void AvoidanceRouting::evaluate(std::vector<float2>& path, const std::shared_ptr<Connection>& edge) {
 			int n = (int)edge->path.size();
 			Direction direction = Direction::Unkown;
 			PortPtr target = edge->destination;
@@ -360,7 +376,7 @@ namespace aly {
 			else if (src->getType() == PortType::Input) {
 				direction = Direction::North;
 			}
-			computeRoute(path, from, to, direction);
+			evaluate(path, from, to, direction);
 		}
 		void AvoidanceRouting::simplifyPath( std::vector<float2>& path,const std::vector<box2f>& obstacles, int parity) {
 			float2 st, end, stNext, endNext;

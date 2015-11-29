@@ -84,8 +84,8 @@ namespace aly {
 				return ss << "DIR:" << apath->direction << " " << apath->path;
 			}
 		}
-		//bool operator==(const std::shared_ptr<AvoidancePath>& a, const std::shared_ptr<AvoidancePath>& b);
-		//bool operator< (const std::shared_ptr<AvoidancePath>& a, const std::shared_ptr<AvoidancePath>& b);
+		bool operator==(const std::shared_ptr<AvoidancePath>& a, const std::shared_ptr<AvoidancePath>& b);
+		bool operator< (const std::shared_ptr<AvoidancePath>& a, const std::shared_ptr<AvoidancePath>& b);
 		class AvoidanceRouting {
 		protected:
 			std::vector<std::shared_ptr<Node>> nodes;
@@ -97,9 +97,9 @@ namespace aly {
 			box2px getPathBounds(float2 from, float2 to) const;
 			void simplifyPath(std::vector<float2>& path, const std::vector<box2f>& obstacles, int parity);
 		public:
-			void updateObstacles();
-			void routeEdge( std::vector<float2>& path,  const std::shared_ptr<Connection>& edge);
-			void computeRoute(std::vector<float2>& path, float2 from, float2 to, Direction direction);
+			void update();
+			void evaluate( std::vector<float2>& path,  const std::shared_ptr<Connection>& edge);
+			void evaluate(std::vector<float2>& path, float2 from, float2 to, Direction direction);
 			void add(const std::shared_ptr<Node>& node) {
 				nodes.push_back(node);
 			}
