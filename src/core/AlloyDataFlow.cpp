@@ -599,27 +599,36 @@ void DataFlow::draw(AlloyContext* context) {
 
 			box2px bounds = connectingPort->getBounds();
 			pixel2 start;
+			float nudge = 8.0f;
+			Direction dir = Direction::Unkown;
 			switch (connectingPort->getType()) {
 			case PortType::Input:
 				start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
-						bounds.position.y);
+					bounds.position.y + nudge);
+				dir = Direction::North;
 				break;
 			case PortType::Output:
 				start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
-						bounds.position.y + bounds.dimensions.y);
+					bounds.position.y + bounds.dimensions.y - nudge);
+				dir = Direction::South;
 				break;
 			case PortType::Child:
-				start = pixel2(bounds.position.x + bounds.dimensions.x,
-						bounds.position.y + bounds.dimensions.y * 0.5f);
+				start = pixel2(bounds.position.x + bounds.dimensions.x - nudge,
+					bounds.position.y + bounds.dimensions.y * 0.5f);
+				dir = Direction::East;
 				break;
 			case PortType::Parent:
-				start = pixel2(bounds.position.x,
-						bounds.position.y + bounds.dimensions.y * 0.5f);
+				start = pixel2(bounds.position.x + nudge,
+					bounds.position.y + bounds.dimensions.y * 0.5f);
+				dir = Direction::West;
 				break;
 			case PortType::Unknown:
 				start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
-						bounds.position.y + bounds.dimensions.y * 0.5f);
+					bounds.position.y + bounds.dimensions.y * 0.5f);
 			}
+			float2& end = cursor;
+			std::vector<float2> path;
+			router.computeRoute(path,start,end,dir);
 			nvgBeginPath(nvg);
 			float dy = cursor.y - start.y;
 			pixel2 k1 = pixel2(start.x, start.y + 0.5f * dy);
@@ -639,15 +648,13 @@ void DataFlow::draw(AlloyContext* context) {
 	}
 }
 void Connection::draw(AlloyContext* context) {
-
 	NVGcontext* nvg = context->nvgContext;
 	nvgStrokeWidth(nvg, 4.0f);
 	nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
-
 	box2px bounds = source->getBounds();
 	pixel2 start;
 	pixel2 end;
-	float nudge = 4.0f;
+	float nudge = 8.0f;
 	switch (source->getType()) {
 	case PortType::Input:
 		start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
@@ -694,11 +701,15 @@ void Connection::draw(AlloyContext* context) {
 	nvgLineCap(nvg, NVG_ROUND);
 	nvgLineJoin(nvg, NVG_BEVEL);
 	nvgBeginPath(nvg);
-	float dy = end.y - start.y;
-	pixel2 k1 = pixel2(start.x, start.y + 0.5f * dy);
-	pixel2 k2 = pixel2(end.x, end.y - 0.5f * dy);
-	nvgMoveTo(nvg, start.x, start.y);
-	nvgBezierTo(nvg, k1.x, k1.y, k2.x, k2.y, end.x, end.y);
+	for (int i = 0; i < (int)path.size();i++) {
+		float2 pt = path[i];
+		if (i == 0) {
+			nvgMoveTo(nvg, pt.x,pt.y);
+		}
+		else {
+			nvgLineTo(nvg,pt.x,pt.y);
+		}
+	}
 	nvgStroke(nvg);
 }
 void DataFlow::startConnection(Port* port) {
@@ -707,6 +718,9 @@ void DataFlow::startConnection(Port* port) {
 void DataFlow::setup() {
 	setRoundCorners(true);
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	onPack = [this]() {
+		router.updateObstacles();
+	};
 	DrawPtr pathsRegion = DrawPtr(
 			new Draw("Paths", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f),
 					[this](AlloyContext* context,const box2px& bounds) {

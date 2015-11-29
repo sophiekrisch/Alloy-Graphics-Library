@@ -1581,6 +1581,38 @@ template<class T, int M> struct box {
 		return aly::clamp(pt, position, position + dimensions);
 	}
 };
+template<class T, int M> struct line {
+public:
+	vec<T, M> start;
+	vec<T, M> end;
+public:
+	line(const vec<T, M>& start = vec<T, M>(T(0)), const vec<T, M>& end = vec<T, M>(T(0))) :start(start), end(end) {
+	}
+	inline float length() const {
+		return distance(start, end);
+	}
+	bool intersects(const box<T,M>& box) const {
+		return false;
+	}
+	static const line<T, M> NONE;
+};
+template<class T, int C> const line<T, C> line<T, C>::NONE = line<T, C>(vec<T, C>(std::numeric_limits<T>::min()), vec<T, C>(std::numeric_limits<T>::min()));
+
+template<class T, int C> bool operator==(const line<T, C>& a, const line<T, C>& b) {
+	return (a.start == b.start&&a.end == b.end);
+}
+template<class T, int C> bool operator!=(const line<T, C>& a, const line<T, C>& b) {
+	return (a.start != b.start || a.end != b.end);
+}
+template<class T, int K, class C, class R> std::basic_ostream<C, R> & operator <<(
+	std::basic_ostream<C, R> & ss, const line<T, K>& line) {
+	return ss << "[" << line.start << "->" << line.end << "]";
+}
+typedef line<float, 2> line2f;
+typedef line<float, 3> line3f;
+typedef line<float, 2> line2d;
+typedef line<double, 3> line3d;
+
 template<class C, class R, class T, int M> std::basic_ostream<C, R> & operator <<(
 		std::basic_ostream<C, R> & ss, const box<T, M> & v) {
 	return ss << "{min: " << v.position << ", max: "

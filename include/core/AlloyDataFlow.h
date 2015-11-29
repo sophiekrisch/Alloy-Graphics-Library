@@ -22,6 +22,7 @@
 #define ALLOYUALGRAPH_H_
 #include "AlloyAny.h"
 #include "AlloyUI.h"
+#include "AvoidanceRouting.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -598,6 +599,7 @@ protected:
 	Node* mouseOverNode;
 	Port* connectingPort;
 	Port* currentPort;
+	AvoidanceRouting router;
 	void setup();
 public:
 	bool isConnecting() const {
@@ -628,26 +630,31 @@ public:
 	void add(const std::shared_ptr<Source>& node) {
 		Composite::add(node);
 		sourceNodes.push_back(node);
+		router.add(node);
 		node->parent = this;
 	}
 	void add(const std::shared_ptr<Destination>& node) {
 		Composite::add(node);
 		destinationNodes.push_back(node);
+		router.add(node); 
 		node->parent = this;
 	}
 	void add(const std::shared_ptr<Data>& node) {
 		Composite::add(node);
 		dataNodes.push_back(node);
+		router.add(node); 
 		node->parent = this;
 	}
 	void add(const std::shared_ptr<View>& node) {
 		Composite::add(node);
 		viewNodes.push_back(node);
+		router.add(node); 
 		node->parent = this;
 	}
 	void add(const std::shared_ptr<Compute>& node) {
 		Composite::add(node);
 		computeNodes.push_back(node);
+		router.add(node);
 		node->parent = this;
 	}
 	void add(const std::shared_ptr<Connection>& node) {
