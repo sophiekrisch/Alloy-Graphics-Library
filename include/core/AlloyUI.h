@@ -316,7 +316,6 @@ public:
 			double pixelRatio, bool clamp = false) override;
 
 	virtual void add(const std::shared_ptr<Region>& region);
-	void add(Region* region); //After add(), composite will own region and be responsible for destroying it.
 	virtual void pack() override {
 		Region::pack();
 	}
@@ -862,6 +861,7 @@ typedef std::shared_ptr<MenuHeader> MenuHeaderPtr;
 typedef std::shared_ptr<MenuBar> MenuBarPtr;
 typedef std::shared_ptr<Draw> DrawPtr;
 typedef std::shared_ptr<NumberField> NumberFieldPtr;
+typedef std::shared_ptr<FileField> FileFieldPtr;
 typedef std::shared_ptr<AdjustableComposite> AdjustableCompositePtr;
 }
 #endif /* ALLOYUI_H_ */
