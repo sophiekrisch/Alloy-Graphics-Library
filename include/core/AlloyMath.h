@@ -1553,6 +1553,13 @@ template<class T, int M> struct box {
 		}
 		position = mn;
 	}
+
+	inline void merge(const box<T, M>& other) {
+		vec<T, M> mn = aly::min(position, other.position);
+		vec<T, M> mx = aly::max(max(), other.max());
+		dimensions = mx - mn;
+		position = mn;
+	}
 	inline bool intersects(const box<T, M>& other) const {
 		vec<T, M> mn = aly::max(position, other.position);
 		vec<T, M> mx = aly::min(max(), other.max());

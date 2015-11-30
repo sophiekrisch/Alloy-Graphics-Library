@@ -232,8 +232,12 @@ void Node::setup() {
 	setClampDragToParentBounds(true);
 	Application::addListener(this);
 }
-box2px Node::getObstacleBounds() const {
-	return nodeIcon->getBounds(false);
+void Node::getObstacleBounds(std::vector<box2px>& obstacles) const {
+	box2px box = nodeIcon->getBounds(false);
+	if (labelRegion.get() != nullptr) {
+		box.merge(labelRegion->getBounds(false));
+	}
+	obstacles.push_back(box);
 }
 bool Node::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	if (Composite::onEventHandler(context, e))
@@ -583,6 +587,8 @@ bool DataFlow::onEventHandler(AlloyContext* context, const InputEvent& e) {
 
 void DataFlow::draw(AlloyContext* context) {
 	mouseOverNode = nullptr;
+
+	const float nudge = context->theme.CORNER_RADIUS;
 	for (std::shared_ptr<Region> child : children) {
 		Node* node = dynamic_cast<Node*>(child.get());
 		if (node) {
@@ -603,7 +609,6 @@ void DataFlow::draw(AlloyContext* context) {
 
 			box2px bounds = connectingPort->getBounds();
 			pixel2 start;
-			float nudge = 8.0f;
 			Direction dir = Direction::Unkown;
 			switch (connectingPort->getType()) {
 			case PortType::Input:
@@ -633,19 +638,28 @@ void DataFlow::draw(AlloyContext* context) {
 			float2& end = cursor;
 			std::vector<float2> path;
 			router.evaluate(path,start,end,dir);
-
 			nvgLineCap(nvg, NVG_ROUND);
 			nvgLineJoin(nvg, NVG_BEVEL);
+			nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
 			nvgBeginPath(nvg);
-				for (int i = 0; i < (int)path.size(); i++) {
-					float2 pt = path[i];
-					if (i == 0) {
-						nvgMoveTo(nvg, pt.x, pt.y);
-					}
-					else {
-						nvgLineTo(nvg, pt.x, pt.y);
-					}
+			float2 pt0 = path.front();
+			nvgMoveTo(nvg, pt0.x, pt0.y);
+			for (int i = 1; i < (int)path.size() - 1; i++) {
+				float2 pt1 = path[i];
+				float2 pt2 = path[i + 1];
+				float diff = 0.5f*std::min(
+					std::max(std::abs(pt1.x - pt2.x), std::abs(pt1.y - pt2.y)),
+					std::max(std::abs(pt1.x - pt0.x), std::abs(pt1.y - pt0.y)));
+				if (diff < context->theme.CORNER_RADIUS) {
+					nvgLineTo(nvg, pt1.x, pt1.y);
 				}
+				else {
+					nvgArcTo(nvg, pt1.x, pt1.y, pt2.x, pt2.y, context->theme.CORNER_RADIUS);
+				}
+				pt0 = pt1;
+			}
+			pt0 = path.back();
+			nvgLineTo(nvg, pt0.x, pt0.y);
 			nvgStroke(nvg);
 		}
 
@@ -658,7 +672,7 @@ void Connection::draw(AlloyContext* context,DataFlow* flow) {
 	box2px bounds = source->getBounds();
 	pixel2 start;
 	pixel2 end;
-	float nudge = 8.0f;
+	const float nudge = context->theme.CORNER_RADIUS;
 	switch (source->getType()) {
 	case PortType::Input:
 		start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
@@ -704,22 +718,26 @@ void Connection::draw(AlloyContext* context,DataFlow* flow) {
 	}
 	nvgLineCap(nvg, NVG_ROUND);
 	nvgLineJoin(nvg, NVG_BEVEL);
-	
-	for (int i = 1; i < (int)path.size();i++) {
-			nvgBeginPath(nvg);
-			
-			line2f ln(path[i - 1], path[i]);
-			bool intersect = false;
-			if (!flow->intersects(ln)) {
-				nvgStrokeColor(nvg,context->theme.HIGHLIGHT);
-			}
-			else {
-				nvgStrokeColor(nvg,Color(255,0,0));
-			}
-			nvgMoveTo(nvg, ln.start.x,ln.start.y);
-			nvgLineTo(nvg,ln.end.x,ln.end.y);
-			nvgStroke(nvg);
+	nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
+	nvgBeginPath(nvg);
+	float2 pt0 = path.front();
+	nvgMoveTo(nvg, pt0.x, pt0.y);
+	for (int i = 1; i < (int)path.size()-1;i++) {
+		float2 pt1 = path[i];
+		float2 pt2 = path[i+1];
+		float diff = 0.5f*std::min(
+			std::max(std::abs(pt1.x - pt2.x), std::abs(pt1.y - pt2.y)),
+			std::max(std::abs(pt1.x - pt0.x), std::abs(pt1.y - pt0.y)));
+		if (diff < context->theme.CORNER_RADIUS) {
+			nvgLineTo(nvg, pt1.x, pt1.y);
+		} else {
+			nvgArcTo(nvg, pt1.x, pt1.y, pt2.x, pt2.y, context->theme.CORNER_RADIUS);
+		}
+		pt0 = pt1;
 	}
+	pt0 = path.back();
+	nvgLineTo(nvg, pt0.x, pt0.y);
+	nvgStroke(nvg);
 }
 bool DataFlow::intersects(const line2f& ln) {
 	for (box2px box : router.getObstacles()) {

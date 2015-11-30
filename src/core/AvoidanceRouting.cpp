@@ -22,10 +22,11 @@
 #include "AlloyDataFlow.h"
 namespace aly {
 	namespace dataflow {
-
+		const float AvoidancePath::BORDER_SPACE = 10.0f;
 		bool operator==(const std::shared_ptr<AvoidancePath>& a, const std::shared_ptr<AvoidancePath>& b) {
 			return (a->path.start == b->path.start&&a->path.end == b->path.end);
 		}
+		//Define operator backwards because priority queue creates a MAX heap.
 		bool operator< (const std::shared_ptr<AvoidancePath>& b, const std::shared_ptr<AvoidancePath>& a) {
 			if (a->distToDest == b->distToDest) {
 				if (a->pathLength == b->pathLength) {
@@ -39,12 +40,11 @@ namespace aly {
 				return (a->distToDest < b->distToDest);
 			}
 		}
-		const float AvoidancePath::BORDER_SPACE = 10.0f;
-		AvoidancePath::AvoidancePath(std::vector<box2px>& obstacles, const float2& from, const float2& to, Direction direction, AvoidancePath* parent) :obstacles(obstacles), direction(direction), parent(parent), path(from, to) {
+		AvoidancePath::AvoidancePath(std::vector<box2px>& obstacles, const float2& from, const float2& to, Direction direction, AvoidancePath* parent) :obstacles(obstacles),direction(direction), parent(parent), path(from, to) {
 			distToDest = std::numeric_limits<float>::max();
 			depth = 0;
 			pathLength = std::numeric_limits<float>::max();
-			updatePath(obstacles, to);
+			updatePath(to);
 			updateDistToDestination(to);
 		}
 		void AvoidancePath::addChild(const std::shared_ptr<AvoidancePath>& child) {
@@ -177,7 +177,7 @@ namespace aly {
 			}
 			return distToDest;
 		}
-		line2f AvoidancePath::updatePath(std::vector<box2f>& obstacles, const float2& to) {
+		line2f AvoidancePath::updatePath(const float2& to) {
 			if (direction == Direction::Unkown) {
 				return path;
 			}
@@ -215,7 +215,7 @@ namespace aly {
 					}
 					break;
 			}
-			for (box2f obstacle : obstacles) {
+			for (box2px obstacle : obstacles) {
 				if (path.intersects(obstacle)) {
 					switch (direction) {
 					case Direction::South:
@@ -242,10 +242,12 @@ namespace aly {
 			return path;
 		}
 		void AvoidanceRouting::update() {
-			getObstacles(obstacles);
+			obstacles.clear();
+			for (NodePtr node : nodes) {
+				node->getObstacleBounds(obstacles);
+			}
 		}
 		void AvoidanceRouting::evaluate(std::vector<float2>& path, float2 from, float2 to, Direction direction) {
-			//std::cout << "Evaluate " << from << " " << to << " " << direction << " " << obstacles.size() << std::endl;
 			path.clear();
 			float2 origFrom = from;
 			float2 origTo = to;
@@ -278,7 +280,6 @@ namespace aly {
 			std::shared_ptr<AvoidancePath> head;
 			while ((queue.size() > 0) && (count < MAX_PATHS)) {
 				head = queue.top();
-				//std::cout <<"Top "<< *head << std::endl;
 				queue.pop();
 				if (head->getDistanceToDestination() == 0) {
 					optNode = head;
@@ -291,19 +292,19 @@ namespace aly {
 				for (std::shared_ptr<AvoidancePath> child : children) {
 					allowAdd = true;
 					for (std::shared_ptr<AvoidancePath> node : history) {
-						if (node == child) {
+						if (node->path.start == child->path.start&&node->path.end == child->path.end) {
 							allowAdd = false;
 							break;
 						}
 					}
 					if (allowAdd) {
-						//std::cout << "Add child " << *child << std::endl;
 						queue.push(child);
 						history.push_back(child);
 					}
 				}
 			}
 			path = optNode->backTrack();
+			
 			path[0] = origFrom;
 			if ((direction == Direction::South) || (direction == Direction::North)) {
 				if ((optNode->direction == Direction::South) || (optNode->direction == Direction::North)) {
@@ -312,7 +313,7 @@ namespace aly {
 				else {
 					path.push_back(origTo);
 				}
-				simplifyPath(path, obstacles,0);
+				simplifyPath(path, 0);
 			}
 			else {
 				if ((optNode->direction == Direction::East) || (optNode->direction == Direction::West)) {
@@ -321,7 +322,7 @@ namespace aly {
 				else {
 					path.push_back(origTo);
 				}
-				simplifyPath(path, obstacles,1);
+				simplifyPath(path, 1);
 			}
 			if (path.size() == 2) {
 				float dx = std::abs(origFrom.x - origTo.x);
@@ -340,15 +341,6 @@ namespace aly {
 				}
 				path.push_back(origTo);
 			}
-			
-
-		}
-		void AvoidanceRouting::getObstacles(std::vector<box2px>& obst) {
-			obst.clear();
-			for (NodePtr& node : nodes) {
-				box2px box = node->getObstacleBounds();
-				obst.push_back(box);
-			}
 		}
 		box2px AvoidanceRouting::getPathBounds(float2 from, float2 to) const {
 			float2 minPt = aly::min(from, to);
@@ -363,10 +355,10 @@ namespace aly {
 			PortPtr target = edge->destination;
 			PortPtr src = edge->source;
 			if (src->getType() == PortType::Parent) {
-				direction = Direction::East;
+				direction = Direction::West;
 			}
 			else if (src->getType() == PortType::Child) {
-				direction = Direction::West;
+				direction = Direction::East;
 			}
 			else if (src->getType() == PortType::Output) {
 				direction = Direction::South;
@@ -376,7 +368,7 @@ namespace aly {
 			}
 			evaluate(path, from, to, direction);
 		}
-		void AvoidanceRouting::simplifyPath(std::vector<float2>& path, const std::vector<box2f>& obstacles, int parity) {
+		void AvoidanceRouting::simplifyPath(std::vector<float2>& path, int parity) {
 			float2 st, end, stNext, endNext;
 			bool reduce = false;
 			line2f l1, l2;

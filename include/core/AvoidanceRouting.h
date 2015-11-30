@@ -49,11 +49,11 @@ namespace aly {
 		}
 		struct AvoidancePath {
 			static const float BORDER_SPACE;
-			std::vector<box2px>& obstacles;
 			Direction direction = Direction::Unkown;
 			float distToDest;
 			float pathLength;
 			int depth;
+			std::vector<box2px>& obstacles;
 			std::vector<std::shared_ptr<AvoidancePath>> children;
 			AvoidancePath* parent;
 			line2f path;
@@ -71,7 +71,7 @@ namespace aly {
 			float getPathLength() const;
 			float lineLength();
 			float updateDistToDestination(float2 target);
-			line2f updatePath(std::vector<box2f>& obstacles, const float2& to);
+			line2f updatePath( const float2& to);
 		};
 		template<class C, class R> std::basic_ostream<C, R> & operator <<(
 			std::basic_ostream<C, R> & ss, const AvoidancePath& apath) {
@@ -91,14 +91,12 @@ namespace aly {
 			std::vector<std::shared_ptr<Node>> nodes;
 			static const int DEPTH_LIMIT = 4;
 			static const int MAX_PATHS = 128;
-			std::vector<box2f> obstacles;
-
-			void getObstacles(std::vector<box2px>& obst);
+			std::vector<box2px> obstacles;
 			box2px getPathBounds(float2 from, float2 to) const;
-			void simplifyPath(std::vector<float2>& path,const std::vector<box2f>& obstacles, int parity);
+			void simplifyPath(std::vector<float2>& path,int parity);
 		public:
 			void update();
-			const std::vector<box2f>& getObstacles() const {
+			const std::vector<box2px>& getObstacles() const {
 				return obstacles;
 			}
 			void evaluate( const std::shared_ptr<Connection>& edge);

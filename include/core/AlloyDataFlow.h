@@ -376,10 +376,11 @@ protected:
 	CompositePtr inputPortComposite;
 	CompositePtr outputPortComposite;
 	TextLabelPtr labelRegion;
-	std::shared_ptr<NodeIcon> nodeIcon;
 	float textWidth;
 	virtual void setup();
 public:
+	std::shared_ptr<NodeIcon> nodeIcon;
+
 	friend class DataFlow;
 	friend class Port;
 	static const pixel2 DIMENSIONS;
@@ -404,7 +405,7 @@ public:
 	const std::shared_ptr<ChildPort>& getChildPort() const {
 		return childPort;
 	}
-	box2px getObstacleBounds() const;
+	void getObstacleBounds(std::vector<box2px>& obstacles) const ;
 	DataFlow* getGraph() const {
 		return parent;
 	}
