@@ -23,9 +23,6 @@
 namespace aly {
 	namespace dataflow {
 		const float AvoidancePath::BORDER_SPACE = 10.0f;
-		bool operator==(const std::shared_ptr<AvoidancePath>& a, const std::shared_ptr<AvoidancePath>& b) {
-			return (a->path.start == b->path.start&&a->path.end == b->path.end);
-		}
 		//Define operator backwards because priority queue creates a MAX heap.
 		bool ComparePaths::operator()(const std::shared_ptr<AvoidancePath>& b, const std::shared_ptr<AvoidancePath>& a) {
 			if (a->distToDest == b->distToDest) {

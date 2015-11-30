@@ -84,7 +84,6 @@ namespace aly {
 				return ss << "Path [" << apath.depth << "] " << apath.direction << " " << apath.path << " " << apath.getDistanceToDestination() << " " << apath.getPathLength();
 			}
 		}
-		bool operator==(const std::shared_ptr<AvoidancePath>& a, const std::shared_ptr<AvoidancePath>& b);
 		struct ComparePaths{
 			bool operator()(const std::shared_ptr<AvoidancePath>& a, const std::shared_ptr<AvoidancePath>& b);
 		};

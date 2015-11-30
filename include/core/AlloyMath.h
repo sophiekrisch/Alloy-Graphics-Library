@@ -1593,9 +1593,9 @@ public:
 	vec<T, M> start;
 	vec<T, M> end;
 private:
-	bool Clip(T denom,T numer, T& t0, T& t1) const 
+	bool clip(T denom,T numer, T& t0, T& t1,T tolerance=T(1E-15)) const
 	{
-		if (denom > T(0))
+		if (denom > tolerance)
 		{
 			if (numer > denom*t1)
 			{
@@ -1607,7 +1607,7 @@ private:
 			}
 			return true;
 		}
-		else if (denom <T(0))
+		else if (denom <-tolerance)
 		{
 			if (numer > denom*t0)
 			{
@@ -1634,18 +1634,25 @@ public:
 	bool intersects(const lineseg<T, M>& line) const {
 		return false;
 	}
-	bool intersects(const box<T,M>& box) const {
+	// Geometric Tools LLC, Redmond WA 98052
+	// Copyright (c) 1998-2015
+	// Distributed under the Boost Software License, Version 1.0.
+	// http://www.boost.org/LICENSE_1_0.txt
+	// http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
+	bool intersects(const box<T,M>& box,T tolerance=T(1E-15)) const {
 		T t0 = -std::numeric_limits<T>::max();
 		T t1 = std::numeric_limits<T>::max();
 		T len = distance(start, end);
+		if(len<tolerance)return box.contains(T(0.5)*(start+end));
 		vec<T, M> lineDirection = (end-start)/len;
-		vec<T, M> lineOrigin = start - box.center();
-		vec<T, M> boxExtent = box.dimensions*0.5f;
+		vec<T, M> boxExtent = box.dimensions*T(0.5);
+		vec<T, M> lineOrigin = start - box.position-boxExtent;
+
 		if (M == 2) {
-			if (Clip(+lineDirection[0], -lineOrigin[0] - boxExtent[0], t0, t1) &&
-				Clip(-lineDirection[0], +lineOrigin[0] - boxExtent[0], t0, t1) &&
-				Clip(+lineDirection[1], -lineOrigin[1] - boxExtent[1], t0, t1) &&
-				Clip(-lineDirection[1], +lineOrigin[1] - boxExtent[1], t0, t1))
+			if (clip(+lineDirection[0], -lineOrigin[0] - boxExtent[0], t0, t1,tolerance) &&
+				clip(-lineDirection[0], +lineOrigin[0] - boxExtent[0], t0, t1,tolerance) &&
+				clip(+lineDirection[1], -lineOrigin[1] - boxExtent[1], t0, t1,tolerance) &&
+				clip(-lineDirection[1], +lineOrigin[1] - boxExtent[1], t0, t1,tolerance))
 			{
 				if (t1 > t0)
 				{
@@ -1659,12 +1666,12 @@ public:
 			}
 		}
 		else if (M == 3) {
-			if (Clip(+lineDirection[0], -lineOrigin[0] - boxExtent[0], t0, t1) &&
-				Clip(-lineDirection[0], +lineOrigin[0] - boxExtent[0], t0, t1) &&
-				Clip(+lineDirection[1], -lineOrigin[1] - boxExtent[1], t0, t1) &&
-				Clip(-lineDirection[1], +lineOrigin[1] - boxExtent[1], t0, t1) &&
-				Clip(+lineDirection[2], -lineOrigin[2] - boxExtent[2], t0, t1) &&
-				Clip(-lineDirection[2], +lineOrigin[2] - boxExtent[2], t0, t1))
+			if (clip(+lineDirection[0], -lineOrigin[0] - boxExtent[0], t0, t1,tolerance) &&
+				clip(-lineDirection[0], +lineOrigin[0] - boxExtent[0], t0, t1,tolerance) &&
+				clip(+lineDirection[1], -lineOrigin[1] - boxExtent[1], t0, t1,tolerance) &&
+				clip(-lineDirection[1], +lineOrigin[1] - boxExtent[1], t0, t1,tolerance) &&
+				clip(+lineDirection[2], -lineOrigin[2] - boxExtent[2], t0, t1,tolerance) &&
+				clip(-lineDirection[2], +lineOrigin[2] - boxExtent[2], t0, t1,tolerance))
 			{
 				if (t1 > t0)
 				{
