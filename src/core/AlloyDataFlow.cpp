@@ -1373,7 +1373,9 @@ void DataFlow::draw(AlloyContext* context) {
 	if (connectingPort) {
 
 		pixel2 cursor = context->cursorPosition;
+		
 		if (getBounds().contains(cursor)) {
+			float2 offset = getDrawOffset();
 			NVGcontext* nvg = context->nvgContext;
 			nvgStrokeWidth(nvg, 2.0f);
 			nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
@@ -1406,18 +1408,19 @@ void DataFlow::draw(AlloyContext* context) {
 				start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
 					bounds.position.y + bounds.dimensions.y * 0.5f);
 			}
-			float2& end = cursor;
+			start -= offset;
+			float2 end = cursor-offset;
 			std::vector<float2> path;
 			router.evaluate(path, start, end, dir);
 			nvgLineCap(nvg, NVG_ROUND);
 			nvgLineJoin(nvg, NVG_BEVEL);
 			nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
 			nvgBeginPath(nvg);
-			float2 pt0 = path.front();
+			float2 pt0 = offset + path.front();
 			nvgMoveTo(nvg, pt0.x, pt0.y);
 			for (int i = 1; i < (int)path.size() - 1; i++) {
-				float2 pt1 = path[i];
-				float2 pt2 = path[i + 1];
+				float2 pt1 = offset+path[i];
+				float2 pt2 = offset + path[i + 1];
 				float diff = 0.5f*std::min(
 					std::max(std::abs(pt1.x - pt2.x), std::abs(pt1.y - pt2.y)),
 					std::max(std::abs(pt1.x - pt0.x), std::abs(pt1.y - pt0.y)));
@@ -1429,7 +1432,7 @@ void DataFlow::draw(AlloyContext* context) {
 				}
 				pt0 = pt1;
 			}
-			pt0 = path.back();
+			pt0 = offset + path.back();
 			nvgLineTo(nvg, pt0.x, pt0.y);
 			nvgStroke(nvg);
 		}

@@ -87,8 +87,8 @@ bool DataFlowEx::init(Composite& rootNode) {
 	graph->add(dataNode3);
 	graph->add(dataNode4);
 
-	graph->add(MakeConnection(computeNode3->getOutputPort(0), dataNode4->getInputPort(1)));
-	graph->add(MakeConnection(computeNode3->getOutputPort(1),destNode2->getInputPort()));
+	//graph->add(MakeConnection(computeNode3->getOutputPort(0), dataNode4->getInputPort(1)));
+	//graph->add(MakeConnection(computeNode3->getOutputPort(1),destNode2->getInputPort()));
 	graph->add(MakeRelationship(dataNode1,"uses",dataNode2));
 	graph->add(MakeRelationship(dataNode1,"uses",dataNode3));
 	graph->add(MakeRelationship(dataNode2,"extends",dataNode3));
