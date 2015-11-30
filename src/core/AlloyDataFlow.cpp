@@ -229,7 +229,6 @@ void Node::setup() {
 	fontSize = 20.0f;
 	cursorDownPosition = pixel2(-1, -1);
 	dragging = false;
-	setClampDragToParentBounds(true);
 	Application::addListener(this);
 }
 box2px Node::getObstacleBounds() const {
