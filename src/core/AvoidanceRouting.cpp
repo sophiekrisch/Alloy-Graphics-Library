@@ -30,7 +30,15 @@ namespace aly {
 		bool operator< (const std::shared_ptr<AvoidancePath>& b, const std::shared_ptr<AvoidancePath>& a) {
 			if (a->distToDest == b->distToDest) {
 				if (a->pathLength == b->pathLength) {
-					return (a->depth < b->depth);
+					if(a->depth==b->depth){
+						if(a->path.start.x==b->path.start.x){
+							return (a->path.start.y>b->path.start.y);
+						} else {
+							return (a->path.start.x>b->path.start.x);
+						}
+					} else {
+						return (a->depth < b->depth);
+					}
 				}
 				else {
 					return (a->pathLength < b->pathLength);
