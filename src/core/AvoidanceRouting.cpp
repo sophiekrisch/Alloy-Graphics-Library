@@ -276,7 +276,7 @@ namespace aly {
 			queue.push(root);
 			std::shared_ptr<AvoidancePath> optNode = root;
 			int count = 0;
-			std::list<std::shared_ptr<AvoidancePath>> history;
+			std::map<int4,std::shared_ptr<AvoidancePath>> history;
 			std::shared_ptr<AvoidancePath> head;
 			while ((queue.size() > 0) && (count < MAX_PATHS)) {
 				head = queue.top();
@@ -288,18 +288,13 @@ namespace aly {
 				count++;
 				std::vector<std::shared_ptr<AvoidancePath>> children;
 				head->createDescendants(children, to, DEPTH_LIMIT);
-				bool allowAdd = false;
 				for (std::shared_ptr<AvoidancePath> child : children) {
-					allowAdd = true;
-					for (std::shared_ptr<AvoidancePath> node : history) {
-						if (node->path.start == child->path.start&&node->path.end == child->path.end) {
-							allowAdd = false;
-							break;
-						}
-					}
-					if (allowAdd) {
+					float2 st = child->path.start;
+					float2 ed = child->path.end;
+					int4 code((int)st.x,(int) st.y,(int) ed.x,(int) ed.y);					
+					if(history.find(code)==history.end()){
 						queue.push(child);
-						history.push_back(child);
+						history[code]=child;
 					}
 				}
 			}
