@@ -238,7 +238,7 @@ void Region::drawDebug(AlloyContext* context) {
 box2px Region::getBounds(bool includeOffset) const {
 	box2px box = bounds;
 	if (parent != nullptr && includeOffset) {
-		box.position += parent->drawOffset();
+		box.position += parent->getDrawOffset();
 	}
 	box.position += dragOffset;
 	return box;
@@ -250,7 +250,7 @@ box2px Region::getCursorBounds(bool includeOffset) const {
 	box2px box = (isDetached() ? getBounds(includeOffset) : bounds);
 	box.position += dragOffset;
 	if (parent != nullptr && (!isDetached() && includeOffset)) {
-		box.position += parent->drawOffset();
+		box.position += parent->getDrawOffset();
 		if (AlloyApplicationContext()->getOnTopRegion() != this) {
 			box.intersect(parent->getCursorBounds());
 		}

@@ -41,11 +41,10 @@ struct Composite;
 struct BorderComposite;
 struct Region: public EventHandler {
 private:
+	pixel2 dragOffset = pixel2(0, 0);
+protected:
 	box2px bounds;
 	box2px extents;
-	pixel2 dragOffset = pixel2(0, 0);
-
-protected:
 	void drawBoundsLabel(AlloyContext* context, const std::string& name,
 			int font);
 	Region* mouseOverRegion = nullptr;
@@ -99,9 +98,9 @@ public:
 	std::string getName() const {
 		return name;
 	}
-	virtual inline pixel2 drawOffset() const {
+	virtual inline pixel2 getDrawOffset() const {
 		if (parent != nullptr) {
-			return parent->drawOffset();
+			return parent->getDrawOffset();
 		} else {
 			return pixel2(0, 0);
 		}
@@ -303,10 +302,10 @@ public:
 	}
 
 
-	virtual inline pixel2 drawOffset() const {
+	virtual inline pixel2 getDrawOffset() const {
 		pixel2 offset=getExtents().position;
 		if (parent != nullptr)
-			offset += parent->drawOffset();
+			offset += parent->getDrawOffset();
 		return offset;
 	}
 

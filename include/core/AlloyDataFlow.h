@@ -620,8 +620,13 @@ protected:
 	Port* connectingPort;
 	Port* currentPort;
 	AvoidanceRouting router;
+	pixel2 currentDrawOffset;
+	pixel2 cursorDownLocation;
+	bool dragging = false;
 	void setup();
 public:
+	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
+		double pixelRatio, bool clamp = false) override;
 	bool isConnecting() const {
 		return (connectingPort != nullptr);
 	}

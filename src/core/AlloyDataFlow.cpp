@@ -582,89 +582,21 @@ bool DataFlow::onEventHandler(AlloyContext* context, const InputEvent& e) {
 		}
 		connectingPort = nullptr;
 	}
+	if (dragging&&e.type == InputType::MouseButton&& e.isUp()) {
+		dragging = false;
+	}
+	if (e.type == InputType::MouseButton&&e.isDown() && e.button == GLFW_MOUSE_BUTTON_RIGHT) {
+		currentDrawOffset = this->extents.position;
+		cursorDownLocation = e.cursor;
+		dragging = true;
+	}
+	if (e.type == InputType::Cursor&&dragging) {
+		this->extents.position = currentDrawOffset + e.cursor - cursorDownLocation;
+	}
+
 	return Composite::onEventHandler(context, e);
 }
 
-void DataFlow::draw(AlloyContext* context) {
-	mouseOverNode = nullptr;
-
-	const float nudge = context->theme.CORNER_RADIUS;
-	for (std::shared_ptr<Region> child : children) {
-		Node* node = dynamic_cast<Node*>(child.get());
-		if (node) {
-			if (context->isMouseOver(node, true)) {
-				mouseOverNode = node;
-				break;
-			}
-		}
-	}
-	Composite::draw(context);
-	if (connectingPort) {
-
-		pixel2 cursor = context->cursorPosition;
-		if (getBounds().contains(cursor)) {
-			NVGcontext* nvg = context->nvgContext;
-			nvgStrokeWidth(nvg, 2.0f);
-			nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
-
-			box2px bounds = connectingPort->getBounds();
-			pixel2 start;
-			Direction dir = Direction::Unkown;
-			switch (connectingPort->getType()) {
-			case PortType::Input:
-				start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
-					bounds.position.y + nudge);
-				dir = Direction::North;
-				break;
-			case PortType::Output:
-				start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
-					bounds.position.y + bounds.dimensions.y - nudge);
-				dir = Direction::South;
-				break;
-			case PortType::Child:
-				start = pixel2(bounds.position.x + bounds.dimensions.x - nudge,
-					bounds.position.y + bounds.dimensions.y * 0.5f);
-				dir = Direction::East;
-				break;
-			case PortType::Parent:
-				start = pixel2(bounds.position.x + nudge,
-					bounds.position.y + bounds.dimensions.y * 0.5f);
-				dir = Direction::West;
-				break;
-			case PortType::Unknown:
-				start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
-					bounds.position.y + bounds.dimensions.y * 0.5f);
-			}
-			float2& end = cursor;
-			std::vector<float2> path;
-			router.evaluate(path,start,end,dir);
-			nvgLineCap(nvg, NVG_ROUND);
-			nvgLineJoin(nvg, NVG_BEVEL);
-			nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
-			nvgBeginPath(nvg);
-			float2 pt0 = path.front();
-			nvgMoveTo(nvg, pt0.x, pt0.y);
-			for (int i = 1; i < (int)path.size() - 1; i++) {
-				float2 pt1 = path[i];
-				float2 pt2 = path[i + 1];
-				float diff = 0.5f*std::min(
-					std::max(std::abs(pt1.x - pt2.x), std::abs(pt1.y - pt2.y)),
-					std::max(std::abs(pt1.x - pt0.x), std::abs(pt1.y - pt0.y)));
-				if (diff < context->theme.CORNER_RADIUS) {
-					nvgLineTo(nvg, pt1.x, pt1.y);
-				}
-				else {
-					nvgArcTo(nvg, pt1.x, pt1.y, pt2.x, pt2.y, context->theme.CORNER_RADIUS);
-				}
-				pt0 = pt1;
-			}
-			pt0 = path.back();
-			nvgLineTo(nvg, pt0.x, pt0.y);
-			nvgStroke(nvg);
-		}
-
-	}
-}
 void Connection::draw(AlloyContext* context,DataFlow* flow) {
 	NVGcontext* nvg = context->nvgContext;
 	nvgStrokeWidth(nvg, 4.0f);
@@ -716,15 +648,16 @@ void Connection::draw(AlloyContext* context,DataFlow* flow) {
 		end = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
 				bounds.position.y + bounds.dimensions.y * 0.5f);
 	}
+	float2 offset = flow->getDrawOffset();
 	nvgLineCap(nvg, NVG_ROUND);
 	nvgLineJoin(nvg, NVG_BEVEL);
 	nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
 	nvgBeginPath(nvg);
-	float2 pt0 = path.front();
+	float2 pt0 = offset + path.front();
 	nvgMoveTo(nvg, pt0.x, pt0.y);
 	for (int i = 1; i < (int)path.size()-1;i++) {
-		float2 pt1 = path[i];
-		float2 pt2 = path[i+1];
+		float2 pt1 = offset+path[i];
+		float2 pt2 = offset + path[i+1];
 		float diff = 0.5f*std::min(
 			std::max(std::abs(pt1.x - pt2.x), std::abs(pt1.y - pt2.y)),
 			std::max(std::abs(pt1.x - pt0.x), std::abs(pt1.y - pt0.y)));
@@ -735,7 +668,7 @@ void Connection::draw(AlloyContext* context,DataFlow* flow) {
 		}
 		pt0 = pt1;
 	}
-	pt0 = path.back();
+	pt0 = offset + path.back();
 	nvgLineTo(nvg, pt0.x, pt0.y);
 	nvgStroke(nvg);
 }
@@ -751,12 +684,6 @@ void DataFlow::startConnection(Port* port) {
 void DataFlow::setup() {
 	setRoundCorners(true);
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
-	onPack = [this]() {
-		router.update();
-		for (ConnectionPtr& connect : connections) {
-			router.evaluate(connect);
-		}
-	};
 	DrawPtr pathsRegion = DrawPtr(
 			new Draw("Paths", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f),
 					[this](AlloyContext* context,const box2px& bounds) {
@@ -1358,6 +1285,200 @@ void Relationship::drawText(AlloyContext* context) {
 			aly::drawText(nvg, mid, predicate->getName(), FontStyle::Normal,
 					context->theme.HIGHLIGHT, context->theme.DARK);
 		}
+	}
+}
+
+void DataFlow::draw(AlloyContext* context) {
+	mouseOverNode = nullptr;
+	const float nudge = context->theme.CORNER_RADIUS;
+	for (std::shared_ptr<Region> child : children) {
+		Node* node = dynamic_cast<Node*>(child.get());
+		if (node) {
+			if (context->isMouseOver(node, true)) {
+				mouseOverNode = node;
+				break;
+			}
+		}
+	}
+	NVGcontext* nvg = context->nvgContext;
+	box2px bounds = getBounds();
+	float w = bounds.dimensions.x;
+	float h = bounds.dimensions.y;
+	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
+		context->pixelRatio);
+	pushScissor(nvg, getCursorBounds());
+	if (backgroundColor->a > 0) {
+		nvgBeginPath(nvg);
+		if (roundCorners) {
+			nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
+				bounds.dimensions.x, bounds.dimensions.y,
+				context->theme.CORNER_RADIUS);
+		}
+		else {
+			nvgRect(nvg, bounds.position.x, bounds.position.y,
+				bounds.dimensions.x, bounds.dimensions.y);
+		}
+		nvgFillColor(nvg, *backgroundColor);
+		nvgFill(nvg);
+	}
+
+	for (std::shared_ptr<Region>& region : children) {
+		if (region->isVisible()) {
+			region->draw(context);
+		}
+	}
+
+	if (verticalScrollTrack.get() != nullptr) {
+		if (isScrollEnabled()) {
+			if (extents.dimensions.y > h) {
+				verticalScrollTrack->draw(context);
+				verticalScrollHandle->draw(context);
+			}
+			else {
+				verticalScrollTrack->draw(context);
+			}
+			if (extents.dimensions.x > w) {
+				horizontalScrollTrack->draw(context);
+				horizontalScrollHandle->draw(context);
+			}
+			else {
+				horizontalScrollTrack->draw(context);
+			}
+		}
+	}
+	popScissor(nvg);
+	if (borderColor->a > 0) {
+
+		nvgLineJoin(nvg, NVG_ROUND);
+		nvgBeginPath(nvg);
+		if (roundCorners) {
+			nvgRoundedRect(nvg, bounds.position.x + lineWidth * 0.5f,
+				bounds.position.y + lineWidth * 0.5f,
+				bounds.dimensions.x - lineWidth,
+				bounds.dimensions.y - lineWidth,
+				context->theme.CORNER_RADIUS);
+		}
+		else {
+			nvgRect(nvg, bounds.position.x + lineWidth * 0.5f,
+				bounds.position.y + lineWidth * 0.5f,
+				bounds.dimensions.x - lineWidth,
+				bounds.dimensions.y - lineWidth);
+		}
+		nvgStrokeColor(nvg, *borderColor);
+		nvgStrokeWidth(nvg, lineWidth);
+		nvgStroke(nvg);
+		nvgLineJoin(nvg, NVG_MITER);
+	}
+
+	if (connectingPort) {
+
+		pixel2 cursor = context->cursorPosition;
+		if (getBounds().contains(cursor)) {
+			NVGcontext* nvg = context->nvgContext;
+			nvgStrokeWidth(nvg, 2.0f);
+			nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
+
+			box2px bounds = connectingPort->getBounds();
+			pixel2 start;
+			Direction dir = Direction::Unkown;
+			switch (connectingPort->getType()) {
+			case PortType::Input:
+				start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
+					bounds.position.y + nudge);
+				dir = Direction::North;
+				break;
+			case PortType::Output:
+				start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
+					bounds.position.y + bounds.dimensions.y - nudge);
+				dir = Direction::South;
+				break;
+			case PortType::Child:
+				start = pixel2(bounds.position.x + bounds.dimensions.x - nudge,
+					bounds.position.y + bounds.dimensions.y * 0.5f);
+				dir = Direction::East;
+				break;
+			case PortType::Parent:
+				start = pixel2(bounds.position.x + nudge,
+					bounds.position.y + bounds.dimensions.y * 0.5f);
+				dir = Direction::West;
+				break;
+			case PortType::Unknown:
+				start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
+					bounds.position.y + bounds.dimensions.y * 0.5f);
+			}
+			float2& end = cursor;
+			std::vector<float2> path;
+			router.evaluate(path, start, end, dir);
+			nvgLineCap(nvg, NVG_ROUND);
+			nvgLineJoin(nvg, NVG_BEVEL);
+			nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
+			nvgBeginPath(nvg);
+			float2 pt0 = path.front();
+			nvgMoveTo(nvg, pt0.x, pt0.y);
+			for (int i = 1; i < (int)path.size() - 1; i++) {
+				float2 pt1 = path[i];
+				float2 pt2 = path[i + 1];
+				float diff = 0.5f*std::min(
+					std::max(std::abs(pt1.x - pt2.x), std::abs(pt1.y - pt2.y)),
+					std::max(std::abs(pt1.x - pt0.x), std::abs(pt1.y - pt0.y)));
+				if (diff < context->theme.CORNER_RADIUS) {
+					nvgLineTo(nvg, pt1.x, pt1.y);
+				}
+				else {
+					nvgArcTo(nvg, pt1.x, pt1.y, pt2.x, pt2.y, context->theme.CORNER_RADIUS);
+				}
+				pt0 = pt1;
+			}
+			pt0 = path.back();
+			nvgLineTo(nvg, pt0.x, pt0.y);
+			nvgStroke(nvg);
+		}
+
+	}
+}
+void DataFlow::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
+	double pixelRatio, bool clamp) {
+	currentDrawOffset = extents.position;
+	Region::pack(pos, dims, dpmm, pixelRatio);
+	box2px bounds = getBounds(false);
+	pixel2 offset = cellPadding;
+	pixel2 scrollExtent = pixel2(0.0f);
+	for (std::shared_ptr<Region>& region : children) {
+		if (!region->isVisible()) {
+			continue;
+		}
+		if (orientation == Orientation::Vertical) {
+			pixel2 pix = region->position.toPixels(bounds.dimensions, dpmm,
+				pixelRatio);
+			region->position = CoordPX(pix.x, offset.y);
+		}
+		if (orientation == Orientation::Horizontal) {
+			pixel2 pix = region->position.toPixels(bounds.dimensions, dpmm,
+				pixelRatio);
+			region->position = CoordPX(offset.x, pix.y);
+		}
+		region->pack(bounds.position, bounds.dimensions, dpmm, pixelRatio);
+		box2px cbounds = region->getBounds();
+		if (orientation == Orientation::Horizontal) {
+			offset.x += cellSpacing.x + cbounds.dimensions.x;
+
+		}
+		if (orientation == Orientation::Vertical) {
+			offset.y += cellSpacing.y + cbounds.dimensions.y;
+		}
+		scrollExtent = aly::max(
+			cbounds.dimensions + cbounds.position - this->bounds.position,
+			scrollExtent);
+	}
+	extents.dimensions = scrollExtent;
+	extents.position=currentDrawOffset;
+	for (std::shared_ptr<Region>& region : children) {
+		if (region->onPack)
+			region->onPack();
+	}
+	router.update();
+	for (ConnectionPtr& connect : connections) {
+		router.evaluate(connect);
 	}
 }
 }
