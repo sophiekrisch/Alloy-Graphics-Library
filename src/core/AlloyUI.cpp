@@ -3850,7 +3850,7 @@ bool AdjustableComposite::onEventHandler(AlloyContext* context,
 				newBounds.clamp(parent->getBounds());
 				newBounds.position -= offset;
 			}
-			this->position = CoordPX(newBounds.position);
+			this->position = CoordPX(newBounds.position-parent->getBoundsPosition());
 			this->dimensions = CoordPX(newBounds.dimensions);
 			if (onResize) {
 				onResize(this, newBounds);
