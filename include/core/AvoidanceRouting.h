@@ -75,13 +75,13 @@ namespace aly {
 		};
 		template<class C, class R> std::basic_ostream<C, R> & operator <<(
 			std::basic_ostream<C, R> & ss, const AvoidancePath& apath) {
-			if ((apath->parent != nullptr) && (apath->parent->obstacle.dimensions.x*apath->parent->obstacle.dimensions.y > 0)) {
-				float2 min = apath->parent->obstacle.min();
-				float2 max = apath->parent->obstacle.max();
-				return ss << "DIR:" << apath->direction << " " << apath->path << " " << min << ":" << max;
+			if ((apath.parent != nullptr) && (apath.parent->obstacle.dimensions.x*apath.parent->obstacle.dimensions.y > 0)) {
+				float2 min = apath.parent->obstacle.min();
+				float2 max = apath.parent->obstacle.max();
+				return ss << "Path ["<<apath.depth<<"] "<< apath.direction << " " << apath.path << " " << min << ":" << max<<" "<<apath.getDistanceToDestination()<<" "<<apath.getPathLength();
 			}
 			else {
-				return ss << "DIR:" << apath->direction << " " << apath->path;
+				return ss << "Path [" << apath.depth << "] " << apath.direction << " " << apath.path << " " << apath.getDistanceToDestination() << " " << apath.getPathLength();
 			}
 		}
 		bool operator==(const std::shared_ptr<AvoidancePath>& a, const std::shared_ptr<AvoidancePath>& b);
@@ -95,10 +95,13 @@ namespace aly {
 
 			void getObstacles(std::vector<box2px>& obst);
 			box2px getPathBounds(float2 from, float2 to) const;
-			void simplifyPath(std::vector<float2>& path, const std::vector<box2f>& obstacles, int parity);
+			void simplifyPath(std::vector<float2>& path,const std::vector<box2f>& obstacles, int parity);
 		public:
 			void update();
-			void evaluate( std::vector<float2>& path,  const std::shared_ptr<Connection>& edge);
+			const std::vector<box2f>& getObstacles() const {
+				return obstacles;
+			}
+			void evaluate( const std::shared_ptr<Connection>& edge);
 			void evaluate(std::vector<float2>& path, float2 from, float2 to, Direction direction);
 			void add(const std::shared_ptr<Node>& node) {
 				nodes.push_back(node);

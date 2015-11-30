@@ -241,7 +241,7 @@ public:
 		source->setConnection(this);
 		destination->setConnection(this);
 	}
-	void draw(AlloyContext* context);
+	void draw(AlloyContext* context,DataFlow* flow);
 };
 
 class ConnectionBundle: public std::vector<std::shared_ptr<Connection>> {
@@ -386,6 +386,25 @@ public:
 	void setParent(DataFlow* parent) {
 		this->parent = parent;
 	}
+	const std::shared_ptr<InputPort>& getInputPort(size_t i) const {
+		return inputPorts[i];
+	}
+	const std::shared_ptr<OutputPort>& getOutputPort(size_t i) const {
+		return outputPorts[i];
+	}
+	const std::shared_ptr<InputPort>& getInputPort() const {
+		return inputPort;
+	}
+	const std::shared_ptr<OutputPort>& getOutputPort() const {
+		return outputPort;
+	}
+	const std::shared_ptr<ParentPort>& getParentPort() const {
+		return parentPort;
+	}
+	const std::shared_ptr<ChildPort>& getChildPort() const {
+		return childPort;
+	}
+	box2px getObstacleBounds() const;
 	DataFlow* getGraph() const {
 		return parent;
 	}
@@ -608,6 +627,7 @@ public:
 	Port* getConnectingPort() const {
 		return connectingPort;
 	}
+	bool intersects(const line2f& ln);
 	void startConnection(Port* port);
 	void setCurrentPort(Port* currentPort);
 	virtual void draw(AlloyContext* context) override;
@@ -728,8 +748,8 @@ public:
 	}
 };
 std::shared_ptr<Connection> MakeConnection(
-		const std::shared_ptr<OutputPort>& source,
-		const std::shared_ptr<InputPort>& destination);
+		const std::shared_ptr<Port>& source,
+		const std::shared_ptr<Port>& destination);
 std::shared_ptr<Relationship> MakeRelationship(
 		const std::shared_ptr<Node>& object,
 		const std::shared_ptr<Predicate>& predicate,

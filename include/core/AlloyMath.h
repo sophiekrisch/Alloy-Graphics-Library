@@ -1585,13 +1585,91 @@ template<class T, int M> struct line {
 public:
 	vec<T, M> start;
 	vec<T, M> end;
+private:
+	bool Clip(T denom,T numer, T& t0, T& t1) const 
+	{
+		if (denom > T(0))
+		{
+			if (numer > denom*t1)
+			{
+				return false;
+			}
+			if (numer > denom*t0)
+			{
+				t0 = numer / denom;
+			}
+			return true;
+		}
+		else if (denom <T(0))
+		{
+			if (numer > denom*t0)
+			{
+				return false;
+			}
+			if (numer > denom*t1)
+			{
+				t1 = numer / denom;
+			}
+			return true;
+		}
+		else
+		{
+			return (numer <= T(0));
+		}
+	}
+
 public:
 	line(const vec<T, M>& start = vec<T, M>(T(0)), const vec<T, M>& end = vec<T, M>(T(0))) :start(start), end(end) {
 	}
 	inline float length() const {
 		return distance(start, end);
 	}
+	bool intersects(const line<T, M>& line) const {
+		return false;
+	}
 	bool intersects(const box<T,M>& box) const {
+		T t0 = -std::numeric_limits<T>::max();
+		T t1 = std::numeric_limits<T>::max();
+		T len = distance(start, end);
+		vec<T, M> lineDirection = (end-start)/len;
+		vec<T, M> lineOrigin = start - box.center();
+		vec<T, M> boxExtent = box.dimensions*0.5f;
+		if (M == 2) {
+			if (Clip(+lineDirection[0], -lineOrigin[0] - boxExtent[0], t0, t1) &&
+				Clip(-lineDirection[0], +lineOrigin[0] - boxExtent[0], t0, t1) &&
+				Clip(+lineDirection[1], -lineOrigin[1] - boxExtent[1], t0, t1) &&
+				Clip(-lineDirection[1], +lineOrigin[1] - boxExtent[1], t0, t1))
+			{
+				if (t1 > t0)
+				{
+					if ((t1 <= len&&t1 >= 0) || t0 <= len && t0 >= 0)return true;
+				}
+				else
+				{
+					if (t0 <= len && t0 >= 0)return true;
+				}
+				return false;
+			}
+		}
+		else if (M == 3) {
+			if (Clip(+lineDirection[0], -lineOrigin[0] - boxExtent[0], t0, t1) &&
+				Clip(-lineDirection[0], +lineOrigin[0] - boxExtent[0], t0, t1) &&
+				Clip(+lineDirection[1], -lineOrigin[1] - boxExtent[1], t0, t1) &&
+				Clip(-lineDirection[1], +lineOrigin[1] - boxExtent[1], t0, t1) &&
+				Clip(+lineDirection[2], -lineOrigin[2] - boxExtent[2], t0, t1) &&
+				Clip(-lineDirection[2], +lineOrigin[2] - boxExtent[2], t0, t1))
+			{
+				if (t1 > t0)
+				{
+					if ((t1 <=len&&t1>=0) || t0<=len && t0 >= 0)return true;
+				}
+				else
+				{
+					if (t0<=len && t0 >= 0)return true;
+				}
+				return false;
+			}
+		}
 		return false;
 	}
 	static const line<T, M> NONE;

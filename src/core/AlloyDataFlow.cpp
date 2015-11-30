@@ -232,6 +232,9 @@ void Node::setup() {
 	setClampDragToParentBounds(true);
 	Application::addListener(this);
 }
+box2px Node::getObstacleBounds() const {
+	return nodeIcon->getBounds(false);
+}
 bool Node::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	if (Composite::onEventHandler(context, e))
 		return true;
@@ -571,6 +574,7 @@ bool DataFlow::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			add(
 					MakeConnection(connectingPort->getReference(),
 							currentPort->getReference()));
+			router.evaluate(connections.back());
 		}
 		connectingPort = nullptr;
 	}
@@ -629,25 +633,25 @@ void DataFlow::draw(AlloyContext* context) {
 			float2& end = cursor;
 			std::vector<float2> path;
 			router.evaluate(path,start,end,dir);
+
+			nvgLineCap(nvg, NVG_ROUND);
+			nvgLineJoin(nvg, NVG_BEVEL);
 			nvgBeginPath(nvg);
-			float dy = cursor.y - start.y;
-			pixel2 k1 = pixel2(start.x, start.y + 0.5f * dy);
-			pixel2 k2 = pixel2(cursor.x, cursor.y - 0.5f * dy);
-			nvgMoveTo(nvg, start.x, start.y);
-			nvgBezierTo(nvg, k1.x, k1.y, k2.x, k2.y, cursor.x, cursor.y);
+				for (int i = 0; i < (int)path.size(); i++) {
+					float2 pt = path[i];
+					if (i == 0) {
+						nvgMoveTo(nvg, pt.x, pt.y);
+					}
+					else {
+						nvgLineTo(nvg, pt.x, pt.y);
+					}
+				}
 			nvgStroke(nvg);
-			/*
-			 nvgFillColor(nvg, Color(220, 0, 0));
-			 nvgBeginPath(nvg);
-			 nvgCircle(nvg, k1.x, k1.y, 5.0f);
-			 nvgCircle(nvg, k2.x, k2.y, 5.0f);
-			 nvgFill(nvg);
-			 */
 		}
 
 	}
 }
-void Connection::draw(AlloyContext* context) {
+void Connection::draw(AlloyContext* context,DataFlow* flow) {
 	NVGcontext* nvg = context->nvgContext;
 	nvgStrokeWidth(nvg, 4.0f);
 	nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
@@ -700,17 +704,28 @@ void Connection::draw(AlloyContext* context) {
 	}
 	nvgLineCap(nvg, NVG_ROUND);
 	nvgLineJoin(nvg, NVG_BEVEL);
-	nvgBeginPath(nvg);
-	for (int i = 0; i < (int)path.size();i++) {
-		float2 pt = path[i];
-		if (i == 0) {
-			nvgMoveTo(nvg, pt.x,pt.y);
-		}
-		else {
-			nvgLineTo(nvg,pt.x,pt.y);
-		}
+	
+	for (int i = 1; i < (int)path.size();i++) {
+			nvgBeginPath(nvg);
+			
+			line2f ln(path[i - 1], path[i]);
+			bool intersect = false;
+			if (!flow->intersects(ln)) {
+				nvgStrokeColor(nvg,context->theme.HIGHLIGHT);
+			}
+			else {
+				nvgStrokeColor(nvg,Color(255,0,0));
+			}
+			nvgMoveTo(nvg, ln.start.x,ln.start.y);
+			nvgLineTo(nvg,ln.end.x,ln.end.y);
+			nvgStroke(nvg);
 	}
-	nvgStroke(nvg);
+}
+bool DataFlow::intersects(const line2f& ln) {
+	for (box2px box : router.getObstacles()) {
+		if (ln.intersects(box))return true;
+	}
+	return false;
 }
 void DataFlow::startConnection(Port* port) {
 	connectingPort = port;
@@ -720,6 +735,9 @@ void DataFlow::setup() {
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	onPack = [this]() {
 		router.update();
+		for (ConnectionPtr& connect : connections) {
+			router.evaluate(connect);
+		}
 	};
 	DrawPtr pathsRegion = DrawPtr(
 			new Draw("Paths", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f),
@@ -728,7 +746,7 @@ void DataFlow::setup() {
 							relationship->draw(context);
 						}
 						for(ConnectionPtr& connection:connections) {
-							connection->draw(context);
+							connection->draw(context,this);
 						}
 						for(RelationshipPtr& relationship:relationships) {
 							relationship->drawText(context);
