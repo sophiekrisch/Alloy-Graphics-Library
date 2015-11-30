@@ -3666,7 +3666,7 @@ AdjustableComposite::AdjustableComposite(const std::string& name,
 	}
 }
 void AdjustableComposite::draw(AlloyContext* context) {
-	pushScissor(context->nvgContext, getBounds());
+	pushScissor(context->nvgContext, getCursorBounds());
 	Composite::draw(context);
 	popScissor(context->nvgContext);
 	if (windowInitialBounds.dimensions.x < 0
