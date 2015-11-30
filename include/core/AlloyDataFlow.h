@@ -405,7 +405,7 @@ public:
 	const std::shared_ptr<ChildPort>& getChildPort() const {
 		return childPort;
 	}
-	void getObstacleBounds(std::vector<box2px>& obstacles) const ;
+	box2px getObstacleBounds() const ;
 	DataFlow* getGraph() const {
 		return parent;
 	}

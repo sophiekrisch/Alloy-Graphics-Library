@@ -244,7 +244,7 @@ namespace aly {
 		void AvoidanceRouting::update() {
 			obstacles.clear();
 			for (NodePtr node : nodes) {
-				node->getObstacleBounds(obstacles);
+				obstacles.push_back(node->getObstacleBounds());
 			}
 		}
 		void AvoidanceRouting::evaluate(std::vector<float2>& path, float2 from, float2 to, Direction direction) {

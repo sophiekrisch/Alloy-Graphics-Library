@@ -232,12 +232,12 @@ void Node::setup() {
 	setClampDragToParentBounds(true);
 	Application::addListener(this);
 }
-void Node::getObstacleBounds(std::vector<box2px>& obstacles) const {
+box2px Node::getObstacleBounds() const {
 	box2px box = nodeIcon->getBounds(false);
 	if (labelRegion.get() != nullptr) {
 		box.merge(labelRegion->getBounds(false));
 	}
-	obstacles.push_back(box);
+	return box;
 }
 bool Node::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	if (Composite::onEventHandler(context, e))
