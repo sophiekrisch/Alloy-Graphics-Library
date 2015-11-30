@@ -860,10 +860,6 @@ bool BorderComposite::onEventHandler(AlloyContext* context,
 		const InputEvent& e) {
 	if (resizeable) {
 		bool over = context->isMouseOver(this, true);
-		if (e.type == InputType::MouseButton
-				&& e.button == GLFW_MOUSE_BUTTON_LEFT && e.isDown() && over) {
-			dynamic_cast<Composite*>(this->parent)->putLast(this);
-		}
 		if (!context->isLeftMouseButtonDown()) {
 			resizing = false;
 		}
