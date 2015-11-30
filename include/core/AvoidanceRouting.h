@@ -56,7 +56,7 @@ namespace aly {
 			std::vector<box2px>& obstacles;
 			std::vector<std::shared_ptr<AvoidancePath>> children;
 			AvoidancePath* parent;
-			line2f path;
+			lineseg2f path;
 			box2f obstacle;
 			AvoidancePath(std::vector<box2px>& obstacles, const float2& from, const float2& to, Direction direction, AvoidancePath* parent = nullptr);
 			void addChild(const std::shared_ptr<AvoidancePath>& child);
@@ -71,7 +71,7 @@ namespace aly {
 			float getPathLength() const;
 			float lineLength();
 			float updateDistToDestination(float2 target);
-			line2f updatePath( const float2& to);
+			lineseg2f updatePath( const float2& to);
 		};
 		template<class C, class R> std::basic_ostream<C, R> & operator <<(
 			std::basic_ostream<C, R> & ss, const AvoidancePath& apath) {

@@ -628,7 +628,7 @@ public:
 	Port* getConnectingPort() const {
 		return connectingPort;
 	}
-	bool intersects(const line2f& ln);
+	bool intersects(const lineseg2f& ln);
 	void startConnection(Port* port);
 	void setCurrentPort(Port* currentPort);
 	virtual void draw(AlloyContext* context) override;

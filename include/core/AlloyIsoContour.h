@@ -125,7 +125,7 @@ protected:
 	bool nudgeLevelSet;
 	const float LEVEL_SET_TOLERANCE;
 	TopologyRule2D rule = TopologyRule2D::Unconstrained;
-	int rows, cols;
+	int rows=0, cols=0;
 	const Image1f* img;
 	float getValue(int x, int y);
 	float fGetOffset(uint2 v1, uint2 v2);

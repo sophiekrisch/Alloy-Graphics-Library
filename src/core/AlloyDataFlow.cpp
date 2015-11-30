@@ -739,7 +739,7 @@ void Connection::draw(AlloyContext* context,DataFlow* flow) {
 	nvgLineTo(nvg, pt0.x, pt0.y);
 	nvgStroke(nvg);
 }
-bool DataFlow::intersects(const line2f& ln) {
+bool DataFlow::intersects(const lineseg2f& ln) {
 	for (box2px box : router.getObstacles()) {
 		if (ln.intersects(box))return true;
 	}

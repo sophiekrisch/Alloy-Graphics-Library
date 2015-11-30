@@ -40,7 +40,7 @@ namespace aly {
 				return (a->distToDest < b->distToDest);
 			}
 		}
-		AvoidancePath::AvoidancePath(std::vector<box2px>& obstacles, const float2& from, const float2& to, Direction direction, AvoidancePath* parent) :obstacles(obstacles),direction(direction), parent(parent), path(from, to) {
+		AvoidancePath::AvoidancePath(std::vector<box2px>& obstacles, const float2& from, const float2& to, Direction direction, AvoidancePath* parent) :direction(direction),obstacles(obstacles), parent(parent), path(from, to) {
 			distToDest = std::numeric_limits<float>::max();
 			depth = 0;
 			pathLength = std::numeric_limits<float>::max();
@@ -125,7 +125,6 @@ namespace aly {
 		float2 AvoidancePath::findNextBoundary(const float2 &point) {
 			float2 p = point;
 			float2 tmp;
-			double minDist = std::numeric_limits<float>::min();
 			if ((parent != nullptr) && (parent->obstacle.dimensions.x*parent->obstacle.dimensions.y > 0)) {
 				box2f rect = parent->obstacle;
 				switch (direction) {
@@ -169,7 +168,7 @@ namespace aly {
 			return distance(path.start, path.end);
 		}
 		float AvoidancePath::updateDistToDestination(float2 target) {
-			if (path != line2f::NONE) {
+			if (path != lineseg2f::NONE) {
 				distToDest = distance(path.end, target);
 			}
 			else {
@@ -177,62 +176,66 @@ namespace aly {
 			}
 			return distToDest;
 		}
-		line2f AvoidancePath::updatePath(const float2& to) {
+		lineseg2f AvoidancePath::updatePath(const float2& to) {
 			if (direction == Direction::Unkown) {
 				return path;
 			}
 			switch (direction) {
 				case Direction::North:
 					if (path.end.y >= path.start.y) {
-						path = line2f(path.start, findNextBoundary(path.start));
+						path = lineseg2f(path.start, findNextBoundary(path.start));
 					}
 					else {
-						path = line2f(path.start, float2(path.start.x, path.end.y));
+						path = lineseg2f(path.start, float2(path.start.x, path.end.y));
 					}
 					break;
 				case Direction::South:
 					if (path.end.y <= path.start.y) {
-						path = line2f(path.start, findNextBoundary(path.start));
+						path = lineseg2f(path.start, findNextBoundary(path.start));
 					}
 					else {
-						path = line2f(path.start, float2(path.start.x, path.end.y));
+						path = lineseg2f(path.start, float2(path.start.x, path.end.y));
 					}
 					break;
 				case Direction::East:
 					if (path.end.x <= path.start.x) {
-						path = line2f(path.start, findNextBoundary(path.start));
+						path = lineseg2f(path.start, findNextBoundary(path.start));
 					}
 					else {
-						path = line2f(path.start, float2(path.end.x, path.start.y));
+						path = lineseg2f(path.start, float2(path.end.x, path.start.y));
 					}
 					break;
 				case Direction::West:
 					if (path.end.x >= path.start.x) {
-						path = line2f(path.start, findNextBoundary(path.start));
+						path = lineseg2f(path.start, findNextBoundary(path.start));
 					}
 					else {
-						path = line2f(path.start, float2(path.end.x, path.start.y));
+						path = lineseg2f(path.start, float2(path.end.x, path.start.y));
 					}
+					break;
+				default:
 					break;
 			}
 			for (box2px obstacle : obstacles) {
 				if (path.intersects(obstacle)) {
 					switch (direction) {
 					case Direction::South:
-						path = line2f(path.start, float2(path.start.x, obstacle.position.y
+						path = lineseg2f(path.start, float2(path.start.x, obstacle.position.y
 							- BORDER_SPACE));
 						break;
 					case Direction::North:
-						path = line2f(path.start, float2(path.start.x, obstacle.position.y + obstacle.dimensions.y
+						path = lineseg2f(path.start, float2(path.start.x, obstacle.position.y + obstacle.dimensions.y
 							+ BORDER_SPACE));
 						break;
 					case Direction::West:
-						path = line2f(path.start, float2(obstacle.position.x + obstacle.dimensions.x + BORDER_SPACE, path.start
+						path = lineseg2f(path.start, float2(obstacle.position.x + obstacle.dimensions.x + BORDER_SPACE, path.start
 							.y));
 						break;
 					case Direction::East:
-						path = line2f(path.start, float2(obstacle.position.x - BORDER_SPACE, path.start
+						path = lineseg2f(path.start, float2(obstacle.position.x - BORDER_SPACE, path.start
 							.y));
+						break;
+					default:
 						break;
 					}
 					this->obstacle = obstacle;
@@ -320,8 +323,6 @@ namespace aly {
 				simplifyPath(path, 1);
 			}
 			if (path.size() == 2) {
-				float dx = std::abs(origFrom.x - origTo.x);
-				float dy = std::abs(origFrom.y - origTo.y);
 				float x2 = origFrom.x + ((origTo.x - origFrom.x) *0.5f);
 				float y2 = origFrom.y + ((origTo.y - origFrom.y) *0.5f);
 				path.clear();
@@ -366,7 +367,7 @@ namespace aly {
 		void AvoidanceRouting::simplifyPath(std::vector<float2>& path, int parity) {
 			float2 st, end, stNext, endNext;
 			bool reduce = false;
-			line2f l1, l2;
+			lineseg2f l1, l2;
 			for (int i = 0; i < (int)path.size() - 4; i++) {
 				st = path[i];
 				end = path[i + 3];
@@ -376,8 +377,8 @@ namespace aly {
 				else {
 					stNext = float2(end.x, st.y);
 				}
-				l1 = line2f(path[i + 1], stNext);
-				l2 = line2f(stNext, end);
+				l1 = lineseg2f(path[i + 1], stNext);
+				l2 = lineseg2f(stNext, end);
 				reduce = true;
 				for (box2px obstacle : obstacles) {
 					if (l1.intersects(obstacle) || l2.intersects(obstacle)) {

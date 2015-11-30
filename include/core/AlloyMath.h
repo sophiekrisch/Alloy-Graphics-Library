@@ -1588,7 +1588,7 @@ template<class T, int M> struct box {
 		return aly::clamp(pt, position, position + dimensions);
 	}
 };
-template<class T, int M> struct line {
+template<class T, int M> struct lineseg {
 public:
 	vec<T, M> start;
 	vec<T, M> end;
@@ -1626,12 +1626,12 @@ private:
 	}
 
 public:
-	line(const vec<T, M>& start = vec<T, M>(T(0)), const vec<T, M>& end = vec<T, M>(T(0))) :start(start), end(end) {
+	lineseg(const vec<T, M>& start = vec<T, M>(T(0)), const vec<T, M>& end = vec<T, M>(T(0))) :start(start), end(end) {
 	}
 	inline float length() const {
 		return distance(start, end);
 	}
-	bool intersects(const line<T, M>& line) const {
+	bool intersects(const lineseg<T, M>& line) const {
 		return false;
 	}
 	bool intersects(const box<T,M>& box) const {
@@ -1649,7 +1649,7 @@ public:
 			{
 				if (t1 > t0)
 				{
-					if ((t1 <= len&&t1 >= 0) || t0 <= len && t0 >= 0)return true;
+					if ((t1 <= len&&t1 >= 0) || (t0 <= len && t0 >= 0))return true;
 				}
 				else
 				{
@@ -1668,7 +1668,7 @@ public:
 			{
 				if (t1 > t0)
 				{
-					if ((t1 <=len&&t1>=0) || t0<=len && t0 >= 0)return true;
+					if ((t1 <= len&&t1 >= 0) || (t0 <= len && t0 >= 0))return true;
 				}
 				else
 				{
@@ -1679,24 +1679,24 @@ public:
 		}
 		return false;
 	}
-	static const line<T, M> NONE;
+	static const lineseg<T, M> NONE;
 };
-template<class T, int C> const line<T, C> line<T, C>::NONE = line<T, C>(vec<T, C>(std::numeric_limits<T>::min()), vec<T, C>(std::numeric_limits<T>::min()));
+template<class T, int C> const lineseg<T, C> lineseg<T, C>::NONE = lineseg<T, C>(vec<T, C>(std::numeric_limits<T>::min()), vec<T, C>(std::numeric_limits<T>::min()));
 
-template<class T, int C> bool operator==(const line<T, C>& a, const line<T, C>& b) {
+template<class T, int C> bool operator==(const lineseg<T, C>& a, const lineseg<T, C>& b) {
 	return (a.start == b.start&&a.end == b.end);
 }
-template<class T, int C> bool operator!=(const line<T, C>& a, const line<T, C>& b) {
+template<class T, int C> bool operator!=(const lineseg<T, C>& a, const lineseg<T, C>& b) {
 	return (a.start != b.start || a.end != b.end);
 }
 template<class T, int K, class C, class R> std::basic_ostream<C, R> & operator <<(
-	std::basic_ostream<C, R> & ss, const line<T, K>& line) {
+	std::basic_ostream<C, R> & ss, const lineseg<T, K>& line) {
 	return ss << "[" << line.start << "->" << line.end << "]";
 }
-typedef line<float, 2> line2f;
-typedef line<float, 3> line3f;
-typedef line<float, 2> line2d;
-typedef line<double, 3> line3d;
+typedef lineseg<float, 2> lineseg2f;
+typedef lineseg<float, 3> lineseg3f;
+typedef lineseg<float, 2> lineseg2d;
+typedef lineseg<double, 3> lineseg3d;
 
 template<class C, class R, class T, int M> std::basic_ostream<C, R> & operator <<(
 		std::basic_ostream<C, R> & ss, const box<T, M> & v) {

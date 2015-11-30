@@ -25,7 +25,7 @@
 #include "AlloyIsoContour.h"
 using namespace aly;
 DistanceFieldEx::DistanceFieldEx() :
-		Application(800, 400, "Distance Field Example") {
+		Application(800, 400, "Distance Field Example"),currentIso(0.0f) {
 }
 bool DistanceFieldEx::init(Composite& rootNode) {
 	//SANITY_CHECK_DISTANCE_FIELD();
