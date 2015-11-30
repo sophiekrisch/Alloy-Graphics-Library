@@ -27,7 +27,7 @@ namespace aly {
 			return (a->path.start == b->path.start&&a->path.end == b->path.end);
 		}
 		//Define operator backwards because priority queue creates a MAX heap.
-		bool operator< (const std::shared_ptr<AvoidancePath>& b, const std::shared_ptr<AvoidancePath>& a) {
+		bool ComparePaths::operator()(const std::shared_ptr<AvoidancePath>& b, const std::shared_ptr<AvoidancePath>& a) {
 			if (a->distToDest == b->distToDest) {
 				if (a->pathLength == b->pathLength) {
 					if(a->depth==b->depth){
@@ -282,7 +282,7 @@ namespace aly {
 			default:
 				break;
 			}
-			std::priority_queue<std::shared_ptr<AvoidancePath>> queue;
+			std::priority_queue<std::shared_ptr<AvoidancePath>,std::vector<std::shared_ptr<AvoidancePath>>,ComparePaths> queue;
 			std::shared_ptr<AvoidancePath> root = std::shared_ptr<AvoidancePath>(new AvoidancePath(obstacles, from, to, direction));
 			queue.push(root);
 			std::shared_ptr<AvoidancePath> optNode = root;

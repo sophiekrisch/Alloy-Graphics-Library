@@ -85,7 +85,9 @@ namespace aly {
 			}
 		}
 		bool operator==(const std::shared_ptr<AvoidancePath>& a, const std::shared_ptr<AvoidancePath>& b);
-		bool operator< (const std::shared_ptr<AvoidancePath>& a, const std::shared_ptr<AvoidancePath>& b);
+		struct ComparePaths{
+			bool operator()(const std::shared_ptr<AvoidancePath>& a, const std::shared_ptr<AvoidancePath>& b);
+		};
 		class AvoidanceRouting {
 		protected:
 			std::vector<std::shared_ptr<Node>> nodes;
