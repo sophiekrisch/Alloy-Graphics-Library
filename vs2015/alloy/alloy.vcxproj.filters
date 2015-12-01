@@ -144,6 +144,9 @@
     <ClCompile Include="..\..\src\core\AvoidanceRouting.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\core\ForceDirectedGraph.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\core\Alloy.h">
@@ -342,6 +345,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\core\AvoidanceRouting.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\core\ForceDirectedGraph.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
