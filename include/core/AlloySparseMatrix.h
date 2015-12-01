@@ -57,6 +57,11 @@ public:
 	SparseMatrix(size_t rows, size_t cols) :storage(rows), rows(rows), cols(cols)
 	{
 	}
+	void resize(size_t rows, size_t cols){
+	    this->rows=rows;
+	    this->cols=cols;
+	    storage.resize(rows,cols);
+	}
 	void set(size_t i, size_t j, const vec<T, C>& value)
 	{
 		if (i >= rows || j >= cols || i < 0 || j < 0)throw std::runtime_error(MakeString() << "Index (" << i << "," << j << ") exceeds matrix bounds [" << rows << "," << cols << "]");
