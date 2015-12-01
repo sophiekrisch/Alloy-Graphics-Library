@@ -50,24 +50,50 @@ struct Spring {
 	ForceItemPtr item2;
 	float coeff;
 	float length;
-	Spring(const ForceItemPtr& fi1,const ForceItemPtr& fi2, float k, float len) :
+	Spring(const ForceItemPtr& fi1, const ForceItemPtr& fi2, float k, float len) :
 			item1(fi1), item2(fi2), coeff(k), length(len) {
 	}
 };
 
 typedef std::shared_ptr<Spring> SpringPtr;
 struct Force {
+	std::vector<float> params;
+	std::vector<float> minValues;
+	std::vector<float> maxValues;
 	virtual void init(const ForceSimulator& fsim)=0;
-	virtual int getParameterCount() const=0;
-	virtual float getParameter(int i) const=0;
-	virtual float getMinValue(int param) const=0;
-	virtual float getMaxValue(int param) const=0;
-	virtual std::string getParameterName(int i) const=0;
-	virtual void setParameter(int i, float val)=0;
-	virtual void setMinValue(int i, float val)=0;
-	virtual void setMaxValue(int i, float val)=0;
-	virtual bool isSpringForce() const=0;
-	virtual bool isItemForce() const=0;
+	virtual ~Force() {
+	}
+	;
+	size_t getParameterCount() const {
+		return params.size();
+	}
+	float getParameter(size_t i) const {
+		return params[i];
+	}
+	float getMinValue(int param) const {
+		return minValues[param];
+	}
+	float getMaxValue(int param) const {
+		return maxValues[param];
+	}
+	std::string getParameterName(size_t i) const {
+		return std::string();
+	}
+	void setParameter(size_t i, float val) {
+		params[i] = val;
+	}
+	void setMinValue(size_t i, float val) {
+		minValues[i] = val;
+	}
+	void setMaxValue(size_t i, float val) {
+		maxValues[i] = val;
+	}
+	virtual bool isSpringForce() const {
+		return false;
+	}
+	virtual bool isItemForce() const {
+		return false;
+	}
 	virtual void getForce(ForceItem& item)=0;
 	virtual void getForce(Spring& spring)=0;
 };
@@ -75,7 +101,7 @@ struct Force {
 typedef std::shared_ptr<Force> ForcePtr;
 
 struct Integrator {
-	virtual void integrate(ForceSimulator& sim, uint64_t timestep)=0;
+	virtual void integrate(ForceSimulator& sim, float timestep)=0;
 	Integrator() {
 	}
 	;
@@ -91,6 +117,7 @@ class ForceSimulator {
 	int iflen, sflen;
 	std::shared_ptr<Integrator> integrator;
 	float speedLimit = 1.0f;
+public:
 	ForceSimulator(const std::shared_ptr<Integrator>& integr);
 	float getSpeedLimit() const;
 	void setSpeedLimit(float limit);
@@ -110,6 +137,13 @@ class ForceSimulator {
 	SpringPtr addSpring(const ForceItemPtr& item1, const ForceItemPtr& item2);
 	void accumulate();
 	void runSimulator(uint64_t timestep);
+};
+
+struct RungeKuttaIntegrator: public Integrator {
+	virtual void integrate(ForceSimulator& sim, float timestep) override;
+};
+struct EulerIntegrator: public Integrator {
+	virtual void integrate(ForceSimulator& sim, float timestep) override;
 };
 }
 }

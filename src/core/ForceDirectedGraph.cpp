@@ -111,6 +111,91 @@ void ForceSimulator::runSimulator(uint64_t timestep) {
 	accumulate();
 	integrator->integrate(*this, timestep);
 }
+void EulerIntegrator::integrate(ForceSimulator& sim, float timestep) {
+	float speedLimit = sim.getSpeedLimit();
+	float coeff, len;
+	for (ForceItemPtr item : sim.getItems()) {
+		item->location += timestep * item->velocity;
+		coeff = timestep / item->mass;
+		item->velocity += coeff * item->force;
+		float2 vel = item->velocity;
+		len = length(vel);
+		if (len > speedLimit) {
+			vel = speedLimit * vel / len;
+		}
+	}
+}
+void RungeKuttaIntegrator::integrate(ForceSimulator& sim, float timestep) {
+	float speedLimit = sim.getSpeedLimit();
+	float coeff;
+	float len;
+	std::array<float2, 4> k, l;
+	for (ForceItemPtr item : sim.getItems()) {
+		coeff = timestep / item->mass;
+		k = item->k;
+		l = item->l;
+		item->plocation = item->location;
+		k[0] = timestep * item->velocity;
+		l[0] = coeff * item->force;
+		item->location += 0.5f * k[0];
+	}
+	sim.accumulate();
+	for (ForceItemPtr item : sim.getItems()) {
+		coeff = timestep / item->mass;
+		k = item->k;
+		l = item->l;
+		float2 vel = item->velocity + 0.5f * l[0];
+		len = length(vel);
+		if (len > speedLimit) {
+			vel = speedLimit * vel / len;
+		}
+		k[1] = timestep * vel;
+		l[1] = coeff * item->force;
+
+		// Set the position to the new predicted position
+		item->location = item->plocation + 0.5f * k[1];
+	}
+
+	// recalculate forces
+	sim.accumulate();
+
+	for (ForceItemPtr item : sim.getItems()) {
+		coeff = timestep / item->mass;
+		k = item->k;
+		l = item->l;
+		float2 vel = item->velocity + 0.5f * l[1];
+		len = length(vel);
+		if (len > speedLimit) {
+			vel = speedLimit * vel / len;
+		}
+		k[2] = timestep * vel;
+		l[2] = coeff * item->force;
+		item->location = item->plocation + 0.5f * k[2];
+	}
+	// recalculate forces
+	sim.accumulate();
+
+	for (ForceItemPtr item : sim.getItems()) {
+		coeff = timestep / item->mass;
+		k = item->k;
+		l = item->l;
+		float2 p = item->plocation;
+		float2 vel = item->velocity + 0.5f * l[1];
+		len = length(vel);
+		if (len > speedLimit) {
+			vel = speedLimit * vel / len;
+		}
+		k[3] = timestep * vel;
+		l[3] = coeff * item->force;
+		item->location = p + (k[0] + k[3]) / 6.0f + (k[1] + k[2]) / 3.0f;
+		vel = (l[0] + l[3]) / 6.0f + (l[1] + l[2]) / 3.0f;
+		len = length(vel);
+		if (len > speedLimit) {
+			vel = speedLimit * vel / len;
+		}
+		item->velocity += vel;
+	}
+}
 }
 }
 
