@@ -305,15 +305,15 @@ float ptSegDistSq(float x1, float y1, float x2, float y2, float px, float py) {
 }
 void WallForce::getForce(ForceItem& item) {
 	float2 n = item.location;
-	int ccw = relativeCCW(p1.x, p1.y, p2.x, p2.y, n[0], n[1]);
+	int ccw = relativeCCW(p1.x, p1.y, p2.x, p2.y, n.x, n.y);
 	float r = (float) std::sqrt(
-			ptSegDistSq(p1.x, p1.y, p2.x, p2.y, n[0], n[1]));
+			ptSegDistSq(p1.x, p1.y, p2.x, p2.y, n.x, n.y));
 	if (r == 0.0)
 		r = (float) RandomUniform(0.0f, 0.01f);
 	float v = params[GRAVITATIONAL_CONST] * item.mass / (r * r * r);
-	if (n[0] >= std::min(p1.x, p2.x) && n[0] <= std::max(p1.x, p2.x))
+	if (n.x >= std::min(p1.x, p2.x) && n.x <= std::max(p1.x, p2.x))
 		item.force[1] += ccw * v * dxy.x;
-	if (n[1] >= std::min(p1.y, p2.y) && n[1] <= std::max(p1.y, p2.y))
+	if (n.y >= std::min(p1.y, p2.y) && n.y <= std::max(p1.y, p2.y))
 		item.force[0] += -1.0f * ccw * v * dxy.y;
 }
 void CircularWallForce::getForce(ForceItem& item) {

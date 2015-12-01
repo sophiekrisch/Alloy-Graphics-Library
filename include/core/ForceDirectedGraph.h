@@ -251,6 +251,46 @@ struct CircularWallForce: public Force {
 	}
 	virtual void getForce(ForceItem& item) override;
 };
+/*
+struct class GravitationalForce extends AbstractForce {
+	private static final String[] pnames
+		= { "GravitationalConstant", "Direction" };
+
+	public static final int GRAVITATIONAL_CONST = 0;
+	public static final int DIRECTION = 1;
+
+	public static final float DEFAULT_FORCE_CONSTANT = 1E-4f;
+	public static final float DEFAULT_MIN_FORCE_CONSTANT = 1E-5f;
+	public static final float DEFAULT_MAX_FORCE_CONSTANT = 1E-3f;
+
+	public static final float DEFAULT_DIRECTION = (float)-Math.PI / 2;
+	public static final float DEFAULT_MIN_DIRECTION = (float)-Math.PI;
+	public static final float DEFAULT_MAX_DIRECTION = (float)Math.PI;
+	public GravitationalForce(float forceConstant, float direction) {
+		params = new float[] { forceConstant, direction };
+		minValues = new float[]
+		{ DEFAULT_MIN_FORCE_CONSTANT, DEFAULT_MIN_DIRECTION };
+		maxValues = new float[]
+		{ DEFAULT_MAX_FORCE_CONSTANT, DEFAULT_MAX_DIRECTION };
+	}
+	public GravitationalForce() {
+		this(DEFAULT_FORCE_CONSTANT, DEFAULT_DIRECTION);
+	}
+	public boolean isItemForce() {
+		return true;
+	}
+	protected String[] getParameterNames() {
+		return pnames;
+	}
+	public void getForce(ForceItem item) {
+		float theta = params[DIRECTION];
+		float coeff = params[GRAVITATIONAL_CONST] * item.mass;
+
+		item.force[0] += Math.cos(theta)*coeff;
+		item.force[1] += Math.sin(theta)*coeff;
+	}
+}*/
+
 }
 }
 #endif /* INCLUDE_CORE_FORCEDIRECTEDGRAPH_H_ */
