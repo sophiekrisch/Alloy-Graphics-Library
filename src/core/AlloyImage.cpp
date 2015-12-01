@@ -360,9 +360,18 @@ void ReadImageFromFile(const std::string& file, ImageRGBAf& img) {
 		if (ret != 0) {
 			throw std::runtime_error(message);
 		}
-		if (exrImage.num_channels > img.channels) {
-			throw std::runtime_error(
-					"Cannot read image because it contains more channels than the output data type.");
+		std::vector<int> channelIndex(4, 0);
+		for (int i = 0; i < exrImage.num_channels; i++) {
+			std::string cname(exrImage.channel_names[i]);
+			if (cname == "R" || cname == "r"||cname=="red"||cname=="RED") {
+				channelIndex[0] = i;
+			} else if (cname == "G" || cname == "g"||cname=="green"||cname=="GREEN") {
+				channelIndex[1] = i;
+			} else if (cname == "B" || cname == "b"||cname=="blue"||cname=="BLUE") {
+				channelIndex[2] = i;
+			} else if (cname == "A" || cname == "a"||cname=="alpha"||cname=="ALPHA") {
+				channelIndex[3] = i;
+			}
 		}
 		img.resize(exrImage.width, exrImage.height);
 		std::vector<float> imageData(img.size() * img.channels);
@@ -370,7 +379,7 @@ void ReadImageFromFile(const std::string& file, ImageRGBAf& img) {
 		for (int c = 0; c < img.channels; c++) {
 			size_t index = 0;
 			for (float4& val : img.data) {
-				val[c] = ptr[exrImage.num_channels - 1 - c][index++];
+				val[c] = ptr[channelIndex[c]][index++];
 			}
 		}
 		FreeEXRImage(&exrImage);
@@ -420,9 +429,18 @@ void ReadImageFromFile(const std::string& file, ImageRGBf& img) {
 		if (ret != 0) {
 			throw std::runtime_error(message);
 		}
-		if (exrImage.num_channels > img.channels) {
-			throw std::runtime_error(
-					"Cannot read image because it contains more channels than the output data type.");
+		std::vector<int> channelIndex(3, 0);
+		for (int i = 0; i < exrImage.num_channels; i++) {
+			std::string cname(exrImage.channel_names[i]);
+			if (cname == "R" || cname == "r" || cname == "red" || cname == "RED") {
+				channelIndex[0] = i;
+			}
+			else if (cname == "G" || cname == "g" || cname == "green" || cname == "GREEN") {
+				channelIndex[1] = i;
+			}
+			else if (cname == "B" || cname == "b" || cname == "blue" || cname == "BLUE") {
+				channelIndex[2] = i;
+			}
 		}
 		img.resize(exrImage.width, exrImage.height);
 		std::vector<float> imageData(img.size() * img.channels);
@@ -430,7 +448,7 @@ void ReadImageFromFile(const std::string& file, ImageRGBf& img) {
 		for (int c = 0; c < img.channels; c++) {
 			size_t index = 0;
 			for (float3& val : img.data) {
-				val[c] = ptr[exrImage.num_channels - 1 - c][index++];
+				val[c] = ptr[channelIndex[c]][index++];
 			}
 		}
 		FreeEXRImage(&exrImage);
@@ -476,10 +494,6 @@ void ReadImageFromFile(const std::string& file, Image1f& img) {
 		ret = LoadMultiChannelEXRFromFile(&exrImage, file.c_str(), &message);
 		if (ret != 0) {
 			throw std::runtime_error(message);
-		}
-		if (exrImage.num_channels > img.channels) {
-			throw std::runtime_error(
-					"Cannot read image because it contains more channels than the output data type.");
 		}
 		img.resize(exrImage.width, exrImage.height);
 		std::vector<float> imageData(img.size() * img.channels);
