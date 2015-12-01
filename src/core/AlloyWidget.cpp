@@ -1819,7 +1819,7 @@ FileButton::FileButton(const std::string& name, const AUnit2D& pos,
 		};
 	}
 
-	foregroundColor = MakeColor(AlloyApplicationContext()->theme.HIGHLIGHT);
+	foregroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
 	iconColor = MakeColor(AlloyApplicationContext()->theme.DARK_TEXT);
 	//borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
 	borderColor = MakeColor(COLOR_NONE);
