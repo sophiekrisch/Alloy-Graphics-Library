@@ -1759,10 +1759,16 @@ FileSelector::FileSelector(const std::string& name, const AUnit2D& pos,
 					std::string file = getValue();
 					AlloyApplicationContext()->setMouseFocusObject(nullptr);
 					if (FileExists(file)) {
-						openFileDialog(context, GetParentDirectory(file));
+						openFileDialog(context, file);
 					}
 					else {
-						openFileDialog(context, GetCurrentWorkingDirectory());
+						std::string parent = GetParentDirectory(file);
+						if (FileExists(parent)) {
+							openFileDialog(context, parent);
+						}
+						else {
+							openFileDialog(context, GetCurrentWorkingDirectory());
+						}
 					}
 					return true;
 				}

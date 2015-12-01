@@ -144,7 +144,7 @@ public:
 			float length);
 	SpringPtr addSpring(const ForceItemPtr& item1, const ForceItemPtr& item2);
 	void accumulate();
-	void runSimulator(uint64_t timestep);
+	void runSimulator(float timestep);
 };
 
 struct RungeKuttaIntegrator: public Integrator {
@@ -155,7 +155,7 @@ struct EulerIntegrator: public Integrator {
 };
 
 struct SpringForce: public Force {
-	static std::string pnames[2];
+	static const std::string pnames[2];
 	static const float DEFAULT_SPRING_COEFF;
 	static const float DEFAULT_MAX_SPRING_COEFF;
 	static const float DEFAULT_MIN_SPRING_COEFF;
@@ -184,7 +184,7 @@ struct SpringForce: public Force {
 	virtual void getForce(Spring& s) override;
 };
 struct DragForce: public Force {
-	static std::string pnames[1];
+	static const std::string pnames[1];
 	static const float DEFAULT_DRAG_COEFF;
 	static const float DEFAULT_MIN_DRAG_COEFF;
 	static const float DEFAULT_MAX_DRAG_COEFF;
@@ -197,10 +197,10 @@ struct DragForce: public Force {
 	DragForce() :
 			DragForce(DEFAULT_DRAG_COEFF) {
 	}
-	bool isItemForce() const {
+	virtual bool isItemForce() const override {
 		return true;
 	}
-	virtual std::string getParameterName(size_t i) const {
+	virtual std::string getParameterName(size_t i) const override {
 		return pnames[i];
 	}
 	virtual void getForce(ForceItem& item) override {
@@ -208,7 +208,7 @@ struct DragForce: public Force {
 	}
 };
 struct WallForce: public Force {
-	static std::string pnames[1];
+	static const std::string pnames[1];
 	static const float DEFAULT_GRAV_CONSTANT;
 	static const float DEFAULT_MIN_GRAV_CONSTANT;
 	static const float DEFAULT_MAX_GRAV_CONSTANT;
@@ -218,13 +218,37 @@ struct WallForce: public Force {
 	WallForce(float2 p1, float2 p2) :
 			WallForce(DEFAULT_GRAV_CONSTANT, p1, p2) {
 	}
-	bool isItemForce() const {
+	virtual bool isItemForce() const override {
 		return true;
 	}
-	virtual std::string getParameterName(size_t i) const {
+	virtual std::string getParameterName(size_t i) const override {
 		return pnames[i];
 	}
 
+	virtual void getForce(ForceItem& item) override;
+};
+struct CircularWallForce: public Force {
+	static const std::string pnames[1];
+	static const float DEFAULT_GRAV_CONSTANT;
+	static const float DEFAULT_MIN_GRAV_CONSTANT ;
+	static const float DEFAULT_MAX_GRAV_CONSTANT ;
+	static const int GRAVITATIONAL_CONST = 0;
+	float2 p;
+	float r;
+	CircularWallForce(float gravConst,float2 p, float r):p(p),r(r)
+	{
+		params = std::vector<float>{ gravConst };
+		minValues = std::vector<float>{ DEFAULT_MIN_GRAV_CONSTANT };
+		maxValues = std::vector<float>{ DEFAULT_MAX_GRAV_CONSTANT };
+	}
+	CircularWallForce(float2 p, float r):CircularWallForce(DEFAULT_GRAV_CONSTANT,p,r) {
+	}
+	virtual bool isItemForce() const override {
+		return true;
+	}
+	virtual std::string getParameterName(size_t i) const override {
+		return pnames[i];
+	}
 	virtual void getForce(ForceItem& item) override;
 };
 }

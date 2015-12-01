@@ -22,7 +22,7 @@
 #include "ForceDirectedGraph.h"
 namespace aly {
 namespace dataflow {
-std::string SpringForce::pnames[2] = { "SpringCoefficient",
+const std::string SpringForce::pnames[2] = { "SpringCoefficient",
 		"DefaultSpringLength" };
 const float SpringForce::DEFAULT_SPRING_COEFF = 1E-4f;
 const float SpringForce::DEFAULT_MAX_SPRING_COEFF = 1E-3f;
@@ -33,17 +33,22 @@ const float SpringForce::DEFAULT_MAX_SPRING_LENGTH = 200;
 const int SpringForce::SPRING_COEFF = 0;
 const int SpringForce::SPRING_LENGTH = 1;
 
-std::string DragForce::pnames[1] = { "DragCoefficient" };
+const std::string DragForce::pnames[1] = { "DragCoefficient" };
 const float DragForce::DEFAULT_DRAG_COEFF = 0.01f;
 const float DragForce::DEFAULT_MIN_DRAG_COEFF = 0.0f;
 const float DragForce::DEFAULT_MAX_DRAG_COEFF = 0.1f;
 const int DragForce::DRAG_COEFF = 0;
 
-std::string WallForce::pnames[1] = { "GravitationalConstant" };
+const std::string WallForce::pnames[1] = { "GravitationalConstant" };
 const float WallForce::DEFAULT_GRAV_CONSTANT = -0.1f;
 const float WallForce::DEFAULT_MIN_GRAV_CONSTANT = -1.0f;
 const float WallForce::DEFAULT_MAX_GRAV_CONSTANT = 1.0f;
 const int WallForce::GRAVITATIONAL_CONST = 0;
+
+const std::string CircularWallForce::pnames[1] = { "GravitationalConstant" };
+const float CircularWallForce::DEFAULT_GRAV_CONSTANT = -0.1f;
+const float CircularWallForce::DEFAULT_MIN_GRAV_CONSTANT = -1.0f;
+const float CircularWallForce::DEFAULT_MAX_GRAV_CONSTANT = 1.0f;
 
 ForceSimulator::ForceSimulator(const std::shared_ptr<Integrator>& integr) :
 		iforces(5), sforces(5), iflen(0), sflen(0), integrator(integr) {
@@ -130,7 +135,7 @@ void ForceSimulator::accumulate() {
 		}
 	}
 }
-void ForceSimulator::runSimulator(uint64_t timestep) {
+void ForceSimulator::runSimulator(float timestep) {
 	accumulate();
 	integrator->integrate(*this, timestep);
 }
@@ -310,6 +315,19 @@ void WallForce::getForce(ForceItem& item) {
 		item.force[1] += ccw * v * dxy.x;
 	if (n[1] >= std::min(p1.y, p2.y) && n[1] <= std::max(p1.y, p2.y))
 		item.force[0] += -1.0f * ccw * v * dxy.y;
+}
+void CircularWallForce::getForce(ForceItem& item) {
+	float2 n = item.location;
+	float2 dxy = p - n;
+	float d = length(dxy);
+	float dr = r - d;
+	float c = (dr > 0) ? -1.0f : 1.0f;
+	float v = c*params[GRAVITATIONAL_CONST] * item.mass / (dr*dr);
+	if (d == 0.0) {
+		dxy = float2(RandomUniform(-0.5f, 0.5f) / 50.0f, RandomUniform(-0.5f, 0.5f) / 50.0f);
+		d = length(dxy);
+	}
+	item.force += v*dxy / d;
 }
 }
 }
