@@ -56,6 +56,21 @@ struct Spring {
 };
 
 typedef std::shared_ptr<Spring> SpringPtr;
+
+
+//TODO: use this to wrap parameters.
+struct ForceParameter {
+	std::string name;
+	float value;
+	float min;
+	float max;
+	ForceParameter(const std::string& name,float value, float min, float max) :name(name),value(value), min(min), max(max) {
+	}
+};
+template<class C, class R> std::basic_ostream<C, R> & operator <<(
+	std::basic_ostream<C, R> & ss, const ForceParameter& param) {
+	return ss << param.name << " : " << param.value << " range: [" << param.min << "," << param.max << "]";
+}
 struct Force {
 	std::vector<float> params;
 	std::vector<float> minValues;
