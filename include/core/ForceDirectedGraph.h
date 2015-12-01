@@ -60,7 +60,9 @@ struct Force {
 	std::vector<float> params;
 	std::vector<float> minValues;
 	std::vector<float> maxValues;
-	virtual void init(const ForceSimulator& fsim)=0;
+	virtual void init(const ForceSimulator& fsim) {
+	}
+	;
 	virtual ~Force() {
 	}
 	;
@@ -76,7 +78,7 @@ struct Force {
 	float getMaxValue(int param) const {
 		return maxValues[param];
 	}
-	std::string getParameterName(size_t i) const {
+	virtual std::string getParameterName(size_t i) const {
 		return std::string();
 	}
 	void setParameter(size_t i, float val) {
@@ -94,14 +96,20 @@ struct Force {
 	virtual bool isItemForce() const {
 		return false;
 	}
-	virtual void getForce(ForceItem& item)=0;
-	virtual void getForce(Spring& spring)=0;
+	virtual void getForce(ForceItem& item) {
+		throw std::runtime_error("Get force item not implemented.");
+	}
+	;
+	virtual void getForce(Spring& spring) {
+		throw std::runtime_error("Get spring not implemented.");
+	}
+	;
 };
 
 typedef std::shared_ptr<Force> ForcePtr;
 
 struct Integrator {
-	virtual void integrate(ForceSimulator& sim, float timestep)=0;
+	virtual void integrate(ForceSimulator& sim, float timestep) const =0;
 	Integrator() {
 	}
 	;
@@ -140,10 +148,84 @@ public:
 };
 
 struct RungeKuttaIntegrator: public Integrator {
-	virtual void integrate(ForceSimulator& sim, float timestep) override;
+	virtual void integrate(ForceSimulator& sim, float timestep) const override;
 };
 struct EulerIntegrator: public Integrator {
-	virtual void integrate(ForceSimulator& sim, float timestep) override;
+	virtual void integrate(ForceSimulator& sim, float timestep) const override;
+};
+
+struct SpringForce: public Force {
+	static std::string pnames[2];
+	static const float DEFAULT_SPRING_COEFF;
+	static const float DEFAULT_MAX_SPRING_COEFF;
+	static const float DEFAULT_MIN_SPRING_COEFF;
+	static const float DEFAULT_SPRING_LENGTH;
+	static const float DEFAULT_MIN_SPRING_LENGTH;
+	static const float DEFAULT_MAX_SPRING_LENGTH;
+	static const int SPRING_COEFF;
+	static const int SPRING_LENGTH;
+	SpringForce(float springCoeff, float defaultLength) {
+		params = std::vector<float> { springCoeff, defaultLength };
+		minValues = std::vector<float> { DEFAULT_MIN_SPRING_COEFF,
+				DEFAULT_MIN_SPRING_LENGTH };
+		maxValues = std::vector<float> { DEFAULT_MAX_SPRING_COEFF,
+				DEFAULT_MAX_SPRING_LENGTH };
+	}
+	SpringForce() {
+		SpringForce(DEFAULT_SPRING_COEFF, DEFAULT_SPRING_LENGTH);
+	}
+	virtual bool isSpringForce() const override {
+		return true;
+	}
+
+	virtual std::string getParameterName(size_t i) const override {
+		return pnames[i];
+	}
+	virtual void getForce(Spring& s) override;
+};
+struct DragForce: public Force {
+	static std::string pnames[1];
+	static const float DEFAULT_DRAG_COEFF;
+	static const float DEFAULT_MIN_DRAG_COEFF;
+	static const float DEFAULT_MAX_DRAG_COEFF;
+	static const int DRAG_COEFF;
+	DragForce(float dragCoeff) {
+		params = std::vector<float> { dragCoeff };
+		minValues = std::vector<float> { DEFAULT_MIN_DRAG_COEFF };
+		maxValues = std::vector<float> { DEFAULT_MAX_DRAG_COEFF };
+	}
+	DragForce() :
+			DragForce(DEFAULT_DRAG_COEFF) {
+	}
+	bool isItemForce() const {
+		return true;
+	}
+	virtual std::string getParameterName(size_t i) const {
+		return pnames[i];
+	}
+	virtual void getForce(ForceItem& item) override {
+		item.force -= params[DRAG_COEFF] * item.velocity;
+	}
+};
+struct WallForce: public Force {
+	static std::string pnames[1];
+	static const float DEFAULT_GRAV_CONSTANT;
+	static const float DEFAULT_MIN_GRAV_CONSTANT;
+	static const float DEFAULT_MAX_GRAV_CONSTANT;
+	static const int GRAVITATIONAL_CONST;
+	float2 p1, p2, dxy;
+	WallForce(float gravConst, float2 p1, float2 p2);
+	WallForce(float2 p1, float2 p2) :
+			WallForce(DEFAULT_GRAV_CONSTANT, p1, p2) {
+	}
+	bool isItemForce() const {
+		return true;
+	}
+	virtual std::string getParameterName(size_t i) const {
+		return pnames[i];
+	}
+
+	virtual void getForce(ForceItem& item) override;
 };
 }
 }

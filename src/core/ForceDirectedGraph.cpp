@@ -22,6 +22,29 @@
 #include "ForceDirectedGraph.h"
 namespace aly {
 namespace dataflow {
+std::string SpringForce::pnames[2] = { "SpringCoefficient",
+		"DefaultSpringLength" };
+const float SpringForce::DEFAULT_SPRING_COEFF = 1E-4f;
+const float SpringForce::DEFAULT_MAX_SPRING_COEFF = 1E-3f;
+const float SpringForce::DEFAULT_MIN_SPRING_COEFF = 1E-5f;
+const float SpringForce::DEFAULT_SPRING_LENGTH = 50;
+const float SpringForce::DEFAULT_MIN_SPRING_LENGTH = 0;
+const float SpringForce::DEFAULT_MAX_SPRING_LENGTH = 200;
+const int SpringForce::SPRING_COEFF = 0;
+const int SpringForce::SPRING_LENGTH = 1;
+
+std::string DragForce::pnames[1] = { "DragCoefficient" };
+const float DragForce::DEFAULT_DRAG_COEFF = 0.01f;
+const float DragForce::DEFAULT_MIN_DRAG_COEFF = 0.0f;
+const float DragForce::DEFAULT_MAX_DRAG_COEFF = 0.1f;
+const int DragForce::DRAG_COEFF = 0;
+
+std::string WallForce::pnames[1] = { "GravitationalConstant" };
+const float WallForce::DEFAULT_GRAV_CONSTANT = -0.1f;
+const float WallForce::DEFAULT_MIN_GRAV_CONSTANT = -1.0f;
+const float WallForce::DEFAULT_MAX_GRAV_CONSTANT = 1.0f;
+const int WallForce::GRAVITATIONAL_CONST = 0;
+
 ForceSimulator::ForceSimulator(const std::shared_ptr<Integrator>& integr) :
 		iforces(5), sforces(5), iflen(0), sflen(0), integrator(integr) {
 }
@@ -111,7 +134,7 @@ void ForceSimulator::runSimulator(uint64_t timestep) {
 	accumulate();
 	integrator->integrate(*this, timestep);
 }
-void EulerIntegrator::integrate(ForceSimulator& sim, float timestep) {
+void EulerIntegrator::integrate(ForceSimulator& sim, float timestep) const {
 	float speedLimit = sim.getSpeedLimit();
 	float coeff, len;
 	for (ForceItemPtr item : sim.getItems()) {
@@ -125,7 +148,8 @@ void EulerIntegrator::integrate(ForceSimulator& sim, float timestep) {
 		}
 	}
 }
-void RungeKuttaIntegrator::integrate(ForceSimulator& sim, float timestep) {
+void RungeKuttaIntegrator::integrate(ForceSimulator& sim,
+		float timestep) const {
 	float speedLimit = sim.getSpeedLimit();
 	float coeff;
 	float len;
@@ -195,6 +219,50 @@ void RungeKuttaIntegrator::integrate(ForceSimulator& sim, float timestep) {
 		}
 		item->velocity += vel;
 	}
+}
+void SpringForce::getForce(Spring& s) {
+	ForceItemPtr item1 = s.item1;
+	ForceItemPtr item2 = s.item2;
+	float length = (s.length < 0 ? params[SPRING_LENGTH] : s.length);
+	float2 p1 = item1->location;
+	float2 p2 = item2->location;
+	float2 dxy = p2 - p1;
+	float r = aly::length(dxy);
+	if (r == 0.0) {
+		dxy = float2(RandomUniform(-0.5f, 0.5f) / 50.0f,
+				RandomUniform(-0.5f, 0.5f) / 50.0f);
+		r = aly::length(dxy);
+	}
+	float d = r - length;
+	float coeff = (s.coeff < 0 ? params[SPRING_COEFF] : s.coeff) * d / r;
+	item1->force += coeff * dxy;
+	item2->force -= coeff * dxy;
+}
+WallForce::WallForce(float gravConst, float2 p1, float2 p2) :
+		p1(p1), p2(p2) {
+	params = std::vector<float> { gravConst };
+	minValues = std::vector<float> { DEFAULT_MIN_GRAV_CONSTANT };
+	maxValues = std::vector<float> { DEFAULT_MAX_GRAV_CONSTANT };
+	dxy = p2 - p1;
+	float r = length(dxy);
+	if (dxy.x != 0.0)
+		dxy.x /= r;
+	if (dxy.y != 0.0)
+		dxy.y /= r;
+}
+void WallForce::getForce(ForceItem& item) {
+	float2 n = item.location;
+	/*
+	 int ccw = Line2D.relativeCCW(x1, y1, x2, y2, n[0], n[1]);
+	 float r = (float) Line2D.ptSegDist(x1, y1, x2, y2, n[0], n[1]);
+	 if (r == 0.0)
+	 r = (float) Math.random() / 100.0f;
+	 float v = params[GRAVITATIONAL_CONST] * item.mass / (r * r * r);
+	 if (n[0] >= Math.min(x1, x2) && n[0] <= Math.max(x1, x2))
+	 item.force[1] += ccw * v * dx;
+	 if (n[1] >= Math.min(y1, y2) && n[1] <= Math.max(y1, y2))
+	 item.force[0] += -1 * ccw * v * dy;
+	 */
 }
 }
 }
