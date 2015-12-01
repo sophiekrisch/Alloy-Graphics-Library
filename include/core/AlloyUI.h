@@ -485,6 +485,12 @@ public:
 			override;
 	virtual inline ~TextField() {
 	}
+	void setShowDefaultLabel(bool show) {
+		showDefaultLabel = show;
+	}
+	void setLabel(const std::string& l) {
+		label = l;
+	}
 	TextField(
 			const std::string& name = MakeString() << "t" << std::setw(8)
 					<< std::setfill('0') << (REGION_COUNTER++));
@@ -532,6 +538,12 @@ public:
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
 			override;
 	virtual inline ~NumberField() {
+	}
+	void setShowDefaultLabel(bool show) {
+		showDefaultLabel = show;
+	}
+	void setLabel(const std::string& l) {
+		label = l;
 	}
 	NumberField(const std::string& name, const NumberType& numberType);
 	NumberField(const std::string& name, const AUnit2D& position,
