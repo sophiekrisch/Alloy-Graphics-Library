@@ -250,19 +250,66 @@ WallForce::WallForce(float gravConst, float2 p1, float2 p2) :
 	if (dxy.y != 0.0)
 		dxy.y /= r;
 }
+int relativeCCW(float x1, float y1, float x2, float y2, float px, float py) {
+	x2 -= x1;
+	y2 -= y1;
+	px -= x1;
+	py -= y1;
+	float ccw = px * y2 - py * x2;
+	if (ccw == 0.0f) {
+		ccw = px * x2 + py * y2;
+		if (ccw > 0.0f) {
+			px -= x2;
+			py -= y2;
+			ccw = px * x2 + py * y2;
+			if (ccw < 0.0f) {
+				ccw = 0.0f;
+			}
+		}
+	}
+	return (ccw < 0.0f) ? -1 : ((ccw > 0.0f) ? 1 : 0);
+}
+float ptSegDistSq(float x1, float y1, float x2, float y2, float px, float py) {
+	x2 -= x1;
+	y2 -= y1;
+	px -= x1;
+	py -= y1;
+	float dotprod = px * x2 + py * y2;
+	float projlenSq;
+	if (dotprod <= 0.0f) {
+
+		projlenSq = 0.0f;
+	} else {
+
+		px = x2 - px;
+		py = y2 - py;
+		dotprod = px * x2 + py * y2;
+		if (dotprod <= 0.0f) {
+
+			projlenSq = 0.0f;
+		} else {
+
+			projlenSq = dotprod * dotprod / (x2 * x2 + y2 * y2);
+		}
+	}
+	float lenSq = px * px + py * py - projlenSq;
+	if (lenSq < 0) {
+		lenSq = 0;
+	}
+	return lenSq;
+}
 void WallForce::getForce(ForceItem& item) {
 	float2 n = item.location;
-	/*
-	 int ccw = Line2D.relativeCCW(x1, y1, x2, y2, n[0], n[1]);
-	 float r = (float) Line2D.ptSegDist(x1, y1, x2, y2, n[0], n[1]);
-	 if (r == 0.0)
-	 r = (float) Math.random() / 100.0f;
-	 float v = params[GRAVITATIONAL_CONST] * item.mass / (r * r * r);
-	 if (n[0] >= Math.min(x1, x2) && n[0] <= Math.max(x1, x2))
-	 item.force[1] += ccw * v * dx;
-	 if (n[1] >= Math.min(y1, y2) && n[1] <= Math.max(y1, y2))
-	 item.force[0] += -1 * ccw * v * dy;
-	 */
+	int ccw = relativeCCW(p1.x, p1.y, p2.x, p2.y, n[0], n[1]);
+	float r = (float) std::sqrt(
+			ptSegDistSq(p1.x, p1.y, p2.x, p2.y, n[0], n[1]));
+	if (r == 0.0)
+		r = (float) RandomUniform(0.0f, 0.01f);
+	float v = params[GRAVITATIONAL_CONST] * item.mass / (r * r * r);
+	if (n[0] >= std::min(p1.x, p2.x) && n[0] <= std::max(p1.x, p2.x))
+		item.force[1] += ccw * v * dxy.x;
+	if (n[1] >= std::min(p1.y, p2.y) && n[1] <= std::max(p1.y, p2.y))
+		item.force[0] += -1.0f * ccw * v * dxy.y;
 }
 }
 }
