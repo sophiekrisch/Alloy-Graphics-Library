@@ -60,7 +60,7 @@ public:
 	void resize(size_t rows, size_t cols){
 	    this->rows=rows;
 	    this->cols=cols;
-	    storage.resize(rows,cols);
+	    storage.resize(rows);
 	}
 	void set(size_t i, size_t j, const vec<T, C>& value)
 	{
