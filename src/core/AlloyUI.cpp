@@ -912,17 +912,17 @@ bool BorderComposite::onEventHandler(AlloyContext* context,
 						if (bounds.contains(e.cursor)) {
 							if (e.cursor.x
 									>= bounds.position.x + bounds.dimensions.x
-											- cellPadding.x) {
+											- cellPadding.x&&eastRegion.get()!=nullptr) {
 								winPos = WindowPosition::Right;
 							} else if (e.cursor.x
-									<= bounds.position.x + cellPadding.x) {
+									<= bounds.position.x + cellPadding.x&&westRegion.get() != nullptr) {
 								winPos = WindowPosition::Left;
 							} else if (e.cursor.y
 									>= bounds.position.y + bounds.dimensions.y
-											- cellPadding.y) {
+											- cellPadding.y&&southRegion.get() != nullptr) {
 								winPos = WindowPosition::Bottom;
 							} else if (e.cursor.y
-									<= bounds.position.y + cellPadding.y) {
+									<= bounds.position.y + cellPadding.y&&northRegion.get() != nullptr) {
 								winPos = WindowPosition::Top;
 							}
 						}
