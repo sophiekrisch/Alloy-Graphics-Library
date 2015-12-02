@@ -57,19 +57,20 @@ struct Spring {
 
 typedef std::shared_ptr<Spring> SpringPtr;
 
-
 //TODO: use this to wrap parameters.
 struct ForceParameter {
 	std::string name;
 	float value;
 	float min;
 	float max;
-	ForceParameter(const std::string& name,float value, float min, float max) :name(name),value(value), min(min), max(max) {
+	ForceParameter(const std::string& name, float value, float min, float max) :
+			name(name), value(value), min(min), max(max) {
 	}
 };
 template<class C, class R> std::basic_ostream<C, R> & operator <<(
-	std::basic_ostream<C, R> & ss, const ForceParameter& param) {
-	return ss << param.name << " : " << param.value << " range: [" << param.min << "," << param.max << "]";
+		std::basic_ostream<C, R> & ss, const ForceParameter& param) {
+	return ss << param.name << " : " << param.value << " range: [" << param.min
+			<< "," << param.max << "]";
 }
 struct Force {
 	std::vector<float> params;
@@ -245,18 +246,19 @@ struct WallForce: public Force {
 struct CircularWallForce: public Force {
 	static const std::string pnames[1];
 	static const float DEFAULT_GRAV_CONSTANT;
-	static const float DEFAULT_MIN_GRAV_CONSTANT ;
-	static const float DEFAULT_MAX_GRAV_CONSTANT ;
+	static const float DEFAULT_MIN_GRAV_CONSTANT;
+	static const float DEFAULT_MAX_GRAV_CONSTANT;
 	static const int GRAVITATIONAL_CONST = 0;
 	float2 p;
 	float r;
-	CircularWallForce(float gravConst,float2 p, float r):p(p),r(r)
-	{
-		params = std::vector<float>{ gravConst };
-		minValues = std::vector<float>{ DEFAULT_MIN_GRAV_CONSTANT };
-		maxValues = std::vector<float>{ DEFAULT_MAX_GRAV_CONSTANT };
+	CircularWallForce(float gravConst, float2 p, float r) :
+			p(p), r(r) {
+		params = std::vector<float> { gravConst };
+		minValues = std::vector<float> { DEFAULT_MIN_GRAV_CONSTANT };
+		maxValues = std::vector<float> { DEFAULT_MAX_GRAV_CONSTANT };
 	}
-	CircularWallForce(float2 p, float r):CircularWallForce(DEFAULT_GRAV_CONSTANT,p,r) {
+	CircularWallForce(float2 p, float r) :
+			CircularWallForce(DEFAULT_GRAV_CONSTANT, p, r) {
 	}
 	virtual bool isItemForce() const override {
 		return true;
@@ -266,46 +268,259 @@ struct CircularWallForce: public Force {
 	}
 	virtual void getForce(ForceItem& item) override;
 };
-/*
-struct class GravitationalForce extends AbstractForce {
-	private static final String[] pnames
-		= { "GravitationalConstant", "Direction" };
 
-	public static final int GRAVITATIONAL_CONST = 0;
-	public static final int DIRECTION = 1;
-
-	public static final float DEFAULT_FORCE_CONSTANT = 1E-4f;
-	public static final float DEFAULT_MIN_FORCE_CONSTANT = 1E-5f;
-	public static final float DEFAULT_MAX_FORCE_CONSTANT = 1E-3f;
-
-	public static final float DEFAULT_DIRECTION = (float)-Math.PI / 2;
-	public static final float DEFAULT_MIN_DIRECTION = (float)-Math.PI;
-	public static final float DEFAULT_MAX_DIRECTION = (float)Math.PI;
-	public GravitationalForce(float forceConstant, float direction) {
-		params = new float[] { forceConstant, direction };
-		minValues = new float[]
-		{ DEFAULT_MIN_FORCE_CONSTANT, DEFAULT_MIN_DIRECTION };
-		maxValues = new float[]
-		{ DEFAULT_MAX_FORCE_CONSTANT, DEFAULT_MAX_DIRECTION };
+struct GravitationalForce: public Force {
+	static const std::string pnames[2];
+	static const int GRAVITATIONAL_CONST = 0;
+	static const int DIRECTION = 1;
+	static const float DEFAULT_FORCE_CONSTANT;
+	static const float DEFAULT_MIN_FORCE_CONSTANT;
+	static const float DEFAULT_MAX_FORCE_CONSTANT;
+	static const float DEFAULT_DIRECTION;
+	static const float DEFAULT_MIN_DIRECTION;
+	static const float DEFAULT_MAX_DIRECTION;
+	GravitationalForce(float forceConstant, float direction) {
+		params = std::vector<float> { forceConstant, direction };
+		minValues = std::vector<float> { DEFAULT_MIN_FORCE_CONSTANT,
+				DEFAULT_MIN_DIRECTION };
+		maxValues = std::vector<float> { DEFAULT_MAX_FORCE_CONSTANT,
+				DEFAULT_MAX_DIRECTION };
 	}
-	public GravitationalForce() {
-		this(DEFAULT_FORCE_CONSTANT, DEFAULT_DIRECTION);
+	GravitationalForce() :
+			GravitationalForce(DEFAULT_FORCE_CONSTANT, DEFAULT_DIRECTION) {
 	}
-	public boolean isItemForce() {
+	virtual bool isItemForce() const override {
 		return true;
 	}
-	protected String[] getParameterNames() {
-		return pnames;
+	virtual std::string getParameterName(size_t i) const override {
+		return pnames[i];
 	}
-	public void getForce(ForceItem item) {
-		float theta = params[DIRECTION];
-		float coeff = params[GRAVITATIONAL_CONST] * item.mass;
+	virtual void getForce(ForceItem& item) override;
+};
 
-		item.force[0] += Math.cos(theta)*coeff;
-		item.force[1] += Math.sin(theta)*coeff;
+struct QuadTreeNode {
+	float mass;
+	float2 com;
+	bool hasChildren;
+	ForceItemPtr value;
+	std::array<std::shared_ptr<QuadTreeNode>, 4> children;
+	QuadTreeNode(float mass = 0.0f, float2 com = float2(0.0f)) :
+			mass(mass), com(com), hasChildren(false) {
 	}
-}*/
+};
+typedef std::shared_ptr<QuadTreeNode> QuadTreeNodePtr;
+/*
+ struct NBodyForce: public Force {
+ static const std::string pnames[3];
+ static const float DEFAULT_GRAV_CONSTANT;
+ static const float DEFAULT_MIN_GRAV_CONSTANT;
+ static const float DEFAULT_MAX_GRAV_CONSTANT;
+ static const float DEFAULT_DISTANCE;
+ static const float DEFAULT_MIN_DISTANCE;
+ static const float DEFAULT_MAX_DISTANCE;
+ static const float DEFAULT_THETA;
+ static const float DEFAULT_MIN_THETA;
+ static const float DEFAULT_MAX_THETA;
+ static const int GRAVITATIONAL_CONST = 0;
+ static const int MIN_DISTANCE = 1;
+ static const int BARNES_HUT_THETA = 2;
+ QuadTreeNodePtr root;
+ //private float xMin, xMax, yMin, yMax;
+ box2f bounds;
+ //private QuadTreeNodeFactory factory = new QuadTreeNodeFactory();private QuadTreeNode root;
+ //private Random rand = new Random(12345678L); // deterministic randomness
 
+ NBodyForce(float gravConstant, float minDistance, float theta) {
+ params = {gravConstant, minDistance, theta};
+ minValues = {DEFAULT_MIN_GRAV_CONSTANT,
+ DEFAULT_MIN_DISTANCE, DEFAULT_MIN_THETA};
+ maxValues = {DEFAULT_MAX_GRAV_CONSTANT,
+ DEFAULT_MAX_DISTANCE, DEFAULT_MAX_THETA};
+ //root = factory.getQuadTreeNode();
+ }
+ NBodyForce():NBodyForce(DEFAULT_GRAV_CONSTANT, DEFAULT_DISTANCE, DEFAULT_THETA) {
+ }
+ virtual bool isItemForce() const override {
+ return true;
+ }
+ virtual std::string getParameterName(size_t i) const override {
+ return pnames[i];
+ }
+ void setBounds(const box2f& b) {
+ bounds=b;
+ }
+ void clear() {
+ root=QuadTreeNodePtr(new QuadTreeNode());
+ }
+ void insert(const ForceItemPtr& p, QuadTreeNode& n,
+ float x1, float y1, float x2, float y2)
+ {
+ // try to insert particle p at node n in the quadtree
+ // by construction, each leaf will contain either 1 or 0 particles
+ if ( n.hasChildren ) {
+ // n contains more than 1 particle
+ insertHelper(p,n,x1,y1,x2,y2);
+ } else if ( n.value != null ) {
+ // n contains 1 particle
+ if ( isSameLocation(n.value, p) ) {
+ insertHelper(p,n,x1,y1,x2,y2);
+ } else {
+ ForceItem v = n.value; n.value = null;
+ insertHelper(v,n,x1,y1,x2,y2);
+ insertHelper(p,n,x1,y1,x2,y2);
+ }
+ } else {
+ // n is empty, so is a leaf
+ n.value = p;
+ }
+ }
+ virtual void init(ForceSimulator& fsim) override {
+ clear(); // clear internal state
+ // compute and squarify bounds of quadtree
+ float x1 = Float.MAX_VALUE, y1 = Float.MAX_VALUE;
+ float x2 = Float.MIN_VALUE, y2 = Float.MIN_VALUE;
+ Iterator itemIter = fsim.getItems();
+ while ( itemIter.hasNext() ) {
+ ForceItem item = (ForceItem)itemIter.next();
+ float x = item.location[0];
+ float y = item.location[1];
+ if ( x < x1 ) x1 = x;
+ if ( y < y1 ) y1 = y;
+ if ( x > x2 ) x2 = x;
+ if ( y > y2 ) y2 = y;
+ }
+ float dx = x2-x1, dy = y2-y1;
+ if ( dx > dy ) {y2 = y1 + dx;} else {x2 = x1 + dy;}
+ setBounds(x1,y1,x2,y2);
+
+ // insert items into quadtree
+ itemIter = fsim.getItems();
+ while ( itemIter.hasNext() ) {
+ ForceItem item = (ForceItem)itemIter.next();
+ insert(item);
+ }
+
+ // calculate magnitudes and centers of mass
+ calcMass(root);
+ }
+
+ virtual void insert(ForceItemPtr item) override {
+ // insert item into the quadtrees
+ try {
+ insert(item, root, xMin, yMin, xMax, yMax);
+ } catch ( StackOverflowError e ) {
+ // TODO: safe to remove?
+ e.printStackTrace();
+ }
+ }
+
+ private static boolean isSameLocation(ForceItem f1, ForceItem f2) {
+ float dx = Math.abs(f1.location[0]-f2.location[0]);
+ float dy = Math.abs(f1.location[1]-f2.location[1]);
+ return ( dx < 0.01 && dy < 0.01 );
+ }
+
+ private void insertHelper(ForceItem p, QuadTreeNode n,
+ float x1, float y1, float x2, float y2)
+ {
+ float x = p.location[0], y = p.location[1];
+ float splitx = (x1+x2)/2;
+ float splity = (y1+y2)/2;
+ int i = (x>=splitx ? 1 : 0) + (y>=splity ? 2 : 0);
+ // create new child node, if necessary
+ if ( n.children[i] == null ) {
+ n.children[i] = factory.getQuadTreeNode();
+ n.hasChildren = true;
+ }
+ // update bounds
+ if ( i==1 || i==3 ) x1 = splitx; else x2 = splitx;
+ if ( i > 1 ) y1 = splity; else y2 = splity;
+ // recurse
+ insert(p,n.children[i],x1,y1,x2,y2);
+ }
+
+ private void calcMass(QuadTreeNode n) {
+ float xcom = 0, ycom = 0;
+ n.mass = 0;
+ if ( n.hasChildren ) {
+ for ( int i=0; i < n.children.length; i++ ) {
+ if ( n.children[i] != null ) {
+ calcMass(n.children[i]);
+ n.mass += n.children[i].mass;
+ xcom += n.children[i].mass * n.children[i].com[0];
+ ycom += n.children[i].mass * n.children[i].com[1];
+ }
+ }
+ }
+ if ( n.value != null ) {
+ n.mass += n.value.mass;
+ xcom += n.value.mass * n.value.location[0];
+ ycom += n.value.mass * n.value.location[1];
+ }
+ n.com[0] = xcom / n.mass;
+ n.com[1] = ycom / n.mass;
+ }
+
+ public void getForce(ForceItem item) {
+ try {
+ forceHelper(item,root,xMin,yMin,xMax,yMax);
+ } catch ( StackOverflowError e ) {
+ // TODO: safe to remove?
+ e.printStackTrace();
+ }
+ }
+
+ private void forceHelper(ForceItem item, QuadTreeNode n,
+ float x1, float y1, float x2, float y2)
+ {
+ float dx = n.com[0] - item.location[0];
+ float dy = n.com[1] - item.location[1];
+ float r = (float)Math.sqrt(dx*dx+dy*dy);
+ boolean same = false;
+ if ( r == 0.0f ) {
+ // if items are in the exact same place, add some noise
+ dx = (rand.nextFloat()-0.5f) / 50.0f;
+ dy = (rand.nextFloat()-0.5f) / 50.0f;
+ r = (float)Math.sqrt(dx*dx+dy*dy);
+ same = true;
+ }
+ boolean minDist = params[MIN_DISTANCE]>0f && r>params[MIN_DISTANCE];
+
+ // the Barnes-Hut approximation criteria is if the ratio of the
+ // size of the quadtree box to the distance between the point and
+ // the box's center of mass is beneath some threshold theta.
+ if ( (!n.hasChildren && n.value != item) ||
+ (!same && (x2-x1)/r < params[BARNES_HUT_THETA]) )
+ {
+ if ( minDist ) return;
+ // either only 1 particle or we meet criteria
+ // for Barnes-Hut approximation, so calc force
+ float v = params[GRAVITATIONAL_CONST]*item.mass*n.mass
+ / (r*r*r);
+ item.force[0] += v*dx;
+ item.force[1] += v*dy;
+ } else if ( n.hasChildren ) {
+ // recurse for more accurate calculation
+ float splitx = (x1+x2)/2;
+ float splity = (y1+y2)/2;
+ for ( int i=0; i<n.children.length; i++ ) {
+ if ( n.children[i] != null ) {
+ forceHelper(item, n.children[i],
+ (i==1||i==3?splitx:x1), (i>1?splity:y1),
+ (i==1||i==3?x2:splitx), (i>1?y2:splity));
+ }
+ }
+ if ( minDist ) return;
+ if ( n.value != null && n.value != item ) {
+ float v = params[GRAVITATIONAL_CONST]*item.mass*n.value.mass
+ / (r*r*r);
+ item.force[0] += v*dx;
+ item.force[1] += v*dy;
+ }
+ }
+ }
+ };
+ */
 }
 }
 #endif /* INCLUDE_CORE_FORCEDIRECTEDGRAPH_H_ */

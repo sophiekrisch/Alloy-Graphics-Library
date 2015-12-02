@@ -50,6 +50,27 @@ const float CircularWallForce::DEFAULT_GRAV_CONSTANT = -0.1f;
 const float CircularWallForce::DEFAULT_MIN_GRAV_CONSTANT = -1.0f;
 const float CircularWallForce::DEFAULT_MAX_GRAV_CONSTANT = 1.0f;
 
+const std::string GravitationalForce::pnames[2] = { "GravitationalConstant",
+		"Direction" };
+const float GravitationalForce::DEFAULT_FORCE_CONSTANT = 1E-4f;
+const float GravitationalForce::DEFAULT_MIN_FORCE_CONSTANT = 1E-5f;
+const float GravitationalForce::DEFAULT_MAX_FORCE_CONSTANT = 1E-3f;
+const float GravitationalForce::DEFAULT_DIRECTION = (float) -M_PI / 2;
+const float GravitationalForce::DEFAULT_MIN_DIRECTION = (float) -M_PI;
+const float GravitationalForce::DEFAULT_MAX_DIRECTION = (float) M_PI;
+
+const std::string pnames[3] = { "GravitationalConstant", "Distance",
+		"BarnesHutTheta" };
+const float DEFAULT_GRAV_CONSTANT = -1.0f;
+const float DEFAULT_MIN_GRAV_CONSTANT = -10.0f;
+const float DEFAULT_MAX_GRAV_CONSTANT = 10.0f;
+const float DEFAULT_DISTANCE = -1.0f;
+const float DEFAULT_MIN_DISTANCE = -1.0f;
+const float DEFAULT_MAX_DISTANCE = 500.0f;
+const float DEFAULT_THETA = 0.9f;
+const float DEFAULT_MIN_THETA = 0.0f;
+const float DEFAULT_MAX_THETA = 1.0f;
+
 ForceSimulator::ForceSimulator(const std::shared_ptr<Integrator>& integr) :
 		iforces(5), sforces(5), iflen(0), sflen(0), integrator(integr) {
 }
@@ -306,8 +327,7 @@ float ptSegDistSq(float x1, float y1, float x2, float y2, float px, float py) {
 void WallForce::getForce(ForceItem& item) {
 	float2 n = item.location;
 	int ccw = relativeCCW(p1.x, p1.y, p2.x, p2.y, n.x, n.y);
-	float r = (float) std::sqrt(
-			ptSegDistSq(p1.x, p1.y, p2.x, p2.y, n.x, n.y));
+	float r = (float) std::sqrt(ptSegDistSq(p1.x, p1.y, p2.x, p2.y, n.x, n.y));
 	if (r == 0.0)
 		r = (float) RandomUniform(0.0f, 0.01f);
 	float v = params[GRAVITATIONAL_CONST] * item.mass / (r * r * r);
@@ -322,12 +342,20 @@ void CircularWallForce::getForce(ForceItem& item) {
 	float d = length(dxy);
 	float dr = r - d;
 	float c = (dr > 0) ? -1.0f : 1.0f;
-	float v = c*params[GRAVITATIONAL_CONST] * item.mass / (dr*dr);
+	float v = c * params[GRAVITATIONAL_CONST] * item.mass / (dr * dr);
 	if (d == 0.0) {
-		dxy = float2(RandomUniform(-0.5f, 0.5f) / 50.0f, RandomUniform(-0.5f, 0.5f) / 50.0f);
+		dxy = float2(RandomUniform(-0.5f, 0.5f) / 50.0f,
+				RandomUniform(-0.5f, 0.5f) / 50.0f);
 		d = length(dxy);
 	}
-	item.force += v*dxy / d;
+	item.force += v * dxy / d;
+}
+void GravitationalForce::getForce(ForceItem& item) {
+	float theta = params[DIRECTION];
+	float coeff = params[GRAVITATIONAL_CONST] * item.mass;
+
+	item.force[0] += std::cos(theta) * coeff;
+	item.force[1] += std::sin(theta) * coeff;
 }
 }
 }
