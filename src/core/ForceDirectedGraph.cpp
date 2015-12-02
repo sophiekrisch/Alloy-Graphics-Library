@@ -55,9 +55,9 @@ const std::string GravitationalForce::pnames[2] = { "GravitationalConstant",
 const float GravitationalForce::DEFAULT_FORCE_CONSTANT = 1E-4f;
 const float GravitationalForce::DEFAULT_MIN_FORCE_CONSTANT = 1E-5f;
 const float GravitationalForce::DEFAULT_MAX_FORCE_CONSTANT = 1E-3f;
-const float GravitationalForce::DEFAULT_DIRECTION = (float) -M_PI / 2;
-const float GravitationalForce::DEFAULT_MIN_DIRECTION = (float) -M_PI;
-const float GravitationalForce::DEFAULT_MAX_DIRECTION = (float) M_PI;
+const float GravitationalForce::DEFAULT_DIRECTION = (float) -ALY_PI / 2.0f;
+const float GravitationalForce::DEFAULT_MIN_DIRECTION = (float) -ALY_PI;
+const float GravitationalForce::DEFAULT_MAX_DIRECTION = (float)ALY_PI;
 
 const std::string pnames[3] = { "GravitationalConstant", "Distance",
 		"BarnesHutTheta" };
