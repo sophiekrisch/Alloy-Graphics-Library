@@ -617,7 +617,7 @@ public:
 			const AUnit2D& dims);
 	void setValue(const std::string& file);
 	std::string getValue() {
-		return fileDialog->getValue();
+		return fileLocation->getValue();
 	}
 	void openFileDialog(AlloyContext* context,
 			const std::string& workingDirectory = GetCurrentWorkingDirectory());
