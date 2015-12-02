@@ -2374,7 +2374,7 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	upDirButton = std::shared_ptr<IconButton>(
 			new IconButton(0xf062, CoordPerPX(1.0, 0.0, -40, 7),
 					CoordPX(30, 30)));
-	upDirButton->foregroundColor = MakeColor(
+	cButton->foregroundColor = MakeColor(
 			AlloyApplicationContext()->theme.LIGHT_TEXT);
 	upDirButton->borderColor = MakeColor(COLOR_NONE);
 	upDirButton->backgroundColor = MakeColor(
@@ -2383,7 +2383,12 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 			AlloyApplicationContext()->theme.DARK_TEXT);
 	upDirButton->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& event) {
-				this->setValue(GetParentDirectory(RemoveTrailingSlash(this->getValue())));
+	                        std::string file=RemoveTrailingSlash(this->getValue());
+	                        if(IsFile(file)){
+	                            this->setValue(GetParentDirectory(RemoveTrailingSlash(GetParentDirectory(file))));
+	                        } else {
+                                    this->setValue(GetParentDirectory(file));
+	                        });
 				return true;
 			};
 	cancelButton = std::shared_ptr<IconButton>(
