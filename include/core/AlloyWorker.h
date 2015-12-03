@@ -25,7 +25,7 @@
 #include <functional>
 #include <chrono>
 namespace aly {
-class Worker {
+class WorkerTask {
 protected:
 	std::thread workerThread;
 	const std::function<void()> executionTask;
@@ -49,13 +49,13 @@ public:
 		return complete;
 	}
 
-	Worker(const std::function<void()>& func);
-	Worker(const std::function<void()>& func, const std::function<void()>& end);
+	WorkerTask(const std::function<void()>& func);
+	WorkerTask(const std::function<void()>& func, const std::function<void()>& end);
 	void execute(bool block=false);
 	void cancel(bool block=true);
-	virtual ~Worker();
+	virtual ~WorkerTask();
 };
-class RecurrentWorker: public Worker {
+class RecurrentWorker: public WorkerTask {
 protected:
 	const std::function<bool(uint64_t iteration)> recurrentTask;
 	long timeout;
@@ -69,7 +69,7 @@ public:
 	RecurrentWorker(const std::function<bool(uint64_t iteration)>& func,
 			const std::function<void()>& end, long milliseconds);
 };
-class Timer: public Worker {
+class Timer: public WorkerTask {
 protected:
 	long timeout;
 	long samplingTime;
@@ -82,6 +82,6 @@ public:
 			const std::function<void()>& failureFunc, long milliseconds,
 			long samplingTime);
 };
-typedef std::shared_ptr<Worker> WorkerTaskPtr;
+typedef std::shared_ptr<WorkerTask> WorkerTaskPtr;
 }
 #endif /* ALLOYWORKER_H_ */

@@ -75,7 +75,7 @@ bool LaplaceFillEx::init(Composite& rootNode) {
 	rootNode.add(tarRegion);
 	rootNode.add(resultRegion);
 	rootNode.add(textLabel);
-	workerTask = WorkerTaskPtr(new Worker([=] {
+	workerTask = WorkerTaskPtr(new WorkerTask([=] {
 		LaplaceFill(mask, tar, 32, 6);
 		ImageRGBA out;
 		ConvertImage(tar,out);

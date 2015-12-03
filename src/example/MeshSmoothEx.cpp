@@ -72,7 +72,7 @@ bool MeshSmoothEx::init(Composite& rootNode) {
 	rootNode.add(renderRegion);
 	rootNode.add(textLabel);
 	rootNode.add(smoothButton);
-	workerTask = WorkerTaskPtr(new Worker([=] {
+	workerTask = WorkerTaskPtr(new WorkerTask([=] {
 		textLabel->setLabel("Smoothing Mesh ...");
 		smoothButton->setVisible(false);
 		smooth();

@@ -45,17 +45,17 @@ namespace aly {
 			}
 		};
 		typedef std::shared_ptr<ForceItem> ForceItemPtr;
-		struct Spring {
+		struct SpringItem {
 			ForceItemPtr item1;
 			ForceItemPtr item2;
 			float coeff;
 			float length;
-			Spring(const ForceItemPtr& fi1, const ForceItemPtr& fi2, float k, float len) :
+			SpringItem(const ForceItemPtr& fi1, const ForceItemPtr& fi2, float k, float len) :
 				item1(fi1), item2(fi2), coeff(k), length(len) {
 			}
 		};
 
-		typedef std::shared_ptr<Spring> SpringPtr;
+		typedef std::shared_ptr<SpringItem> SpringItemPtr;
 
 		//TODO: use this to wrap parameters.
 		struct ForceParameter {
@@ -85,17 +85,20 @@ namespace aly {
 			size_t getParameterCount() const {
 				return params.size();
 			}
-			float getParameter(size_t i) const {
+			float getParameterValue(size_t i) const {
 				return params[i];
 			}
-			float getMinValue(int param) const {
+			float getMinValue(size_t param) const {
 				return minValues[param];
 			}
-			float getMaxValue(int param) const {
+			float getMaxValue(size_t param) const {
 				return maxValues[param];
 			}
 			virtual std::string getParameterName(size_t i) const {
 				return std::string();
+			}
+			ForceParameter getParameter(size_t i) const {
+				return ForceParameter(getParameterName(i), getParameterValue(i), getMinValue(i), getMaxValue(i));
 			}
 			void setParameter(size_t i, float val) {
 				params[i] = val;
@@ -106,18 +109,18 @@ namespace aly {
 			void setMaxValue(size_t i, float val) {
 				maxValues[i] = val;
 			}
-			virtual bool isSpringForce() const {
+			virtual bool isSpringItem() const {
 				return false;
 			}
-			virtual bool isItemForce() const {
+			virtual bool isForceItem() const {
 				return false;
 			}
-			virtual void getForce(ForceItem& item) {
+			virtual void getForce(const ForceItemPtr& item) {
 				throw std::runtime_error("Get force item not implemented.");
 			}
 			;
-			virtual void getForce(Spring& spring) {
-				throw std::runtime_error("Get spring not implemented.");
+			virtual void getForce(const SpringItemPtr& spring) {
+				throw std::runtime_error("Get spring item not implemented.");
 			}
 			;
 		};
@@ -135,7 +138,7 @@ namespace aly {
 		typedef std::shared_ptr<Integrator> IntegratorPtr;
 		class ForceSimulator {
 			std::vector<ForceItemPtr> items;
-			std::vector<SpringPtr> springs;
+			std::vector<SpringItemPtr> springs;
 			std::vector<ForcePtr> iforces;
 			std::vector<ForcePtr> sforces;
 			int iflen, sflen;
@@ -153,12 +156,12 @@ namespace aly {
 			void addItem(const ForceItemPtr& item);
 			bool removeItem(ForceItemPtr item);
 			std::vector<ForceItemPtr>& getItems();
-			std::vector<SpringPtr>& getSprings();
-			SpringPtr addSpring(const ForceItemPtr& item1, const ForceItemPtr& item2,
+			std::vector<SpringItemPtr>& getSprings();
+			SpringItemPtr addSpring(const ForceItemPtr& item1, const ForceItemPtr& item2,
 				float coeff, float length);
-			SpringPtr addSpring(const ForceItemPtr& item1, const ForceItemPtr& item2,
+			SpringItemPtr addSpring(const ForceItemPtr& item1, const ForceItemPtr& item2,
 				float length);
-			SpringPtr addSpring(const ForceItemPtr& item1, const ForceItemPtr& item2);
+			SpringItemPtr addSpring(const ForceItemPtr& item1, const ForceItemPtr& item2);
 			void accumulate();
 			void runSimulator(float timestep);
 		};
@@ -190,14 +193,14 @@ namespace aly {
 			SpringForce() {
 				SpringForce(DEFAULT_SPRING_COEFF, DEFAULT_SPRING_LENGTH);
 			}
-			virtual bool isSpringForce() const override {
+			virtual bool isSpringItem() const override {
 				return true;
 			}
 
 			virtual std::string getParameterName(size_t i) const override {
 				return pnames[i];
 			}
-			virtual void getForce(Spring& s) override;
+			virtual void getForce(const SpringItemPtr& s) override;
 		};
 		struct DragForce : public Force {
 			static const std::string pnames[1];
@@ -213,14 +216,14 @@ namespace aly {
 			DragForce() :
 				DragForce(DEFAULT_DRAG_COEFF) {
 			}
-			virtual bool isItemForce() const override {
+			virtual bool isForceItem() const override {
 				return true;
 			}
 			virtual std::string getParameterName(size_t i) const override {
 				return pnames[i];
 			}
-			virtual void getForce(ForceItem& item) override {
-				item.force -= params[DRAG_COEFF] * item.velocity;
+			virtual void getForce(const ForceItemPtr& item) override {
+				item->force -= params[DRAG_COEFF] * item->velocity;
 			}
 		};
 		struct WallForce : public Force {
@@ -234,14 +237,14 @@ namespace aly {
 			WallForce(float2 p1, float2 p2) :
 				WallForce(DEFAULT_GRAV_CONSTANT, p1, p2) {
 			}
-			virtual bool isItemForce() const override {
+			virtual bool isForceItem() const override {
 				return true;
 			}
 			virtual std::string getParameterName(size_t i) const override {
 				return pnames[i];
 			}
 
-			virtual void getForce(ForceItem& item) override;
+			virtual void getForce(const ForceItemPtr& item) override;
 		};
 		struct CircularWallForce : public Force {
 			static const std::string pnames[1];
@@ -260,13 +263,13 @@ namespace aly {
 			CircularWallForce(float2 p, float r) :
 				CircularWallForce(DEFAULT_GRAV_CONSTANT, p, r) {
 			}
-			virtual bool isItemForce() const override {
+			virtual bool isForceItem() const override {
 				return true;
 			}
 			virtual std::string getParameterName(size_t i) const override {
 				return pnames[i];
 			}
-			virtual void getForce(ForceItem& item) override;
+			virtual void getForce(const ForceItemPtr& item) override;
 		};
 
 		struct GravitationalForce : public Force {
@@ -289,13 +292,13 @@ namespace aly {
 			GravitationalForce() :
 				GravitationalForce(DEFAULT_FORCE_CONSTANT, DEFAULT_DIRECTION) {
 			}
-			virtual bool isItemForce() const override {
+			virtual bool isForceItem() const override {
 				return true;
 			}
 			virtual std::string getParameterName(size_t i) const override {
 				return pnames[i];
 			}
-			virtual void getForce(ForceItem& item) override;
+			virtual void getForce(const ForceItemPtr& item) override;
 		};
 
 		struct QuadTreeNode {
@@ -326,16 +329,18 @@ namespace aly {
 			static const int BARNES_HUT_THETA = 2;
 			QuadTreeNodePtr root;
 			box2f bounds;
+		public:
 			NBodyForce(float gravConstant, float minDistance, float theta) {
 				params = { gravConstant, minDistance, theta };
 				minValues = { DEFAULT_MIN_GRAV_CONSTANT,
 				DEFAULT_MIN_DISTANCE, DEFAULT_MIN_THETA };
 				maxValues = { DEFAULT_MAX_GRAV_CONSTANT,
 				DEFAULT_MAX_DISTANCE, DEFAULT_MAX_THETA };
+				root = QuadTreeNodePtr(new QuadTreeNode());
 			}
 			NBodyForce() :NBodyForce(DEFAULT_GRAV_CONSTANT, DEFAULT_DISTANCE, DEFAULT_THETA) {
 			}
-			virtual bool isItemForce() const override {
+			virtual bool isForceItem() const override {
 				return true;
 			}
 			virtual std::string getParameterName(size_t i) const override {
@@ -347,147 +352,15 @@ namespace aly {
 			void clear() {
 				root = QuadTreeNodePtr(new QuadTreeNode());
 			}
-			void insertHelper(const ForceItemPtr& p, const QuadTreeNodePtr& n, box2f box)
-			{
-				float2 pt = p->location;
-				float2 split = box.center();
-				int i = (pt.x >= split.x ? 1 : 0) + (pt.y >= split.y ? 2 : 0);
-				// create new child node, if necessary
-				if (n->children[i].get() == nullptr) {
-					n->children[i] = QuadTreeNodePtr(new QuadTreeNode());
-					n->hasChildren = true;
-				}
-				// update bounds
-				if (i == 1 || i == 3) box.position.x = split.x; else box.dimensions.x = split.x - box.position.x;
-				if (i > 1) box.position.y = split.y; else box.dimensions.y = split.y - box.position.y;
-				insert(p, n->children[i], box);
-			}
-
-			void insert(const ForceItemPtr& p, QuadTreeNodePtr& n, box2f box) {
-				// try to insert particle p at node n in the quadtree
-				// by construction, each leaf will contain either 1 or 0 particles
-				if (n->hasChildren) {
-					// n contains more than 1 particle
-					insertHelper(p, n, box);
-				}
-				else if (n->value.get() != nullptr) {
-					// n contains 1 particle
-					if (isSameLocation(n->value, p)) {
-						insertHelper(p, n, box);
-					}
-					else {
-						ForceItemPtr v = n->value;
-						n->value.reset();
-						insertHelper(v, n, box);
-						insertHelper(p, n, box);
-					}
-				}
-				else {
-					// n is empty, so is a leaf
-					n->value = p;
-				}
-			}
-			virtual void init(ForceSimulator& fsim) override {
-				clear(); // clear internal state
-				// compute and squarify bounds of quadtree
-				float2 p1(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
-				float2 p2(std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
-				for (ForceItemPtr item : fsim.getItems()) {
-					float2 p = item->location;
-					if (p.x < p1.x) p1.x = p.x;
-					if (p.y < p1.y) p1.y = p.y;
-					if (p.x > p2.x) p2.x = p.x;
-					if (p.y > p2.y) p2.y = p.y;
-				}
-				float2 dxy = p2 - p1;
-				if (dxy.x > dxy.y) {
-					p2.y = p1.y + dxy.x;
-				}
-				else {
-					p2.x = p1.x + dxy.y;
-				}
-				setBounds(box2f(p1, p2 - p1));
-				for (ForceItemPtr item : fsim.getItems()) {
-					insert(item);
-				}
-				// calculate magnitudes and centers of mass
-				calcMass(root);
-			}
-			void insert(ForceItemPtr item) {
-				// insert item into the quadtrees
-				insert(item, root, bounds);
-			}
-
-			bool isSameLocation(const ForceItemPtr& f1, const ForceItemPtr& f2) const {
-				float2 dxy = aly::abs(f1->location - f2->location);
-				return (dxy.x < 0.01 && dxy.y < 0.01);
-			}
-			void calcMass(const QuadTreeNodePtr& n) {
-				float2 com(0.0f);
-				n->mass = 0;
-				if (n->hasChildren) {
-					for (int i = 0; i < n->children.size(); i++) {
-						if (n->children[i].get() != nullptr) {
-							calcMass(n->children[i]);
-							n->mass += n->children[i]->mass;
-							com += n->children[i]->mass * n->children[i]->com;
-						}
-					}
-				}
-				if (n->value.get() != nullptr) {
-					n->mass += n->value->mass;
-					com += n->value->mass * n->value->location;
-				}
-				n->com = com / n->mass;
-			}
-			void forceHelper(const ForceItemPtr& item, const QuadTreeNodePtr& n, const box2f& box)
-			{
-				float2 dxy = n->com - item->location;
-				float r = length(dxy);
-				bool same = false;
-				if (r == 0.0f) {
-					// if items are in the exact same place, add some noise
-					dxy = float2(RandomUniform(-0.5f, 0.5f) / 50.0f, RandomUniform(-0.5f, 0.5f) / 50.0f);
-					r = length(dxy);
-					same = true;
-				}
-				bool minDist = params[MIN_DISTANCE] > 0.0f && r > params[MIN_DISTANCE];
-				// the Barnes-Hut approximation criteria is if the ratio of the
-				// size of the quadtree box to the distance between the point and
-				// the box's center of mass is beneath some threshold theta.
-				if ((!n->hasChildren && n->value.get() != item.get()) ||
-					(!same && box.dimensions.x / r < params[BARNES_HUT_THETA]))
-				{
-					if (minDist) return;
-					// either only 1 particle or we meet criteria
-					// for Barnes-Hut approximation, so calc force
-					float v = params[GRAVITATIONAL_CONST] * item->mass*n->mass
-						/ (r*r*r);
-					item->force += v*dxy;
-				}
-				else if (n->hasChildren) {
-					// recurse for more accurate calculation
-					float2 split = box.center();
-					for (int i = 0; i < n->children.size(); i++) {
-						if (n->children[i].get() != nullptr) {
-							float2 minPt = float2((i == 1 || i == 3 ? split.x : box.position.x), (i>1 ? split.y : box.position.y));
-							float2 maxPt = float2((i == 1 || i == 3 ? box.position.x + box.dimensions.x : split.x), (i>1 ? box.position.y + box.dimensions.y : split.y));
-							forceHelper(item, n->children[i], box2f(minPt, maxPt - minPt));
-						}
-					}
-					if (minDist) return;
-					if (n->value.get() != nullptr && n->value.get() != item.get()) {
-						float v = params[GRAVITATIONAL_CONST] * item->mass*n->value->mass
-							/ (r*r*r);
-						item->force += v*dxy;
-					}
-				}
-			}
-			void getForce(ForceItem& item) {
-				ForceItemPtr f = ForceItemPtr(new ForceItem());
-				forceHelper(f, root, bounds);
-				item = *f;
-			}
+			virtual void init(ForceSimulator& fsim) override;
+			void getForce(const ForceItemPtr& item) override;
+		private:
+			void insertHelper(const ForceItemPtr& p, const QuadTreeNodePtr& n, box2f box);
+			void insert(const ForceItemPtr& p, QuadTreeNodePtr& n, box2f box);
+			void insert(ForceItemPtr item);
+			bool isSameLocation(const ForceItemPtr& f1, const ForceItemPtr& f2) const;
+			void calcMass(const QuadTreeNodePtr& n);
+			void forceHelper(const ForceItemPtr& item, const QuadTreeNodePtr& n, const box2f& box);
 		};
 
 	}

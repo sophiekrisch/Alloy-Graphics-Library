@@ -22,16 +22,16 @@
 #include "AlloyMath.h"
 #include "AlloyWorker.h"
 namespace aly {
-Worker::Worker(const std::function<void()>& func) :
+WorkerTask::WorkerTask(const std::function<void()>& func) :
 		executionTask(func), endTask() {
 
 }
-Worker::Worker(const std::function<void()>& func,
+WorkerTask::WorkerTask(const std::function<void()>& func,
 		const std::function<void()>& end) :
 		executionTask(func), endTask(end) {
 
 }
-void Worker::task() {
+void WorkerTask::task() {
 	running = true;
 	requestCancel = false;
 	if (executionTask) {
@@ -44,21 +44,21 @@ void Worker::task() {
 	requestCancel = false;
 	complete = true;
 }
-void Worker::done() {
+void WorkerTask::done() {
 	if (endTask)
 		endTask();
 }
-void Worker::execute(bool block) {
+void WorkerTask::execute(bool block) {
 	if (block) {
 		task();
 	} else {
-		workerThread = std::thread(&Worker::task, this);
+		workerThread = std::thread(&WorkerTask::task, this);
 	}
 }
-Worker::~Worker() {
+WorkerTask::~WorkerTask() {
 	cancel();
 }
-void Worker::cancel(bool block) {
+void WorkerTask::cancel(bool block) {
 	if (block) {
 		if (workerThread.joinable()) {
 			if (!requestCancel) {
@@ -72,12 +72,12 @@ void Worker::cancel(bool block) {
 }
 RecurrentWorker::RecurrentWorker(const std::function<bool(uint64_t)>& func,
 		long timeout) :
-		Worker([this] {this->step();}), recurrentTask(func), timeout(timeout) {
+		WorkerTask([this] {this->step();}), recurrentTask(func), timeout(timeout) {
 
 }
 RecurrentWorker::RecurrentWorker(const std::function<bool(uint64_t)>& func,
 		const std::function<void()>& end, long timeout) :
-		Worker([this] {this->step();}, end), recurrentTask(func), timeout(
+		WorkerTask([this] {this->step();}, end), recurrentTask(func), timeout(
 				timeout) {
 
 }
@@ -104,7 +104,7 @@ void RecurrentWorker::step() {
 Timer::Timer(const std::function<void()>& successFunc,
 		const std::function<void()>& failureFunc, long timeout,
 		long samplingTime) :
-		Worker(successFunc, failureFunc), timeout(timeout), samplingTime(
+		WorkerTask(successFunc, failureFunc), timeout(timeout), samplingTime(
 				samplingTime) {
 
 }

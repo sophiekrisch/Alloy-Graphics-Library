@@ -72,7 +72,7 @@ bool IntersectorEx::init(Composite& rootNode) {
 	rootNode.add(distRegion);
 	rootNode.add(textLabel);
 	
-	workerTask = WorkerTaskPtr(new Worker([=] {
+	workerTask = WorkerTaskPtr(new WorkerTask([=] {
 		ImageRGBA depthRGBA(tarImg.width,tarImg.height);
 		ImageRGBA distRGBA(tarImg.width,tarImg.height);
 		Image1f distImg(tarImg.width, tarImg.height);
