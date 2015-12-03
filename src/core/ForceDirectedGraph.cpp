@@ -59,17 +59,17 @@ namespace aly {
 		const float GravitationalForce::DEFAULT_MIN_DIRECTION = (float)-ALY_PI;
 		const float GravitationalForce::DEFAULT_MAX_DIRECTION = (float)ALY_PI;
 
-		const std::string pnames[3] = { "GravitationalConstant", "Distance",
+		const std::string NBodyForce::pnames[3] = { "GravitationalConstant", "Distance",
 				"BarnesHutTheta" };
-		const float DEFAULT_GRAV_CONSTANT = -1.0f;
-		const float DEFAULT_MIN_GRAV_CONSTANT = -10.0f;
-		const float DEFAULT_MAX_GRAV_CONSTANT = 10.0f;
-		const float DEFAULT_DISTANCE = -1.0f;
-		const float DEFAULT_MIN_DISTANCE = -1.0f;
-		const float DEFAULT_MAX_DISTANCE = 500.0f;
-		const float DEFAULT_THETA = 0.9f;
-		const float DEFAULT_MIN_THETA = 0.0f;
-		const float DEFAULT_MAX_THETA = 1.0f;
+		const float NBodyForce::DEFAULT_GRAV_CONSTANT = -1.0f;
+		const float NBodyForce::DEFAULT_MIN_GRAV_CONSTANT = -10.0f;
+		const float NBodyForce::DEFAULT_MAX_GRAV_CONSTANT = 10.0f;
+		const float NBodyForce::DEFAULT_DISTANCE = -1.0f;
+		const float NBodyForce::DEFAULT_MIN_DISTANCE = -1.0f;
+		const float NBodyForce::DEFAULT_MAX_DISTANCE = 500.0f;
+		const float NBodyForce::DEFAULT_THETA = 0.9f;
+		const float NBodyForce::DEFAULT_MIN_THETA = 0.0f;
+		const float NBodyForce::DEFAULT_MAX_THETA = 1.0f;
 
 		ForceSimulator::ForceSimulator() :ForceSimulator(std::shared_ptr<Integrator>(new RungeKuttaIntegrator())){
 		}
@@ -441,7 +441,7 @@ namespace aly {
 			float2 com(0.0f);
 			n->mass = 0;
 			if (n->hasChildren) {
-				for (int i = 0; i < n->children.size(); i++) {
+				for (int i = 0; i < (int)n->children.size(); i++) {
 					if (n->children[i].get() != nullptr) {
 						calcMass(n->children[i]);
 						n->mass += n->children[i]->mass;
@@ -483,7 +483,7 @@ namespace aly {
 			else if (n->hasChildren) {
 				// recurse for more accurate calculation
 				float2 split = box.center();
-				for (int i = 0; i < n->children.size(); i++) {
+				for (int i = 0; i < (int)n->children.size(); i++) {
 					if (n->children[i].get() != nullptr) {
 						float2 minPt = float2((i == 1 || i == 3 ? split.x : box.position.x), (i>1 ? split.y : box.position.y));
 						float2 maxPt = float2((i == 1 || i == 3 ? box.position.x + box.dimensions.x : split.x), (i>1 ? box.position.y + box.dimensions.y : split.y));
