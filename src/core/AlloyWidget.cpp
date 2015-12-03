@@ -2360,7 +2360,7 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	fileLocation = std::shared_ptr<FileField>(
 			new FileField("File Location", CoordPX(10, 7),
 					CoordPerPX(1.0f, 0.0f, -55.0f, 30.0f)));
-	if (type == FileDialogType::SaveFile) {
+	if (type == FileDialogType::SaveFile||type==FileDialogType::OpenMultiFile) {
 		fileLocation->setEnableAutoSugest(false);
 	}
 	fileLocation->backgroundColor = MakeColor(
@@ -2370,7 +2370,7 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 		this->updateDirectoryList();
 	};
 	fileLocation->onKeyInput = [this](TextField* field) {
-		if (this->type == FileDialogType::SaveFile) {
+		if (this->type == FileDialogType::SaveFile || this->type == FileDialogType::OpenMultiFile) {
 			this->updateDirectoryList();
 		}
 	};
