@@ -2371,7 +2371,7 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	};
 	fileLocation->onKeyInput = [this](TextField* field) {
 		if (this->type == FileDialogType::SaveFile) {
-			this->updateValidity();
+			this->updateDirectoryList();
 		}
 	};
 	upDirButton = std::shared_ptr<IconButton>(
