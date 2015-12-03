@@ -152,7 +152,7 @@ namespace aly {
 			}
 			for (SpringItemPtr s : springs) {
 				for (int i = 0; i < sflen; i++) {
-					sforces[i]->getForce(s);
+					sforces[i]->getSpring(s);
 				}
 			}
 		}
@@ -246,7 +246,7 @@ namespace aly {
 				item->velocity += vel;
 			}
 		}
-		void SpringForce::getForce(const SpringItemPtr& s) {
+		void SpringForce::getSpring(const SpringItemPtr& s) {
 			ForceItemPtr item1 = s->item1;
 			ForceItemPtr item2 = s->item2;
 			float length = (s->length < 0 ? params[SPRING_LENGTH] : s->length);

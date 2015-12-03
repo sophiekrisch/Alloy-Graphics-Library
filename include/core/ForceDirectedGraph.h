@@ -119,7 +119,7 @@ namespace aly {
 				throw std::runtime_error("Get force item not implemented.");
 			}
 			;
-			virtual void getForce(const SpringItemPtr& spring) {
+			virtual void getSpring(const SpringItemPtr& spring) {
 				throw std::runtime_error("Get spring item not implemented.");
 			}
 			;
@@ -200,7 +200,7 @@ namespace aly {
 			virtual std::string getParameterName(size_t i) const override {
 				return pnames[i];
 			}
-			virtual void getForce(const SpringItemPtr& s) override;
+			virtual void getSpring(const SpringItemPtr& s) override;
 		};
 		struct DragForce : public Force {
 			static const std::string pnames[1];
