@@ -2377,6 +2377,7 @@ bool FileField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			break;
 		case InputType::Character:
 			handleCharacterInput(context, e);
+			setValue(value);
 			showTimer.reset();
 			if (showTimer.get() == nullptr) {
 				showTimer = std::shared_ptr<TimerTask>(new TimerTask([this, context] {
@@ -2396,6 +2397,7 @@ bool FileField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 				}
 			}
 			handleKeyInput(context, e);
+			setValue(value);
 			if (e.isDown()) {
 				if (e.key == GLFW_KEY_BACKSPACE) {
 					showTimer.reset();
