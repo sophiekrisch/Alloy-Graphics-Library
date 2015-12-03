@@ -680,13 +680,16 @@ bool DataFlow::intersects(const lineseg2f& ln) {
 void DataFlow::startConnection(Port* port) {
 	connectingPort = port;
 }
-bool  DataFlow::updateSimulation(uint64_t iter) {
+bool DataFlow::updateSimulation(uint64_t iter) {
+	std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
+	float elapsed = std::chrono::duration<float>(currentTime- lastTime).count();
+	forceSim.runSimulator(elapsed);
+	lastTime = currentTime;
+	//std::cout << "Elapsed " << elapsed << " sec"<<std::endl;
 	return true;
 }
 void DataFlow::setup() {
-	simWorker = RecurrentWorkerPtr(new RecurrentTask([this](uint64_t iter) {
-		return this->updateSimulation(iter);
-	},30));
+
 	setRoundCorners(true);
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	DrawPtr pathsRegion = DrawPtr(
@@ -704,6 +707,11 @@ void DataFlow::setup() {
 					}));
 	Composite::add(pathsRegion);
 	Application::addListener(this);
+	simWorker = RecurrentWorkerPtr(new RecurrentTask([this](uint64_t iter) {
+		return this->updateSimulation(iter);
+	}, 500));
+	lastTime = std::chrono::steady_clock::now();
+	simWorker->execute();
 }
 void OutputMultiPort::insertValue(const std::shared_ptr<Packet>& packet,
 		int index) {

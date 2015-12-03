@@ -28,6 +28,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <chrono>
 namespace aly {
 namespace dataflow {
 class Node;
@@ -618,6 +619,7 @@ protected:
 	std::vector<std::shared_ptr<Destination>> destinationNodes;
 	std::vector<std::shared_ptr<Connection>> connections;
 	std::vector<std::shared_ptr<Relationship>> relationships;
+	std::chrono::steady_clock::time_point lastTime;
 	Node* mouseOverNode;
 	Port* connectingPort;
 	Port* currentPort;
