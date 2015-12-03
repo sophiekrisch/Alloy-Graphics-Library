@@ -384,14 +384,14 @@ protected:
 	TextLabelPtr labelRegion;
 	float textWidth;
 	ForceItemPtr forceItem;
+
 	virtual void setup();
 public:
 	std::shared_ptr<NodeIcon> nodeIcon;
-
 	friend class DataFlow;
 	friend class Port;
 	static const pixel2 DIMENSIONS;
-
+	ForceSimulator& getForceSimulator();
 	void setParent(DataFlow* parent) {
 		this->parent = parent;
 	}
@@ -585,6 +585,9 @@ public:
 			Node(name, pos, dims) {
 		setup();
 	}
+	virtual void pack(const pixel2& pos, const pixel2& dims,
+		const double2& dpmm, double pixelRatio, bool clamp = false)
+		override;
 	virtual void draw(AlloyContext* context) override;
 };
 
@@ -614,6 +617,9 @@ public:
 			Node(name, pos, dims) {
 		setup();
 	}
+	virtual void pack(const pixel2& pos, const pixel2& dims,
+		const double2& dpmm, double pixelRatio, bool clamp = false)
+		override;
 	virtual void draw(AlloyContext* context) override;
 };
 class DataFlow: public Composite {
@@ -638,6 +644,9 @@ protected:
 	void setup();
 	bool updateSimulation(uint64_t iter);
 public:
+	ForceSimulator& getForceSimulator() {
+		return forceSim;
+	}
 	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp = false) override;
 	bool isConnecting() const {

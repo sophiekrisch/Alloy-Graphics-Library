@@ -55,7 +55,7 @@ const std::string GravitationalForce::pnames[2] = { "GravitationalConstant",
 const float GravitationalForce::DEFAULT_FORCE_CONSTANT = 1E-4f;
 const float GravitationalForce::DEFAULT_MIN_FORCE_CONSTANT = 1E-5f;
 const float GravitationalForce::DEFAULT_MAX_FORCE_CONSTANT = 1E-3f;
-const float GravitationalForce::DEFAULT_DIRECTION = (float) -ALY_PI / 2.0f;
+const float GravitationalForce::DEFAULT_DIRECTION = (float) ALY_PI / 2.0f;
 const float GravitationalForce::DEFAULT_MIN_DIRECTION = (float) -ALY_PI;
 const float GravitationalForce::DEFAULT_MAX_DIRECTION = (float) ALY_PI;
 
@@ -74,8 +74,7 @@ const float NBodyForce::DEFAULT_MAX_THETA = 1.0f;
 ForceSimulator::ForceSimulator() :
 		ForceSimulator(std::shared_ptr<Integrator>(new RungeKuttaIntegrator())) {
 }
-ForceSimulator::ForceSimulator(const std::shared_ptr<Integrator>& integr) :
-		iforces(5), sforces(5), iflen(0), sflen(0), integrator(integr) {
+ForceSimulator::ForceSimulator(const std::shared_ptr<Integrator>& integr) : integrator(integr) {
 }
 float ForceSimulator::getSpeedLimit() const {
 	return speedLimit;
@@ -135,6 +134,9 @@ SpringItemPtr ForceSimulator::addSpring(const ForceItemPtr& item1,
 	springs.push_back(s);
 	return s;
 }
+void ForceSimulator::addSpring(const SpringItemPtr& spring) {
+	springs.push_back(spring);
+}
 SpringItemPtr ForceSimulator::addSpring(const ForceItemPtr& item1,
 		const ForceItemPtr& item2, float length) {
 	return addSpring(item1, item2, -1.f, length);
@@ -145,18 +147,22 @@ SpringItemPtr ForceSimulator::addSpring(const ForceItemPtr& item1,
 	return addSpring(item1, item2, -1.f, -1.f);
 }
 void ForceSimulator::accumulate() {
-	for (int i = 0; i < iflen; i++)
-		iforces[i]->init(*this);
-	for (int i = 0; i < sflen; i++)
-		sforces[i]->init(*this);
+	//std::cout << "Forces " << iforces.size() << " " << sforces.size() << " " << items.size() << std::endl;
+	for (ForcePtr f : iforces) {
+		f->init(*this);
+	}
+	for (ForcePtr f : sforces) {
+		f->init(*this);
+	}
 	for (ForceItemPtr item : items) {
 		item->force = float2(0.0f);
-		for (int i = 0; i < iflen; i++)
-			iforces[i]->getForce(item);
+		for (ForcePtr f : iforces) {
+			f->getForce(item);
+		}
 	}
 	for (SpringItemPtr s : springs) {
-		for (int i = 0; i < sflen; i++) {
-			sforces[i]->getSpring(s);
+		for (ForcePtr f : sforces){
+			f->getSpring(s);
 		}
 	}
 }
@@ -355,11 +361,8 @@ void CircularWallForce::getForce(const ForceItemPtr& item) {
 	item->force += v * dxy / d;
 }
 void GravitationalForce::getForce(const ForceItemPtr& item) {
-	float theta = params[DIRECTION];
 	float coeff = params[GRAVITATIONAL_CONST] * item->mass;
-
-	item->force.x += std::cos(theta) * coeff;
-	item->force.y += std::sin(theta) * coeff;
+	item->force += gDirection * coeff;
 }
 
 void NBodyForce::insertHelper(const ForceItemPtr& p, const QuadTreeNodePtr& n,

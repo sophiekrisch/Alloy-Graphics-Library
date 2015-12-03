@@ -231,6 +231,9 @@ void Node::setup() {
 	dragging = false;
 	Application::addListener(this);
 }
+ForceSimulator& Node::getForceSimulator() {
+	return parent->getForceSimulator();
+}
 box2px Node::getObstacleBounds() const {
 	box2px box = nodeIcon->getBounds(false);
 	if (labelRegion.get() != nullptr) {
@@ -569,8 +572,7 @@ bool Node::isMouseOver() const {
 ForceItemPtr Node::getForceItem() {
 	if (forceItem.get() == nullptr) {
 		forceItem = ForceItemPtr(new ForceItem());
-		forceItem->location = nodeIcon->getBounds(false).center()
-				- parent->getBoundsPosition();
+		getForceSimulator().addItem(forceItem);
 	}
 	return forceItem;
 }
@@ -700,9 +702,11 @@ bool DataFlow::updateSimulation(uint64_t iter) {
 			std::chrono::steady_clock::now();
 	float elapsed =
 			std::chrono::duration<float>(currentTime - lastTime).count();
-	forceSim.runSimulator(elapsed);
+	if (!AlloyApplicationContext()->isMouseDown()) {
+		forceSim.runSimulator(1000.0f*elapsed);
+		AlloyApplicationContext()->requestPack();
+	}
 	lastTime = currentTime;
-	//std::cout << "Elapsed " << elapsed << " sec"<<std::endl;
 	return true;
 }
 void DataFlow::setup() {
@@ -724,9 +728,11 @@ void DataFlow::setup() {
 					}));
 	Composite::add(pathsRegion);
 	Application::addListener(this);
+	forceSim.addForce(SpringForcePtr(new SpringForce()));
+	forceSim.addForce(GravitationalForcePtr(new GravitationalForce()));
 	simWorker = RecurrentTaskPtr(new RecurrentTask([this](uint64_t iter) {
 		return this->updateSimulation(iter);
-	}, 500));
+	}, 90));
 	lastTime = std::chrono::steady_clock::now();
 	simWorker->execute();
 }
@@ -1045,6 +1051,14 @@ void Data::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 							+ outputPorts.size()
 									* (OutputPort::DIMENSIONS.x + 2.0f)),
 			Node::DIMENSIONS.y);
+	if (forceItem.get() == nullptr) {
+		ForceItemPtr f = getForceItem();
+		f->location = position.toPixels(dims, dpmm, pixelRatio);
+	} else {
+		
+		ForceItemPtr f = getForceItem();
+		position = CoordPX(f->location);
+	}
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
 }
 void View::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
@@ -1060,6 +1074,8 @@ void View::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 									* (OutputPort::DIMENSIONS.x + 2.0f)),
 			Node::DIMENSIONS.y);
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
+	ForceItemPtr f=getForceItem();
+
 }
 void Compute::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp) {
@@ -1074,6 +1090,17 @@ void Compute::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 									* (OutputPort::DIMENSIONS.x + 2.0f)),
 			Node::DIMENSIONS.y);
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
+	getForceItem();
+}
+void Source::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
+	double pixelRatio, bool clamp) {
+	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
+	getForceItem();
+}
+void Destination::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
+	double pixelRatio, bool clamp) {
+	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
+	getForceItem();
 }
 void Node::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
@@ -1243,6 +1270,7 @@ SpringItemPtr Relationship::getSpringItem() {
 		springItem = SpringItemPtr(
 				new SpringItem(subject->getForceItem(), object->getForceItem(),
 						-1.0f, length(Node::DIMENSIONS)));
+		subject->getForceSimulator().addSpring(springItem);
 	}
 	return springItem;
 }

@@ -102,7 +102,7 @@ struct Force {
 		return ForceParameter(getParameterName(i), getParameterValue(i),
 				getMinValue(i), getMaxValue(i));
 	}
-	void setParameter(size_t i, float val) {
+	virtual void setParameter(size_t i, float val){
 		params[i] = val;
 	}
 	void setMinValue(size_t i, float val) {
@@ -143,7 +143,6 @@ class ForceSimulator {
 	std::vector<SpringItemPtr> springs;
 	std::vector<ForcePtr> iforces;
 	std::vector<ForcePtr> sforces;
-	int iflen, sflen;
 	std::shared_ptr<Integrator> integrator;
 	float speedLimit = 1.0f;
 public:
@@ -166,6 +165,7 @@ public:
 			const ForceItemPtr& item2, float length);
 	SpringItemPtr addSpring(const ForceItemPtr& item1,
 			const ForceItemPtr& item2);
+	void addSpring(const SpringItemPtr& spring);
 	void accumulate();
 	void runSimulator(float timestep);
 };
@@ -206,6 +206,7 @@ struct SpringForce: public Force {
 	}
 	virtual void getSpring(const SpringItemPtr& s) override;
 };
+typedef std::shared_ptr<SpringForce> SpringForcePtr;
 struct DragForce: public Force {
 	static const std::string pnames[1];
 	static const float DEFAULT_DRAG_COEFF;
@@ -230,6 +231,7 @@ struct DragForce: public Force {
 		item->force -= params[DRAG_COEFF] * item->velocity;
 	}
 };
+typedef std::shared_ptr<DragForce> DragForcePtr;
 struct WallForce: public Force {
 	static const std::string pnames[1];
 	static const float DEFAULT_GRAV_CONSTANT;
@@ -250,6 +252,7 @@ struct WallForce: public Force {
 
 	virtual void getForce(const ForceItemPtr& item) override;
 };
+typedef std::shared_ptr<WallForce> WallForcePtr;
 struct CircularWallForce: public Force {
 	static const std::string pnames[1];
 	static const float DEFAULT_GRAV_CONSTANT;
@@ -275,7 +278,7 @@ struct CircularWallForce: public Force {
 	}
 	virtual void getForce(const ForceItemPtr& item) override;
 };
-
+typedef std::shared_ptr<CircularWallForce> CircularWallForcePtr;
 struct GravitationalForce: public Force {
 	static const std::string pnames[2];
 	static const int GRAVITATIONAL_CONST = 0;
@@ -286,15 +289,24 @@ struct GravitationalForce: public Force {
 	static const float DEFAULT_DIRECTION;
 	static const float DEFAULT_MIN_DIRECTION;
 	static const float DEFAULT_MAX_DIRECTION;
+	float2 gDirection;
 	GravitationalForce(float forceConstant, float direction) {
 		params = std::vector<float> { forceConstant, direction };
 		minValues = std::vector<float> { DEFAULT_MIN_FORCE_CONSTANT,
 				DEFAULT_MIN_DIRECTION };
 		maxValues = std::vector<float> { DEFAULT_MAX_FORCE_CONSTANT,
 				DEFAULT_MAX_DIRECTION };
+		float theta = params[DIRECTION];
+		gDirection = float2(std::cos(theta), std::sin(theta));
 	}
 	GravitationalForce() :
 			GravitationalForce(DEFAULT_FORCE_CONSTANT, DEFAULT_DIRECTION) {
+	}
+	virtual void setParameter(size_t i, float val) override {
+		params[i] = val;
+		if (i == DIRECTION) {
+			gDirection = float2(std::cos(val), std::sin(val));
+		}
 	}
 	virtual bool isForceItem() const override {
 		return true;
@@ -304,7 +316,7 @@ struct GravitationalForce: public Force {
 	}
 	virtual void getForce(const ForceItemPtr& item) override;
 };
-
+typedef std::shared_ptr<GravitationalForce> GravitationalForcePtr;
 struct QuadTreeNode {
 	float mass;
 	float2 com;
@@ -366,7 +378,7 @@ private:
 	void calcMass(const QuadTreeNodePtr& n);
 	void forceHelper(const ForceItemPtr& item, const QuadTreeNodePtr& n, const box2f& box);
 };
-
+typedef std::shared_ptr<NBodyForce> NBodyForcePtr;
 }
 }
 #endif /* INCLUDE_CORE_FORCEDIRECTEDGRAPH_H_ */

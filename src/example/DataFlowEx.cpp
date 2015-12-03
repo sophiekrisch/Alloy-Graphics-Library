@@ -24,7 +24,7 @@
 using namespace aly;
 using namespace aly::dataflow;
 DataFlowEx::DataFlowEx() :
-		Application(800, 600, "Data Flow Graph Example") {
+		Application(1920, 1080, "Data Flow Graph Example") {
 }
 void DataFlowEx::createRadialGraph(const DataFlowPtr& graph) {
 	int D =3;
