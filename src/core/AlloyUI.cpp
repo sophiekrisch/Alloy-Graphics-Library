@@ -2300,19 +2300,20 @@ void FileField::setValue(const std::string& text) {
 	const int PREFERRED_TEXT_WIDTH = 32;
 	if (text != this->value) {
 		this->value = text;
-		if (text.size() == 0) {
-			label = name;
-		} else {
-			if (text.size() > PREFERRED_TEXT_WIDTH) {
-				this->label = std::string("..") + ALY_PATH_SEPARATOR+ GetFileName(text);
-			}
-			else {
-				this->label = text;
-			}
-		}
 		segmentedPath = SplitPath(value);
 		textStart = 0;
 		moveCursorTo((int) value.size());
+	}
+	if (text.size() == 0) {
+		label = name;
+	}
+	else {
+		if (text.size() > PREFERRED_TEXT_WIDTH) {
+			this->label = std::string("..") + ALY_PATH_SEPARATOR + GetFileName(text);
+		}
+		else {
+			this->label = text;
+		}
 	}
 }
 void FileField::updateSuggestionBox(AlloyContext* context, bool forceValue) {
