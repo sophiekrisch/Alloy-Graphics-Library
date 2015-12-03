@@ -70,19 +70,19 @@ void WorkerTask::cancel(bool block) {
 		requestCancel = true;
 	}
 }
-RecurrentWorker::RecurrentWorker(const std::function<bool(uint64_t)>& func,
+RecurrentTask::RecurrentTask(const std::function<bool(uint64_t)>& func,
 		long timeout) :
 		WorkerTask([this] {this->step();}), recurrentTask(func), timeout(timeout) {
 
 }
-RecurrentWorker::RecurrentWorker(const std::function<bool(uint64_t)>& func,
+RecurrentTask::RecurrentTask(const std::function<bool(uint64_t)>& func,
 		const std::function<void()>& end, long timeout) :
 		WorkerTask([this] {this->step();}, end), recurrentTask(func), timeout(
 				timeout) {
 
 }
 
-void RecurrentWorker::step() {
+void RecurrentTask::step() {
 	uint64_t iter = 0;
 	while (!requestCancel) {
 		auto currentTime = std::chrono::steady_clock::now();
@@ -101,7 +101,7 @@ void RecurrentWorker::step() {
 	}
 }
 
-Timer::Timer(const std::function<void()>& successFunc,
+TimerTask::TimerTask(const std::function<void()>& successFunc,
 		const std::function<void()>& failureFunc, long timeout,
 		long samplingTime) :
 		WorkerTask(successFunc, failureFunc), timeout(timeout), samplingTime(
@@ -109,7 +109,7 @@ Timer::Timer(const std::function<void()>& successFunc,
 
 }
 
-void Timer::task() {
+void TimerTask::task() {
 	running = true;
 	requestCancel = false;
 	complete = false;

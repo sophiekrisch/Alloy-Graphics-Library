@@ -23,6 +23,8 @@
 #include "AlloyAny.h"
 #include "AlloyUI.h"
 #include "AvoidanceRouting.h"
+#include "ForceDirectedGraph.h"
+#include "AlloyWorker.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -620,10 +622,13 @@ protected:
 	Port* connectingPort;
 	Port* currentPort;
 	AvoidanceRouting router;
+	ForceSimulator forceSim;
 	pixel2 currentDrawOffset;
 	pixel2 cursorDownLocation;
+	RecurrentWorkerPtr simWorker;
 	bool dragging = false;
 	void setup();
+	bool updateSimulation(uint64_t iter);
 public:
 	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp = false) override;

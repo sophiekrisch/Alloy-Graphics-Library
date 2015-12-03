@@ -25,7 +25,7 @@
 #include "AlloyApplication.h"
 class ControlsEx: public aly::Application {
 protected:
-	std::unique_ptr<aly::RecurrentWorker> progressTask;
+	std::unique_ptr<aly::RecurrentTask> progressTask;
 public:
 	ControlsEx();
 	bool init(aly::Composite& rootNode);

@@ -146,6 +146,7 @@ namespace aly {
 			float speedLimit = 1.0f;
 		public:
 			ForceSimulator(const std::shared_ptr<Integrator>& integr);
+			ForceSimulator();
 			float getSpeedLimit() const;
 			void setSpeedLimit(float limit);
 			IntegratorPtr getIntegrator() const;

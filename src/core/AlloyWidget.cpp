@@ -2234,7 +2234,7 @@ ListBox::ListBox(const std::string& name, const AUnit2D& pos,
 					firstBounds.dimensions.y = entryHeight;
 					if ((!isHorizontalScrollVisible() && lastBounds.contains(e.cursor)) || (dragBox.dimensions.x*dragBox.dimensions.y > 0 && e.cursor.y > bounds.dimensions.y + bounds.position.y)) {
 						if (downTimer.get() == nullptr) {
-							downTimer = std::shared_ptr<Timer>(new Timer([this] {
+							downTimer = std::shared_ptr<TimerTask>(new TimerTask([this] {
 												double deltaT = 200;
 												scrollingDown = true;
 												while (scrollingDown) {
@@ -2254,7 +2254,7 @@ ListBox::ListBox(const std::string& name, const AUnit2D& pos,
 					}
 					if (firstBounds.contains(e.cursor) || (dragBox.dimensions.x*dragBox.dimensions.y > 0 && e.cursor.y < bounds.position.y)) {
 						if (upTimer.get() == nullptr) {
-							upTimer = std::shared_ptr<Timer>(new Timer([this] {
+							upTimer = std::shared_ptr<TimerTask>(new TimerTask([this] {
 												double deltaT = 200;
 												scrollingUp = true;
 												while (scrollingUp) {

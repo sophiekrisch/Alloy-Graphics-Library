@@ -2378,7 +2378,7 @@ bool FileField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			handleCharacterInput(context, e);
 			showTimer.reset();
 			if (showTimer.get() == nullptr) {
-				showTimer = std::shared_ptr<Timer>(new Timer([this, context] {
+				showTimer = std::shared_ptr<TimerTask>(new TimerTask([this, context] {
 					updateSuggestionBox(context, false);
 				}, nullptr, 500, 30));
 			}
@@ -2399,8 +2399,8 @@ bool FileField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 				if (e.key == GLFW_KEY_BACKSPACE) {
 					showTimer.reset();
 					if (showTimer.get() == nullptr) {
-						showTimer = std::shared_ptr<Timer>(
-								new Timer([this, context] {
+						showTimer = std::shared_ptr<TimerTask>(
+								new TimerTask([this, context] {
 									updateSuggestionBox(context, false);
 								}, nullptr, 500, 30));
 					}
@@ -3056,7 +3056,7 @@ SelectionBox::SelectionBox(const std::string& name,
 						firstBounds.dimensions.y = entryHeight;
 						if (lastBounds.contains(event.cursor)) {
 							if (downTimer.get() == nullptr) {
-								downTimer = std::shared_ptr<Timer>(new Timer([this] {
+								downTimer = std::shared_ptr<TimerTask>(new TimerTask([this] {
 													double deltaT = 200;
 													scrollingDown = true;
 													while (scrollingDown&&selectionOffset < (int)options.size() - maxDisplayEntries) {
@@ -3076,7 +3076,7 @@ SelectionBox::SelectionBox(const std::string& name,
 						}
 						if (firstBounds.contains(event.cursor)) {
 							if (upTimer.get() == nullptr) {
-								upTimer = std::shared_ptr<Timer>(new Timer([this] {
+								upTimer = std::shared_ptr<TimerTask>(new TimerTask([this] {
 													double deltaT = 200;
 													scrollingUp = true;
 													while (scrollingUp&&selectionOffset > 0) {
@@ -3302,8 +3302,8 @@ void MenuItem::setVisibleItem(const std::shared_ptr<MenuItem>& item,
 			AlloyApplicationContext()->requestPack();
 		} else {
 			showTimer =
-					std::shared_ptr<Timer>(
-							new Timer(
+					std::shared_ptr<TimerTask>(
+							new TimerTask(
 									[=] {
 										std::lock_guard<std::mutex> lockMe(showLock);
 										if (currentSelected.get() == item.get()) {
@@ -3346,8 +3346,8 @@ void MenuBar::setVisibleItem(const std::shared_ptr<MenuItem>& item,
 			AlloyApplicationContext()->requestPack();
 		} else {
 			showTimer =
-					std::shared_ptr<Timer>(
-							new Timer(
+					std::shared_ptr<TimerTask>(
+							new TimerTask(
 									[=] {
 										std::lock_guard<std::mutex> lockMe(showLock);
 										if (currentSelected.get() == item.get()) {
@@ -3493,7 +3493,7 @@ Menu::Menu(const std::string& name, float menuWidth,
 						firstBounds.dimensions.y = entryHeight;
 						if (lastBounds.contains(event.cursor)) {
 							if (downTimer.get() == nullptr) {
-								downTimer = std::shared_ptr<Timer>(new Timer([this] {
+								downTimer = std::shared_ptr<TimerTask>(new TimerTask([this] {
 													double deltaT = 200;
 													scrollingDown = true;
 													while (scrollingDown&&selectionOffset < (int)options.size() - maxDisplayEntries) {
@@ -3513,7 +3513,7 @@ Menu::Menu(const std::string& name, float menuWidth,
 						}
 						if (firstBounds.contains(event.cursor)) {
 							if (upTimer.get() == nullptr) {
-								upTimer = std::shared_ptr<Timer>(new Timer([this] {
+								upTimer = std::shared_ptr<TimerTask>(new TimerTask([this] {
 													double deltaT = 200;
 													scrollingUp = true;
 													while (scrollingUp&&selectionOffset > 0) {

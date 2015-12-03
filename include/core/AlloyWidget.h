@@ -513,7 +513,7 @@ class ListBox: public Composite {
 protected:
 	bool enableMultiSelection;
 	box2px dragBox;
-	std::shared_ptr<Timer> downTimer, upTimer;
+	std::shared_ptr<TimerTask> downTimer, upTimer;
 	bool scrollingDown;
 	bool scrollingUp;
 	std::vector<std::shared_ptr<ListEntry>> listEntries;

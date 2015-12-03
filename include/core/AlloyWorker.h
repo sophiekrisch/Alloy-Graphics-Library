@@ -55,7 +55,7 @@ public:
 	void cancel(bool block=true);
 	virtual ~WorkerTask();
 };
-class RecurrentWorker: public WorkerTask {
+class RecurrentTask: public WorkerTask {
 protected:
 	const std::function<bool(uint64_t iteration)> recurrentTask;
 	long timeout;
@@ -64,12 +64,12 @@ public:
 	void setTimeout(long milliseconds) {
 		timeout = milliseconds;
 	}
-	RecurrentWorker(const std::function<bool(uint64_t iteration)>& func,
+	RecurrentTask(const std::function<bool(uint64_t iteration)>& func,
 			long milliseconds);
-	RecurrentWorker(const std::function<bool(uint64_t iteration)>& func,
+	RecurrentTask(const std::function<bool(uint64_t iteration)>& func,
 			const std::function<void()>& end, long milliseconds);
 };
-class Timer: public WorkerTask {
+class TimerTask: public WorkerTask {
 protected:
 	long timeout;
 	long samplingTime;
@@ -78,10 +78,12 @@ public:
 	void setTimeout(long milliseconds) {
 		timeout = milliseconds;
 	}
-	Timer(const std::function<void()>& successFunc,
+	TimerTask(const std::function<void()>& successFunc,
 			const std::function<void()>& failureFunc, long milliseconds,
 			long samplingTime);
 };
 typedef std::shared_ptr<WorkerTask> WorkerTaskPtr;
+typedef std::shared_ptr<RecurrentTask> RecurrentWorkerPtr;
+typedef std::shared_ptr<TimerTask> TimerTaskPtr;
 }
 #endif /* ALLOYWORKER_H_ */

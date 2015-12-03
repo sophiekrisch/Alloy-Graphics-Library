@@ -114,8 +114,8 @@ bool ControlsEx::init(Composite& rootNode) {
 	rootNode.add(ifield);
 	rootNode.add(ffield);
 
-	progressTask = std::unique_ptr<aly::RecurrentWorker>(
-			new RecurrentWorker([pbar](uint64_t iter) {
+	progressTask = std::unique_ptr<aly::RecurrentTask>(
+			new RecurrentTask([pbar](uint64_t iter) {
 				//std::cout << "Iteration " << iter << std::endl;
 					pbar->setValue("Task Executing ...", (iter++) / 20.0f);
 					return (iter<20);

@@ -680,7 +680,13 @@ bool DataFlow::intersects(const lineseg2f& ln) {
 void DataFlow::startConnection(Port* port) {
 	connectingPort = port;
 }
+bool  DataFlow::updateSimulation(uint64_t iter) {
+	return true;
+}
 void DataFlow::setup() {
+	simWorker = RecurrentWorkerPtr(new RecurrentTask([this](uint64_t iter) {
+		return this->updateSimulation(iter);
+	},30));
 	setRoundCorners(true);
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	DrawPtr pathsRegion = DrawPtr(

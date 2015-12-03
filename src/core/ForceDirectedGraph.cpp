@@ -71,6 +71,8 @@ namespace aly {
 		const float DEFAULT_MIN_THETA = 0.0f;
 		const float DEFAULT_MAX_THETA = 1.0f;
 
+		ForceSimulator::ForceSimulator() :ForceSimulator(std::shared_ptr<Integrator>(new RungeKuttaIntegrator())){
+		}
 		ForceSimulator::ForceSimulator(const std::shared_ptr<Integrator>& integr) :
 			iforces(5), sforces(5), iflen(0), sflen(0), integrator(integr) {
 		}

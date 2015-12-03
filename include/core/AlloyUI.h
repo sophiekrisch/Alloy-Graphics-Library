@@ -565,7 +565,7 @@ protected:
 	int maxDisplayEntries = 8;
 	int selectionOffset = 0;
 	bool scrollingDown = false, scrollingUp = false;
-	std::shared_ptr<Timer> downTimer, upTimer;
+	std::shared_ptr<TimerTask> downTimer, upTimer;
 	std::shared_ptr<AwesomeGlyph> downArrow, upArrow;
 
 public:
@@ -607,7 +607,7 @@ protected:
 	std::shared_ptr<MenuItem> currentSelected;
 	std::shared_ptr<MenuItem> requestedSelected;
 	std::shared_ptr<MenuItem> currentVisible;
-	std::shared_ptr<Timer> showTimer;
+	std::shared_ptr<TimerTask> showTimer;
 	const int MENU_DISPLAY_DELAY = 250;
 public:
 	MenuItem* getSelectedItem();
@@ -637,7 +637,7 @@ protected:
 	int maxDisplayEntries = 8;
 	int selectionOffset = 0;
 	bool scrollingDown = false, scrollingUp = false;
-	std::shared_ptr<Timer> downTimer, upTimer;
+	std::shared_ptr<TimerTask> downTimer, upTimer;
 	std::shared_ptr<AwesomeGlyph> downArrow, upArrow;
 	std::vector<std::shared_ptr<MenuItem>> options;
 	bool fireEvent(int selectedIndex);
@@ -702,7 +702,7 @@ struct FileField: public TextField {
 protected:
 	std::vector<std::string> segmentedPath;
 	std::shared_ptr<SelectionBox> selectionBox;
-	std::shared_ptr<Timer> showTimer;
+	std::shared_ptr<TimerTask> showTimer;
 	bool autoSuggest;
 	void updateSuggestionBox(AlloyContext* context, bool forceValue);
 public:
