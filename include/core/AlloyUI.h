@@ -703,9 +703,12 @@ protected:
 	std::vector<std::string> segmentedPath;
 	std::shared_ptr<SelectionBox> selectionBox;
 	std::shared_ptr<Timer> showTimer;
+	bool autoSuggest;
 	void updateSuggestionBox(AlloyContext* context, bool forceValue);
 public:
-
+	void setEnableAutoSugest(bool b) {
+		autoSuggest = b;
+	}
 	AColor textColor = MakeColor(Theme::Default.LIGHT_TEXT);
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
 			override;

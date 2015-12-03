@@ -1806,7 +1806,6 @@ FileButton::FileButton(const std::string& name, const AUnit2D& pos,
 			new FileDialog("File Dialog",
 					CoordPerPX(0.5, 0.5, -350 + 7.5f, -250 - 7.5f),
 					CoordPX(700, 500), type));
-
 	fileDialog->setVisible(false);
 	glassPanel->add(fileDialog);
 	if (type == FileDialogType::SaveFile) {
@@ -2361,8 +2360,12 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	fileLocation = std::shared_ptr<FileField>(
 			new FileField("File Location", CoordPX(10, 7),
 					CoordPerPX(1.0f, 0.0f, -55.0f, 30.0f)));
+	if (type == FileDialogType::SaveFile) {
+		fileLocation->setEnableAutoSugest(false);
+	}
 	fileLocation->backgroundColor = MakeColor(
 			AlloyApplicationContext()->theme.LIGHT);
+
 	fileLocation->onTextEntered = [this](TextField* field) {
 		this->updateDirectoryList();
 	};
@@ -2374,12 +2377,12 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	upDirButton = std::shared_ptr<IconButton>(
 			new IconButton(0xf062, CoordPerPX(1.0, 0.0, -40, 7),
 					CoordPX(30, 30)));
-	cButton->foregroundColor = MakeColor(
+	upDirButton->foregroundColor = MakeColor(
 			AlloyApplicationContext()->theme.LIGHT_TEXT);
 	upDirButton->borderColor = MakeColor(COLOR_NONE);
 	upDirButton->backgroundColor = MakeColor(
 			AlloyApplicationContext()->theme.SHADOW);
-	c->iconColor = MakeColor(
+	upDirButton->iconColor = MakeColor(
 			AlloyApplicationContext()->theme.DARK_TEXT);
 	upDirButton->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& event) {

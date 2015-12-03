@@ -2269,6 +2269,7 @@ FileField::FileField(const std::string& name, const AUnit2D& position,
 		const AUnit2D& dimensions) :
 		TextField(name, position, dimensions) {
 	showDefaultLabel = true;
+	autoSuggest = true;
 	selectionBox = SelectionBoxPtr(new SelectionBox(label));
 	selectionBox->setDetached(true);
 	selectionBox->setVisible(false);
@@ -2319,43 +2320,49 @@ void FileField::updateSuggestionBox(AlloyContext* context, bool forceValue) {
 	std::string root = GetParentDirectory(value);
 	std::vector<std::string> listing = GetDirectoryListing(root);
 	std::vector<std::string> suggestions = AutoComplete(value, listing);
-	if (suggestions.size() == 1 && forceValue) {
-		if (IsDirectory(suggestions[0])) {
-			this->setValue(
-					RemoveTrailingSlash(suggestions[0]) + ALY_PATH_SEPARATOR);
-		}
-		else {
-			this->setValue(suggestions[0]);
-		}
+	if (!autoSuggest) {
 		context->removeOnTopRegion(selectionBox.get());
 		selectionBox->setVisible(false);
 	}
 	else {
-		std::vector<std::string>& labels = selectionBox->options;
-		labels.clear();
-		for (std::string f : suggestions) {
-			if (IsDirectory(f)) {
-				labels.push_back(
-						GetFileName(f) + ALY_PATH_SEPARATOR);
+		if (suggestions.size() == 1 && forceValue) {
+			if (IsDirectory(suggestions[0])) {
+				this->setValue(
+					RemoveTrailingSlash(suggestions[0]) + ALY_PATH_SEPARATOR);
 			}
 			else {
-				labels.push_back(GetFileName(f));
+				this->setValue(suggestions[0]);
 			}
-		}
-		if (labels.size() > 0) {
-			context->setOnTopRegion(selectionBox.get());
-			lastValue = this->getValue();
-			box2px bounds = getBounds(false);
-			selectionBox->pack(bounds.position,
-					bounds.dimensions, context->dpmm,
-					context->pixelRatio);
-			selectionBox->setVisible(true);
-			selectionBox->setSelectionOffset(0);
-			selectionBox->setSelectedIndex(0);
-		}
-		else {
 			context->removeOnTopRegion(selectionBox.get());
 			selectionBox->setVisible(false);
+		}
+		else {
+			std::vector<std::string>& labels = selectionBox->options;
+			labels.clear();
+			for (std::string f : suggestions) {
+				if (IsDirectory(f)) {
+					labels.push_back(
+						GetFileName(f) + ALY_PATH_SEPARATOR);
+				}
+				else {
+					labels.push_back(GetFileName(f));
+				}
+			}
+			if (labels.size() > 0) {
+				context->setOnTopRegion(selectionBox.get());
+				lastValue = this->getValue();
+				box2px bounds = getBounds(false);
+				selectionBox->pack(bounds.position,
+					bounds.dimensions, context->dpmm,
+					context->pixelRatio);
+				selectionBox->setVisible(true);
+				selectionBox->setSelectionOffset(0);
+				selectionBox->setSelectedIndex(0);
+			}
+			else {
+				context->removeOnTopRegion(selectionBox.get());
+				selectionBox->setVisible(false);
+			}
 		}
 	}
 }
