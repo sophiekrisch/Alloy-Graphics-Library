@@ -1719,7 +1719,7 @@ template<class T> matrix<T, 4, 4> MakeTransform(const box<T, 3>& src,
 			* MakeScale(scaleT / scaleS)
 			* MakeTranslation(-(src.position + 0.5f * src.dimensions));
 }
-template<class T> matrix<T, 4, 4> perspectiveMatrix(const T &fovy,
+template<class T> matrix<T, 4, 4> MakePerspectiveMatrix(const T &fovy,
 		const T &aspect, const T &zNear, const T &zFar) {
 	T f = 1.0f / tan(ALY_PI * fovy / 360.0f);
 	T sx = f / aspect;
@@ -1734,7 +1734,7 @@ template<class T> matrix<T, 4, 4> perspectiveMatrix(const T &fovy,
 	M(2, 3) = pz;
 	return M;
 }
-template<class T> matrix<T, 4, 4> orthographicMatrix(const T& scaleX,
+template<class T> matrix<T, 4, 4> MakeOrthographicMatrix(const T& scaleX,
 		const T& scaleY, const T &zNear, const T &zFar) {
 	T sx = 2.0f * scaleX;
 	T sy = 2.0f * scaleY;
@@ -1748,7 +1748,7 @@ template<class T> matrix<T, 4, 4> orthographicMatrix(const T& scaleX,
 	M(2, 3) = pz;
 	return M;
 }
-template<class T> matrix<T, 4, 4> lookAtMatrix(vec<T, 3> eyePosition3D,
+template<class T> matrix<T, 4, 4> MakeLookAtMatrix(vec<T, 3> eyePosition3D,
 		vec<T, 3> center3D, vec<T, 3> upVector3D) {
 	vec<T, 3> forward, side, up;
 	matrix<T, 4, 4> matrix2;

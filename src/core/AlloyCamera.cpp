@@ -75,10 +75,10 @@ void Camera::aim(const box2px& bounds) {
 
 		if (cameraType == CameraType::Perspective) {
 			Projection = Tcamera
-					* perspectiveMatrix(fov, aspectRatio, nearPlane, farPlane);
+					* MakePerspectiveMatrix(fov, aspectRatio, nearPlane, farPlane);
 		} else if (cameraType == CameraType::Orthographic) {
 			Projection = Tcamera
-					* orthographicMatrix(1.0f / aspectRatio, 1.0f, nearPlane,
+					* MakeOrthographicMatrix(1.0f / aspectRatio, 1.0f, nearPlane,
 							farPlane);
 		}
 		View = Teye * S * Rw * T * Rm;
