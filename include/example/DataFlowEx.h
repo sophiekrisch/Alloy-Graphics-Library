@@ -27,6 +27,7 @@
 class DataFlowEx: public aly::Application {
 protected:
 	aly::dataflow::DataFlowPtr graph;
+	void createRadialGraph(const aly::dataflow::DataFlowPtr& graph);
 public:
 	DataFlowEx();
 	bool init(aly::Composite& rootNode);

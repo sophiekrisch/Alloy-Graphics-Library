@@ -26,79 +26,115 @@ using namespace aly::dataflow;
 DataFlowEx::DataFlowEx() :
 		Application(800, 600, "Data Flow Graph Example") {
 }
+void DataFlowEx::createRadialGraph(const DataFlowPtr& graph) {
+	int D =3;
+	int N = 6;
+	float armLength = 500.0f;
+	float2 center = getContext()->getViewport().center()-0.5f*Node::DIMENSIONS;
+	std::cout<<"Center "<<center<<std::endl;
+	std::vector<DataPtr> childNodes;
+	childNodes.push_back(MakeDataNode("Root", center));
+	graph->add(childNodes.front());
+	box2f bounds= getContext()->getViewport();
+	for (int d = 0; d < D; d++) {
+		std::vector<DataPtr> tmpList;
+		for (DataPtr parent : childNodes) {
+			parent->pack(bounds.position,bounds.dimensions,getContext()->dpmm,getContext()->pixelRatio,false);
+			for (int n = 0; n < N; n++) {
+				float2 pt = parent->getCenter()-0.5f*Node::DIMENSIONS
+						+ (armLength*std::pow(0.3f,(float)d))
+								* float2(
+										std::cos(n * ALY_PI * 2.0f / (float) N),
+										std::sin(
+												n * ALY_PI * 2.0f / (float) N));
+				DataPtr child = MakeDataNode(
+						MakeString() << "Data " << d << "::" << n, pt);
+				graph->add(child);
+				graph->add(MakeRelationship(parent, "has child", child));
+				tmpList.push_back(child);
+			}
+		}
+		childNodes = tmpList;
+	}
+
+}
 bool DataFlowEx::init(Composite& rootNode) {
 	graph = MakeDataFlow("Data Flow", CoordPX(10, 10),
 			CoordPerPX(1.0f, 1.0f, -20.0f, -20.0f));
-	ComputePtr computeNode1 = MakeComputeNode("Compute 1", pixel2(10, 10));
-	ComputePtr computeNode2 = MakeComputeNode("Compute 2", pixel2(120, 10));
-	ComputePtr computeNode3 = MakeComputeNode("Compute 3", pixel2(230, 10));
+	createRadialGraph(graph);
+	/*
+	 ComputePtr computeNode1 = MakeComputeNode("Compute 1", pixel2(10, 10));
+	 ComputePtr computeNode2 = MakeComputeNode("Compute 2", pixel2(120, 10));
+	 ComputePtr computeNode3 = MakeComputeNode("Compute 3", pixel2(230, 10));
 
-	ViewPtr viewNode1 = MakeViewNode("View 1", pixel2(10, 120));
-	ViewPtr viewNode2 = MakeViewNode("View 2", pixel2(120, 120));
+	 ViewPtr viewNode1 = MakeViewNode("View 1", pixel2(10, 120));
+	 ViewPtr viewNode2 = MakeViewNode("View 2", pixel2(120, 120));
 
-	DataPtr dataNode1 = MakeDataNode("Data 1", pixel2(10, 230));
-	DataPtr dataNode2 = MakeDataNode("Data 2", pixel2(120, 230));
-	DataPtr dataNode3 = MakeDataNode("Data 3", pixel2(230, 230));
-	DataPtr dataNode4 = MakeDataNode("Data 4", pixel2(340, 230));
+	 DataPtr dataNode1 = MakeDataNode("Data 1", pixel2(10, 230));
+	 DataPtr dataNode2 = MakeDataNode("Data 2", pixel2(120, 230));
+	 DataPtr dataNode3 = MakeDataNode("Data 3", pixel2(230, 230));
+	 DataPtr dataNode4 = MakeDataNode("Data 4", pixel2(340, 230));
 
-	SourcePtr sourceNode1 = MakeSourceNode("Source 1", pixel2(10, 340));
-	SourcePtr sourceNode2 = MakeSourceNode("Source 2", pixel2(120, 340));
+	 SourcePtr sourceNode1 = MakeSourceNode("Source 1", pixel2(10, 340));
+	 SourcePtr sourceNode2 = MakeSourceNode("Source 2", pixel2(120, 340));
 
-	DestinationPtr destNode1 = MakeDestinationNode("Destination 1", pixel2(10, 450));
-	DestinationPtr destNode2 = MakeDestinationNode("Destination 2", pixel2(120, 450));
+	 DestinationPtr destNode1 = MakeDestinationNode("Destination 1",
+	 pixel2(10, 450));
+	 DestinationPtr destNode2 = MakeDestinationNode("Destination 2",
+	 pixel2(120, 450));
 
+	 for (int i = 0; i < 4; i++) {
+	 dataNode1->add(MakeInputPort(MakeString() << "Input " << i));
+	 dataNode2->add(MakeInputPort(MakeString() << "Input " << i));
+	 dataNode3->add(MakeInputPort(MakeString() << "Input " << i));
+	 dataNode4->add(MakeInputPort(MakeString() << "Input " << i));
 
-	for(int i=0;i<4;i++){
-		dataNode1->add(MakeInputPort(MakeString()<<"Input "<<i));
-		dataNode2->add(MakeInputPort(MakeString()<<"Input "<<i));
-		dataNode3->add(MakeInputPort(MakeString()<<"Input "<<i));
-		dataNode4->add(MakeInputPort(MakeString()<<"Input "<<i));
+	 }
+	 for (int i = 0; i < 3; i++) {
+	 dataNode1->add(MakeOutputPort(MakeString() << "Output " << i));
+	 dataNode2->add(MakeOutputPort(MakeString() << "Output " << i));
+	 dataNode3->add(MakeOutputPort(MakeString() << "Output " << i));
+	 dataNode4->add(MakeOutputPort(MakeString() << "Output " << i));
 
-	}
-	for(int i=0;i<3;i++){
-		dataNode1->add(MakeOutputPort(MakeString()<<"Output "<<i));
-		dataNode2->add(MakeOutputPort(MakeString()<<"Output "<<i));
-		dataNode3->add(MakeOutputPort(MakeString()<<"Output "<<i));
-		dataNode4->add(MakeOutputPort(MakeString()<<"Output "<<i));
+	 }
+	 for (int i = 0; i < 7; i++) {
+	 computeNode1->add(MakeInputPort(MakeString() << "Input " << i));
+	 computeNode2->add(MakeInputPort(MakeString() << "Input " << i));
+	 computeNode3->add(MakeInputPort(MakeString() << "Input " << i));
+	 }
+	 for (int i = 0; i < 2; i++) {
+	 computeNode1->add(MakeOutputPort(MakeString() << "Output " << i));
+	 computeNode2->add(MakeOutputPort(MakeString() << "Output " << i));
+	 computeNode3->add(MakeOutputPort(MakeString() << "Output " << i));
+	 }
 
-	}
-	for(int i=0;i<7;i++){
-		computeNode1->add(MakeInputPort(MakeString()<<"Input "<<i));
-		computeNode2->add(MakeInputPort(MakeString()<<"Input "<<i));
-		computeNode3->add(MakeInputPort(MakeString()<<"Input "<<i));
-	}
-	for(int i=0;i<2;i++){
-		computeNode1->add(MakeOutputPort(MakeString()<<"Output "<<i));
-		computeNode2->add(MakeOutputPort(MakeString()<<"Output "<<i));
-		computeNode3->add(MakeOutputPort(MakeString()<<"Output "<<i));
-	}
+	 for (int i = 0; i < 3; i++) {
+	 viewNode1->add(MakeInputPort(MakeString() << "Input " << i));
+	 viewNode2->add(MakeInputPort(MakeString() << "Input " << i));
+	 }
+	 graph->add(computeNode1);
+	 graph->add(computeNode2);
+	 graph->add(computeNode3);
+	 graph->add(viewNode1);
+	 graph->add(viewNode2);
+	 graph->add(dataNode1);
+	 graph->add(dataNode2);
+	 graph->add(dataNode3);
+	 graph->add(dataNode4);
 
-	for(int i=0;i<3;i++){
-		viewNode1->add(MakeInputPort(MakeString()<<"Input "<<i));
-		viewNode2->add(MakeInputPort(MakeString()<<"Input "<<i));
-	}
-	graph->add(computeNode1);
-	graph->add(computeNode2);
-	graph->add(computeNode3);
-	graph->add(viewNode1);
-	graph->add(viewNode2);
-	graph->add(dataNode1);
-	graph->add(dataNode2);
-	graph->add(dataNode3);
-	graph->add(dataNode4);
+	 //graph->add(MakeConnection(computeNode3->getOutputPort(0), dataNode4->getInputPort(1)));
+	 //graph->add(MakeConnection(computeNode3->getOutputPort(1),destNode2->getInputPort()));
+	 graph->add(MakeRelationship(dataNode1, "uses", dataNode2));
+	 graph->add(MakeRelationship(dataNode1, "uses", dataNode3));
+	 graph->add(MakeRelationship(dataNode2, "extends", dataNode3));
+	 graph->add(MakeRelationship(dataNode4, "extends", dataNode2));
+	 graph->add(MakeRelationship(dataNode3, "has", dataNode4));
 
-	//graph->add(MakeConnection(computeNode3->getOutputPort(0), dataNode4->getInputPort(1)));
-	//graph->add(MakeConnection(computeNode3->getOutputPort(1),destNode2->getInputPort()));
-	graph->add(MakeRelationship(dataNode1,"uses",dataNode2));
-	graph->add(MakeRelationship(dataNode1,"uses",dataNode3));
-	graph->add(MakeRelationship(dataNode2,"extends",dataNode3));
-	graph->add(MakeRelationship(dataNode4,"extends",dataNode2));
-	graph->add(MakeRelationship(dataNode3,"has",dataNode4));
-
-	graph->add(sourceNode1);
-	graph->add(sourceNode2);
-	graph->add(destNode1);
-	graph->add(destNode2);
+	 graph->add(sourceNode1);
+	 graph->add(sourceNode2);
+	 graph->add(destNode1);
+	 graph->add(destNode2);
+	 */
 	rootNode.add(graph);
 	return true;
 }

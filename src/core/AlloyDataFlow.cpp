@@ -1222,33 +1222,33 @@ void Destination::draw(AlloyContext* context) {
 	Composite::draw(context);
 }
 void Relationship::draw(AlloyContext* context) {
-	pixel2 scenter = subject->getCenter();
-	pixel2 ocenter = object->getCenter();
+	pixel2 subjectPt = subject->getCenter();
+	pixel2 objectPt = object->getCenter();
 	NVGcontext* nvg = context->nvgContext;
 
-	pixel2 vec = ocenter - scenter;
+	pixel2 vec = subjectPt - objectPt;
 	float len = length(vec);
 	const float arrowLength = 10;
 	const float arrowWidth = 10;
 
 	float r = object->getRadius();
 	if (len > 2 * r) {
-		pixel2 mid = 0.5f * (scenter + ocenter);
+		pixel2 mid = 0.5f * (objectPt + subjectPt);
 		vec /= len;
 		pixel2 ortho(-vec.y, vec.x);
-		pixel2 pt1 = ocenter - vec * r;
+		pixel2 pt1 = subjectPt - vec * r;
 
 		nvgStrokeColor(nvg, context->theme.NEUTRAL);
 		nvgStrokeWidth(nvg, 4.0f);
 		nvgLineCap(nvg, NVG_ROUND);
 		nvgBeginPath(nvg);
-		nvgMoveTo(nvg, scenter.x, scenter.y);
-		ocenter = pt1 - arrowLength * vec;
-		nvgLineTo(nvg, ocenter.x, ocenter.y);
+		nvgMoveTo(nvg, objectPt.x, objectPt.y);
+		subjectPt = pt1 - arrowLength * vec;
+		nvgLineTo(nvg, subjectPt.x, subjectPt.y);
 		nvgStroke(nvg);
 
-		pixel2 pt2 = ocenter + ortho * arrowWidth * 0.5f;
-		pixel2 pt3 = ocenter - ortho * arrowWidth * 0.5f;
+		pixel2 pt2 = subjectPt + ortho * arrowWidth * 0.5f;
+		pixel2 pt3 = subjectPt - ortho * arrowWidth * 0.5f;
 		nvgFillColor(nvg, context->theme.NEUTRAL);
 		nvgBeginPath(nvg);
 		nvgMoveTo(nvg, pt1.x, pt1.y);
