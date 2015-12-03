@@ -334,6 +334,8 @@ public:
 	}
 };
 class Relationship {
+protected:
+	SpringItemPtr springItem;
 public:
 	std::shared_ptr<Node> subject;
 	std::shared_ptr<Node> object;
@@ -345,6 +347,7 @@ public:
 	}
 	void draw(AlloyContext* context);
 	void drawText(AlloyContext* context);
+	SpringItemPtr getSpringItem();
 };
 
 enum class NodeShape {
@@ -380,6 +383,7 @@ protected:
 	CompositePtr outputPortComposite;
 	TextLabelPtr labelRegion;
 	float textWidth;
+	ForceItemPtr forceItem;
 	virtual void setup();
 public:
 	std::shared_ptr<NodeIcon> nodeIcon;
@@ -387,6 +391,7 @@ public:
 	friend class DataFlow;
 	friend class Port;
 	static const pixel2 DIMENSIONS;
+
 	void setParent(DataFlow* parent) {
 		this->parent = parent;
 	}
@@ -421,6 +426,7 @@ public:
 	pixel2 getCenter() const {
 		return nodeIcon->getBounds().center();
 	}
+	ForceItemPtr getForceItem();
 	float getRadius() const {
 		return nodeIcon->getBounds().dimensions.y * 0.5f;
 	}
