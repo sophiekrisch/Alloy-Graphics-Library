@@ -83,7 +83,7 @@ public:
 			long samplingTime);
 };
 typedef std::shared_ptr<WorkerTask> WorkerTaskPtr;
-typedef std::shared_ptr<RecurrentTask> RecurrentWorkerPtr;
+typedef std::shared_ptr<RecurrentTask> RecurrentTaskPtr;
 typedef std::shared_ptr<TimerTask> TimerTaskPtr;
 }
 #endif /* ALLOYWORKER_H_ */

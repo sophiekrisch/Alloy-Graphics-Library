@@ -627,7 +627,7 @@ protected:
 	ForceSimulator forceSim;
 	pixel2 currentDrawOffset;
 	pixel2 cursorDownLocation;
-	RecurrentWorkerPtr simWorker;
+	RecurrentTaskPtr simWorker;
 	bool dragging = false;
 	void setup();
 	bool updateSimulation(uint64_t iter);

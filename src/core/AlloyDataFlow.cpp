@@ -707,7 +707,7 @@ void DataFlow::setup() {
 					}));
 	Composite::add(pathsRegion);
 	Application::addListener(this);
-	simWorker = RecurrentWorkerPtr(new RecurrentTask([this](uint64_t iter) {
+	simWorker = RecurrentTaskPtr(new RecurrentTask([this](uint64_t iter) {
 		return this->updateSimulation(iter);
 	}, 500));
 	lastTime = std::chrono::steady_clock::now();
