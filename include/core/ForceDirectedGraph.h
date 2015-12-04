@@ -30,20 +30,32 @@
 #include <memory>
 #include <mutex>
 namespace aly {
+	class AlloyContext;
 namespace dataflow {
 class ForceSimulator;
+
+enum class NodeShape {
+	Circle = 0, Triangle = 1, Square = 2, Hexagon = 3
+};
 struct ForceItem {
 	float mass;
 	float2 force;
 	float2 velocity;
 	float2 location;
 	float2 plocation;
+	NodeShape shape;
 	std::array<float2, 4> k;
 	std::array<float2, 4> l;
 	ForceItem() :
 			mass(1.0f), force(0.0f), velocity(0.0f), location(0.0f), plocation(
-					0.0f) {
+					0.0f),shape(NodeShape::Circle){
 	}
+	void reset() {
+		force = float2(0.0f);
+		velocity = float2(0.0f);
+		plocation = location;
+	}
+	void draw(AlloyContext* context);
 };
 typedef std::shared_ptr<ForceItem> ForceItemPtr;
 struct SpringItem {
@@ -55,6 +67,7 @@ struct SpringItem {
 			float len) :
 			item1(fi1), item2(fi2), coeff(k), length(len) {
 	}
+	void draw(AlloyContext* context);
 };
 
 typedef std::shared_ptr<SpringItem> SpringItemPtr;

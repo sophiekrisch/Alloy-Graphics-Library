@@ -20,6 +20,7 @@
  */
 
 #include "ForceDirectedGraph.h"
+#include "AlloyContext.h"
 namespace aly {
 namespace dataflow {
 const std::string SpringForce::pnames[2] = { "SpringCoefficient",
@@ -71,6 +72,12 @@ const float NBodyForce::DEFAULT_THETA = 0.9f;
 const float NBodyForce::DEFAULT_MIN_THETA = 0.0f;
 const float NBodyForce::DEFAULT_MAX_THETA = 1.0f;
 
+void ForceItem::draw(AlloyContext* context) {
+
+}
+void SpringItem::draw(AlloyContext* context) {
+
+}
 ForceSimulator::ForceSimulator() :
 		ForceSimulator(std::shared_ptr<Integrator>(new RungeKuttaIntegrator())) {
 }

@@ -710,7 +710,6 @@ bool DataFlow::updateSimulation(uint64_t iter) {
 		float elapsed =
 			std::chrono::duration<float>(currentTime - lastTime).count();
 		if (elapsed >= 0.01f) {
-			context->requestPack();
 			lastTime = currentTime;
 		}
 	}
@@ -1062,6 +1061,7 @@ void Data::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 							+ outputPorts.size()
 									* (OutputPort::DIMENSIONS.x + 2.0f)),
 			Node::DIMENSIONS.y);
+	/*
 	ForceItemPtr f;
 	if (forceItem.get() == nullptr||forceItem->mass<0.0f) {
 		f= getForceItem();
@@ -1071,6 +1071,7 @@ void Data::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		f = getForceItem();
 		position = CoordPX(f->location - Node::DIMENSIONS*0.5f);
 	}
+	*/
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
 }
 void View::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
@@ -1086,8 +1087,6 @@ void View::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 									* (OutputPort::DIMENSIONS.x + 2.0f)),
 			Node::DIMENSIONS.y);
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
-	ForceItemPtr f=getForceItem();
-
 }
 void Compute::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp) {
@@ -1102,17 +1101,14 @@ void Compute::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 									* (OutputPort::DIMENSIONS.x + 2.0f)),
 			Node::DIMENSIONS.y);
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
-	getForceItem();
 }
 void Source::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 	double pixelRatio, bool clamp) {
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
-	getForceItem();
 }
 void Destination::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 	double pixelRatio, bool clamp) {
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
-	getForceItem();
 }
 void Node::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;

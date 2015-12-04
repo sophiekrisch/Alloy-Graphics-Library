@@ -61,9 +61,11 @@ bool DataFlowEx::init(Composite& rootNode) {
 	graph = MakeDataFlow("Data Flow", CoordPX(10, 10),
 			CoordPerPX(1.0f, 1.0f, -20.0f, -20.0f));
 	createRadialGraph(graph);
+	/*
 	getContext()->addDeferredTask([this]() {
 		graph->start();
 	});
+	*/
 	/*
 	 ComputePtr computeNode1 = MakeComputeNode("Compute 1", pixel2(10, 10));
 	 ComputePtr computeNode2 = MakeComputeNode("Compute 2", pixel2(120, 10));
