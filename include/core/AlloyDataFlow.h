@@ -649,6 +649,7 @@ public:
 	ForceSimulator& getForceSimulator() {
 		return forceSim;
 	}
+	void start();
 	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp = false) override;
 	bool isConnecting() const {

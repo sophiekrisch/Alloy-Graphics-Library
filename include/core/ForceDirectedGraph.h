@@ -366,9 +366,7 @@ public:
 	void setBounds(const box2f& b) {
 		bounds = b;
 	}
-	void clear() {
-		root = QuadTreeNodePtr(new QuadTreeNode());
-	}
+	void clear();
 	virtual void init(ForceSimulator& fsim) override;
 	void getForce(const ForceItemPtr& item) override;
 private:

@@ -700,18 +700,20 @@ void DataFlow::startConnection(Port* port) {
 	connectingPort = port;
 }
 bool DataFlow::updateSimulation(uint64_t iter) {
-	std::chrono::steady_clock::time_point currentTime =
-			std::chrono::steady_clock::now();
-	float elapsed =
-			std::chrono::duration<float>(currentTime - lastTime).count();
+
 	std::shared_ptr<AlloyContext>  context = AlloyApplicationContext();
 	if (context.get() == nullptr)return false;
 	if (!context->isMouseDown()) {
-		forceSim.runSimulator(1000.0f*elapsed);
-		forceSim.runSimulator(1000.0f*elapsed);
-		context->requestPack();
+		forceSim.runSimulator(30.0f);
+		std::chrono::steady_clock::time_point currentTime =
+			std::chrono::steady_clock::now();
+		float elapsed =
+			std::chrono::duration<float>(currentTime - lastTime).count();
+		if (elapsed >= 0.01f) {
+			context->requestPack();
+			lastTime = currentTime;
+		}
 	}
-	lastTime = currentTime;
 	return true;
 }
 void DataFlow::setup() {
@@ -734,10 +736,14 @@ void DataFlow::setup() {
 	Composite::add(pathsRegion);
 	Application::addListener(this);
 	forceSim.addForce(SpringForcePtr(new SpringForce()));
+	forceSim.addForce(NBodyForcePtr(new NBodyForce()));
 	//forceSim.addForce(GravitationalForcePtr(new GravitationalForce()));
 	simWorker = RecurrentTaskPtr(new RecurrentTask([this](uint64_t iter) {
 		return this->updateSimulation(iter);
-	}, 20));
+	}, 10));
+	lastTime = std::chrono::steady_clock::now();
+}
+void DataFlow::start() {
 	lastTime = std::chrono::steady_clock::now();
 	simWorker->execute();
 }

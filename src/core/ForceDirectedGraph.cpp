@@ -215,7 +215,6 @@ void RungeKuttaIntegrator::integrate(ForceSimulator& sim,
 		}
 		k[1] = timestep * vel;
 		l[1] = coeff * item->force;
-
 		// Set the position to the new predicted position
 		item->location = item->plocation + 0.5f * k[1];
 	}
@@ -412,31 +411,28 @@ void NBodyForce::insert(const ForceItemPtr& p, QuadTreeNodePtr& n, box2f box) {
 		n->value = p;
 	}
 }
+void NBodyForce::clear() {
+	root = QuadTreeNodePtr(new QuadTreeNode());
+}
 void NBodyForce::init(ForceSimulator& fsim) {
-	clear(); // clear internal state
-			 // compute and squarify bounds of quadtree
-	float2 p1(std::numeric_limits<float>::max(),
-			std::numeric_limits<float>::max());
-	float2 p2(std::numeric_limits<float>::min(),
-			std::numeric_limits<float>::min());
+	clear();
+	float2 p1(1E30f);
+	float2 p2(-1E30f);
 	for (ForceItemPtr item : fsim.getItems()) {
-		float2 p = item->location;
-		if (p.x < p1.x)
-			p1.x = p.x;
-		if (p.y < p1.y)
-			p1.y = p.y;
-		if (p.x > p2.x)
-			p2.x = p.x;
-		if (p.y > p2.y)
-			p2.y = p.y;
+			float2 p = item->location;
+			p1 = aly::min(p, p1);
+			p2 = aly::max(p, p2);
 	}
 	float2 dxy = p2 - p1;
+	float2 center = 0.5f*(p1+p2);
+	float maxDim = std::max(dxy.x, dxy.y);
 	if (dxy.x > dxy.y) {
 		p2.y = p1.y + dxy.x;
 	} else {
 		p2.x = p1.x + dxy.y;
 	}
-	setBounds(box2f(p1, p2 - p1));
+	box2f box = box2f(center - float2(maxDim*0.5f), float2(maxDim));
+	setBounds(box);
 	for (ForceItemPtr item : fsim.getItems()) {
 		insert(item);
 	}
