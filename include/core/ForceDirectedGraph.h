@@ -28,6 +28,7 @@
 #include <vector>
 #include <array>
 #include <memory>
+#include <mutex>
 namespace aly {
 namespace dataflow {
 class ForceSimulator;
@@ -139,6 +140,7 @@ struct Integrator {
 };
 typedef std::shared_ptr<Integrator> IntegratorPtr;
 class ForceSimulator {
+	std::mutex lock;
 	std::vector<ForceItemPtr> items;
 	std::vector<SpringItemPtr> springs;
 	std::vector<ForcePtr> iforces;
@@ -194,8 +196,7 @@ struct SpringForce: public Force {
 		maxValues = std::vector<float> { DEFAULT_MAX_SPRING_COEFF,
 				DEFAULT_MAX_SPRING_LENGTH };
 	}
-	SpringForce() {
-		SpringForce(DEFAULT_SPRING_COEFF, DEFAULT_SPRING_LENGTH);
+	SpringForce():SpringForce(DEFAULT_SPRING_COEFF, DEFAULT_SPRING_LENGTH){
 	}
 	virtual bool isSpringItem() const override {
 		return true;

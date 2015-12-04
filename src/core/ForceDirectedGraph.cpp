@@ -93,6 +93,7 @@ void ForceSimulator::clear() {
 	springs.clear();
 }
 void ForceSimulator::addForce(const ForcePtr& f) {
+	std::lock_guard<std::mutex> lockMe(lock);
 	if (f->isForceItem()) {
 		iforces.push_back(f);
 	}
@@ -107,10 +108,12 @@ std::vector<ForcePtr> ForceSimulator::getForces() const {
 	return forcesOut;
 }
 void ForceSimulator::addItem(const ForceItemPtr& item) {
+	std::lock_guard<std::mutex> lockMe(lock);
 	items.push_back(item);
 }
 
 bool ForceSimulator::removeItem(ForceItemPtr item) {
+	std::lock_guard<std::mutex> lockMe(lock);
 	for (size_t i = 0; i < items.size(); i++) {
 		if (items[i].get() == item.get()) {
 			items.erase(items.begin() + i);
@@ -131,10 +134,11 @@ SpringItemPtr ForceSimulator::addSpring(const ForceItemPtr& item1,
 		const ForceItemPtr& item2, float coeff, float length) {
 	SpringItemPtr s = SpringItemPtr(
 			new SpringItem(item1, item2, coeff, length));
-	springs.push_back(s);
+	addSpring(s);
 	return s;
 }
 void ForceSimulator::addSpring(const SpringItemPtr& spring) {
+	std::lock_guard<std::mutex> lockMe(lock);
 	springs.push_back(spring);
 }
 SpringItemPtr ForceSimulator::addSpring(const ForceItemPtr& item1,
@@ -167,7 +171,7 @@ void ForceSimulator::accumulate() {
 	}
 }
 void ForceSimulator::runSimulator(float timestep) {
-	accumulate();
+	std::lock_guard<std::mutex> lockMe(lock);
 	integrator->integrate(*this, timestep);
 }
 void EulerIntegrator::integrate(ForceSimulator& sim, float timestep) const {
@@ -259,7 +263,7 @@ void RungeKuttaIntegrator::integrate(ForceSimulator& sim,
 void SpringForce::getSpring(const SpringItemPtr& s) {
 	ForceItemPtr item1 = s->item1;
 	ForceItemPtr item2 = s->item2;
-	float length = (s->length < 0 ? params[SPRING_LENGTH] : s->length);
+	float len = (s->length < 0 ? params[SPRING_LENGTH] : s->length);
 	float2 p1 = item1->location;
 	float2 p2 = item2->location;
 	float2 dxy = p2 - p1;
@@ -269,7 +273,7 @@ void SpringForce::getSpring(const SpringItemPtr& s) {
 				RandomUniform(-0.5f, 0.5f) / 50.0f);
 		r = aly::length(dxy);
 	}
-	float d = r - length;
+	float d = r - len;
 	float coeff = (s->coeff < 0 ? params[SPRING_COEFF] : s->coeff) * d / r;
 	item1->force += coeff * dxy;
 	item2->force -= coeff * dxy;

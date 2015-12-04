@@ -340,14 +340,16 @@ public:
 	std::shared_ptr<Node> subject;
 	std::shared_ptr<Node> object;
 	std::shared_ptr<Predicate> predicate;
+	SpringItemPtr getSpringItem();
 	Relationship(const std::shared_ptr<Node>& object,
 			const std::shared_ptr<Predicate>& predicate,
 			const std::shared_ptr<Node>& subject) :
 			subject(subject), object(object), predicate(predicate) {
+		getSpringItem();
 	}
 	void draw(AlloyContext* context);
 	void drawText(AlloyContext* context);
-	SpringItemPtr getSpringItem();
+
 };
 
 enum class NodeShape {

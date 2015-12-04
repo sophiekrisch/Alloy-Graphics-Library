@@ -232,6 +232,7 @@ void Node::setup() {
 	Application::addListener(this);
 }
 ForceSimulator& Node::getForceSimulator() {
+	if (parent == nullptr)throw std::runtime_error("Node has no parent dataflow.");
 	return parent->getForceSimulator();
 }
 box2px Node::getObstacleBounds() const {
@@ -572,6 +573,7 @@ bool Node::isMouseOver() const {
 ForceItemPtr Node::getForceItem() {
 	if (forceItem.get() == nullptr) {
 		forceItem = ForceItemPtr(new ForceItem());
+		forceItem->mass = -1;
 		getForceSimulator().addItem(forceItem);
 	}
 	return forceItem;
@@ -702,9 +704,12 @@ bool DataFlow::updateSimulation(uint64_t iter) {
 			std::chrono::steady_clock::now();
 	float elapsed =
 			std::chrono::duration<float>(currentTime - lastTime).count();
-	if (!AlloyApplicationContext()->isMouseDown()) {
+	std::shared_ptr<AlloyContext>  context = AlloyApplicationContext();
+	if (context.get() == nullptr)return false;
+	if (!context->isMouseDown()) {
 		forceSim.runSimulator(1000.0f*elapsed);
-		AlloyApplicationContext()->requestPack();
+		forceSim.runSimulator(1000.0f*elapsed);
+		context->requestPack();
 	}
 	lastTime = currentTime;
 	return true;
@@ -729,10 +734,10 @@ void DataFlow::setup() {
 	Composite::add(pathsRegion);
 	Application::addListener(this);
 	forceSim.addForce(SpringForcePtr(new SpringForce()));
-	forceSim.addForce(GravitationalForcePtr(new GravitationalForce()));
+	//forceSim.addForce(GravitationalForcePtr(new GravitationalForce()));
 	simWorker = RecurrentTaskPtr(new RecurrentTask([this](uint64_t iter) {
 		return this->updateSimulation(iter);
-	}, 90));
+	}, 20));
 	lastTime = std::chrono::steady_clock::now();
 	simWorker->execute();
 }
@@ -1051,13 +1056,14 @@ void Data::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 							+ outputPorts.size()
 									* (OutputPort::DIMENSIONS.x + 2.0f)),
 			Node::DIMENSIONS.y);
-	if (forceItem.get() == nullptr) {
-		ForceItemPtr f = getForceItem();
-		f->location = position.toPixels(dims, dpmm, pixelRatio);
+	ForceItemPtr f;
+	if (forceItem.get() == nullptr||forceItem->mass<0.0f) {
+		f= getForceItem();
+		f->location = position.toPixels(dims, dpmm, pixelRatio)+Node::DIMENSIONS*0.5f;
+		f->mass = 1.0f;
 	} else {
-		
-		ForceItemPtr f = getForceItem();
-		position = CoordPX(f->location);
+		f = getForceItem();
+		position = CoordPX(f->location - Node::DIMENSIONS*0.5f);
 	}
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
 }
@@ -1267,9 +1273,10 @@ void Destination::draw(AlloyContext* context) {
 }
 SpringItemPtr Relationship::getSpringItem() {
 	if (springItem.get() == nullptr) {
+		float r=std::min(Node::DIMENSIONS.x,Node::DIMENSIONS.y);
 		springItem = SpringItemPtr(
 				new SpringItem(subject->getForceItem(), object->getForceItem(),
-						-1.0f, length(Node::DIMENSIONS)));
+						-1.0f, r));
 		subject->getForceSimulator().addSpring(springItem);
 	}
 	return springItem;

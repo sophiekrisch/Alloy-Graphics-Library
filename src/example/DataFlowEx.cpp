@@ -27,11 +27,10 @@ DataFlowEx::DataFlowEx() :
 		Application(1920, 1080, "Data Flow Graph Example") {
 }
 void DataFlowEx::createRadialGraph(const DataFlowPtr& graph) {
-	int D =3;
+	int D =1;
 	int N = 6;
-	float armLength = 500.0f;
+	float armLength = 200.0f;
 	float2 center = getContext()->getViewport().center()-0.5f*Node::DIMENSIONS;
-	std::cout<<"Center "<<center<<std::endl;
 	std::vector<DataPtr> childNodes;
 	childNodes.push_back(MakeDataNode("Root", center));
 	graph->add(childNodes.front());
