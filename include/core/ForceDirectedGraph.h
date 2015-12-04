@@ -25,6 +25,7 @@
 #define INCLUDE_CORE_FORCEDIRECTEDGRAPH_H_
 #include "ForceDirectedGraph.h"
 #include "AlloyMath.h"
+#include "AlloyUI.h"
 #include <vector>
 #include <array>
 #include <memory>
@@ -152,7 +153,14 @@ struct Integrator {
 	}
 };
 typedef std::shared_ptr<Integrator> IntegratorPtr;
-class ForceSimulator {
+class ForceSimulator;
+struct RungeKuttaIntegrator : public Integrator {
+	virtual void integrate(ForceSimulator& sim, float timestep) const override;
+};
+struct EulerIntegrator : public Integrator {
+	virtual void integrate(ForceSimulator& sim, float timestep) const override;
+};
+class ForceSimulator: public Region {
 	std::mutex lock;
 	std::vector<ForceItemPtr> items;
 	std::vector<SpringItemPtr> springs;
@@ -161,8 +169,8 @@ class ForceSimulator {
 	std::shared_ptr<Integrator> integrator;
 	float speedLimit = 1.0f;
 public:
-	ForceSimulator(const std::shared_ptr<Integrator>& integr);
-	ForceSimulator();
+	static const float RADIUS;
+	ForceSimulator(const std::string& name, const AUnit2D& pos, const AUnit2D& dims, const std::shared_ptr<Integrator>& integr = std::shared_ptr<Integrator>(new RungeKuttaIntegrator()));
 	float getSpeedLimit() const;
 	void setSpeedLimit(float limit);
 	IntegratorPtr getIntegrator() const;
@@ -183,14 +191,10 @@ public:
 	void addSpring(const SpringItemPtr& spring);
 	void accumulate();
 	void runSimulator(float timestep);
+	virtual void draw(AlloyContext* context) override;
 };
+typedef std::shared_ptr<ForceSimulator> ForceSimulatorPtr;
 
-struct RungeKuttaIntegrator: public Integrator {
-	virtual void integrate(ForceSimulator& sim, float timestep) const override;
-};
-struct EulerIntegrator: public Integrator {
-	virtual void integrate(ForceSimulator& sim, float timestep) const override;
-};
 
 struct SpringForce: public Force {
 	static const std::string pnames[2];

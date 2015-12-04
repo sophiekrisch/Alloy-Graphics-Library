@@ -391,7 +391,7 @@ public:
 	friend class DataFlow;
 	friend class Port;
 	static const pixel2 DIMENSIONS;
-	ForceSimulator& getForceSimulator();
+	ForceSimulatorPtr getForceSimulator();
 	void setParent(DataFlow* parent) {
 		this->parent = parent;
 	}
@@ -430,10 +430,9 @@ public:
 	float getRadius() const {
 		return nodeIcon->getBounds().dimensions.y * 0.5f;
 	}
-	Node(const std::string& name) :
-			Composite(name), label(name), parent(nullptr) {
-		setup();
-	}
+	Node(const std::string& name, const pixel2& pt);
+	Node(const std::string& name, const std::string& label, const pixel2& pt);
+	/*
 	Node(const std::string& name, const std::string& label) :
 			Composite(name), label(label), parent(nullptr) {
 		setup();
@@ -447,6 +446,7 @@ public:
 			Composite(name, pos, dims), label(name), parent(nullptr) {
 		setup();
 	}
+	*/
 	void add(const std::shared_ptr<Region>& region) {
 		Composite::add(region);
 	}
@@ -477,10 +477,15 @@ public:
 	virtual NodeType getType() const override {
 		return NodeType::Data;
 	}
-	Data(const std::string& name) :
-			Node(name) {
+	Data(const std::string& name,const pixel2& pt) :
+			Node(name,pt) {
 		setup();
 	}
+	Data(const std::string& name, const std::string& label, const pixel2& pt) :
+		Node(name, label, pt) {
+		setup();
+	}
+	/*
 	Data(const std::string& name, const std::string& label) :
 			Node(name, label) {
 		setup();
@@ -494,6 +499,7 @@ public:
 			Node(name, pos, dims) {
 		setup();
 	}
+	*/
 	virtual void draw(AlloyContext* context) override;
 	virtual void pack(const pixel2& pos, const pixel2& dims,
 			const double2& dpmm, double pixelRatio, bool clamp = false)
@@ -507,10 +513,15 @@ public:
 	virtual NodeType getType() const override {
 		return NodeType::View;
 	}
-	View(const std::string& name) :
-			Node(name) {
+	View(const std::string& name, const pixel2& pt) :
+		Node(name, pt) {
 		setup();
 	}
+	View(const std::string& name, const std::string& label, const pixel2& pt) :
+		Node(name,label, pt) {
+		setup();
+	}
+	/*
 	View(const std::string& name, const std::string& label) :
 			Node(name, label) {
 		setup();
@@ -524,6 +535,7 @@ public:
 			Node(name, pos, dims) {
 		setup();
 	}
+	*/
 	virtual void pack(const pixel2& pos, const pixel2& dims,
 			const double2& dpmm, double pixelRatio, bool clamp = false)
 					override;
@@ -537,10 +549,15 @@ public:
 	virtual NodeType getType() const override {
 		return NodeType::Compute;
 	}
-	Compute(const std::string& name) :
-			Node(name) {
+	Compute(const std::string& name, const pixel2& pt) :
+		Node(name, pt) {
 		setup();
 	}
+	Compute(const std::string& name, const std::string& label, const pixel2& pt) :
+		Node(name, label, pt) {
+		setup();
+	}
+	/*
 	Compute(const std::string& name, const std::string& label) :
 			Node(name, label) {
 		setup();
@@ -554,6 +571,7 @@ public:
 			Node(name, pos, dims) {
 		setup();
 	}
+	*/
 	virtual void pack(const pixel2& pos, const pixel2& dims,
 			const double2& dpmm, double pixelRatio, bool clamp = false)
 					override;
@@ -568,10 +586,15 @@ public:
 	virtual NodeType getType() const override {
 		return NodeType::Source;
 	}
-	Source(const std::string& name) :
-			Node(name) {
+	Source(const std::string& name, const pixel2& pt) :
+		Node(name, pt) {
 		setup();
 	}
+	Source(const std::string& name, const std::string& label, const pixel2& pt) :
+		Node(name, label, pt) {
+		setup();
+	}
+	/*
 	Source(const std::string& name, const std::string& label) :
 			Node(name, label) {
 		setup();
@@ -585,6 +608,7 @@ public:
 			Node(name, pos, dims) {
 		setup();
 	}
+	*/
 	virtual void pack(const pixel2& pos, const pixel2& dims,
 		const double2& dpmm, double pixelRatio, bool clamp = false)
 		override;
@@ -599,6 +623,15 @@ public:
 	virtual NodeType getType() const override {
 		return NodeType::Destination;
 	}
+	Destination(const std::string& name, const pixel2& pt) :
+		Node(name, pt) {
+		setup();
+	}
+	Destination(const std::string& name, const std::string& label, const pixel2& pt) :
+		Node(name, label, pt) {
+		setup();
+	}
+	/*
 	Destination(const std::string& name) :
 			Node(name) {
 		setup();
@@ -617,6 +650,7 @@ public:
 			Node(name, pos, dims) {
 		setup();
 	}
+	*/
 	virtual void pack(const pixel2& pos, const pixel2& dims,
 		const double2& dpmm, double pixelRatio, bool clamp = false)
 		override;
@@ -636,7 +670,7 @@ protected:
 	Port* connectingPort;
 	Port* currentPort;
 	AvoidanceRouting router;
-	ForceSimulator forceSim;
+	std::shared_ptr<ForceSimulator> forceSim;
 	pixel2 currentDrawOffset;
 	pixel2 cursorDownLocation;
 	RecurrentTaskPtr simWorker;
@@ -644,7 +678,7 @@ protected:
 	void setup();
 	bool updateSimulation(uint64_t iter);
 public:
-	ForceSimulator& getForceSimulator() {
+	std::shared_ptr<ForceSimulator> getForceSimulator() {
 		return forceSim;
 	}
 	void start();
@@ -680,30 +714,35 @@ public:
 		Composite::add(node);
 		sourceNodes.push_back(node);
 		router.add(node);
+		forceSim->addItem(node->getForceItem());
 		node->parent = this;
 	}
 	void add(const std::shared_ptr<Destination>& node) {
 		Composite::add(node);
 		destinationNodes.push_back(node);
 		router.add(node); 
+		forceSim->addItem(node->getForceItem());
 		node->parent = this;
 	}
 	void add(const std::shared_ptr<Data>& node) {
 		Composite::add(node);
 		dataNodes.push_back(node);
 		router.add(node); 
+		forceSim->addItem(node->getForceItem());
 		node->parent = this;
 	}
 	void add(const std::shared_ptr<View>& node) {
 		Composite::add(node);
 		viewNodes.push_back(node);
-		router.add(node); 
+		router.add(node);
+		forceSim->addItem(node->getForceItem());
 		node->parent = this;
 	}
 	void add(const std::shared_ptr<Compute>& node) {
 		Composite::add(node);
 		computeNodes.push_back(node);
 		router.add(node);
+		forceSim->addItem(node->getForceItem());
 		node->parent = this;
 	}
 	void add(const std::shared_ptr<Connection>& node) {
@@ -755,10 +794,11 @@ public:
 	NodeType getType() const override {
 		return NodeType::Group;
 	}
-
-	Group(const std::string& name) :
-			Node(name) {
+	Group(const std::string& name, const pixel2& pt) :
+		Node(name, pt) {
+		setup();
 	}
+	/*
 	Group(const std::string& name, const std::string& label) :
 			Node(name, label) {
 	}
@@ -769,6 +809,7 @@ public:
 	Group(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
 			Node(name, pos, dims) {
 	}
+	*/
 	void setGraph(std::shared_ptr<DataFlow>& graph) {
 		this->graph = graph;
 	}

@@ -77,98 +77,70 @@ std::shared_ptr<Relationship> MakeRelationship(
 			new Relationship(object, PredicatePtr(new Predicate(name)),
 					subject));
 }
-std::shared_ptr<Data> MakeDataNode(const std::string& name,
-		const std::string& label, const pixel2& pos) {
-	return DataPtr(
-			new Data(name, label, CoordPX(pos), CoordPX(Node::DIMENSIONS)));
+std::shared_ptr<Data> MakeDataNode(const std::string& name,const std::string& label, const pixel2& pos) {
+	return DataPtr(new Data(name,label,pos));
 }
 std::shared_ptr<Data> MakeDataNode(const std::string& name, const pixel2& pos) {
-	return DataPtr(new Data(name, CoordPX(pos), CoordPX(Node::DIMENSIONS)));
+	return DataPtr(new Data(name,pos));
 }
-std::shared_ptr<Data> MakeDataNode(const std::string& name,
-		const std::string& label) {
-	return DataPtr(
-			new Data(name, label, CoordPX(0, 0), CoordPX(Node::DIMENSIONS)));
+std::shared_ptr<Data> MakeDataNode(const std::string& name,const std::string& label) {
+	return DataPtr(new Data(name, label,pixel2(0.0f)));
 }
 std::shared_ptr<Data> MakeDataNode(const std::string& name) {
-	return DataPtr(new Data(name, CoordPX(0, 0), CoordPX(Node::DIMENSIONS)));
+	return DataPtr(new Data(name, pixel2(0.0f)));
 }
 
-std::shared_ptr<View> MakeViewNode(const std::string& name,
-		const std::string& label, const pixel2& pos) {
-	return ViewPtr(
-			new View(name, label, CoordPX(pos), CoordPX(Node::DIMENSIONS)));
+
+std::shared_ptr<View> MakeViewNode(const std::string& name, const std::string& label, const pixel2& pos) {
+	return ViewPtr(new View(name, label, pos));
 }
 std::shared_ptr<View> MakeViewNode(const std::string& name, const pixel2& pos) {
-	return ViewPtr(new View(name, CoordPX(pos), CoordPX(Node::DIMENSIONS)));
+	return ViewPtr(new View(name, pos));
 }
-std::shared_ptr<View> MakeViewNode(const std::string& name,
-		const std::string& label) {
-	return ViewPtr(
-			new View(name, label, CoordPX(0, 0), CoordPX(Node::DIMENSIONS)));
+std::shared_ptr<View> MakeViewNode(const std::string& name, const std::string& label) {
+	return ViewPtr(new View(name, label, pixel2(0.0f)));
 }
 std::shared_ptr<View> MakeViewNode(const std::string& name) {
-	return ViewPtr(new View(name, CoordPX(0, 0), CoordPX(Node::DIMENSIONS)));
+	return ViewPtr(new View(name, pixel2(0.0f)));
 }
 
-std::shared_ptr<Compute> MakeComputeNode(const std::string& name,
-		const std::string& label, const pixel2& pos) {
-	return ComputePtr(
-			new Compute(name, label, CoordPX(pos), CoordPX(Node::DIMENSIONS)));
+std::shared_ptr<Compute> MakeComputeNode(const std::string& name, const std::string& label, const pixel2& pos) {
+	return ComputePtr(new Compute(name, label, pos));
 }
-std::shared_ptr<Compute> MakeComputeNode(const std::string& name,
-		const pixel2& pos) {
-	return ComputePtr(
-			new Compute(name, CoordPX(pos), CoordPX(Node::DIMENSIONS)));
+std::shared_ptr<Compute> MakeComputeNode(const std::string& name, const pixel2& pos) {
+	return ComputePtr(new Compute(name, pos));
 }
-std::shared_ptr<Compute> MakeComputeNode(const std::string& name,
-		const std::string& label) {
-	return ComputePtr(
-			new Compute(name, label, CoordPX(0, 0), CoordPX(Node::DIMENSIONS)));
+std::shared_ptr<Compute> MakeComputeNode(const std::string& name, const std::string& label) {
+	return ComputePtr(new Compute(name, label, pixel2(0.0f)));
 }
 std::shared_ptr<Compute> MakeComputeNode(const std::string& name) {
-	return ComputePtr(
-			new Compute(name, CoordPX(0, 0), CoordPX(Node::DIMENSIONS)));
+	return ComputePtr(new Compute(name, pixel2(0.0f)));
 }
 
-std::shared_ptr<Source> MakeSourceNode(const std::string& name,
-		const std::string& label, const pixel2& pos) {
-	return SourcePtr(
-			new Source(name, label, CoordPX(pos), CoordPX(Node::DIMENSIONS)));
+std::shared_ptr<Source> MakeSourceNode(const std::string& name, const std::string& label, const pixel2& pos) {
+	return SourcePtr(new Source(name, label, pos));
 }
-std::shared_ptr<Source> MakeSourceNode(const std::string& name,
-		const pixel2& pos) {
-	return SourcePtr(new Source(name, CoordPX(pos), CoordPX(Node::DIMENSIONS)));
+std::shared_ptr<Source> MakeSourceNode(const std::string& name, const pixel2& pos) {
+	return SourcePtr(new Source(name, pos));
 }
-std::shared_ptr<Source> MakeSourceNode(const std::string& name,
-		const std::string& label) {
-	return SourcePtr(
-			new Source(name, label, CoordPX(0, 0), CoordPX(Node::DIMENSIONS)));
+std::shared_ptr<Source> MakeSourceNode(const std::string& name, const std::string& label) {
+	return SourcePtr(new Source(name, label, pixel2(0.0f)));
 }
 std::shared_ptr<Source> MakeSourceNode(const std::string& name) {
-	return SourcePtr(new Source(name, CoordPX(0, 0), CoordPX(Node::DIMENSIONS)));
+	return SourcePtr(new Source(name, pixel2(0.0f)));
 }
 
-std::shared_ptr<Destination> MakeDestinationNode(const std::string& name,
-		const std::string& label, const pixel2& pos) {
-	return DestinationPtr(
-			new Destination(name, label, CoordPX(pos),
-					CoordPX(Node::DIMENSIONS)));
+std::shared_ptr<Destination> MakeDestinationNode(const std::string& name, const std::string& label, const pixel2& pos) {
+	return DestinationPtr(new Destination(name, label, pos));
 }
-std::shared_ptr<Destination> MakeDestinationNode(const std::string& name,
-		const pixel2& pos) {
-	return DestinationPtr(
-			new Destination(name, CoordPX(pos), CoordPX(Node::DIMENSIONS)));
+std::shared_ptr<Destination> MakeDestinationNode(const std::string& name, const pixel2& pos) {
+	return DestinationPtr(new Destination(name, pos));
 }
-std::shared_ptr<Destination> MakeDestinationNode(const std::string& name,
-		const std::string& label) {
-	return DestinationPtr(
-			new Destination(name, label, CoordPX(0, 0),
-					CoordPX(Node::DIMENSIONS)));
+std::shared_ptr<Destination> MakeDestinationNode(const std::string& name, const std::string& label) {
+	return DestinationPtr(new Destination(name, label, pixel2(0.0f)));
 }
 std::shared_ptr<Destination> MakeDestinationNode(const std::string& name) {
-	return DestinationPtr(
-			new Destination(name, CoordPX(0, 0), CoordPX(Node::DIMENSIONS)));
+	return DestinationPtr(new Destination(name, pixel2(0.0f)));
 }
 void NodeIcon::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
@@ -231,7 +203,7 @@ void Node::setup() {
 	dragging = false;
 	Application::addListener(this);
 }
-ForceSimulator& Node::getForceSimulator() {
+ForceSimulatorPtr Node::getForceSimulator() {
 	if (parent == nullptr)throw std::runtime_error("Node has no parent dataflow.");
 	return parent->getForceSimulator();
 }
@@ -571,11 +543,6 @@ bool Node::isMouseOver() const {
 	return false;
 }
 ForceItemPtr Node::getForceItem() {
-	if (forceItem.get() == nullptr) {
-		forceItem = ForceItemPtr(new ForceItem());
-		forceItem->mass = -1;
-		getForceSimulator().addItem(forceItem);
-	}
 	return forceItem;
 }
 void DataFlow::setCurrentPort(Port* currentPort) {
@@ -700,25 +667,21 @@ void DataFlow::startConnection(Port* port) {
 	connectingPort = port;
 }
 bool DataFlow::updateSimulation(uint64_t iter) {
-
+	std::chrono::steady_clock::time_point currentTime =std::chrono::steady_clock::now();
 	std::shared_ptr<AlloyContext>  context = AlloyApplicationContext();
 	if (context.get() == nullptr)return false;
+	float elapsed =std::chrono::duration<float>(currentTime - lastTime).count();
 	if (!context->isMouseDown()) {
-		forceSim.runSimulator(30.0f);
-		std::chrono::steady_clock::time_point currentTime =
-			std::chrono::steady_clock::now();
-		float elapsed =
-			std::chrono::duration<float>(currentTime - lastTime).count();
-		if (elapsed >= 0.01f) {
-			lastTime = currentTime;
-		}
+		forceSim->runSimulator(1000.0f*elapsed);
 	}
+	lastTime = currentTime;
 	return true;
 }
 void DataFlow::setup() {
 
 	setRoundCorners(true);
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	forceSim= ForceSimulatorPtr(new ForceSimulator("Force Simulator",CoordPX(0.0f,0.0f),CoordPercent(1.0f,1.0f)));
 	DrawPtr pathsRegion = DrawPtr(
 			new Draw("Paths", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f),
 					[this](AlloyContext* context,const box2px& bounds) {
@@ -732,14 +695,15 @@ void DataFlow::setup() {
 							relationship->drawText(context);
 						}
 					}));
+	Composite::add(forceSim);
 	Composite::add(pathsRegion);
 	Application::addListener(this);
-	forceSim.addForce(SpringForcePtr(new SpringForce()));
-	forceSim.addForce(NBodyForcePtr(new NBodyForce()));
+	forceSim->addForce(SpringForcePtr(new SpringForce()));
+	forceSim->addForce(NBodyForcePtr(new NBodyForce()));
 	//forceSim.addForce(GravitationalForcePtr(new GravitationalForce()));
 	simWorker = RecurrentTaskPtr(new RecurrentTask([this](uint64_t iter) {
 		return this->updateSimulation(iter);
-	}, 10));
+	}, 30));
 	lastTime = std::chrono::steady_clock::now();
 }
 void DataFlow::start() {
@@ -1110,6 +1074,18 @@ void Destination::pack(const pixel2& pos, const pixel2& dims, const double2& dpm
 	double pixelRatio, bool clamp) {
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
 }
+Node::Node(const std::string& name, const pixel2& pt) :
+	Composite(name, CoordPX(pt), CoordPX(Node::DIMENSIONS)), label(name), parent(nullptr) {
+	forceItem = ForceItemPtr(new ForceItem());
+	forceItem->plocation = forceItem->location = pt+Node::DIMENSIONS*0.5f;
+	setup();
+}
+Node::Node(const std::string& name, const std::string& label, const pixel2& pt) :
+	Composite(name, CoordPX(pt), CoordPX(Node::DIMENSIONS)), label(label), parent(nullptr) {
+	forceItem = ForceItemPtr(new ForceItem());
+	forceItem->plocation = forceItem->location = pt+Node::DIMENSIONS*0.5f;
+	setup();
+}
 void Node::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
@@ -1275,11 +1251,10 @@ void Destination::draw(AlloyContext* context) {
 }
 SpringItemPtr Relationship::getSpringItem() {
 	if (springItem.get() == nullptr) {
-		float r=std::min(Node::DIMENSIONS.x,Node::DIMENSIONS.y);
 		springItem = SpringItemPtr(
 				new SpringItem(subject->getForceItem(), object->getForceItem(),
-						-1.0f, r));
-		subject->getForceSimulator().addSpring(springItem);
+						-1.0f, 2*ForceSimulator::RADIUS));
+		subject->getForceSimulator()->addSpring(springItem);
 	}
 	return springItem;
 }

@@ -72,16 +72,68 @@ const float NBodyForce::DEFAULT_THETA = 0.9f;
 const float NBodyForce::DEFAULT_MIN_THETA = 0.0f;
 const float NBodyForce::DEFAULT_MAX_THETA = 1.0f;
 
+const float ForceSimulator::RADIUS = 20.0f;
 void ForceItem::draw(AlloyContext* context) {
-
+	const float lineWidth = 4.0f;
+	NVGcontext* nvg = context->nvgContext;
+	nvgStrokeWidth(nvg, lineWidth);
+	nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+	nvgFillColor(nvg, Color(255,64,64));
+	nvgStrokeWidth(nvg, lineWidth);
+	nvgBeginPath(nvg);
+	float r = ForceSimulator::RADIUS;
+	if (shape == NodeShape::Circle) {
+		nvgCircle(nvg, location.x,
+			location.y,r-lineWidth*0.5f);
+	}
+	else if (shape == NodeShape::Square) {
+		nvgRoundedRect(nvg, location.x + lineWidth * 0.5f,
+			location.y + lineWidth * 0.5f,
+			2*r - lineWidth,
+			2 * r - lineWidth, r * 0.5f);
+	}
+	else if (shape == NodeShape::Triangle) {
+		nvgLineJoin(nvg, NVG_ROUND);
+		nvgMoveTo(nvg, location.x -r,location.y-r- lineWidth);
+		nvgLineTo(nvg, location.x + r + lineWidth * 0.5f,location.y + r + lineWidth * 0.5f);
+		nvgLineTo(nvg, location.x-r - lineWidth,location.y -r+ lineWidth * 0.5f);
+		nvgClosePath(nvg);
+	}
+	else if (shape == NodeShape::Hexagon) {
+		nvgLineJoin(nvg, NVG_ROUND);
+		float cx = location.x;
+		float cy = location.y;
+		static const float SCALE = 1.0f / std::sqrt(0.75f);
+		float rx = (r- lineWidth * 0.5f) * SCALE;
+		float ry = (r - lineWidth * 0.5f);
+		nvgMoveTo(nvg, cx + rx, cy);
+		nvgLineTo(nvg, cx + rx * 0.5f, cy - ry);
+		nvgLineTo(nvg, cx - rx * 0.5f, cy - ry);
+		nvgLineTo(nvg, cx - rx * 0.5f, cy - ry);
+		nvgLineTo(nvg, cx - rx, cy);
+		nvgLineTo(nvg, cx - rx * 0.5f, cy + ry);
+		nvgLineTo(nvg, cx + rx * 0.5f, cy + ry);
+		nvgClosePath(nvg);
+	}
+	nvgFill(nvg);
+	nvgStroke(nvg);
 }
 void SpringItem::draw(AlloyContext* context) {
+	NVGcontext* nvg = context->nvgContext;
+	nvgStrokeColor(nvg, context->theme.NEUTRAL);
+	nvgStrokeWidth(nvg, 4.0f);
+	nvgLineCap(nvg, NVG_ROUND);
+	nvgBeginPath(nvg);
+	float2 objectPt = item2->location;
+	float2 subjectPt = item1->location;
+	nvgMoveTo(nvg, objectPt.x, objectPt.y);
+	nvgLineTo(nvg, subjectPt.x, subjectPt.y);
+	nvgStroke(nvg);
+}
 
-}
-ForceSimulator::ForceSimulator() :
-		ForceSimulator(std::shared_ptr<Integrator>(new RungeKuttaIntegrator())) {
-}
-ForceSimulator::ForceSimulator(const std::shared_ptr<Integrator>& integr) : integrator(integr) {
+ForceSimulator::ForceSimulator(const std::string& name, const AUnit2D& pos, const AUnit2D& dims, const std::shared_ptr<Integrator>& integr) 
+	:Region(name, pos, dims),integrator(integr) {
+
 }
 float ForceSimulator::getSpeedLimit() const {
 	return speedLimit;
@@ -156,6 +208,14 @@ SpringItemPtr ForceSimulator::addSpring(const ForceItemPtr& item1,
 SpringItemPtr ForceSimulator::addSpring(const ForceItemPtr& item1,
 		const ForceItemPtr& item2) {
 	return addSpring(item1, item2, -1.f, -1.f);
+}
+void ForceSimulator::draw(AlloyContext* context) {
+	for (SpringItemPtr item : springs) {
+		item->draw(context);
+	}
+	for (ForceItemPtr item : items) {
+		item->draw(context);
+	}
 }
 void ForceSimulator::accumulate() {
 	//std::cout << "Forces " << iforces.size() << " " << sforces.size() << " " << items.size() << std::endl;
