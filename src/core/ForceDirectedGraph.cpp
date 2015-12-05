@@ -268,6 +268,12 @@ void ForceSimulator::draw(AlloyContext* context) {
 	float2 offset = getBoundsPosition();
 	NVGcontext* nvg = context->nvgContext;
 	pushScissor(nvg, getCursorBounds());
+	for (ForcePtr f : iforces) {
+		f->draw(context, offset);
+	}
+	for (ForcePtr f : sforces) {
+		f->draw(context, offset);
+	}
 	for (SpringItemPtr item : springs) {
 		item->draw(context, offset);
 	}
@@ -289,7 +295,6 @@ void ForceSimulator::drawDebug(AlloyContext* context) {
 			forceBounds.position.y + offset.y, forceBounds.dimensions.x,
 			forceBounds.dimensions.y);
 	nvgStroke(nvg);
-
 	for (ForcePtr f : iforces) {
 		f->draw(context, offset);
 	}
@@ -554,13 +559,13 @@ BoxForce::BoxForce(float gravConst, const box2f& box) {
 }
 void BoxForce::draw(AlloyContext* context, const pixel2& offset) {
 	NVGcontext* nvg = context->nvgContext;
-	nvgStrokeWidth(nvg, 8.0f);
-	nvgStrokeColor(nvg, Color(1.0f, 1.0f, 1.0f, 1.0f));
+	nvgStrokeWidth(nvg, 4.0f);
+	nvgStrokeColor(nvg, Color(0.8f,0.8f,0.8f, 1.0f));
 	nvgBeginPath(nvg);
-	nvgMoveTo(nvg, pts[0].x + offset.x + 4.0f, pts[0].y + offset.y + 4.0f);
-	nvgLineTo(nvg, pts[1].x + offset.x - 4.0f, pts[1].y + offset.y + 4.0f);
-	nvgLineTo(nvg, pts[2].x + offset.x - 4.0f, pts[2].y + offset.y - 4.0f);
-	nvgLineTo(nvg, pts[3].x + offset.x + 4.0f, pts[3].y + offset.y - 4.0f);
+	nvgMoveTo(nvg, pts[0].x + offset.x + 2.0f, pts[0].y + offset.y + 2.0f);
+	nvgLineTo(nvg, pts[1].x + offset.x - 2.0f, pts[1].y + offset.y + 2.0f);
+	nvgLineTo(nvg, pts[2].x + offset.x - 2.0f, pts[2].y + offset.y - 2.0f);
+	nvgLineTo(nvg, pts[3].x + offset.x + 2.0f, pts[3].y + offset.y - 2.0f);
 	nvgClosePath(nvg);
 	nvgStroke(nvg);
 }
@@ -767,8 +772,8 @@ void NBodyForce::draw(AlloyContext* context, const pixel2& offset) {
 
 void CircularWallForce::draw(AlloyContext* context, const pixel2& offset) {
 	NVGcontext* nvg = context->nvgContext;
-	nvgStrokeWidth(nvg, 8.0f);
-	nvgStrokeColor(nvg, Color(1.0f, 1.0f, 1.0f, 1.0f));
+	nvgStrokeWidth(nvg, 4.0f);
+	nvgStrokeColor(nvg, Color(0.8f,0.8f,0.8f, 1.0f));
 	nvgBeginPath(nvg);
 	nvgCircle(nvg, p.x + offset.x, p.y + offset.y, r);
 	nvgStroke(nvg);

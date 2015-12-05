@@ -24,7 +24,7 @@
 using namespace aly;
 using namespace aly::dataflow;
 ForceDirectedGraphEx::ForceDirectedGraphEx() :
-		Application(1920, 1080, "Force Directed Graph Example") {
+		Application(1024,768, "Force Directed Graph Example") {
 }
 void ForceDirectedGraphEx::createRadialGraph(const ForceSimulatorPtr& graph) {
 	int D =3;
@@ -68,7 +68,7 @@ bool ForceDirectedGraphEx::init(Composite& rootNode) {
 	controlRegion->borderColor = MakeColor(200, 200, 200);
 	controlRegion->borderWidth = UnitPX(1.0f);
 	BorderCompositePtr borderRegion = BorderCompositePtr(new BorderComposite("Layout", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f),true));
-	borderRegion->setWest(controlRegion, UnitPX(350.0f));
+	borderRegion->setWest(controlRegion, UnitPX(300.0f));
 	borderRegion->setCenter(displayRegion);
 	graph = ForceSimulatorPtr(new ForceSimulator("Force Simulator", CoordPX(0.0f, 0.0f),CoordPX(2000,2000)));
 	displayRegion->add(graph);
@@ -83,6 +83,7 @@ bool ForceDirectedGraphEx::init(Composite& rootNode) {
 	graph->addForce(BoxForcePtr(new BoxForce(box2f(float2(0.0f,0.0f), float2(2000.0f,2000.0f)))));
 	graph->addForce(CircularWallForcePtr(new CircularWallForce(float2(1000.0f, 1000.0f), 960.0f)));
 	graph->addForce(DragForcePtr(new DragForce(0.001f)));
+	bool firstTime=true;
 	for (ForcePtr f : graph->getForces()) {
 		int N = (int)f->getParameterCount();
 		CompositePtr paramRegion = MakeComposite(f->getName(), CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f));
@@ -100,7 +101,8 @@ bool ForceDirectedGraphEx::init(Composite& rootNode) {
 				f->setParameter(n,val.toFloat());
 			});
 		}
-		controlRegion->add(paramRegion, 30.0f+N * (40.0f +5.0f)+5.0f, true);
+		controlRegion->add(paramRegion, 30.0f+N * (40.0f +5.0f)+5.0f, firstTime);
+		firstTime=false;
 	}
 	rootNode.add(borderRegion);
 	getContext()->addDeferredTask([this]() {
