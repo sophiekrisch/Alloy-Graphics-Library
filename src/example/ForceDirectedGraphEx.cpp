@@ -60,12 +60,12 @@ bool ForceDirectedGraphEx::init(Composite& rootNode) {
 	createRadialGraph(graph);
 	graph->setDragEnabled(true);
 	graph->backgroundColor = MakeColor(32, 32, 32);
-	graph->setRoundCorners(true);
 	graph->setClampDragToParentBounds(false);
 	graph->addForce(SpringForcePtr(new SpringForce()));
 	graph->addForce(NBodyForcePtr(new NBodyForce()));
 	graph->addForce(GravitationalForcePtr(new GravitationalForce()));
 	graph->addForce(WallForcePtr(new WallForce(float2(100.0f, 1800.0f), float2(1900.0f, 1700.0f))));
+	graph->addForce(BoxForcePtr(new BoxForce(box2f(float2(0.0f,0.0f), float2(2000.0f,2000.0f)))));
 	graph->addForce(CircularWallForcePtr(new CircularWallForce(float2(1000.0f, 1000.0f), 960.0f)));
 	graph->addForce(DragForcePtr(new DragForce(0.001f)));
 	rootNode.add(graph);

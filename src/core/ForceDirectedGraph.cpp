@@ -22,6 +22,7 @@
 #include "ForceDirectedGraph.h"
 #include "AlloyDataFlow.h"
 #include "AlloyContext.h"
+#include "AlloyDrawUtil.h"
 #define NUM_THREADS 4
 namespace aly {
 	namespace dataflow {
@@ -48,19 +49,35 @@ namespace aly {
 		const float WallForce::DEFAULT_MAX_GRAV_CONSTANT = 1.0f;
 		const int WallForce::GRAVITATIONAL_CONST = 0;
 
+		const std::string BoxForce::pnames[1] = { "GravitationalConstant" };
+		const float BoxForce::DEFAULT_GRAV_CONSTANT = -0.1f;
+		const float BoxForce::DEFAULT_MIN_GRAV_CONSTANT = -1.0f;
+		const float BoxForce::DEFAULT_MAX_GRAV_CONSTANT = 1.0f;
+		const int BoxForce::GRAVITATIONAL_CONST = 0;
+
 		const std::string CircularWallForce::pnames[1] = { "GravitationalConstant" };
 		const float CircularWallForce::DEFAULT_GRAV_CONSTANT = -0.1f;
 		const float CircularWallForce::DEFAULT_MIN_GRAV_CONSTANT = -1.0f;
 		const float CircularWallForce::DEFAULT_MAX_GRAV_CONSTANT = 1.0f;
 
 		const std::string GravitationalForce::pnames[2] = { "GravitationalConstant",
-				"Direction" };
+				"Orientation" };
 		const float GravitationalForce::DEFAULT_FORCE_CONSTANT = 1E-4f;
 		const float GravitationalForce::DEFAULT_MIN_FORCE_CONSTANT = 1E-5f;
 		const float GravitationalForce::DEFAULT_MAX_FORCE_CONSTANT = 1E-3f;
 		const float GravitationalForce::DEFAULT_DIRECTION = (float)ALY_PI / 2.0f;
 		const float GravitationalForce::DEFAULT_MIN_DIRECTION = (float)-ALY_PI;
 		const float GravitationalForce::DEFAULT_MAX_DIRECTION = (float)ALY_PI;
+
+
+		const std::string BuoyancyForce::pnames[2] = { "GravitationalConstant",
+			"Orientation" };
+		const float BuoyancyForce::DEFAULT_FORCE_CONSTANT = 1E-4f;
+		const float BuoyancyForce::DEFAULT_MIN_FORCE_CONSTANT = 1E-5f;
+		const float BuoyancyForce::DEFAULT_MAX_FORCE_CONSTANT = 1E-3f;
+		const float BuoyancyForce::DEFAULT_DIRECTION = (float)ALY_PI / 2.0f;
+		const float BuoyancyForce::DEFAULT_MIN_DIRECTION = (float)-ALY_PI;
+		const float BuoyancyForce::DEFAULT_MAX_DIRECTION = (float)ALY_PI;
 
 		const std::string NBodyForce::pnames[3] = { "GravitationalConstant", "Distance",
 				"BarnesHutTheta" };
@@ -250,6 +267,14 @@ namespace aly {
 			context->setCursor(&Cursor::Position);
 			std::lock_guard<std::mutex> lockMe(lock);
 			float2 offset = getBoundsPosition();
+			NVGcontext* nvg = context->nvgContext;
+			pushScissor(nvg, getCursorBounds());
+			nvgStrokeWidth(nvg, 4.0f);
+			nvgStrokeColor(nvg, Color(0.3f, 0.3f, 0.3f, 1.0f));
+			nvgBeginPath(nvg);
+			nvgRect(nvg,forceBounds.position.x + offset.x, forceBounds.position.y + offset.y, forceBounds.dimensions.x, forceBounds.dimensions.y);
+			nvgStroke(nvg);
+
 			for (ForcePtr f : iforces) {
 				f->draw(context, offset);
 			}
@@ -262,6 +287,7 @@ namespace aly {
 			for (ForceItemPtr item : items) {
 				item->draw(context, offset);
 			}
+			popScissor(nvg);
 		}
 		void ForceSimulator::accumulate() {
 			float2 p1(1E30f);
@@ -402,18 +428,6 @@ namespace aly {
 			item1->force += coeff * dxy;
 			item2->force -= coeff * dxy;
 		}
-		WallForce::WallForce(float gravConst, float2 p1, float2 p2) :
-			p1(p1), p2(p2) {
-			params = std::vector<float>{ gravConst };
-			minValues = std::vector<float>{ DEFAULT_MIN_GRAV_CONSTANT };
-			maxValues = std::vector<float>{ DEFAULT_MAX_GRAV_CONSTANT };
-			dxy = p2 - p1;
-			float r = length(dxy);
-			if (dxy.x != 0.0)
-				dxy.x /= r;
-			if (dxy.y != 0.0)
-				dxy.y /= r;
-		}
 		int relativeCCW(float x1, float y1, float x2, float y2, float px, float py) {
 			x2 -= x1;
 			y2 -= y1;
@@ -464,6 +478,27 @@ namespace aly {
 			}
 			return lenSq;
 		}
+		WallForce::WallForce(float gravConst, float2 p1, float2 p2) :
+			p1(p1), p2(p2) {
+			params = std::vector<float>{ gravConst };
+			minValues = std::vector<float>{ DEFAULT_MIN_GRAV_CONSTANT };
+			maxValues = std::vector<float>{ DEFAULT_MAX_GRAV_CONSTANT };
+			dxy = p2 - p1;
+			float r = length(dxy);
+			if (dxy.x != 0.0)
+				dxy.x /= r;
+			if (dxy.y != 0.0)
+				dxy.y /= r;
+		}
+		void WallForce::draw(AlloyContext* context, const pixel2& offset) {
+			NVGcontext* nvg = context->nvgContext;
+			nvgStrokeWidth(nvg, 8.0f);
+			nvgStrokeColor(nvg, Color(1.0f, 1.0f, 1.0f, 1.0f));
+			nvgBeginPath(nvg);
+			nvgMoveTo(nvg, p1.x + offset.x, p1.y + offset.y);
+			nvgLineTo(nvg, p2.x + offset.x, p2.y + offset.y);
+			nvgStroke(nvg);
+		}
 		void WallForce::getForce(const ForceItemPtr& item) {
 			float2 n = item->location;
 			int ccw = relativeCCW(p1.x, p1.y, p2.x, p2.y, n.x, n.y);
@@ -475,6 +510,56 @@ namespace aly {
 				item->force.y += ccw * v * dxy.x;
 			if (n.y >= std::min(p1.y, p2.y) && n.y <= std::max(p1.y, p2.y))
 				item->force.x += -1.0f * ccw * v * dxy.y;
+		}
+		BoxForce::BoxForce(float gravConst, const box2f& box) {
+			params = std::vector<float>{ gravConst };
+			minValues = std::vector<float>{ DEFAULT_MIN_GRAV_CONSTANT };
+			maxValues = std::vector<float>{ DEFAULT_MAX_GRAV_CONSTANT };
+			pts[0] = box.position;
+			pts[1] = box.position+float2(box.dimensions.x,0.0f);
+			pts[2] = box.position + box.dimensions;
+			pts[3] = box.position + float2(0.0f,box.dimensions.x);
+
+			for (int k = 0; k < 4;k++) {
+				float2 p1 = pts[k];
+				float2 p2 = pts[(k+1)%4];
+				float2 dxy = p2 - p1;
+				float r = length(dxy);
+				if (dxy.x != 0.0)
+					dxy.x /= r;
+				if (dxy.y != 0.0)
+					dxy.y /= r;
+				this->dxy[k] = dxy;
+			}
+		}
+		void BoxForce::draw(AlloyContext* context, const pixel2& offset) {
+			NVGcontext* nvg = context->nvgContext;
+			nvgStrokeWidth(nvg, 8.0f);
+			nvgStrokeColor(nvg, Color(1.0f, 1.0f, 1.0f, 1.0f));
+			nvgBeginPath(nvg);
+			nvgMoveTo(nvg, pts[0].x + offset.x + 4.0f, pts[0].y + offset.y + 4.0f);
+			nvgLineTo(nvg, pts[1].x + offset.x - 4.0f, pts[1].y + offset.y + 4.0f);
+			nvgLineTo(nvg, pts[2].x + offset.x - 4.0f, pts[2].y + offset.y - 4.0f);
+			nvgLineTo(nvg, pts[3].x + offset.x + 4.0f, pts[3].y + offset.y - 4.0f);
+			nvgClosePath(nvg);
+			nvgStroke(nvg);
+		}
+		void BoxForce::getForce(const ForceItemPtr& item) {
+			float2 n = item->location;
+			for (int k = 0; k < 4; k++) {
+				float2 p1 = pts[k];
+				float2 p2 = pts[(k + 1) % 4];
+				float2 dxy = this->dxy[k];
+				int ccw = relativeCCW(p1.x, p1.y, p2.x, p2.y, n.x, n.y);
+				float r = (float)std::sqrt(ptSegDistSq(p1.x, p1.y, p2.x, p2.y, n.x, n.y));
+				if (r < 1E-5f)
+					r = (float)RandomUniform(1E-5f, 0.01f);
+				float v = params[GRAVITATIONAL_CONST] * item->mass / (r * r * r);
+				if (n.x >= std::min(p1.x, p2.x) && n.x <= std::max(p1.x, p2.x))
+					item->force.y += ccw * v * dxy.x;
+				if (n.y >= std::min(p1.y, p2.y) && n.y <= std::max(p1.y, p2.y))
+					item->force.x += -1.0f * ccw * v * dxy.y;
+			}
 		}
 		void CircularWallForce::getForce(const ForceItemPtr& item) {
 			float2 n = item->location;
@@ -490,6 +575,9 @@ namespace aly {
 			}
 			item->force += v * dxy / d;
 		}
+
+
+
 		void GravitationalForce::getForce(const ForceItemPtr& item) {
 			float coeff = params[GRAVITATIONAL_CONST] * item->mass;
 			item->force += gDirection * coeff;
@@ -660,15 +748,7 @@ namespace aly {
 			nvgRect(nvg, bounds.position.x + offset.x, bounds.position.y + offset.y, bounds.dimensions.x, bounds.dimensions.y);
 			nvgStroke(nvg);
 		}
-		void WallForce::draw(AlloyContext* context, const pixel2& offset) {
-			NVGcontext* nvg = context->nvgContext;
-			nvgStrokeWidth(nvg, 8.0f);
-			nvgStrokeColor(nvg, Color(1.0f,1.0f,1.0f, 1.0f));
-			nvgBeginPath(nvg);
-			nvgMoveTo(nvg, p1.x+offset.x, p1.y + offset.y);
-			nvgLineTo(nvg, p2.x + offset.x, p2.y+offset.y);
-			nvgStroke(nvg);
-		}
+
 		void CircularWallForce::draw(AlloyContext* context, const pixel2& offset) {
 			NVGcontext* nvg = context->nvgContext;
 			nvgStrokeWidth(nvg, 8.0f);

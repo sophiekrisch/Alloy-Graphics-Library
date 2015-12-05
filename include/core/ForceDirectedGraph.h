@@ -286,6 +286,30 @@ struct WallForce: public Force {
 	virtual void getForce(const ForceItemPtr& item) override;
 };
 typedef std::shared_ptr<WallForce> WallForcePtr;
+
+struct BoxForce : public Force {
+	static const std::string pnames[1];
+	static const float DEFAULT_GRAV_CONSTANT;
+	static const float DEFAULT_MIN_GRAV_CONSTANT;
+	static const float DEFAULT_MAX_GRAV_CONSTANT;
+	static const int GRAVITATIONAL_CONST;
+	float2 pts[4];
+	float2 dxy[4];
+	
+	BoxForce(float gravConst, const box2f& box);
+	BoxForce(const box2f& box) :
+		BoxForce(DEFAULT_GRAV_CONSTANT, box) {
+	}
+	virtual bool isForceItem() const override {
+		return true;
+	}
+	virtual std::string getParameterName(size_t i) const override {
+		return pnames[i];
+	}
+	virtual void draw(AlloyContext* context, const pixel2& offset) override;
+	virtual void getForce(const ForceItemPtr& item) override;
+};
+typedef std::shared_ptr<BoxForce> BoxForcePtr;
 struct CircularWallForce: public Force {
 	static const std::string pnames[1];
 	static const float DEFAULT_GRAV_CONSTANT;
