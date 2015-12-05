@@ -30,7 +30,7 @@ void ForceDirectedGraphEx::createRadialGraph(const ForceSimulatorPtr& graph) {
 	int D =3;
 	int N = 6;
 	float armLength = 500.0f;
-	float2 center = getContext()->getViewport().center();
+	float2 center(1000.0f,1000.0f);
 	std::vector<ForceItemPtr> childNodes;
 	childNodes.push_back(ForceItemPtr(new ForceItem(center)));
 	graph->addForceItem(childNodes.front());
@@ -56,15 +56,17 @@ void ForceDirectedGraphEx::createRadialGraph(const ForceSimulatorPtr& graph) {
 
 }
 bool ForceDirectedGraphEx::init(Composite& rootNode) {
-	graph = ForceSimulatorPtr(new ForceSimulator("Force Simulator", CoordPX(10, 10),CoordPerPX(1.0f, 1.0f, -20.0f, -20.0f)));
+	graph = ForceSimulatorPtr(new ForceSimulator("Force Simulator", CoordPX(0.0f, 0.0f),CoordPX(2000,2000)));
 	createRadialGraph(graph);
 	graph->setDragEnabled(true);
+	graph->backgroundColor = MakeColor(32, 32, 32);
+	graph->setRoundCorners(true);
 	graph->setClampDragToParentBounds(false);
 	graph->addForce(SpringForcePtr(new SpringForce()));
 	graph->addForce(NBodyForcePtr(new NBodyForce()));
 	graph->addForce(GravitationalForcePtr(new GravitationalForce()));
-	graph->addForce(WallForcePtr(new WallForce(float2(0.0f, 1280.0f), float2(1920.0f, 1080.0f))));
-	graph->addForce(CircularWallForcePtr(new CircularWallForce(float2(960.0f, 540.0f), 960.0f)));
+	graph->addForce(WallForcePtr(new WallForce(float2(100.0f, 1800.0f), float2(1900.0f, 1700.0f))));
+	graph->addForce(CircularWallForcePtr(new CircularWallForce(float2(1000.0f, 1000.0f), 960.0f)));
 	graph->addForce(DragForcePtr(new DragForce(0.001f)));
 	rootNode.add(graph);
 	

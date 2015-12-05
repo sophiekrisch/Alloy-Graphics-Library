@@ -246,6 +246,7 @@ namespace aly {
 			return addSpringItem(item1, item2, -1.f, -1.f);
 		}
 		void ForceSimulator::draw(AlloyContext* context) {
+			Region::draw(context);
 			context->setCursor(&Cursor::Position);
 			std::lock_guard<std::mutex> lockMe(lock);
 			float2 offset = getBoundsPosition();
