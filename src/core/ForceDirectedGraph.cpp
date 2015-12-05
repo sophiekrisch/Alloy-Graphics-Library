@@ -513,6 +513,7 @@ WallForce::WallForce(float gravConst, float2 p1, float2 p2) :
 		dxy.y /= r;
 }
 void WallForce::draw(AlloyContext* context, const pixel2& offset) {
+	if(!enabled)return;
 	NVGcontext* nvg = context->nvgContext;
 	nvgStrokeWidth(nvg, 8.0f);
 	nvgStrokeColor(nvg, Color(1.0f, 1.0f, 1.0f, 1.0f));
@@ -558,6 +559,7 @@ BoxForce::BoxForce(float gravConst, const box2f& box) {
 	setBounds(box);
 }
 void BoxForce::draw(AlloyContext* context, const pixel2& offset) {
+	if(!enabled)return;
 	NVGcontext* nvg = context->nvgContext;
 	nvgStrokeWidth(nvg, 4.0f);
 	nvgStrokeColor(nvg, Color(0.8f, 0.8f, 0.8f, 1.0f));
@@ -761,6 +763,7 @@ void NBodyForce::getForce(const ForceItemPtr& item) {
 	forceHelper(item, root, bounds);
 }
 void NBodyForce::draw(AlloyContext* context, const pixel2& offset) {
+	if(!enabled)return;
 	NVGcontext* nvg = context->nvgContext;
 	nvgStrokeWidth(nvg, 2.0f);
 	nvgStrokeColor(nvg, Color(0.5f, 0.5f, 0.5f, 1.0f));
@@ -771,6 +774,7 @@ void NBodyForce::draw(AlloyContext* context, const pixel2& offset) {
 }
 
 void CircularWallForce::draw(AlloyContext* context, const pixel2& offset) {
+	if(!enabled)return;
 	NVGcontext* nvg = context->nvgContext;
 	nvgStrokeWidth(nvg, 4.0f);
 	nvgStrokeColor(nvg, Color(0.8f, 0.8f, 0.8f, 1.0f));
