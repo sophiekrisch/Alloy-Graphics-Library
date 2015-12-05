@@ -264,7 +264,20 @@ namespace aly {
 		}
 		void ForceSimulator::draw(AlloyContext* context) {
 			Region::draw(context);
-			context->setCursor(&Cursor::Position);
+			std::lock_guard<std::mutex> lockMe(lock);
+			float2 offset = getBoundsPosition();
+			NVGcontext* nvg = context->nvgContext;
+			pushScissor(nvg, getCursorBounds());
+			for (SpringItemPtr item : springs) {
+				item->draw(context, offset);
+			}
+			for (ForceItemPtr item : items) {
+				item->draw(context, offset);
+			}
+			popScissor(nvg);
+		}
+		void ForceSimulator::drawDebug(AlloyContext* context) {
+			Region::draw(context);
 			std::lock_guard<std::mutex> lockMe(lock);
 			float2 offset = getBoundsPosition();
 			NVGcontext* nvg = context->nvgContext;
@@ -272,7 +285,7 @@ namespace aly {
 			nvgStrokeWidth(nvg, 4.0f);
 			nvgStrokeColor(nvg, Color(0.3f, 0.3f, 0.3f, 1.0f));
 			nvgBeginPath(nvg);
-			nvgRect(nvg,forceBounds.position.x + offset.x, forceBounds.position.y + offset.y, forceBounds.dimensions.x, forceBounds.dimensions.y);
+			nvgRect(nvg, forceBounds.position.x + offset.x, forceBounds.position.y + offset.y, forceBounds.dimensions.x, forceBounds.dimensions.y);
 			nvgStroke(nvg);
 
 			for (ForcePtr f : iforces) {

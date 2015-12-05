@@ -207,6 +207,7 @@ public:
 	void addSpringItem(const SpringItemPtr& spring);
 	void accumulate();
 	virtual void draw(AlloyContext* context) override;
+	virtual void drawDebug(AlloyContext* context) override;
 };
 typedef std::shared_ptr<ForceSimulator> ForceSimulatorPtr;
 

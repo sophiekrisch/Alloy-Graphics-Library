@@ -70,7 +70,7 @@ bool ForceDirectedGraphEx::init(Composite& rootNode) {
 	graph->addForce(CircularWallForcePtr(new CircularWallForce(float2(1000.0f, 1000.0f), 960.0f)));
 	graph->addForce(DragForcePtr(new DragForce(0.001f)));
 	rootNode.add(graph);
-	
+	getContext()->setDebug(true);
 	getContext()->addDeferredTask([this]() {
 		graph->start();
 	});
