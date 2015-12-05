@@ -188,7 +188,7 @@ public:
 	static const float RADIUS;
 	static const float DEFAULT_TIME_STEP;
 	static const int DEFAULT_INTEGRATION_CYCLES;
-	ForceSimulator(const std::string& name, const AUnit2D& pos, const AUnit2D& dims, const std::shared_ptr<Integrator>& integr = std::shared_ptr<Integrator>(new RungeKuttaIntegrator()));
+	ForceSimulator(const std::string& name, const AUnit2D& pos, const AUnit2D& dims, const std::shared_ptr<Integrator>& integr = std::shared_ptr<Integrator>(new  RungeKuttaIntegrator()));
 	void start();
 	void stop();
 	box2f getForceItemBounds() const {

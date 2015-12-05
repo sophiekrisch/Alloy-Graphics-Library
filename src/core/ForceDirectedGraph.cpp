@@ -347,6 +347,7 @@ void ForceSimulator::accumulate() {
 }
 void ForceSimulator::runSimulator(float timestep) {
 	std::lock_guard<std::mutex> lockMe(lock);
+	accumulate();
 	integrator->integrate(*this, timestep);
 }
 void EulerIntegrator::integrate(ForceSimulator& sim, float timestep) const {
@@ -359,7 +360,7 @@ void EulerIntegrator::integrate(ForceSimulator& sim, float timestep) const {
 		float2 vel = item->velocity;
 		len = length(vel);
 		if (len > speedLimit) {
-			vel = speedLimit * vel / len;
+			item->velocity= speedLimit * vel / len;
 		}
 	}
 }
