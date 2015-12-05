@@ -671,7 +671,7 @@ bool DataFlow::updateSimulation(uint64_t iter) {
 	if (renderCount == 0) {
 		lastTime = std::chrono::steady_clock::now();
 	}
-	const int integrationCycles = 2;
+	const int integrationCycles = 4;
 	for (int c = 0; c < integrationCycles; c++) {
 		forceSim->runSimulator();
 	}
