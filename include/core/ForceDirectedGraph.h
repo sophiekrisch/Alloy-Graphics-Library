@@ -243,7 +243,7 @@ struct SpringForce: public Force {
 	SpringForce():SpringForce(DEFAULT_SPRING_COEFF, DEFAULT_SPRING_LENGTH){
 	}
 	virtual std::string getName() const override {
-		return "Spring";
+		return "Spring Force";
 	}
 	virtual bool isSpringItem() const override {
 		return true;
@@ -270,7 +270,7 @@ struct DragForce: public Force {
 			DragForce(DEFAULT_DRAG_COEFF) {
 	}
 	virtual std::string getName() const override {
-		return "Drag";
+		return "Drag Force";
 	}
 	virtual bool isForceItem() const override {
 		return true;
@@ -501,7 +501,7 @@ public:
 		bounds = b;
 	}
 	virtual std::string getName() const override {
-		return "Gravitational Repulsion Force";
+		return "N-Body Force";
 	}
 	void clear();
 	virtual void init(ForceSimulator& fsim) override;
