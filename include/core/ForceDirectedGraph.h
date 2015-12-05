@@ -23,7 +23,7 @@
 //originally written by Jeffrey Heer (http://jheer.org) at UC Berkeley.
 #ifndef INCLUDE_CORE_FORCEDIRECTEDGRAPH_H_
 #define INCLUDE_CORE_FORCEDIRECTEDGRAPH_H_
-#include "ForceDirectedGraph.h"
+#include "AlloyDataFlow.h"
 #include "AlloyMath.h"
 #include "AlloyUI.h"
 #include <vector>
@@ -35,9 +35,6 @@ namespace aly {
 namespace dataflow {
 class ForceSimulator;
 
-enum class NodeShape {
-	Circle = 0, Triangle = 1, Square = 2, Hexagon = 3
-};
 struct ForceItem {
 	float mass;
 	float2 force;
@@ -56,7 +53,7 @@ struct ForceItem {
 		velocity = float2(0.0f);
 		plocation = location;
 	}
-	void draw(AlloyContext* context);
+	void draw(AlloyContext* context, const pixel2& offset);
 };
 typedef std::shared_ptr<ForceItem> ForceItemPtr;
 struct SpringItem {
@@ -68,7 +65,7 @@ struct SpringItem {
 			float len) :
 			item1(fi1), item2(fi2), coeff(k), length(len) {
 	}
-	void draw(AlloyContext* context);
+	void draw(AlloyContext* context,const pixel2& offset);
 };
 
 typedef std::shared_ptr<SpringItem> SpringItemPtr;
@@ -139,6 +136,9 @@ struct Force {
 	virtual void getSpring(const SpringItemPtr& spring) {
 		throw std::runtime_error("Get spring item not implemented.");
 	}
+	virtual void draw(AlloyContext* context, const pixel2& offset) {
+
+	}
 	;
 };
 
@@ -178,17 +178,17 @@ public:
 	void clear();
 	void addForce(const ForcePtr& f);
 	std::vector<ForcePtr> getForces() const;
-	void addItem(const ForceItemPtr& item);
+	void addForceItem(const ForceItemPtr& item);
 	bool removeItem(ForceItemPtr item);
 	std::vector<ForceItemPtr>& getItems();
 	std::vector<SpringItemPtr>& getSprings();
-	SpringItemPtr addSpring(const ForceItemPtr& item1,
+	SpringItemPtr addSpringItem(const ForceItemPtr& item1,
 			const ForceItemPtr& item2, float coeff, float length);
-	SpringItemPtr addSpring(const ForceItemPtr& item1,
+	SpringItemPtr addSpringItem(const ForceItemPtr& item1,
 			const ForceItemPtr& item2, float length);
-	SpringItemPtr addSpring(const ForceItemPtr& item1,
+	SpringItemPtr addSpringItem(const ForceItemPtr& item1,
 			const ForceItemPtr& item2);
-	void addSpring(const SpringItemPtr& spring);
+	void addSpringItem(const SpringItemPtr& spring);
 	void accumulate();
 	void runSimulator(float timestep);
 	virtual void draw(AlloyContext* context) override;
@@ -340,12 +340,14 @@ struct QuadTreeNode {
 	float2 com;
 	bool hasChildren;
 	ForceItemPtr value;
-	std::array<std::shared_ptr<QuadTreeNode>, 4> children;
+	std::array<std::unique_ptr<QuadTreeNode>, 4> children;
 	QuadTreeNode(float mass = 0.0f, float2 com = float2(0.0f)) :
 			mass(mass), com(com), hasChildren(false) {
 	}
+	void draw(AlloyContext* context, const pixel2& offset);
+	void reset();
 };
-typedef std::shared_ptr<QuadTreeNode> QuadTreeNodePtr;
+typedef std::unique_ptr<QuadTreeNode> QuadTreeNodePtr;
 
 struct NBodyForce: public Force {
 	static const std::string pnames[3];
@@ -377,6 +379,7 @@ public:
 	virtual bool isForceItem() const override {
 		return true;
 	}
+	virtual void draw(AlloyContext* context, const pixel2& offset) override;
 	virtual std::string getParameterName(size_t i) const override {
 		return pnames[i];
 	}

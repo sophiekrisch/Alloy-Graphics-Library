@@ -23,7 +23,6 @@
 #include "AlloyAny.h"
 #include "AlloyUI.h"
 #include "AvoidanceRouting.h"
-#include "ForceDirectedGraph.h"
 #include "AlloyWorker.h"
 #include <string>
 #include <vector>
@@ -37,6 +36,10 @@ class Compute;
 class View;
 class DataFlow;
 class Connection;
+class ForceSimulator;
+struct ForceItem;
+struct SpringItem;
+
 enum class NodeType {
 	Unknown = 0,
 	Data = 1,
@@ -45,6 +48,10 @@ enum class NodeType {
 	Group = 4,
 	Source = 5,
 	Destination = 6
+};
+
+enum class NodeShape {
+	Circle = 0, Triangle = 1, Square = 2, Hexagon = 3
 };
 enum class PortType {
 	Unknown = 0, Input = 1, Output = 2, Child = 3, Parent = 4
@@ -335,12 +342,12 @@ public:
 };
 class Relationship {
 protected:
-	SpringItemPtr springItem;
+	std::shared_ptr<SpringItem> springItem;
 public:
 	std::shared_ptr<Node> subject;
 	std::shared_ptr<Node> object;
 	std::shared_ptr<Predicate> predicate;
-	SpringItemPtr getSpringItem();
+	std::shared_ptr<SpringItem>& getSpringItem();
 	Relationship(const std::shared_ptr<Node>& object,
 			const std::shared_ptr<Predicate>& predicate,
 			const std::shared_ptr<Node>& subject) :
@@ -383,7 +390,7 @@ protected:
 	CompositePtr outputPortComposite;
 	TextLabelPtr labelRegion;
 	float textWidth;
-	ForceItemPtr forceItem;
+	std::shared_ptr<ForceItem> forceItem;
 
 	virtual void setup();
 public:
@@ -391,7 +398,7 @@ public:
 	friend class DataFlow;
 	friend class Port;
 	static const pixel2 DIMENSIONS;
-	ForceSimulatorPtr getForceSimulator();
+	std::shared_ptr<ForceSimulator> getForceSimulator();
 	void setParent(DataFlow* parent) {
 		this->parent = parent;
 	}
@@ -426,7 +433,7 @@ public:
 	pixel2 getCenter() const {
 		return nodeIcon->getBounds().center();
 	}
-	ForceItemPtr getForceItem();
+	std::shared_ptr<ForceItem>& getForceItem();
 	float getRadius() const {
 		return nodeIcon->getBounds().dimensions.y * 0.5f;
 	}
@@ -666,6 +673,7 @@ protected:
 	std::vector<std::shared_ptr<Connection>> connections;
 	std::vector<std::shared_ptr<Relationship>> relationships;
 	std::chrono::steady_clock::time_point lastTime;
+	int renderCount=0;
 	Node* mouseOverNode;
 	Port* connectingPort;
 	Port* currentPort;
@@ -677,6 +685,7 @@ protected:
 	bool dragging = false;
 	void setup();
 	bool updateSimulation(uint64_t iter);
+	void addNode(const std::shared_ptr<Node>& node);
 public:
 	std::shared_ptr<ForceSimulator> getForceSimulator() {
 		return forceSim;
@@ -704,50 +713,14 @@ public:
 	bool isMouseOverNode(const Node* node) const {
 		return (node != nullptr && node == mouseOverNode);
 	}
-	void add(const std::shared_ptr<Region>& region) {
-		Composite::add(region);
-	}
-	void add(const std::shared_ptr<Relationship>& relationship) {
-		relationships.push_back(relationship);
-	}
-	void add(const std::shared_ptr<Source>& node) {
-		Composite::add(node);
-		sourceNodes.push_back(node);
-		router.add(node);
-		forceSim->addItem(node->getForceItem());
-		node->parent = this;
-	}
-	void add(const std::shared_ptr<Destination>& node) {
-		Composite::add(node);
-		destinationNodes.push_back(node);
-		router.add(node); 
-		forceSim->addItem(node->getForceItem());
-		node->parent = this;
-	}
-	void add(const std::shared_ptr<Data>& node) {
-		Composite::add(node);
-		dataNodes.push_back(node);
-		router.add(node); 
-		forceSim->addItem(node->getForceItem());
-		node->parent = this;
-	}
-	void add(const std::shared_ptr<View>& node) {
-		Composite::add(node);
-		viewNodes.push_back(node);
-		router.add(node);
-		forceSim->addItem(node->getForceItem());
-		node->parent = this;
-	}
-	void add(const std::shared_ptr<Compute>& node) {
-		Composite::add(node);
-		computeNodes.push_back(node);
-		router.add(node);
-		forceSim->addItem(node->getForceItem());
-		node->parent = this;
-	}
-	void add(const std::shared_ptr<Connection>& node) {
-		connections.push_back(node);
-	}
+	void add(const std::shared_ptr<Region>& region);
+	void add(const std::shared_ptr<Relationship>& relationship);
+	void add(const std::shared_ptr<Source>& node);
+	void add(const std::shared_ptr<Destination>& node);
+	void add(const std::shared_ptr<Data>& node);
+	void add(const std::shared_ptr<View>& node);
+	void add(const std::shared_ptr<Compute>& node);
+	void add(const std::shared_ptr<Connection>& node);
 
 	const std::vector<std::shared_ptr<Data>>& getDataNodes() const {
 		return dataNodes;

@@ -21,6 +21,7 @@
 #include "AlloyDataFlow.h"
 #include "AlloyApplication.h"
 #include "AlloyDrawUtil.h"
+#include "ForceDirectedGraph.h"
 namespace aly {
 namespace dataflow {
 const int MultiPort::FrontIndex = std::numeric_limits<int>::min();
@@ -542,7 +543,7 @@ bool Node::isMouseOver() const {
 		return parent->isMouseOverNode(this);
 	return false;
 }
-ForceItemPtr Node::getForceItem() {
+ForceItemPtr& Node::getForceItem() {
 	return forceItem;
 }
 void DataFlow::setCurrentPort(Port* currentPort) {
@@ -667,15 +668,61 @@ void DataFlow::startConnection(Port* port) {
 	connectingPort = port;
 }
 bool DataFlow::updateSimulation(uint64_t iter) {
-	std::chrono::steady_clock::time_point currentTime =std::chrono::steady_clock::now();
-	std::shared_ptr<AlloyContext>  context = AlloyApplicationContext();
-	if (context.get() == nullptr)return false;
-	float elapsed =std::chrono::duration<float>(currentTime - lastTime).count();
-	if (!context->isMouseDown()) {
-		forceSim->runSimulator(1000.0f*elapsed);
+	if (renderCount == 0) {
+		lastTime = std::chrono::steady_clock::now();
 	}
-	lastTime = currentTime;
+	const int C = 2;
+	for (int c = 0; c < C; c++) {
+		forceSim->runSimulator(30.0f);
+	}
+	renderCount++;
+	std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
+	double elapsed = std::chrono::duration<double>(currentTime - lastTime).count();
+	if (elapsed>1.0f) {
+		lastTime = currentTime;
+		//std::cout << "Frame Rate " << C*renderCount/elapsed << " fps" << std::endl;
+		renderCount = 0;
+	}
 	return true;
+}
+void DataFlow::add(const std::shared_ptr<Region>& region) {
+	Composite::add(region);
+}
+void DataFlow::add(const std::shared_ptr<Relationship>& relationship) {
+	relationship->getSpringItem().reset(
+		new SpringItem(relationship->subject->getForceItem(), relationship->object->getForceItem(),
+			-1.0f, 2 * ForceSimulator::RADIUS));
+	forceSim->addSpringItem(relationship->getSpringItem());
+	relationships.push_back(relationship);
+}
+void DataFlow::addNode(const std::shared_ptr<Node>& node) {
+	//Composite::add(node);
+	router.add(node);
+	forceSim->addForceItem(node->getForceItem());
+	node->parent = this;
+}
+void DataFlow::add(const std::shared_ptr<Source>& node) {
+	addNode(node);
+	sourceNodes.push_back(node);
+}
+void DataFlow::add(const std::shared_ptr<Destination>& node) {
+	addNode(node);
+	destinationNodes.push_back(node);
+}
+void DataFlow::add(const std::shared_ptr<Data>& node) {
+	addNode(node);
+	dataNodes.push_back(node);
+}
+void DataFlow::add(const std::shared_ptr<View>& node) {
+	addNode(node);
+	viewNodes.push_back(node);
+}
+void DataFlow::add(const std::shared_ptr<Compute>& node) {
+	addNode(node);
+	computeNodes.push_back(node);
+}
+void DataFlow::add(const std::shared_ptr<Connection>& node) {
+	connections.push_back(node);
 }
 void DataFlow::setup() {
 
@@ -703,11 +750,11 @@ void DataFlow::setup() {
 	//forceSim.addForce(GravitationalForcePtr(new GravitationalForce()));
 	simWorker = RecurrentTaskPtr(new RecurrentTask([this](uint64_t iter) {
 		return this->updateSimulation(iter);
-	}, 30));
-	lastTime = std::chrono::steady_clock::now();
+	}, 10));
 }
 void DataFlow::start() {
-	lastTime = std::chrono::steady_clock::now();
+	
+	renderCount = 0;
 	simWorker->execute();
 }
 void OutputMultiPort::insertValue(const std::shared_ptr<Packet>& packet,
@@ -1249,13 +1296,7 @@ void Destination::draw(AlloyContext* context) {
 
 	Composite::draw(context);
 }
-SpringItemPtr Relationship::getSpringItem() {
-	if (springItem.get() == nullptr) {
-		springItem = SpringItemPtr(
-				new SpringItem(subject->getForceItem(), object->getForceItem(),
-						-1.0f, 2*ForceSimulator::RADIUS));
-		subject->getForceSimulator()->addSpring(springItem);
-	}
+SpringItemPtr& Relationship::getSpringItem() {
 	return springItem;
 }
 void Relationship::draw(AlloyContext* context) {
