@@ -614,12 +614,28 @@ namespace aly {
 		void NBodyForce::draw(AlloyContext* context, const pixel2& offset) {
 			NVGcontext* nvg = context->nvgContext;
 			nvgStrokeWidth(nvg, 2.0f);
-			nvgStrokeColor(nvg, Color(1.0f, 0.2f, 0.2f, 1.0f));
+			nvgStrokeColor(nvg, Color(0.5f, 1.0f, 0.5f, 1.0f));
 			nvgBeginPath(nvg);
 			nvgRect(nvg, bounds.position.x + offset.x, bounds.position.y + offset.y, bounds.dimensions.x, bounds.dimensions.y);
 			nvgStroke(nvg);
 		}
-
+		void WallForce::draw(AlloyContext* context, const pixel2& offset) {
+			NVGcontext* nvg = context->nvgContext;
+			nvgStrokeWidth(nvg, 8.0f);
+			nvgStrokeColor(nvg, Color(1.0f,1.0f,1.0f, 1.0f));
+			nvgBeginPath(nvg);
+			nvgMoveTo(nvg, p1.x+offset.x, p1.y + offset.y);
+			nvgLineTo(nvg, p2.x + offset.x, p2.y+offset.y);
+			nvgStroke(nvg);
+		}
+		void CircularWallForce::draw(AlloyContext* context, const pixel2& offset) {
+			NVGcontext* nvg = context->nvgContext;
+			nvgStrokeWidth(nvg, 8.0f);
+			nvgStrokeColor(nvg, Color(1.0f, 1.0f, 1.0f, 1.0f));
+			nvgBeginPath(nvg);
+			nvgCircle(nvg, p.x + offset.x, p.y + offset.y, r);
+			nvgStroke(nvg);
+		}
 	}
 }
 

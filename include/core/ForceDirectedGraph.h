@@ -267,7 +267,7 @@ struct WallForce: public Force {
 	virtual std::string getParameterName(size_t i) const override {
 		return pnames[i];
 	}
-
+	virtual void draw(AlloyContext* context, const pixel2& offset) override;
 	virtual void getForce(const ForceItemPtr& item) override;
 };
 typedef std::shared_ptr<WallForce> WallForcePtr;
@@ -295,6 +295,7 @@ struct CircularWallForce: public Force {
 		return pnames[i];
 	}
 	virtual void getForce(const ForceItemPtr& item) override;
+	virtual void draw(AlloyContext* context, const pixel2& offset) override;
 };
 typedef std::shared_ptr<CircularWallForce> CircularWallForcePtr;
 struct GravitationalForce: public Force {
@@ -344,7 +345,7 @@ struct QuadTreeNode {
 	QuadTreeNode(float mass = 0.0f, float2 com = float2(0.0f)) :
 			mass(mass), com(com), hasChildren(false) {
 	}
-	void draw(AlloyContext* context, const pixel2& offset);
+	
 	void reset();
 };
 typedef std::unique_ptr<QuadTreeNode> QuadTreeNodePtr;
