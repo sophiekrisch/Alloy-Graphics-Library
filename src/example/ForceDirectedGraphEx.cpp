@@ -36,7 +36,6 @@ void ForceDirectedGraphEx::createRadialGraph(const ForceSimulatorPtr& graph) {
 	child->buoyancy = -1;
 	childNodes.push_back(child);
 	graph->addForceItem(childNodes.front());
-	box2f bounds= getContext()->getViewport();
 	for (int d = 0; d < D; d++) {
 		std::vector<ForceItemPtr> tmpList;
 		for (ForceItemPtr parent : childNodes) {

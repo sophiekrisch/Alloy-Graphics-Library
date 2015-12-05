@@ -327,6 +327,7 @@ struct BoxForce : public Force {
 	virtual bool isForceItem() const override {
 		return true;
 	}
+	void setBounds(const box2f& bounds);
 	virtual std::string getParameterName(size_t i) const override {
 		return pnames[i];
 	}
