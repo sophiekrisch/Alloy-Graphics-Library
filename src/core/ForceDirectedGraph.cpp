@@ -26,8 +26,8 @@
 #define NUM_THREADS 4
 namespace aly {
 	namespace dataflow {
-		const std::string SpringForce::pnames[2] = { "SpringCoefficient",
-				"DefaultSpringLength" };
+		const std::string SpringForce::pnames[2] = { "Spring Coefficient",
+				"Rest Length" };
 		const float SpringForce::DEFAULT_SPRING_COEFF = 1E-4f;
 		const float SpringForce::DEFAULT_MAX_SPRING_COEFF = 1E-3f;
 		const float SpringForce::DEFAULT_MIN_SPRING_COEFF = 1E-5f;
@@ -37,30 +37,30 @@ namespace aly {
 		const int SpringForce::SPRING_COEFF = 0;
 		const int SpringForce::SPRING_LENGTH = 1;
 
-		const std::string DragForce::pnames[1] = { "DragCoefficient" };
+		const std::string DragForce::pnames[1] = { "Drag Coefficient" };
 		const float DragForce::DEFAULT_DRAG_COEFF = 0.01f;
 		const float DragForce::DEFAULT_MIN_DRAG_COEFF = 0.0f;
 		const float DragForce::DEFAULT_MAX_DRAG_COEFF = 0.1f;
 		const int DragForce::DRAG_COEFF = 0;
 
-		const std::string WallForce::pnames[1] = { "GravitationalConstant" };
+		const std::string WallForce::pnames[1] = { "Gravitational Constant" };
 		const float WallForce::DEFAULT_GRAV_CONSTANT = -0.1f;
 		const float WallForce::DEFAULT_MIN_GRAV_CONSTANT = -1.0f;
 		const float WallForce::DEFAULT_MAX_GRAV_CONSTANT = 1.0f;
 		const int WallForce::GRAVITATIONAL_CONST = 0;
 
-		const std::string BoxForce::pnames[1] = { "GravitationalConstant" };
+		const std::string BoxForce::pnames[1] = { "Gravitational Constant" };
 		const float BoxForce::DEFAULT_GRAV_CONSTANT = -0.1f;
 		const float BoxForce::DEFAULT_MIN_GRAV_CONSTANT = -1.0f;
 		const float BoxForce::DEFAULT_MAX_GRAV_CONSTANT = 1.0f;
 		const int BoxForce::GRAVITATIONAL_CONST = 0;
 
-		const std::string CircularWallForce::pnames[1] = { "GravitationalConstant" };
+		const std::string CircularWallForce::pnames[1] = { "Gravitational Constant" };
 		const float CircularWallForce::DEFAULT_GRAV_CONSTANT = -0.1f;
 		const float CircularWallForce::DEFAULT_MIN_GRAV_CONSTANT = -1.0f;
 		const float CircularWallForce::DEFAULT_MAX_GRAV_CONSTANT = 1.0f;
 
-		const std::string GravitationalForce::pnames[2] = { "GravitationalConstant",
+		const std::string GravitationalForce::pnames[2] = { "Gravitational Constant",
 				"Orientation" };
 		const float GravitationalForce::DEFAULT_FORCE_CONSTANT = 1E-4f;
 		const float GravitationalForce::DEFAULT_MIN_FORCE_CONSTANT = 1E-5f;
@@ -70,7 +70,7 @@ namespace aly {
 		const float GravitationalForce::DEFAULT_MAX_DIRECTION = (float)ALY_PI;
 
 
-		const std::string BuoyancyForce::pnames[2] = { "GravitationalConstant",
+		const std::string BuoyancyForce::pnames[2] = { "Gravitational Constant",
 			"Orientation" };
 		const float BuoyancyForce::DEFAULT_FORCE_CONSTANT = 1E-4f;
 		const float BuoyancyForce::DEFAULT_MIN_FORCE_CONSTANT = 1E-5f;
@@ -79,8 +79,8 @@ namespace aly {
 		const float BuoyancyForce::DEFAULT_MIN_DIRECTION = (float)-ALY_PI;
 		const float BuoyancyForce::DEFAULT_MAX_DIRECTION = (float)ALY_PI;
 
-		const std::string NBodyForce::pnames[3] = { "GravitationalConstant", "Distance",
-				"BarnesHutTheta" };
+		const std::string NBodyForce::pnames[3] = { "Gravitational Constant", "Distance",
+				"Barnes-Hut Theta" };
 		const float NBodyForce::DEFAULT_GRAV_CONSTANT = -1.0f;
 		const float NBodyForce::DEFAULT_MIN_GRAV_CONSTANT = -10.0f;
 		const float NBodyForce::DEFAULT_MAX_GRAV_CONSTANT = 10.0f;
@@ -170,7 +170,7 @@ namespace aly {
 			renderCount++;
 			std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
 			double elapsed = std::chrono::duration<double>(currentTime - lastTime).count();
-			if (elapsed>1.0f) {
+			if (elapsed > 1.0f) {
 				lastTime = currentTime;
 				frameRate = (float)(DEFAULT_INTEGRATION_CYCLES*renderCount / elapsed);
 				//std::cout << "Frame Rate " << << " fps" << std::endl;
@@ -277,7 +277,7 @@ namespace aly {
 			popScissor(nvg);
 		}
 		void ForceSimulator::drawDebug(AlloyContext* context) {
-			Region::draw(context);
+			Region::drawDebug(context);
 			std::lock_guard<std::mutex> lockMe(lock);
 			float2 offset = getBoundsPosition();
 			NVGcontext* nvg = context->nvgContext;
@@ -313,24 +313,28 @@ namespace aly {
 			forceBounds = box2f(p1, p2 - p1);
 			extents = forceBounds;
 #pragma omp parallel for num_threads(NUM_THREADS)
-			for (int i = 0; i < (int)iforces.size();i++) {
-				iforces[i]->init(*this);
+			for (int i = 0; i < (int)iforces.size(); i++) {
+				if (iforces[i]->isEnabled())
+					iforces[i]->init(*this);
 			}
 #pragma omp parallel for num_threads(NUM_THREADS)
 			for (int i = 0; i < (int)sforces.size(); i++) {
-				sforces[i]->init(*this);
+				if (sforces[i]->isEnabled())
+					sforces[i]->init(*this);
 			}
 #pragma omp parallel for num_threads(NUM_THREADS)
 			for (int i = 0; i < (int)items.size(); i++) {
 				items[i]->force = float2(0.0f);
 				for (ForcePtr f : iforces) {
-					f->getForce(items[i]);
+					if (f->isEnabled())
+						f->getForce(items[i]);
 				}
 			}
 #pragma omp parallel for num_threads(NUM_THREADS)
 			for (int i = 0; i < (int)springs.size(); i++) {
 				for (ForcePtr f : sforces) {
-					f->getSpring(springs[i]);
+					if (f->isEnabled())
+						f->getSpring(springs[i]);
 				}
 			}
 		}
@@ -529,13 +533,13 @@ namespace aly {
 			minValues = std::vector<float>{ DEFAULT_MIN_GRAV_CONSTANT };
 			maxValues = std::vector<float>{ DEFAULT_MAX_GRAV_CONSTANT };
 			pts[0] = box.position;
-			pts[1] = box.position+float2(box.dimensions.x,0.0f);
+			pts[1] = box.position + float2(box.dimensions.x, 0.0f);
 			pts[2] = box.position + box.dimensions;
-			pts[3] = box.position + float2(0.0f,box.dimensions.x);
+			pts[3] = box.position + float2(0.0f, box.dimensions.x);
 
-			for (int k = 0; k < 4;k++) {
+			for (int k = 0; k < 4; k++) {
 				float2 p1 = pts[k];
-				float2 p2 = pts[(k+1)%4];
+				float2 p2 = pts[(k + 1) % 4];
 				float2 dxy = p2 - p1;
 				float r = length(dxy);
 				if (dxy.x != 0.0)
@@ -661,9 +665,9 @@ namespace aly {
 		}
 		void NBodyForce::init(ForceSimulator& fsim) {
 			clear();
-			bounds=fsim.getForceItemBounds();
+			bounds = fsim.getForceItemBounds();
 			float2 dxy = bounds.dimensions;
-			float2 center =bounds.center();
+			float2 center = bounds.center();
 			float maxDim = std::max(dxy.x, dxy.y);
 			bounds = box2f(center - float2(maxDim*0.5f), float2(maxDim));
 			for (ForceItemPtr item : fsim.getItems()) {
@@ -756,7 +760,7 @@ namespace aly {
 		void NBodyForce::draw(AlloyContext* context, const pixel2& offset) {
 			NVGcontext* nvg = context->nvgContext;
 			nvgStrokeWidth(nvg, 2.0f);
-			nvgStrokeColor(nvg, Color(0.5f, 1.0f, 0.5f, 1.0f));
+			nvgStrokeColor(nvg, Color(0.5f, 0.5f, 0.5f, 1.0f));
 			nvgBeginPath(nvg);
 			nvgRect(nvg, bounds.position.x + offset.x, bounds.position.y + offset.y, bounds.dimensions.x, bounds.dimensions.y);
 			nvgStroke(nvg);

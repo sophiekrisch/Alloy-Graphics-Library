@@ -84,10 +84,14 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(
 	return ss << param.name << " : " << param.value << " range: [" << param.min
 			<< "," << param.max << "]";
 }
-struct Force {
+class Force {
+
+protected:
 	std::vector<float> params;
 	std::vector<float> minValues;
 	std::vector<float> maxValues;
+	bool enabled=true;
+public:
 	virtual void init(ForceSimulator& fsim) {
 	}
 	;
@@ -96,6 +100,12 @@ struct Force {
 	;
 	size_t getParameterCount() const {
 		return params.size();
+	}
+	void setEnabled(bool b) {
+		enabled = b;
+	}
+	bool isEnabled() const {
+		return enabled;
 	}
 	float getParameterValue(size_t i) const {
 		return params[i];
@@ -109,6 +119,7 @@ struct Force {
 	virtual std::string getParameterName(size_t i) const {
 		return std::string();
 	}
+	virtual std::string getName() const = 0;
 	ForceParameter getParameter(size_t i) const {
 		return ForceParameter(getParameterName(i), getParameterValue(i),
 				getMinValue(i), getMaxValue(i));
@@ -231,6 +242,9 @@ struct SpringForce: public Force {
 	}
 	SpringForce():SpringForce(DEFAULT_SPRING_COEFF, DEFAULT_SPRING_LENGTH){
 	}
+	virtual std::string getName() const override {
+		return "Spring";
+	}
 	virtual bool isSpringItem() const override {
 		return true;
 	}
@@ -254,6 +268,9 @@ struct DragForce: public Force {
 	}
 	DragForce() :
 			DragForce(DEFAULT_DRAG_COEFF) {
+	}
+	virtual std::string getName() const override {
+		return "Drag";
 	}
 	virtual bool isForceItem() const override {
 		return true;
@@ -280,6 +297,9 @@ struct WallForce: public Force {
 	virtual bool isForceItem() const override {
 		return true;
 	}
+	virtual std::string getName() const override {
+		return "Wall Boundary";
+	}
 	virtual std::string getParameterName(size_t i) const override {
 		return pnames[i];
 	}
@@ -300,6 +320,9 @@ struct BoxForce : public Force {
 	BoxForce(float gravConst, const box2f& box);
 	BoxForce(const box2f& box) :
 		BoxForce(DEFAULT_GRAV_CONSTANT, box) {
+	}
+	virtual std::string getName() const override {
+		return "Box Boundary";
 	}
 	virtual bool isForceItem() const override {
 		return true;
@@ -327,6 +350,9 @@ struct CircularWallForce: public Force {
 	}
 	CircularWallForce(float2 p, float r) :
 			CircularWallForce(DEFAULT_GRAV_CONSTANT, p, r) {
+	}
+	virtual std::string getName() const override {
+		return "Circular Boundary";
 	}
 	virtual bool isForceItem() const override {
 		return true;
@@ -360,6 +386,9 @@ struct GravitationalForce: public Force {
 	}
 	GravitationalForce() :
 			GravitationalForce(DEFAULT_FORCE_CONSTANT, DEFAULT_DIRECTION) {
+	}
+	virtual std::string getName() const override {
+		return "Gravity";
 	}
 	virtual void setParameter(size_t i, float val) override {
 		params[i] = val;
@@ -399,6 +428,9 @@ struct BuoyancyForce : public Force {
 	}
 	BuoyancyForce() :
 		BuoyancyForce(DEFAULT_FORCE_CONSTANT, DEFAULT_DIRECTION) {
+	}
+	virtual std::string getName() const override {
+		return "Buoyancy";
 	}
 	virtual void setParameter(size_t i, float val) override {
 		params[i] = val;
@@ -466,6 +498,9 @@ public:
 	}
 	void setBounds(const box2f& b) {
 		bounds = b;
+	}
+	virtual std::string getName() const override {
+		return "Gravitational Repulsion Force";
 	}
 	void clear();
 	virtual void init(ForceSimulator& fsim) override;
