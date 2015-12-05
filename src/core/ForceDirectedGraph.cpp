@@ -75,6 +75,7 @@ namespace aly {
 		const float NBodyForce::DEFAULT_MAX_THETA = 1.0f;
 
 		const float ForceSimulator::RADIUS = 20.0f;
+		const float ForceSimulator::DEFAULT_TIME_STEP = 30.0f;
 		void ForceItem::draw(AlloyContext* context, const pixel2& offset) {
 			const float lineWidth = 4.0f;
 			NVGcontext* nvg = context->nvgContext;
@@ -426,8 +427,8 @@ namespace aly {
 			float2 n = item->location;
 			int ccw = relativeCCW(p1.x, p1.y, p2.x, p2.y, n.x, n.y);
 			float r = (float)std::sqrt(ptSegDistSq(p1.x, p1.y, p2.x, p2.y, n.x, n.y));
-			if (r == 0.0)
-				r = (float)RandomUniform(0.0f, 0.01f);
+			if (r < 1E-5f)
+				r = (float)RandomUniform(1E-5f, 0.01f);
 			float v = params[GRAVITATIONAL_CONST] * item->mass / (r * r * r);
 			if (n.x >= std::min(p1.x, p2.x) && n.x <= std::max(p1.x, p2.x))
 				item->force.y += ccw * v * dxy.x;
@@ -441,7 +442,7 @@ namespace aly {
 			float dr = r - d;
 			float c = (dr > 0) ? -1.0f : 1.0f;
 			float v = c * params[GRAVITATIONAL_CONST] * item->mass / (dr * dr);
-			if (d == 0.0) {
+			if (d < 1E-5f) {
 				dxy = float2(RandomUniform(-0.5f, 0.5f) / 50.0f,
 					RandomUniform(-0.5f, 0.5f) / 50.0f);
 				d = length(dxy);

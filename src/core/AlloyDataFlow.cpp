@@ -671,17 +671,19 @@ bool DataFlow::updateSimulation(uint64_t iter) {
 	if (renderCount == 0) {
 		lastTime = std::chrono::steady_clock::now();
 	}
-	const int C = 2;
-	for (int c = 0; c < C; c++) {
-		forceSim->runSimulator(30.0f);
+	const int integrationCycles = 2;
+	for (int c = 0; c < integrationCycles; c++) {
+		forceSim->runSimulator();
 	}
 	renderCount++;
 	std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
 	double elapsed = std::chrono::duration<double>(currentTime - lastTime).count();
 	if (elapsed>1.0f) {
 		lastTime = currentTime;
-		//std::cout << "Frame Rate " << C*renderCount/elapsed << " fps" << std::endl;
+		frameRate = (float)(integrationCycles*renderCount / elapsed);
+		//std::cout << "Frame Rate " << << " fps" << std::endl;
 		renderCount = 0;
+		
 	}
 	return true;
 }
@@ -750,6 +752,7 @@ void DataFlow::setup() {
 	forceSim->addForce(GravitationalForcePtr(new GravitationalForce()));
 	forceSim->addForce(WallForcePtr(new WallForce(float2(0.0f, 1280.0f), float2(1920.0f,1080.0f))));
 	forceSim->addForce(CircularWallForcePtr(new CircularWallForce(float2(960.0f,540.0f), 960.0f)));
+	forceSim->addForce(DragForcePtr(new DragForce(0.001f)));
 	simWorker = RecurrentTaskPtr(new RecurrentTask([this](uint64_t iter) {
 		return this->updateSimulation(iter);
 	}, 10));

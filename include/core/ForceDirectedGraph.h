@@ -69,8 +69,6 @@ struct SpringItem {
 };
 
 typedef std::shared_ptr<SpringItem> SpringItemPtr;
-
-//TODO: use this to wrap parameters.
 struct ForceParameter {
 	std::string name;
 	float value;
@@ -170,6 +168,7 @@ class ForceSimulator: public Region {
 	float speedLimit = 1.0f;
 public:
 	static const float RADIUS;
+	static const float DEFAULT_TIME_STEP;
 	ForceSimulator(const std::string& name, const AUnit2D& pos, const AUnit2D& dims, const std::shared_ptr<Integrator>& integr = std::shared_ptr<Integrator>(new RungeKuttaIntegrator()));
 	float getSpeedLimit() const;
 	void setSpeedLimit(float limit);
@@ -190,7 +189,7 @@ public:
 			const ForceItemPtr& item2);
 	void addSpringItem(const SpringItemPtr& spring);
 	void accumulate();
-	void runSimulator(float timestep);
+	void runSimulator(float timestep= DEFAULT_TIME_STEP);
 	virtual void draw(AlloyContext* context) override;
 };
 typedef std::shared_ptr<ForceSimulator> ForceSimulatorPtr;

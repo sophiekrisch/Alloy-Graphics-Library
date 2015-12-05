@@ -674,6 +674,7 @@ protected:
 	std::vector<std::shared_ptr<Relationship>> relationships;
 	std::chrono::steady_clock::time_point lastTime;
 	int renderCount=0;
+	float frameRate=0.0f;
 	Node* mouseOverNode;
 	Port* connectingPort;
 	Port* currentPort;
@@ -689,6 +690,9 @@ protected:
 public:
 	std::shared_ptr<ForceSimulator> getForceSimulator() {
 		return forceSim;
+	}
+	float getFrameRate() const {
+		return frameRate;
 	}
 	void start();
 	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
