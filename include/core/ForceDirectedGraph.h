@@ -26,6 +26,7 @@
 #include "AlloyDataFlow.h"
 #include "AlloyMath.h"
 #include "AlloyUI.h"
+#include "AlloyWorker.h"
 #include <vector>
 #include <array>
 #include <memory>
@@ -37,6 +38,7 @@ class ForceSimulator;
 
 struct ForceItem {
 	float mass;
+	float buoyancy;
 	float2 force;
 	float2 velocity;
 	float2 location;
@@ -44,9 +46,8 @@ struct ForceItem {
 	NodeShape shape;
 	std::array<float2, 4> k;
 	std::array<float2, 4> l;
-	ForceItem() :
-			mass(1.0f), force(0.0f), velocity(0.0f), location(0.0f), plocation(
-					0.0f),shape(NodeShape::Circle){
+	ForceItem(const float2& pt=float2(0.0f)) :
+			mass(1.0f), buoyancy(1.0f), force(0.0f), velocity(0.0f), location(pt), plocation(pt),shape(NodeShape::Circle){
 	}
 	void reset() {
 		force = float2(0.0f);
@@ -166,10 +167,26 @@ class ForceSimulator: public Region {
 	std::vector<ForcePtr> sforces;
 	std::shared_ptr<Integrator> integrator;
 	float speedLimit = 1.0f;
+	int renderCount = 0;
+	float frameRate = 0.0f;
+	box2f forceBounds;
+	std::chrono::steady_clock::time_point lastTime;
+	bool update(uint64_t iter);
+	void runSimulator(float timestep = DEFAULT_TIME_STEP);
 public:
 	static const float RADIUS;
 	static const float DEFAULT_TIME_STEP;
+	static const int DEFAULT_INTEGRATION_CYCLES;
 	ForceSimulator(const std::string& name, const AUnit2D& pos, const AUnit2D& dims, const std::shared_ptr<Integrator>& integr = std::shared_ptr<Integrator>(new RungeKuttaIntegrator()));
+	void start();
+	void stop();
+	box2f getForceItemBounds() const {
+		return forceBounds;
+	}
+	RecurrentTaskPtr simWorker;
+	float getFrameRate() const {
+		return frameRate;
+	}
 	float getSpeedLimit() const;
 	void setSpeedLimit(float limit);
 	IntegratorPtr getIntegrator() const;
@@ -189,7 +206,6 @@ public:
 			const ForceItemPtr& item2);
 	void addSpringItem(const SpringItemPtr& spring);
 	void accumulate();
-	void runSimulator(float timestep= DEFAULT_TIME_STEP);
 	virtual void draw(AlloyContext* context) override;
 };
 typedef std::shared_ptr<ForceSimulator> ForceSimulatorPtr;
@@ -335,6 +351,46 @@ struct GravitationalForce: public Force {
 	virtual void getForce(const ForceItemPtr& item) override;
 };
 typedef std::shared_ptr<GravitationalForce> GravitationalForcePtr;
+
+struct BuoyancyForce : public Force {
+	static const std::string pnames[2];
+	static const int GRAVITATIONAL_CONST = 0;
+	static const int DIRECTION = 1;
+	static const float DEFAULT_FORCE_CONSTANT;
+	static const float DEFAULT_MIN_FORCE_CONSTANT;
+	static const float DEFAULT_MAX_FORCE_CONSTANT;
+	static const float DEFAULT_DIRECTION;
+	static const float DEFAULT_MIN_DIRECTION;
+	static const float DEFAULT_MAX_DIRECTION;
+	float2 gDirection;
+	BuoyancyForce(float forceConstant, float direction) {
+		params = std::vector<float>{ forceConstant, direction };
+		minValues = std::vector<float>{ DEFAULT_MIN_FORCE_CONSTANT,
+			DEFAULT_MIN_DIRECTION };
+		maxValues = std::vector<float>{ DEFAULT_MAX_FORCE_CONSTANT,
+			DEFAULT_MAX_DIRECTION };
+		float theta = params[DIRECTION];
+		gDirection = float2(std::cos(theta), std::sin(theta));
+	}
+	BuoyancyForce() :
+		BuoyancyForce(DEFAULT_FORCE_CONSTANT, DEFAULT_DIRECTION) {
+	}
+	virtual void setParameter(size_t i, float val) override {
+		params[i] = val;
+		if (i == DIRECTION) {
+			gDirection = float2(std::cos(val), std::sin(val));
+		}
+	}
+	virtual bool isForceItem() const override {
+		return true;
+	}
+	virtual std::string getParameterName(size_t i) const override {
+		return pnames[i];
+	}
+	virtual void getForce(const ForceItemPtr& item) override;
+};
+typedef std::shared_ptr<BuoyancyForce> BuoyancyForcePtr;
+
 struct QuadTreeNode {
 	float mass;
 	float2 com;
@@ -389,6 +445,7 @@ public:
 	void clear();
 	virtual void init(ForceSimulator& fsim) override;
 	void getForce(const ForceItemPtr& item) override;
+
 private:
 	void insertHelper(const ForceItemPtr& p, const QuadTreeNodePtr& n, box2f box);
 	void insert(const ForceItemPtr& p, QuadTreeNodePtr& n, box2f box);

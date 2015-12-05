@@ -23,7 +23,6 @@
 #include "AlloyAny.h"
 #include "AlloyUI.h"
 #include "AvoidanceRouting.h"
-#include "AlloyWorker.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -439,21 +438,6 @@ public:
 	}
 	Node(const std::string& name, const pixel2& pt);
 	Node(const std::string& name, const std::string& label, const pixel2& pt);
-	/*
-	Node(const std::string& name, const std::string& label) :
-			Composite(name), label(label), parent(nullptr) {
-		setup();
-	}
-	Node(const std::string& name, const std::string& label, const AUnit2D& pos,
-			const AUnit2D& dims) :
-			Composite(name, pos, dims), label(label), parent(nullptr) {
-		setup();
-	}
-	Node(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
-			Composite(name, pos, dims), label(name), parent(nullptr) {
-		setup();
-	}
-	*/
 	void add(const std::shared_ptr<Region>& region) {
 		Composite::add(region);
 	}
@@ -492,21 +476,6 @@ public:
 		Node(name, label, pt) {
 		setup();
 	}
-	/*
-	Data(const std::string& name, const std::string& label) :
-			Node(name, label) {
-		setup();
-	}
-	Data(const std::string& name, const std::string& label, const AUnit2D& pos,
-			const AUnit2D& dims) :
-			Node(name, label, pos, dims) {
-		setup();
-	}
-	Data(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
-			Node(name, pos, dims) {
-		setup();
-	}
-	*/
 	virtual void draw(AlloyContext* context) override;
 	virtual void pack(const pixel2& pos, const pixel2& dims,
 			const double2& dpmm, double pixelRatio, bool clamp = false)
@@ -528,21 +497,6 @@ public:
 		Node(name,label, pt) {
 		setup();
 	}
-	/*
-	View(const std::string& name, const std::string& label) :
-			Node(name, label) {
-		setup();
-	}
-	View(const std::string& name, const std::string& label, const AUnit2D& pos,
-			const AUnit2D& dims) :
-			Node(name, label, pos, dims) {
-		setup();
-	}
-	View(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
-			Node(name, pos, dims) {
-		setup();
-	}
-	*/
 	virtual void pack(const pixel2& pos, const pixel2& dims,
 			const double2& dpmm, double pixelRatio, bool clamp = false)
 					override;
@@ -564,21 +518,6 @@ public:
 		Node(name, label, pt) {
 		setup();
 	}
-	/*
-	Compute(const std::string& name, const std::string& label) :
-			Node(name, label) {
-		setup();
-	}
-	Compute(const std::string& name, const std::string& label,
-			const AUnit2D& pos, const AUnit2D& dims) :
-			Node(name, label, pos, dims) {
-		setup();
-	}
-	Compute(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
-			Node(name, pos, dims) {
-		setup();
-	}
-	*/
 	virtual void pack(const pixel2& pos, const pixel2& dims,
 			const double2& dpmm, double pixelRatio, bool clamp = false)
 					override;
@@ -601,21 +540,6 @@ public:
 		Node(name, label, pt) {
 		setup();
 	}
-	/*
-	Source(const std::string& name, const std::string& label) :
-			Node(name, label) {
-		setup();
-	}
-	Source(const std::string& name, const std::string& label,
-			const AUnit2D& pos, const AUnit2D& dims) :
-			Node(name, label, pos, dims) {
-		setup();
-	}
-	Source(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
-			Node(name, pos, dims) {
-		setup();
-	}
-	*/
 	virtual void pack(const pixel2& pos, const pixel2& dims,
 		const double2& dpmm, double pixelRatio, bool clamp = false)
 		override;
@@ -638,26 +562,6 @@ public:
 		Node(name, label, pt) {
 		setup();
 	}
-	/*
-	Destination(const std::string& name) :
-			Node(name) {
-		setup();
-	}
-	Destination(const std::string& name, const std::string& label) :
-			Node(name, label) {
-		setup();
-	}
-	Destination(const std::string& name, const std::string& label,
-			const AUnit2D& pos, const AUnit2D& dims) :
-			Node(name, label, pos, dims) {
-		setup();
-	}
-	Destination(const std::string& name, const AUnit2D& pos,
-			const AUnit2D& dims) :
-			Node(name, pos, dims) {
-		setup();
-	}
-	*/
 	virtual void pack(const pixel2& pos, const pixel2& dims,
 		const double2& dpmm, double pixelRatio, bool clamp = false)
 		override;
@@ -672,9 +576,8 @@ protected:
 	std::vector<std::shared_ptr<Destination>> destinationNodes;
 	std::vector<std::shared_ptr<Connection>> connections;
 	std::vector<std::shared_ptr<Relationship>> relationships;
-	std::chrono::steady_clock::time_point lastTime;
-	int renderCount=0;
-	float frameRate=0.0f;
+
+
 	Node* mouseOverNode;
 	Port* connectingPort;
 	Port* currentPort;
@@ -682,7 +585,7 @@ protected:
 	std::shared_ptr<ForceSimulator> forceSim;
 	pixel2 currentDrawOffset;
 	pixel2 cursorDownLocation;
-	RecurrentTaskPtr simWorker;
+
 	bool dragging = false;
 	void setup();
 	bool updateSimulation(uint64_t iter);
@@ -691,10 +594,8 @@ public:
 	std::shared_ptr<ForceSimulator> getForceSimulator() {
 		return forceSim;
 	}
-	float getFrameRate() const {
-		return frameRate;
-	}
 	void start();
+	void stop();
 	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp = false) override;
 	bool isConnecting() const {
@@ -775,18 +676,6 @@ public:
 		Node(name, pt) {
 		setup();
 	}
-	/*
-	Group(const std::string& name, const std::string& label) :
-			Node(name, label) {
-	}
-	Group(const std::string& name, const std::string& label, const AUnit2D& pos,
-			const AUnit2D& dims) :
-			Node(name, label, pos, dims) {
-	}
-	Group(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
-			Node(name, pos, dims) {
-	}
-	*/
 	void setGraph(std::shared_ptr<DataFlow>& graph) {
 		this->graph = graph;
 	}

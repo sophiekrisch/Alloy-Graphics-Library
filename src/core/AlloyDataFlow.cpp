@@ -667,26 +667,7 @@ bool DataFlow::intersects(const lineseg2f& ln) {
 void DataFlow::startConnection(Port* port) {
 	connectingPort = port;
 }
-bool DataFlow::updateSimulation(uint64_t iter) {
-	if (renderCount == 0) {
-		lastTime = std::chrono::steady_clock::now();
-	}
-	const int integrationCycles = 4;
-	for (int c = 0; c < integrationCycles; c++) {
-		forceSim->runSimulator();
-	}
-	renderCount++;
-	std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
-	double elapsed = std::chrono::duration<double>(currentTime - lastTime).count();
-	if (elapsed>1.0f) {
-		lastTime = currentTime;
-		frameRate = (float)(integrationCycles*renderCount / elapsed);
-		//std::cout << "Frame Rate " << << " fps" << std::endl;
-		renderCount = 0;
-		
-	}
-	return true;
-}
+
 void DataFlow::add(const std::shared_ptr<Region>& region) {
 	Composite::add(region);
 }
@@ -698,7 +679,7 @@ void DataFlow::add(const std::shared_ptr<Relationship>& relationship) {
 	relationships.push_back(relationship);
 }
 void DataFlow::addNode(const std::shared_ptr<Node>& node) {
-	//Composite::add(node);
+	Composite::add(node);
 	router.add(node);
 	forceSim->addForceItem(node->getForceItem());
 	node->parent = this;
@@ -727,7 +708,6 @@ void DataFlow::add(const std::shared_ptr<Connection>& node) {
 	connections.push_back(node);
 }
 void DataFlow::setup() {
-
 	setRoundCorners(true);
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	forceSim= ForceSimulatorPtr(new ForceSimulator("Force Simulator",CoordPX(0.0f,0.0f),CoordPercent(1.0f,1.0f)));
@@ -744,7 +724,7 @@ void DataFlow::setup() {
 							relationship->drawText(context);
 						}
 					}));
-	Composite::add(forceSim);
+	//Composite::add(forceSim);
 	Composite::add(pathsRegion);
 	Application::addListener(this);
 	forceSim->addForce(SpringForcePtr(new SpringForce()));
@@ -753,14 +733,13 @@ void DataFlow::setup() {
 	forceSim->addForce(WallForcePtr(new WallForce(float2(0.0f, 1280.0f), float2(1920.0f,1080.0f))));
 	forceSim->addForce(CircularWallForcePtr(new CircularWallForce(float2(960.0f,540.0f), 960.0f)));
 	forceSim->addForce(DragForcePtr(new DragForce(0.001f)));
-	simWorker = RecurrentTaskPtr(new RecurrentTask([this](uint64_t iter) {
-		return this->updateSimulation(iter);
-	}, 10));
+
 }
 void DataFlow::start() {
-	
-	renderCount = 0;
-	simWorker->execute();
+	forceSim->start();
+}
+void DataFlow::stop() {
+	forceSim->stop();
 }
 void OutputMultiPort::insertValue(const std::shared_ptr<Packet>& packet,
 		int index) {
@@ -1467,7 +1446,7 @@ void DataFlow::draw(AlloyContext* context) {
 		pixel2 cursor = context->cursorPosition;
 
 		if (getBounds().contains(cursor)) {
-			float2 offset = getDrawOffset();
+			float2 offset =getDrawOffset();
 			NVGcontext* nvg = context->nvgContext;
 			nvgStrokeWidth(nvg, 2.0f);
 			nvgStrokeColor(nvg, context->theme.HIGHLIGHT);

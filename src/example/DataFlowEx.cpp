@@ -20,49 +20,15 @@
  */
 
 #include "Alloy.h"
-#include "ForceDirectedGraph.h"
 #include "../../include/example/DataFlowEx.h"
 using namespace aly;
 using namespace aly::dataflow;
 DataFlowEx::DataFlowEx() :
-		Application(1920, 1080, "Data Flow Graph Example") {
-}
-void DataFlowEx::createRadialGraph(const DataFlowPtr& graph) {
-	int D =3;
-	int N = 6;
-	float armLength = 500.0f;
-	float2 center = getContext()->getViewport().center()-0.5f*Node::DIMENSIONS;
-	std::vector<DataPtr> childNodes;
-	childNodes.push_back(MakeDataNode("Root", center));
-	graph->add(childNodes.front());
-	box2f bounds= getContext()->getViewport();
-	for (int d = 0; d < D; d++) {
-		std::vector<DataPtr> tmpList;
-		for (DataPtr parent : childNodes) {
-			for (int n = 0; n < N; n++) {
-				float2 pt = parent->getForceItem()->location
-						+ (armLength*std::pow(0.3f,(float)d))
-								* float2(
-										std::cos(n * ALY_PI * 2.0f / (float) N),
-										std::sin(
-												n * ALY_PI * 2.0f / (float) N));
-				DataPtr child = MakeDataNode(
-						MakeString() << "Data " << d << "::" << n, pt-Node::DIMENSIONS*0.5f);
-				graph->add(child);
-				graph->add(MakeRelationship(parent, "has child", child));
-				tmpList.push_back(child);
-			}
-		}
-		childNodes = tmpList;
-	}
-
+		Application(800,600, "Data Flow Graph Example") {
 }
 bool DataFlowEx::init(Composite& rootNode) {
 	graph = MakeDataFlow("Data Flow", CoordPX(10, 10),
 			CoordPerPX(1.0f, 1.0f, -20.0f, -20.0f));
-	createRadialGraph(graph);
-	graph->start();
-	/*
 	 ComputePtr computeNode1 = MakeComputeNode("Compute 1", pixel2(10, 10));
 	 ComputePtr computeNode2 = MakeComputeNode("Compute 2", pixel2(120, 10));
 	 ComputePtr computeNode3 = MakeComputeNode("Compute 3", pixel2(230, 10));
@@ -134,7 +100,7 @@ bool DataFlowEx::init(Composite& rootNode) {
 	 graph->add(sourceNode2);
 	 graph->add(destNode1);
 	 graph->add(destNode2);
-	 */
+	 
 	rootNode.add(graph);
 	return true;
 }

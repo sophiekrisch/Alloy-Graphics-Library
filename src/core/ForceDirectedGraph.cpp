@@ -76,6 +76,7 @@ namespace aly {
 
 		const float ForceSimulator::RADIUS = 20.0f;
 		const float ForceSimulator::DEFAULT_TIME_STEP = 30.0f;
+		const int ForceSimulator::DEFAULT_INTEGRATION_CYCLES = 4;
 		void ForceItem::draw(AlloyContext* context, const pixel2& offset) {
 			const float lineWidth = 4.0f;
 			NVGcontext* nvg = context->nvgContext;
@@ -138,7 +139,37 @@ namespace aly {
 
 		ForceSimulator::ForceSimulator(const std::string& name, const AUnit2D& pos, const AUnit2D& dims, const std::shared_ptr<Integrator>& integr)
 			:Region(name, pos, dims), integrator(integr) {
+			simWorker = RecurrentTaskPtr(new RecurrentTask([this](uint64_t iter) {
+				return update(iter);
+			}, 10));
+		}
+		bool ForceSimulator::update(uint64_t iter) {
+			if (renderCount == 0) {
+				lastTime = std::chrono::steady_clock::now();
+			}
+			for (int c = 0; c < DEFAULT_INTEGRATION_CYCLES; c++) {
+				runSimulator();
+			}
+			renderCount++;
+			std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
+			double elapsed = std::chrono::duration<double>(currentTime - lastTime).count();
+			if (elapsed>1.0f) {
+				lastTime = currentTime;
+				frameRate = (float)(DEFAULT_INTEGRATION_CYCLES*renderCount / elapsed);
+				//std::cout << "Frame Rate " << << " fps" << std::endl;
+				renderCount = 0;
 
+			}
+			return true;
+		}
+		void ForceSimulator::start() {
+			renderCount = 0;
+			simWorker->execute();
+		}
+		void ForceSimulator::stop() {
+			simWorker->cancel();
+			renderCount = 0;
+			frameRate = 0;
 		}
 		float ForceSimulator::getSpeedLimit() const {
 			return speedLimit;
@@ -215,8 +246,9 @@ namespace aly {
 			return addSpringItem(item1, item2, -1.f, -1.f);
 		}
 		void ForceSimulator::draw(AlloyContext* context) {
+			context->setCursor(&Cursor::Position);
 			std::lock_guard<std::mutex> lockMe(lock);
-			float2 offset = getDrawOffset();
+			float2 offset = getBoundsPosition();
 			for (ForcePtr f : iforces) {
 				f->draw(context, offset);
 			}
@@ -231,7 +263,15 @@ namespace aly {
 			}
 		}
 		void ForceSimulator::accumulate() {
-		//std::cout << "Forces " << iforces.size() << " " << sforces.size() << " " << items.size() << std::endl;
+			float2 p1(1E30f);
+			float2 p2(-1E30f);
+			for (ForceItemPtr item : getItems()) {
+				float2 p = item->location;
+				p1 = aly::min(p, p1);
+				p2 = aly::max(p, p2);
+			}
+			forceBounds = box2f(p1, p2 - p1);
+			extents = forceBounds;
 #pragma omp parallel for num_threads(NUM_THREADS)
 			for (int i = 0; i < (int)iforces.size();i++) {
 				iforces[i]->init(*this);
@@ -453,6 +493,11 @@ namespace aly {
 			float coeff = params[GRAVITATIONAL_CONST] * item->mass;
 			item->force += gDirection * coeff;
 		}
+		void BuoyancyForce::getForce(const ForceItemPtr& item) {
+			//1 means it sinks, 0 neutrally buoyant, -1 it floats
+			float coeff = params[GRAVITATIONAL_CONST] * item->mass*item->buoyancy;
+			item->force += gDirection * coeff;
+		}
 		void QuadTreeNode::reset() {
 			com = float2(0.0f);
 			mass = 0;
@@ -514,15 +559,9 @@ namespace aly {
 		}
 		void NBodyForce::init(ForceSimulator& fsim) {
 			clear();
-			float2 p1(1E30f);
-			float2 p2(-1E30f);
-			for (ForceItemPtr item : fsim.getItems()) {
-				float2 p = item->location;
-				p1 = aly::min(p, p1);
-				p2 = aly::max(p, p2);
-			}
-			float2 dxy = p2 - p1;
-			float2 center = 0.5f*(p1 + p2);
+			bounds=fsim.getForceItemBounds();
+			float2 dxy = bounds.dimensions;
+			float2 center =bounds.center();
 			float maxDim = std::max(dxy.x, dxy.y);
 			bounds = box2f(center - float2(maxDim*0.5f), float2(maxDim));
 			for (ForceItemPtr item : fsim.getItems()) {

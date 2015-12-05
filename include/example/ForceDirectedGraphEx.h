@@ -19,16 +19,17 @@
  * THE SOFTWARE.
  */
 
-#ifndef DATAFLOW_EX_H_
-#define DATAFLOW_EX_H_
+#ifndef FORCEDIRECTEDGRAPH_EX_H_
+#define FORCEDIRECTEDGRAPH_EX_H_
 
 #include "AlloyApplication.h"
-#include "AlloyDataFlow.h"
-class DataFlowEx: public aly::Application {
+#include "ForceDirectedGraph.h"
+class ForceDirectedGraphEx: public aly::Application {
 protected:
-	aly::dataflow::DataFlowPtr graph;
+	aly::dataflow::ForceSimulatorPtr graph;
+	void createRadialGraph(const aly::dataflow::ForceSimulatorPtr& graph);
 public:
-	DataFlowEx();
+	ForceDirectedGraphEx();
 	bool init(aly::Composite& rootNode);
 };
 
