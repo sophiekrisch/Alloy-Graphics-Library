@@ -1593,93 +1593,110 @@ public:
 	vec<T, M> start;
 	vec<T, M> end;
 private:
-	bool clip(T denom,T numer, T& t0, T& t1,T tolerance=T(1E-15)) const
-	{
-		if (denom > tolerance)
-		{
-			if (numer > denom*t1)
-			{
+	bool clip(T denom, T numer, T& t0, T& t1, T tolerance = T(1E-15)) const {
+		if (denom > tolerance) {
+			if (numer > denom * t1) {
 				return false;
 			}
-			if (numer > denom*t0)
-			{
+			if (numer > denom * t0) {
 				t0 = numer / denom;
 			}
 			return true;
-		}
-		else if (denom <-tolerance)
-		{
-			if (numer > denom*t0)
-			{
+		} else if (denom < -tolerance) {
+			if (numer > denom * t0) {
 				return false;
 			}
-			if (numer > denom*t1)
-			{
+			if (numer > denom * t1) {
 				t1 = numer / denom;
 			}
 			return true;
-		}
-		else
-		{
+		} else {
 			return (numer <= T(0));
 		}
 	}
 
 public:
-	lineseg(const vec<T, M>& start = vec<T, M>(T(0)), const vec<T, M>& end = vec<T, M>(T(0))) :start(start), end(end) {
+	lineseg(const vec<T, M>& start = vec<T, M>(T(0)), const vec<T, M>& end =
+			vec<T, M>(T(0))) :
+			start(start), end(end) {
 	}
 	inline float length() const {
 		return distance(start, end);
 	}
-	bool intersects(const lineseg<T, M>& line) const {
-		return false;
+	bool intersects(const lineseg<T, M>& line, T& t, T& s,
+			T tolerance = T(1E-15)) const {
+		vec<T, M> a = (line.end - line.start);
+		vec<T, M> b = (end - start);
+		vec<T, M> c = (line.start - start);
+		T cb=cross(c,b);
+		T ab=cross(a,b);
+		T len=ab*ab;
+		if (len >= tolerance) {
+			t =(cb*ab) / len;
+			s = dot(a,start+b*t-line.start)/lengthSqr(a);
+			if (t >= T(0) && t <= T(1) && s >= T(0) && s <= T(1)) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			t = std::numeric_limits<T>::max();
+			s = std::numeric_limits<T>::max();
+			return false;
+		}
 	}
 	// Geometric Tools LLC, Redmond WA 98052
 	// Copyright (c) 1998-2015
 	// Distributed under the Boost Software License, Version 1.0.
 	// http://www.boost.org/LICENSE_1_0.txt
 	// http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
-	bool intersects(const box<T,M>& box,T tolerance=T(1E-15)) const {
+	bool intersects(const box<T, M>& box, T tolerance = T(1E-15)) const {
 		T t0 = -std::numeric_limits<T>::max();
 		T t1 = std::numeric_limits<T>::max();
 		T len = distance(start, end);
-		if(len<tolerance)return box.contains(T(0.5)*(start+end));
-		vec<T, M> lineDirection = (end-start)/len;
-		vec<T, M> boxExtent = box.dimensions*T(0.5);
-		vec<T, M> lineOrigin = start - box.position-boxExtent;
+		if (len < tolerance)
+			return box.contains(T(0.5) * (start + end));
+		vec<T, M> lineDirection = (end - start) / len;
+		vec<T, M> boxExtent = box.dimensions * T(0.5);
+		vec<T, M> lineOrigin = start - box.position - boxExtent;
 
 		if (M == 2) {
-			if (clip(+lineDirection[0], -lineOrigin[0] - boxExtent[0], t0, t1,tolerance) &&
-				clip(-lineDirection[0], +lineOrigin[0] - boxExtent[0], t0, t1,tolerance) &&
-				clip(+lineDirection[1], -lineOrigin[1] - boxExtent[1], t0, t1,tolerance) &&
-				clip(-lineDirection[1], +lineOrigin[1] - boxExtent[1], t0, t1,tolerance))
-			{
-				if (t1 > t0)
-				{
-					if ((t1 <= len&&t1 >= 0) || (t0 <= len && t0 >= 0))return true;
-				}
-				else
-				{
-					if (t0 <= len && t0 >= 0)return true;
+			if (clip(+lineDirection[0], -lineOrigin[0] - boxExtent[0], t0, t1,
+					tolerance)
+					&& clip(-lineDirection[0], +lineOrigin[0] - boxExtent[0],
+							t0, t1, tolerance)
+					&& clip(+lineDirection[1], -lineOrigin[1] - boxExtent[1],
+							t0, t1, tolerance)
+					&& clip(-lineDirection[1], +lineOrigin[1] - boxExtent[1],
+							t0, t1, tolerance)) {
+				if (t1 > t0) {
+					if ((t1 <= len && t1 >= 0) || (t0 <= len && t0 >= 0))
+						return true;
+				} else {
+					if (t0 <= len && t0 >= 0)
+						return true;
 				}
 				return false;
 			}
-		}
-		else if (M == 3) {
-			if (clip(+lineDirection[0], -lineOrigin[0] - boxExtent[0], t0, t1,tolerance) &&
-				clip(-lineDirection[0], +lineOrigin[0] - boxExtent[0], t0, t1,tolerance) &&
-				clip(+lineDirection[1], -lineOrigin[1] - boxExtent[1], t0, t1,tolerance) &&
-				clip(-lineDirection[1], +lineOrigin[1] - boxExtent[1], t0, t1,tolerance) &&
-				clip(+lineDirection[2], -lineOrigin[2] - boxExtent[2], t0, t1,tolerance) &&
-				clip(-lineDirection[2], +lineOrigin[2] - boxExtent[2], t0, t1,tolerance))
-			{
-				if (t1 > t0)
-				{
-					if ((t1 <= len&&t1 >= 0) || (t0 <= len && t0 >= 0))return true;
-				}
-				else
-				{
-					if (t0<=len && t0 >= 0)return true;
+		} else if (M == 3) {
+			if (clip(+lineDirection[0], -lineOrigin[0] - boxExtent[0], t0, t1,
+					tolerance)
+					&& clip(-lineDirection[0], +lineOrigin[0] - boxExtent[0],
+							t0, t1, tolerance)
+					&& clip(+lineDirection[1], -lineOrigin[1] - boxExtent[1],
+							t0, t1, tolerance)
+					&& clip(-lineDirection[1], +lineOrigin[1] - boxExtent[1],
+							t0, t1, tolerance)
+					&& clip(+lineDirection[2], -lineOrigin[2] - boxExtent[2],
+							t0, t1, tolerance)
+					&& clip(-lineDirection[2], +lineOrigin[2] - boxExtent[2],
+							t0, t1, tolerance)) {
+				if (t1 > t0) {
+					if ((t1 <= len && t1 >= 0) || (t0 <= len && t0 >= 0))
+						return true;
+				} else {
+					if (t0 <= len && t0 >= 0)
+						return true;
 				}
 				return false;
 			}
@@ -1688,16 +1705,20 @@ public:
 	}
 	static const lineseg<T, M> NONE;
 };
-template<class T, int C> const lineseg<T, C> lineseg<T, C>::NONE = lineseg<T, C>(vec<T, C>(std::numeric_limits<T>::min()), vec<T, C>(std::numeric_limits<T>::min()));
+template<class T, int C> const lineseg<T, C> lineseg<T, C>::NONE =
+		lineseg<T, C>(vec<T, C>(std::numeric_limits<T>::min()),
+				vec<T, C>(std::numeric_limits<T>::min()));
 
-template<class T, int C> bool operator==(const lineseg<T, C>& a, const lineseg<T, C>& b) {
-	return (a.start == b.start&&a.end == b.end);
+template<class T, int C> bool operator==(const lineseg<T, C>& a,
+		const lineseg<T, C>& b) {
+	return (a.start == b.start && a.end == b.end);
 }
-template<class T, int C> bool operator!=(const lineseg<T, C>& a, const lineseg<T, C>& b) {
+template<class T, int C> bool operator!=(const lineseg<T, C>& a,
+		const lineseg<T, C>& b) {
 	return (a.start != b.start || a.end != b.end);
 }
 template<class T, int K, class C, class R> std::basic_ostream<C, R> & operator <<(
-	std::basic_ostream<C, R> & ss, const lineseg<T, K>& line) {
+		std::basic_ostream<C, R> & ss, const lineseg<T, K>& line) {
 	return ss << "[" << line.start << "->" << line.end << "]";
 }
 typedef lineseg<float, 2> lineseg2f;

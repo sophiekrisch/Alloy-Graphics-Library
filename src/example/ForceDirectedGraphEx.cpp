@@ -75,14 +75,15 @@ bool ForceDirectedGraphEx::init(Composite& rootNode) {
 	createRadialGraph(graph);
 	graph->backgroundColor = MakeColor(64,64,64);
 	graph->setClampDragToParentBounds(false);
-	graph->addForce(SpringForcePtr(new SpringForce()));
 	graph->addForce(NBodyForcePtr(new NBodyForce()));
+	graph->addForce(SpringForcePtr(new SpringForce()));
+	graph->addForce(DragForcePtr(new DragForce(0.001f)));
 	graph->addForce(GravitationalForcePtr(new GravitationalForce()));
 	graph->addForce(BuoyancyForcePtr(new BuoyancyForce()));
 	graph->addForce(WallForcePtr(new WallForce(float2(100.0f, 1800.0f), float2(1900.0f, 1700.0f))));
 	graph->addForce(BoxForcePtr(new BoxForce(box2f(float2(0.0f,0.0f), float2(2000.0f,2000.0f)))));
 	graph->addForce(CircularWallForcePtr(new CircularWallForce(float2(1000.0f, 1000.0f), 960.0f)));
-	graph->addForce(DragForcePtr(new DragForce(0.001f)));
+
 	bool firstTime=true;
 	for (ForcePtr f : graph->getForces()) {
 		int N = (int)f->getParameterCount();
@@ -90,7 +91,9 @@ bool ForceDirectedGraphEx::init(Composite& rootNode) {
 		paramRegion->setOrientation(Orientation::Vertical,pixel2(5.0f),pixel2(5.0f));
 		ToggleBoxPtr enabledToggle = ToggleBoxPtr(new ToggleBox("Force Enabled", CoordPX(5.0f,5.0f),CoordPerPX(1.0f,0.0f,-10.0f,25.0f),true));
 		enabledToggle->onChange = [=](bool b) {
+			graph->getLock().lock();
 			f->setEnabled(b);
+			graph->getLock().unlock();
 		};
 		paramRegion->add(enabledToggle);
 		for (int n = 0; n < N; n++) {
@@ -98,7 +101,9 @@ bool ForceDirectedGraphEx::init(Composite& rootNode) {
 			paramRegion->add(hslider);
 			hslider->setOnChangeEvent(
 				[=](const Number& val) {
+				graph->getLock().lock();
 				f->setParameter(n,val.toFloat());
+				graph->getLock().unlock();
 			});
 		}
 		controlRegion->add(paramRegion, 30.0f+N * (40.0f +5.0f)+5.0f, firstTime);

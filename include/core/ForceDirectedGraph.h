@@ -32,7 +32,7 @@
 #include <memory>
 #include <mutex>
 namespace aly {
-	class AlloyContext;
+class AlloyContext;
 namespace dataflow {
 class ForceSimulator;
 
@@ -46,8 +46,9 @@ struct ForceItem {
 	NodeShape shape;
 	std::array<float2, 4> k;
 	std::array<float2, 4> l;
-	ForceItem(const float2& pt=float2(0.0f)) :
-			mass(1.0f), buoyancy(1.0f), force(0.0f), velocity(0.0f), location(pt), plocation(pt),shape(NodeShape::Circle){
+	ForceItem(const float2& pt = float2(0.0f)) :
+			mass(1.0f), buoyancy(1.0f), force(0.0f), velocity(0.0f), location(
+					pt), plocation(pt), shape(NodeShape::Circle) {
 	}
 	void reset() {
 		force = float2(0.0f);
@@ -66,7 +67,7 @@ struct SpringItem {
 			float len) :
 			item1(fi1), item2(fi2), coeff(k), length(len) {
 	}
-	void draw(AlloyContext* context,const pixel2& offset);
+	void draw(AlloyContext* context, const pixel2& offset);
 };
 
 typedef std::shared_ptr<SpringItem> SpringItemPtr;
@@ -90,7 +91,7 @@ protected:
 	std::vector<float> params;
 	std::vector<float> minValues;
 	std::vector<float> maxValues;
-	bool enabled=true;
+	bool enabled = true;
 public:
 	virtual void init(ForceSimulator& fsim) {
 	}
@@ -100,6 +101,9 @@ public:
 	;
 	size_t getParameterCount() const {
 		return params.size();
+	}
+	virtual void enforceBoundary(const std::shared_ptr<ForceItem>& forceItem){
+
 	}
 	void setEnabled(bool b) {
 		enabled = b;
@@ -124,7 +128,7 @@ public:
 		return ForceParameter(getParameterName(i), getParameterValue(i),
 				getMinValue(i), getMaxValue(i));
 	}
-	virtual void setParameter(size_t i, float val){
+	virtual void setParameter(size_t i, float val) {
 		params[i] = val;
 	}
 	void setMinValue(size_t i, float val) {
@@ -137,6 +141,9 @@ public:
 		return false;
 	}
 	virtual bool isForceItem() const {
+		return false;
+	}
+	virtual bool isBoundaryItem() const {
 		return false;
 	}
 	virtual void getForce(const ForceItemPtr& item) {
@@ -164,10 +171,10 @@ struct Integrator {
 };
 typedef std::shared_ptr<Integrator> IntegratorPtr;
 class ForceSimulator;
-struct RungeKuttaIntegrator : public Integrator {
+struct RungeKuttaIntegrator: public Integrator {
 	virtual void integrate(ForceSimulator& sim, float timestep) const override;
 };
-struct EulerIntegrator : public Integrator {
+struct EulerIntegrator: public Integrator {
 	virtual void integrate(ForceSimulator& sim, float timestep) const override;
 };
 class ForceSimulator: public Region {
@@ -176,6 +183,8 @@ class ForceSimulator: public Region {
 	std::vector<SpringItemPtr> springs;
 	std::vector<ForcePtr> iforces;
 	std::vector<ForcePtr> sforces;
+	std::vector<ForcePtr> bforces;
+	std::vector<ForcePtr> allforces;
 	std::shared_ptr<Integrator> integrator;
 	float speedLimit = 1.0f;
 	int renderCount = 0;
@@ -188,9 +197,15 @@ public:
 	static const float RADIUS;
 	static const float DEFAULT_TIME_STEP;
 	static const int DEFAULT_INTEGRATION_CYCLES;
-	ForceSimulator(const std::string& name, const AUnit2D& pos, const AUnit2D& dims, const std::shared_ptr<Integrator>& integr = std::shared_ptr<Integrator>(new  RungeKuttaIntegrator()));
+	std::mutex& getLock(){
+		return lock;
+	}
+	ForceSimulator(const std::string& name, const AUnit2D& pos,
+			const AUnit2D& dims, const std::shared_ptr<Integrator>& integr =
+					std::shared_ptr<Integrator>(new RungeKuttaIntegrator()));
 	void start();
 	void stop();
+	void enforceBoundaries();
 	box2f getForceItemBounds() const {
 		return forceBounds;
 	}
@@ -204,7 +219,7 @@ public:
 	void setIntegrator(const IntegratorPtr& intgr);
 	void clear();
 	void addForce(const ForcePtr& f);
-	std::vector<ForcePtr> getForces() const;
+	std::vector<ForcePtr>& getForces();
 	void addForceItem(const ForceItemPtr& item);
 	bool removeItem(ForceItemPtr item);
 	std::vector<ForceItemPtr>& getItems();
@@ -221,7 +236,6 @@ public:
 	virtual void drawDebug(AlloyContext* context) override;
 };
 typedef std::shared_ptr<ForceSimulator> ForceSimulatorPtr;
-
 
 struct SpringForce: public Force {
 	static const std::string pnames[2];
@@ -240,7 +254,8 @@ struct SpringForce: public Force {
 		maxValues = std::vector<float> { DEFAULT_MAX_SPRING_COEFF,
 				DEFAULT_MAX_SPRING_LENGTH };
 	}
-	SpringForce():SpringForce(DEFAULT_SPRING_COEFF, DEFAULT_SPRING_LENGTH){
+	SpringForce() :
+			SpringForce(DEFAULT_SPRING_COEFF, DEFAULT_SPRING_LENGTH) {
 	}
 	virtual std::string getName() const override {
 		return "Spring Force";
@@ -294,6 +309,7 @@ struct WallForce: public Force {
 	WallForce(float2 p1, float2 p2) :
 			WallForce(DEFAULT_GRAV_CONSTANT, p1, p2) {
 	}
+	virtual void enforceBoundary(const std::shared_ptr<ForceItem>& forceItem) override;
 	virtual bool isForceItem() const override {
 		return true;
 	}
@@ -303,12 +319,15 @@ struct WallForce: public Force {
 	virtual std::string getParameterName(size_t i) const override {
 		return pnames[i];
 	}
+	virtual bool isBoundaryItem() const override {
+		return true;
+	}
 	virtual void draw(AlloyContext* context, const pixel2& offset) override;
 	virtual void getForce(const ForceItemPtr& item) override;
 };
 typedef std::shared_ptr<WallForce> WallForcePtr;
 
-struct BoxForce : public Force {
+struct BoxForce: public Force {
 	static const std::string pnames[1];
 	static const float DEFAULT_GRAV_CONSTANT;
 	static const float DEFAULT_MIN_GRAV_CONSTANT;
@@ -316,10 +335,10 @@ struct BoxForce : public Force {
 	static const int GRAVITATIONAL_CONST;
 	float2 pts[4];
 	float2 dxy[4];
-	
+
 	BoxForce(float gravConst, const box2f& box);
 	BoxForce(const box2f& box) :
-		BoxForce(DEFAULT_GRAV_CONSTANT, box) {
+			BoxForce(DEFAULT_GRAV_CONSTANT, box) {
 	}
 	virtual std::string getName() const override {
 		return "Box Boundary";
@@ -327,6 +346,10 @@ struct BoxForce : public Force {
 	virtual bool isForceItem() const override {
 		return true;
 	}
+	virtual bool isBoundaryItem() const override {
+		return true;
+	}
+	virtual void enforceBoundary(const std::shared_ptr<ForceItem>& forceItem) override;
 	void setBounds(const box2f& bounds);
 	virtual std::string getParameterName(size_t i) const override {
 		return pnames[i];
@@ -358,6 +381,10 @@ struct CircularWallForce: public Force {
 	virtual bool isForceItem() const override {
 		return true;
 	}
+	virtual bool isBoundaryItem() const override {
+		return true;
+	}
+	virtual void enforceBoundary(const std::shared_ptr<ForceItem>& forceItem) override;
 	virtual std::string getParameterName(size_t i) const override {
 		return pnames[i];
 	}
@@ -407,7 +434,7 @@ struct GravitationalForce: public Force {
 };
 typedef std::shared_ptr<GravitationalForce> GravitationalForcePtr;
 
-struct BuoyancyForce : public Force {
+struct BuoyancyForce: public Force {
 	static const std::string pnames[2];
 	static const int GRAVITATIONAL_CONST = 0;
 	static const int DIRECTION = 1;
@@ -419,16 +446,16 @@ struct BuoyancyForce : public Force {
 	static const float DEFAULT_MAX_DIRECTION;
 	float2 gDirection;
 	BuoyancyForce(float forceConstant, float direction) {
-		params = std::vector<float>{ forceConstant, direction };
-		minValues = std::vector<float>{ DEFAULT_MIN_FORCE_CONSTANT,
-			DEFAULT_MIN_DIRECTION };
-		maxValues = std::vector<float>{ DEFAULT_MAX_FORCE_CONSTANT,
-			DEFAULT_MAX_DIRECTION };
+		params = std::vector<float> { forceConstant, direction };
+		minValues = std::vector<float> { DEFAULT_MIN_FORCE_CONSTANT,
+				DEFAULT_MIN_DIRECTION };
+		maxValues = std::vector<float> { DEFAULT_MAX_FORCE_CONSTANT,
+				DEFAULT_MAX_DIRECTION };
 		float theta = params[DIRECTION];
 		gDirection = float2(std::cos(theta), std::sin(theta));
 	}
 	BuoyancyForce() :
-		BuoyancyForce(DEFAULT_FORCE_CONSTANT, DEFAULT_DIRECTION) {
+			BuoyancyForce(DEFAULT_FORCE_CONSTANT, DEFAULT_DIRECTION) {
 	}
 	virtual std::string getName() const override {
 		return "Buoyancy";
@@ -458,7 +485,7 @@ struct QuadTreeNode {
 	QuadTreeNode(float mass = 0.0f, float2 com = float2(0.0f)) :
 			mass(mass), com(com), hasChildren(false) {
 	}
-	
+
 	void reset();
 };
 typedef std::unique_ptr<QuadTreeNode> QuadTreeNodePtr;

@@ -206,18 +206,19 @@ void ForceSimulator::clear() {
 }
 void ForceSimulator::addForce(const ForcePtr& f) {
 	std::lock_guard<std::mutex> lockMe(lock);
+	allforces.push_back(f);
 	if (f->isForceItem()) {
 		iforces.push_back(f);
 	}
 	if (f->isSpringItem()) {
 		sforces.push_back(f);
 	}
+	if (f->isBoundaryItem()) {
+		bforces.push_back(f);
+	}
 }
-std::vector<ForcePtr> ForceSimulator::getForces() const {
-	std::vector<ForcePtr> forcesOut;
-	forcesOut.insert(forcesOut.end(), iforces.begin(), iforces.end());
-	forcesOut.insert(forcesOut.end(), sforces.begin(), sforces.end());
-	return forcesOut;
+std::vector<ForcePtr>& ForceSimulator::getForces() {
+	return allforces;
 }
 void ForceSimulator::addForceItem(const ForceItemPtr& item) {
 	std::lock_guard<std::mutex> lockMe(lock);
@@ -348,6 +349,16 @@ void ForceSimulator::runSimulator(float timestep) {
 	forceBounds = box2f(p1, p2 - p1);
 	accumulate();
 	integrator->integrate(*this, timestep);
+	enforceBoundaries();
+}
+void ForceSimulator::enforceBoundaries() {
+#pragma omp parallel for num_threads(NUM_THREADS)
+	for (int i = 0; i < (int) items.size(); i++) {
+		for (ForcePtr f : bforces) {
+			if (f->isEnabled())
+				f->enforceBoundary(items[i]);
+		}
+	}
 }
 void EulerIntegrator::integrate(ForceSimulator& sim, float timestep) const {
 	float speedLimit = sim.getSpeedLimit();
@@ -378,6 +389,7 @@ void RungeKuttaIntegrator::integrate(ForceSimulator& sim,
 		l[0] = coeff * item->force;
 		item->location += 0.5f * k[0];
 	}
+	sim.enforceBoundaries();
 	sim.accumulate();
 	for (ForceItemPtr item : sim.getItems()) {
 		coeff = timestep / item->mass;
@@ -393,10 +405,9 @@ void RungeKuttaIntegrator::integrate(ForceSimulator& sim,
 		// Set the position to the new predicted position
 		item->location = item->plocation + 0.5f * k[1];
 	}
-
+	sim.enforceBoundaries();
 	// recalculate forces
 	sim.accumulate();
-
 	for (ForceItemPtr item : sim.getItems()) {
 		coeff = timestep / item->mass;
 		k = item->k;
@@ -410,6 +421,7 @@ void RungeKuttaIntegrator::integrate(ForceSimulator& sim,
 		l[2] = coeff * item->force;
 		item->location = item->plocation + 0.5f * k[2];
 	}
+	sim.enforceBoundaries();
 	// recalculate forces
 	sim.accumulate();
 
@@ -512,8 +524,17 @@ WallForce::WallForce(float gravConst, float2 p1, float2 p2) :
 	if (dxy.y != 0.0)
 		dxy.y /= r;
 }
+void WallForce::enforceBoundary(const std::shared_ptr<ForceItem>& forceItem) {
+	lineseg2f line(forceItem->plocation, forceItem->location);
+	lineseg2f boundary(p1, p2);
+	float t, s;
+	if (line.intersects(boundary, t, s)) {
+		forceItem->location = mix(line.start, line.end, t);
+	}
+}
 void WallForce::draw(AlloyContext* context, const pixel2& offset) {
-	if(!enabled)return;
+	if (!enabled)
+		return;
 	NVGcontext* nvg = context->nvgContext;
 	nvgStrokeWidth(nvg, 8.0f);
 	nvgStrokeColor(nvg, Color(1.0f, 1.0f, 1.0f, 1.0f));
@@ -552,6 +573,10 @@ void BoxForce::setBounds(const box2f& box) {
 		this->dxy[k] = dxy;
 	}
 }
+void BoxForce::enforceBoundary(const std::shared_ptr<ForceItem>& forceItem) {
+	box2f box(pts[0], pts[2] - pts[0]);
+	box.clamp(forceItem->location);
+}
 BoxForce::BoxForce(float gravConst, const box2f& box) {
 	params = std::vector<float> { gravConst };
 	minValues = std::vector<float> { DEFAULT_MIN_GRAV_CONSTANT };
@@ -559,7 +584,8 @@ BoxForce::BoxForce(float gravConst, const box2f& box) {
 	setBounds(box);
 }
 void BoxForce::draw(AlloyContext* context, const pixel2& offset) {
-	if(!enabled)return;
+	if (!enabled)
+		return;
 	NVGcontext* nvg = context->nvgContext;
 	nvgStrokeWidth(nvg, 4.0f);
 	nvgStrokeColor(nvg, Color(0.8f, 0.8f, 0.8f, 1.0f));
@@ -603,7 +629,15 @@ void CircularWallForce::getForce(const ForceItemPtr& item) {
 	}
 	item->force += v * dxy / d;
 }
-
+void CircularWallForce::enforceBoundary(
+		const std::shared_ptr<ForceItem>& forceItem) {
+	float2 n = forceItem->location;
+	float2 dxy = p - n;
+	float d = length(dxy);
+	if (d > r) {
+		forceItem->location = p + dxy * r / d;
+	}
+}
 void GravitationalForce::getForce(const ForceItemPtr& item) {
 	float coeff = params[GRAVITATIONAL_CONST] * item->mass;
 	item->force += gDirection * coeff;
@@ -715,7 +749,7 @@ void NBodyForce::forceHelper(const ForceItemPtr& item, const QuadTreeNodePtr& n,
 	float2 dxy = n->com - item->location;
 	float r = length(dxy);
 	bool same = false;
-	if (r == 0.0f) {
+	if (r <1E-5f) {
 		// if items are in the exact same place, add some noise
 		dxy = float2(RandomUniform(-0.5f, 0.5f) / 50.0f,
 				RandomUniform(-0.5f, 0.5f) / 50.0f);
@@ -763,7 +797,8 @@ void NBodyForce::getForce(const ForceItemPtr& item) {
 	forceHelper(item, root, bounds);
 }
 void NBodyForce::draw(AlloyContext* context, const pixel2& offset) {
-	if(!enabled)return;
+	if (!enabled)
+		return;
 	NVGcontext* nvg = context->nvgContext;
 	nvgStrokeWidth(nvg, 2.0f);
 	nvgStrokeColor(nvg, Color(0.5f, 0.5f, 0.5f, 1.0f));
@@ -774,7 +809,8 @@ void NBodyForce::draw(AlloyContext* context, const pixel2& offset) {
 }
 
 void CircularWallForce::draw(AlloyContext* context, const pixel2& offset) {
-	if(!enabled)return;
+	if (!enabled)
+		return;
 	NVGcontext* nvg = context->nvgContext;
 	nvgStrokeWidth(nvg, 4.0f);
 	nvgStrokeColor(nvg, Color(0.8f, 0.8f, 0.8f, 1.0f));
