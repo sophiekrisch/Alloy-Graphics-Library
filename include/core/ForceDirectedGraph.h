@@ -477,18 +477,24 @@ struct BuoyancyForce: public Force {
 typedef std::shared_ptr<BuoyancyForce> BuoyancyForcePtr;
 
 struct QuadTreeNode {
+	static const int MAX_LEAFS = 8;
+	static const int MAX_DEPTH = 12;
 	float mass;
 	float2 com;
 	bool hasChildren;
-	ForceItemPtr value;
-	std::array<std::unique_ptr<QuadTreeNode>, 4> children;
-	QuadTreeNode(float mass = 0.0f, float2 com = float2(0.0f)) :
-			mass(mass), com(com), hasChildren(false) {
+	int depth;
+	box2f bounds;
+	std::vector<ForceItemPtr> values;
+	std::array<std::shared_ptr<QuadTreeNode>, 4> children;
+	void update();
+	QuadTreeNode(float mass = 0.0f, float2 com = float2(0.0f),int depth=-1) :
+			mass(mass), com(com), hasChildren(false),depth(depth),bounds(box2f()) {
 	}
-
+	void insert(const ForceItemPtr& item);
+	void draw(AlloyContext* context, const pixel2& offset);
 	void reset();
 };
-typedef std::unique_ptr<QuadTreeNode> QuadTreeNodePtr;
+typedef std::shared_ptr<QuadTreeNode> QuadTreeNodePtr;
 
 struct NBodyForce: public Force {
 	static const std::string pnames[3];
@@ -505,7 +511,6 @@ struct NBodyForce: public Force {
 	static const int MIN_DISTANCE = 1;
 	static const int BARNES_HUT_THETA = 2;
 	QuadTreeNodePtr root;
-	box2f bounds;
 public:
 	NBodyForce(float gravConstant, float minDistance, float theta) {
 		params = {gravConstant, minDistance, theta};
@@ -513,7 +518,7 @@ public:
 			DEFAULT_MIN_DISTANCE, DEFAULT_MIN_THETA};
 		maxValues = {DEFAULT_MAX_GRAV_CONSTANT,
 			DEFAULT_MAX_DISTANCE, DEFAULT_MAX_THETA};
-		root = QuadTreeNodePtr(new QuadTreeNode());
+		
 	}
 	NBodyForce() :NBodyForce(DEFAULT_GRAV_CONSTANT, DEFAULT_DISTANCE, DEFAULT_THETA) {
 	}
@@ -524,9 +529,6 @@ public:
 	virtual std::string getParameterName(size_t i) const override {
 		return pnames[i];
 	}
-	void setBounds(const box2f& b) {
-		bounds = b;
-	}
 	virtual std::string getName() const override {
 		return "N-Body Force";
 	}
@@ -535,12 +537,8 @@ public:
 	void getForce(const ForceItemPtr& item) override;
 
 private:
-	void insertHelper(const ForceItemPtr& p, const QuadTreeNodePtr& n, box2f box);
-	void insert(const ForceItemPtr& p, QuadTreeNodePtr& n, box2f box);
-	void insert(ForceItemPtr item);
-	bool isSameLocation(const ForceItemPtr& f1, const ForceItemPtr& f2) const;
-	void calcMass(const QuadTreeNodePtr& n);
-	void forceHelper(const ForceItemPtr& item, const QuadTreeNodePtr& n, const box2f& box);
+	//void insert(ForceItemPtr item);
+	void forceHelper(const ForceItemPtr& item, const QuadTreeNodePtr& n);
 };
 typedef std::shared_ptr<NBodyForce> NBodyForcePtr;
 }

@@ -25,799 +25,828 @@
 #include "AlloyDrawUtil.h"
 #define NUM_THREADS 4
 namespace aly {
-namespace dataflow {
-const std::string SpringForce::pnames[2] =
+	namespace dataflow {
+		const std::string SpringForce::pnames[2] =
 		{ "Spring Coefficient", "Rest Length" };
-const float SpringForce::DEFAULT_SPRING_COEFF = 1E-4f;
-const float SpringForce::DEFAULT_MAX_SPRING_COEFF = 1E-3f;
-const float SpringForce::DEFAULT_MIN_SPRING_COEFF = 1E-5f;
-const float SpringForce::DEFAULT_SPRING_LENGTH = 50;
-const float SpringForce::DEFAULT_MIN_SPRING_LENGTH = 0;
-const float SpringForce::DEFAULT_MAX_SPRING_LENGTH = 200;
-const int SpringForce::SPRING_COEFF = 0;
-const int SpringForce::SPRING_LENGTH = 1;
+		const float SpringForce::DEFAULT_SPRING_COEFF = 1E-4f;
+		const float SpringForce::DEFAULT_MAX_SPRING_COEFF = 1E-3f;
+		const float SpringForce::DEFAULT_MIN_SPRING_COEFF = 1E-5f;
+		const float SpringForce::DEFAULT_SPRING_LENGTH = 50;
+		const float SpringForce::DEFAULT_MIN_SPRING_LENGTH = 0;
+		const float SpringForce::DEFAULT_MAX_SPRING_LENGTH = 200;
+		const int SpringForce::SPRING_COEFF = 0;
+		const int SpringForce::SPRING_LENGTH = 1;
 
-const std::string DragForce::pnames[1] = { "Drag Coefficient" };
-const float DragForce::DEFAULT_DRAG_COEFF = 0.01f;
-const float DragForce::DEFAULT_MIN_DRAG_COEFF = 0.0f;
-const float DragForce::DEFAULT_MAX_DRAG_COEFF = 0.1f;
-const int DragForce::DRAG_COEFF = 0;
+		const std::string DragForce::pnames[1] = { "Drag Coefficient" };
+		const float DragForce::DEFAULT_DRAG_COEFF = 0.01f;
+		const float DragForce::DEFAULT_MIN_DRAG_COEFF = 0.0f;
+		const float DragForce::DEFAULT_MAX_DRAG_COEFF = 0.1f;
+		const int DragForce::DRAG_COEFF = 0;
 
-const std::string WallForce::pnames[1] = { "Gravitational Constant" };
-const float WallForce::DEFAULT_GRAV_CONSTANT = -0.1f;
-const float WallForce::DEFAULT_MIN_GRAV_CONSTANT = -1.0f;
-const float WallForce::DEFAULT_MAX_GRAV_CONSTANT = 1.0f;
-const int WallForce::GRAVITATIONAL_CONST = 0;
+		const std::string WallForce::pnames[1] = { "Gravitational Constant" };
+		const float WallForce::DEFAULT_GRAV_CONSTANT = -0.1f;
+		const float WallForce::DEFAULT_MIN_GRAV_CONSTANT = -1.0f;
+		const float WallForce::DEFAULT_MAX_GRAV_CONSTANT = 1.0f;
+		const int WallForce::GRAVITATIONAL_CONST = 0;
 
-const std::string BoxForce::pnames[1] = { "Gravitational Constant" };
-const float BoxForce::DEFAULT_GRAV_CONSTANT = -0.1f;
-const float BoxForce::DEFAULT_MIN_GRAV_CONSTANT = -1.0f;
-const float BoxForce::DEFAULT_MAX_GRAV_CONSTANT = 1.0f;
-const int BoxForce::GRAVITATIONAL_CONST = 0;
+		const std::string BoxForce::pnames[1] = { "Gravitational Constant" };
+		const float BoxForce::DEFAULT_GRAV_CONSTANT = -0.1f;
+		const float BoxForce::DEFAULT_MIN_GRAV_CONSTANT = -1.0f;
+		const float BoxForce::DEFAULT_MAX_GRAV_CONSTANT = 1.0f;
+		const int BoxForce::GRAVITATIONAL_CONST = 0;
 
-const std::string CircularWallForce::pnames[1] = { "Gravitational Constant" };
-const float CircularWallForce::DEFAULT_GRAV_CONSTANT = -0.1f;
-const float CircularWallForce::DEFAULT_MIN_GRAV_CONSTANT = -1.0f;
-const float CircularWallForce::DEFAULT_MAX_GRAV_CONSTANT = 1.0f;
+		const std::string CircularWallForce::pnames[1] = { "Gravitational Constant" };
+		const float CircularWallForce::DEFAULT_GRAV_CONSTANT = -0.1f;
+		const float CircularWallForce::DEFAULT_MIN_GRAV_CONSTANT = -1.0f;
+		const float CircularWallForce::DEFAULT_MAX_GRAV_CONSTANT = 1.0f;
 
-const std::string GravitationalForce::pnames[2] = { "Gravitational Constant",
-		"Orientation" };
-const float GravitationalForce::DEFAULT_FORCE_CONSTANT = 1E-4f;
-const float GravitationalForce::DEFAULT_MIN_FORCE_CONSTANT = 1E-5f;
-const float GravitationalForce::DEFAULT_MAX_FORCE_CONSTANT = 1E-3f;
-const float GravitationalForce::DEFAULT_DIRECTION = (float) ALY_PI / 2.0f;
-const float GravitationalForce::DEFAULT_MIN_DIRECTION = (float) -ALY_PI;
-const float GravitationalForce::DEFAULT_MAX_DIRECTION = (float) ALY_PI;
+		const std::string GravitationalForce::pnames[2] = { "Gravitational Constant",
+				"Orientation" };
+		const float GravitationalForce::DEFAULT_FORCE_CONSTANT = 1E-4f;
+		const float GravitationalForce::DEFAULT_MIN_FORCE_CONSTANT = 1E-5f;
+		const float GravitationalForce::DEFAULT_MAX_FORCE_CONSTANT = 1E-3f;
+		const float GravitationalForce::DEFAULT_DIRECTION = (float)ALY_PI / 2.0f;
+		const float GravitationalForce::DEFAULT_MIN_DIRECTION = (float)-ALY_PI;
+		const float GravitationalForce::DEFAULT_MAX_DIRECTION = (float)ALY_PI;
 
-const std::string BuoyancyForce::pnames[2] = { "Gravitational Constant",
-		"Orientation" };
-const float BuoyancyForce::DEFAULT_FORCE_CONSTANT = 1E-4f;
-const float BuoyancyForce::DEFAULT_MIN_FORCE_CONSTANT = 1E-5f;
-const float BuoyancyForce::DEFAULT_MAX_FORCE_CONSTANT = 1E-3f;
-const float BuoyancyForce::DEFAULT_DIRECTION = (float) ALY_PI / 2.0f;
-const float BuoyancyForce::DEFAULT_MIN_DIRECTION = (float) -ALY_PI;
-const float BuoyancyForce::DEFAULT_MAX_DIRECTION = (float) ALY_PI;
+		const std::string BuoyancyForce::pnames[2] = { "Gravitational Constant",
+				"Orientation" };
+		const float BuoyancyForce::DEFAULT_FORCE_CONSTANT = 1E-4f;
+		const float BuoyancyForce::DEFAULT_MIN_FORCE_CONSTANT = 1E-5f;
+		const float BuoyancyForce::DEFAULT_MAX_FORCE_CONSTANT = 1E-3f;
+		const float BuoyancyForce::DEFAULT_DIRECTION = (float)ALY_PI / 2.0f;
+		const float BuoyancyForce::DEFAULT_MIN_DIRECTION = (float)-ALY_PI;
+		const float BuoyancyForce::DEFAULT_MAX_DIRECTION = (float)ALY_PI;
 
-const std::string NBodyForce::pnames[3] = { "Gravitational Constant",
-		"Distance", "Barnes-Hut Theta" };
-const float NBodyForce::DEFAULT_GRAV_CONSTANT = -1.0f;
-const float NBodyForce::DEFAULT_MIN_GRAV_CONSTANT = -10.0f;
-const float NBodyForce::DEFAULT_MAX_GRAV_CONSTANT = 10.0f;
-const float NBodyForce::DEFAULT_DISTANCE = -1.0f;
-const float NBodyForce::DEFAULT_MIN_DISTANCE = -1.0f;
-const float NBodyForce::DEFAULT_MAX_DISTANCE = 500.0f;
-const float NBodyForce::DEFAULT_THETA = 0.9f;
-const float NBodyForce::DEFAULT_MIN_THETA = 0.0f;
-const float NBodyForce::DEFAULT_MAX_THETA = 1.0f;
+		const std::string NBodyForce::pnames[3] = { "Gravitational Constant",
+				"Distance", "Barnes-Hut Theta" };
+		const float NBodyForce::DEFAULT_GRAV_CONSTANT = -1.0f;
+		const float NBodyForce::DEFAULT_MIN_GRAV_CONSTANT = -10.0f;
+		const float NBodyForce::DEFAULT_MAX_GRAV_CONSTANT = 10.0f;
+		const float NBodyForce::DEFAULT_DISTANCE = -1.0f;
+		const float NBodyForce::DEFAULT_MIN_DISTANCE = -1.0f;
+		const float NBodyForce::DEFAULT_MAX_DISTANCE = 500.0f;
+		const float NBodyForce::DEFAULT_THETA = 0.9f;
+		const float NBodyForce::DEFAULT_MIN_THETA = 0.0f;
+		const float NBodyForce::DEFAULT_MAX_THETA = 1.0f;
 
-const float ForceSimulator::RADIUS = 20.0f;
-const float ForceSimulator::DEFAULT_TIME_STEP = 30.0f;
-const int ForceSimulator::DEFAULT_INTEGRATION_CYCLES = 4;
-void ForceItem::draw(AlloyContext* context, const pixel2& offset) {
-	const float lineWidth = 4.0f;
-	NVGcontext* nvg = context->nvgContext;
+		const float ForceSimulator::RADIUS = 20.0f;
+		const float ForceSimulator::DEFAULT_TIME_STEP = 30.0f;
+		const int ForceSimulator::DEFAULT_INTEGRATION_CYCLES = 4;
+		void ForceItem::draw(AlloyContext* context, const pixel2& offset) {
+			const float lineWidth = 4.0f;
+			NVGcontext* nvg = context->nvgContext;
 
-	nvgStrokeWidth(nvg, lineWidth);
-	nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
-	nvgFillColor(nvg, Color(255, 64, 64));
-	nvgStrokeWidth(nvg, lineWidth);
-	nvgBeginPath(nvg);
-	float r = ForceSimulator::RADIUS;
-	pixel2 location = this->location + offset;
-	if (shape == NodeShape::Circle) {
-		nvgCircle(nvg, location.x, location.y, r - lineWidth * 0.5f);
-	} else if (shape == NodeShape::Square) {
-		nvgRoundedRect(nvg, location.x + lineWidth * 0.5f,
-				location.y + lineWidth * 0.5f, 2 * r - lineWidth,
-				2 * r - lineWidth, r * 0.5f);
-	} else if (shape == NodeShape::Triangle) {
-		nvgLineJoin(nvg, NVG_ROUND);
-		nvgMoveTo(nvg, location.x - r, location.y - r - lineWidth);
-		nvgLineTo(nvg, location.x + r + lineWidth * 0.5f,
-				location.y + r + lineWidth * 0.5f);
-		nvgLineTo(nvg, location.x - r - lineWidth,
-				location.y - r + lineWidth * 0.5f);
-		nvgClosePath(nvg);
-	} else if (shape == NodeShape::Hexagon) {
-		nvgLineJoin(nvg, NVG_ROUND);
-		float cx = location.x;
-		float cy = location.y;
-		static const float SCALE = 1.0f / std::sqrt(0.75f);
-		float rx = (r - lineWidth * 0.5f) * SCALE;
-		float ry = (r - lineWidth * 0.5f);
-		nvgMoveTo(nvg, cx + rx, cy);
-		nvgLineTo(nvg, cx + rx * 0.5f, cy - ry);
-		nvgLineTo(nvg, cx - rx * 0.5f, cy - ry);
-		nvgLineTo(nvg, cx - rx * 0.5f, cy - ry);
-		nvgLineTo(nvg, cx - rx, cy);
-		nvgLineTo(nvg, cx - rx * 0.5f, cy + ry);
-		nvgLineTo(nvg, cx + rx * 0.5f, cy + ry);
-		nvgClosePath(nvg);
-	}
-	nvgFill(nvg);
-	nvgStroke(nvg);
-}
-void SpringItem::draw(AlloyContext* context, const pixel2& offset) {
-	NVGcontext* nvg = context->nvgContext;
-	nvgStrokeColor(nvg, context->theme.NEUTRAL);
-	nvgStrokeWidth(nvg, 4.0f);
-	nvgLineCap(nvg, NVG_ROUND);
-	nvgBeginPath(nvg);
-	float2 objectPt = item2->location + offset;
-	float2 subjectPt = item1->location + offset;
-	nvgMoveTo(nvg, objectPt.x, objectPt.y);
-	nvgLineTo(nvg, subjectPt.x, subjectPt.y);
-	nvgStroke(nvg);
-}
+			nvgStrokeWidth(nvg, lineWidth);
+			nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+			nvgFillColor(nvg, Color(255, 64, 64));
+			nvgStrokeWidth(nvg, lineWidth);
+			nvgBeginPath(nvg);
+			float r = ForceSimulator::RADIUS;
+			pixel2 location = this->location + offset;
+			if (shape == NodeShape::Circle) {
+				nvgCircle(nvg, location.x, location.y, r - lineWidth * 0.5f);
+			}
+			else if (shape == NodeShape::Square) {
+				nvgRoundedRect(nvg, location.x + lineWidth * 0.5f,
+					location.y + lineWidth * 0.5f, 2 * r - lineWidth,
+					2 * r - lineWidth, r * 0.5f);
+			}
+			else if (shape == NodeShape::Triangle) {
+				nvgLineJoin(nvg, NVG_ROUND);
+				nvgMoveTo(nvg, location.x - r, location.y - r - lineWidth);
+				nvgLineTo(nvg, location.x + r + lineWidth * 0.5f,
+					location.y + r + lineWidth * 0.5f);
+				nvgLineTo(nvg, location.x - r - lineWidth,
+					location.y - r + lineWidth * 0.5f);
+				nvgClosePath(nvg);
+			}
+			else if (shape == NodeShape::Hexagon) {
+				nvgLineJoin(nvg, NVG_ROUND);
+				float cx = location.x;
+				float cy = location.y;
+				static const float SCALE = 1.0f / std::sqrt(0.75f);
+				float rx = (r - lineWidth * 0.5f) * SCALE;
+				float ry = (r - lineWidth * 0.5f);
+				nvgMoveTo(nvg, cx + rx, cy);
+				nvgLineTo(nvg, cx + rx * 0.5f, cy - ry);
+				nvgLineTo(nvg, cx - rx * 0.5f, cy - ry);
+				nvgLineTo(nvg, cx - rx * 0.5f, cy - ry);
+				nvgLineTo(nvg, cx - rx, cy);
+				nvgLineTo(nvg, cx - rx * 0.5f, cy + ry);
+				nvgLineTo(nvg, cx + rx * 0.5f, cy + ry);
+				nvgClosePath(nvg);
+			}
+			nvgFill(nvg);
+			nvgStroke(nvg);
+		}
+		void SpringItem::draw(AlloyContext* context, const pixel2& offset) {
+			NVGcontext* nvg = context->nvgContext;
+			nvgStrokeColor(nvg, context->theme.NEUTRAL);
+			nvgStrokeWidth(nvg, 4.0f);
+			nvgLineCap(nvg, NVG_ROUND);
+			nvgBeginPath(nvg);
+			float2 objectPt = item2->location + offset;
+			float2 subjectPt = item1->location + offset;
+			nvgMoveTo(nvg, objectPt.x, objectPt.y);
+			nvgLineTo(nvg, subjectPt.x, subjectPt.y);
+			nvgStroke(nvg);
+		}
+		ForceSimulator::ForceSimulator(const std::string& name, const AUnit2D& pos,
+			const AUnit2D& dims, const std::shared_ptr<Integrator>& integr) :
+			Region(name, pos, dims), integrator(integr) {
+			simWorker = RecurrentTaskPtr(new RecurrentTask([this](uint64_t iter) {
+				return update(iter);
+			}, 10));
+		}
+		bool ForceSimulator::update(uint64_t iter) {
+			if (renderCount == 0) {
+				lastTime = std::chrono::steady_clock::now();
+			}
+			for (int c = 0; c < DEFAULT_INTEGRATION_CYCLES; c++) {
+				runSimulator();
+			}
+			renderCount++;
+			std::chrono::steady_clock::time_point currentTime =
+				std::chrono::steady_clock::now();
+			double elapsed =
+				std::chrono::duration<double>(currentTime - lastTime).count();
+			if (elapsed > 1.0f) {
+				lastTime = currentTime;
+				frameRate =
+					(float)(DEFAULT_INTEGRATION_CYCLES * renderCount / elapsed);
+				//std::cout << "Frame Rate " << << " fps" << std::endl;
+				renderCount = 0;
 
-ForceSimulator::ForceSimulator(const std::string& name, const AUnit2D& pos,
-		const AUnit2D& dims, const std::shared_ptr<Integrator>& integr) :
-		Region(name, pos, dims), integrator(integr) {
-	simWorker = RecurrentTaskPtr(new RecurrentTask([this](uint64_t iter) {
-		return update(iter);
-	}, 10));
-}
-bool ForceSimulator::update(uint64_t iter) {
-	if (renderCount == 0) {
-		lastTime = std::chrono::steady_clock::now();
-	}
-	for (int c = 0; c < DEFAULT_INTEGRATION_CYCLES; c++) {
-		runSimulator();
-	}
-	renderCount++;
-	std::chrono::steady_clock::time_point currentTime =
-			std::chrono::steady_clock::now();
-	double elapsed =
-			std::chrono::duration<double>(currentTime - lastTime).count();
-	if (elapsed > 1.0f) {
-		lastTime = currentTime;
-		frameRate =
-				(float) (DEFAULT_INTEGRATION_CYCLES * renderCount / elapsed);
-		//std::cout << "Frame Rate " << << " fps" << std::endl;
-		renderCount = 0;
-
-	}
-	return true;
-}
-void ForceSimulator::start() {
-	renderCount = 0;
-	simWorker->execute();
-}
-void ForceSimulator::stop() {
-	simWorker->cancel();
-	renderCount = 0;
-	frameRate = 0;
-}
-float ForceSimulator::getSpeedLimit() const {
-	return speedLimit;
-}
-void ForceSimulator::setSpeedLimit(float limit) {
-	speedLimit = limit;
-}
-IntegratorPtr ForceSimulator::getIntegrator() const {
-	return integrator;
-}
-void ForceSimulator::setIntegrator(const IntegratorPtr& intgr) {
-	integrator = intgr;
-}
-void ForceSimulator::clear() {
-	items.clear();
-	springs.clear();
-}
-void ForceSimulator::addForce(const ForcePtr& f) {
-	std::lock_guard<std::mutex> lockMe(lock);
-	allforces.push_back(f);
-	if (f->isForceItem()) {
-		iforces.push_back(f);
-	}
-	if (f->isSpringItem()) {
-		sforces.push_back(f);
-	}
-	if (f->isBoundaryItem()) {
-		bforces.push_back(f);
-	}
-}
-std::vector<ForcePtr>& ForceSimulator::getForces() {
-	return allforces;
-}
-void ForceSimulator::addForceItem(const ForceItemPtr& item) {
-	std::lock_guard<std::mutex> lockMe(lock);
-	items.push_back(item);
-}
-
-bool ForceSimulator::removeItem(ForceItemPtr item) {
-	std::lock_guard<std::mutex> lockMe(lock);
-	for (size_t i = 0; i < items.size(); i++) {
-		if (items[i].get() == item.get()) {
-			items.erase(items.begin() + i);
+			}
 			return true;
 		}
-	}
-	return false;
-}
-
-std::vector<ForceItemPtr>& ForceSimulator::getItems() {
-	return items;
-}
-
-std::vector<SpringItemPtr>& ForceSimulator::getSprings() {
-	return springs;
-}
-SpringItemPtr ForceSimulator::addSpringItem(const ForceItemPtr& item1,
-		const ForceItemPtr& item2, float coeff, float length) {
-	SpringItemPtr s = SpringItemPtr(
-			new SpringItem(item1, item2, coeff, length));
-	addSpringItem(s);
-	return s;
-}
-void ForceSimulator::addSpringItem(const SpringItemPtr& spring) {
-	std::lock_guard<std::mutex> lockMe(lock);
-	springs.push_back(spring);
-}
-SpringItemPtr ForceSimulator::addSpringItem(const ForceItemPtr& item1,
-		const ForceItemPtr& item2, float length) {
-	return addSpringItem(item1, item2, -1.f, length);
-}
-
-SpringItemPtr ForceSimulator::addSpringItem(const ForceItemPtr& item1,
-		const ForceItemPtr& item2) {
-	return addSpringItem(item1, item2, -1.f, -1.f);
-}
-void ForceSimulator::draw(AlloyContext* context) {
-	Region::draw(context);
-	std::lock_guard<std::mutex> lockMe(lock);
-	float2 offset = getBoundsPosition();
-	NVGcontext* nvg = context->nvgContext;
-	pushScissor(nvg, getCursorBounds());
-	for (ForcePtr f : iforces) {
-		f->draw(context, offset);
-	}
-	for (ForcePtr f : sforces) {
-		f->draw(context, offset);
-	}
-	for (SpringItemPtr item : springs) {
-		item->draw(context, offset);
-	}
-	for (ForceItemPtr item : items) {
-		item->draw(context, offset);
-	}
-	popScissor(nvg);
-}
-void ForceSimulator::drawDebug(AlloyContext* context) {
-	Region::drawDebug(context);
-	std::lock_guard<std::mutex> lockMe(lock);
-	float2 offset = getBoundsPosition();
-	NVGcontext* nvg = context->nvgContext;
-	pushScissor(nvg, getCursorBounds());
-	nvgStrokeWidth(nvg, 4.0f);
-	nvgStrokeColor(nvg, Color(0.3f, 0.3f, 0.3f, 1.0f));
-	nvgBeginPath(nvg);
-	nvgRect(nvg, forceBounds.position.x + offset.x,
-			forceBounds.position.y + offset.y, forceBounds.dimensions.x,
-			forceBounds.dimensions.y);
-	nvgStroke(nvg);
-	for (ForcePtr f : iforces) {
-		f->draw(context, offset);
-	}
-	for (ForcePtr f : sforces) {
-		f->draw(context, offset);
-	}
-	for (SpringItemPtr item : springs) {
-		item->draw(context, offset);
-	}
-	for (ForceItemPtr item : items) {
-		item->draw(context, offset);
-	}
-	popScissor(nvg);
-}
-void ForceSimulator::accumulate() {
-#pragma omp parallel for num_threads(NUM_THREADS)
-	for (int i = 0; i < (int) iforces.size(); i++) {
-		if (iforces[i]->isEnabled())
-			iforces[i]->init(*this);
-	}
-#pragma omp parallel for num_threads(NUM_THREADS)
-	for (int i = 0; i < (int) sforces.size(); i++) {
-		if (sforces[i]->isEnabled())
-			sforces[i]->init(*this);
-	}
-#pragma omp parallel for num_threads(NUM_THREADS)
-	for (int i = 0; i < (int) items.size(); i++) {
-		items[i]->force = float2(0.0f);
-		for (ForcePtr f : iforces) {
-			if (f->isEnabled())
-				f->getForce(items[i]);
+		void ForceSimulator::start() {
+			renderCount = 0;
+			simWorker->execute();
 		}
-	}
-#pragma omp parallel for num_threads(NUM_THREADS)
-	for (int i = 0; i < (int) springs.size(); i++) {
-		for (ForcePtr f : sforces) {
-			if (f->isEnabled())
-				f->getSpring(springs[i]);
+		void ForceSimulator::stop() {
+			simWorker->cancel();
+			renderCount = 0;
+			frameRate = 0;
 		}
-	}
-}
-void ForceSimulator::runSimulator(float timestep) {
-	std::lock_guard<std::mutex> lockMe(lock);
-	float2 p1(1E30f);
-	float2 p2(-1E30f);
-	for (ForceItemPtr item : getItems()) {
-		float2 p = item->location;
-		p1 = aly::min(p, p1);
-		p2 = aly::max(p, p2);
-	}
-	forceBounds = box2f(p1, p2 - p1);
-	accumulate();
-	integrator->integrate(*this, timestep);
-	enforceBoundaries();
-}
-void ForceSimulator::enforceBoundaries() {
-#pragma omp parallel for num_threads(NUM_THREADS)
-	for (int i = 0; i < (int) items.size(); i++) {
-		for (ForcePtr f : bforces) {
-			if (f->isEnabled())
-				f->enforceBoundary(items[i]);
+		float ForceSimulator::getSpeedLimit() const {
+			return speedLimit;
 		}
-	}
-}
-void EulerIntegrator::integrate(ForceSimulator& sim, float timestep) const {
-	float speedLimit = sim.getSpeedLimit();
-	float coeff, len;
-	for (ForceItemPtr item : sim.getItems()) {
-		item->location += timestep * item->velocity;
-		coeff = timestep / item->mass;
-		item->velocity += coeff * item->force;
-		float2 vel = item->velocity;
-		len = length(vel);
-		if (len > speedLimit) {
-			item->velocity = speedLimit * vel / len;
+		void ForceSimulator::setSpeedLimit(float limit) {
+			speedLimit = limit;
 		}
-	}
-}
-void RungeKuttaIntegrator::integrate(ForceSimulator& sim,
-		float timestep) const {
-	float speedLimit = sim.getSpeedLimit();
-	float coeff;
-	float len;
-	std::array<float2, 4> k, l;
-	for (ForceItemPtr item : sim.getItems()) {
-		coeff = timestep / item->mass;
-		k = item->k;
-		l = item->l;
-		item->plocation = item->location;
-		k[0] = timestep * item->velocity;
-		l[0] = coeff * item->force;
-		item->location += 0.5f * k[0];
-	}
-	sim.enforceBoundaries();
-	sim.accumulate();
-	for (ForceItemPtr item : sim.getItems()) {
-		coeff = timestep / item->mass;
-		k = item->k;
-		l = item->l;
-		float2 vel = item->velocity + 0.5f * l[0];
-		len = length(vel);
-		if (len > speedLimit) {
-			vel = speedLimit * vel / len;
+		IntegratorPtr ForceSimulator::getIntegrator() const {
+			return integrator;
 		}
-		k[1] = timestep * vel;
-		l[1] = coeff * item->force;
-		// Set the position to the new predicted position
-		item->location = item->plocation + 0.5f * k[1];
-	}
-	sim.enforceBoundaries();
-	// recalculate forces
-	sim.accumulate();
-	for (ForceItemPtr item : sim.getItems()) {
-		coeff = timestep / item->mass;
-		k = item->k;
-		l = item->l;
-		float2 vel = item->velocity + 0.5f * l[1];
-		len = length(vel);
-		if (len > speedLimit) {
-			vel = speedLimit * vel / len;
+		void ForceSimulator::setIntegrator(const IntegratorPtr& intgr) {
+			integrator = intgr;
 		}
-		k[2] = timestep * vel;
-		l[2] = coeff * item->force;
-		item->location = item->plocation + 0.5f * k[2];
-	}
-	sim.enforceBoundaries();
-	// recalculate forces
-	sim.accumulate();
-
-	for (ForceItemPtr item : sim.getItems()) {
-		coeff = timestep / item->mass;
-		k = item->k;
-		l = item->l;
-		float2 p = item->plocation;
-		float2 vel = item->velocity + 0.5f * l[1];
-		len = length(vel);
-		if (len > speedLimit) {
-			vel = speedLimit * vel / len;
+		void ForceSimulator::clear() {
+			items.clear();
+			springs.clear();
 		}
-		k[3] = timestep * vel;
-		l[3] = coeff * item->force;
-		item->location = p + (k[0] + k[3]) / 6.0f + (k[1] + k[2]) / 3.0f;
-		vel = (l[0] + l[3]) / 6.0f + (l[1] + l[2]) / 3.0f;
-		len = length(vel);
-		if (len > speedLimit) {
-			vel = speedLimit * vel / len;
-		}
-		item->velocity += vel;
-	}
-}
-void SpringForce::getSpring(const SpringItemPtr& s) {
-	ForceItemPtr item1 = s->item1;
-	ForceItemPtr item2 = s->item2;
-	float len = (s->length < 0 ? params[SPRING_LENGTH] : s->length);
-	float2 p1 = item1->location;
-	float2 p2 = item2->location;
-	float2 dxy = p2 - p1;
-	float r = aly::length(dxy);
-	if (r == 0.0f) {
-		dxy = float2(RandomUniform(-0.5f, 0.5f) / 50.0f,
-				RandomUniform(-0.5f, 0.5f) / 50.0f);
-		r = aly::length(dxy);
-	}
-	float d = r - len;
-	float coeff = (s->coeff < 0 ? params[SPRING_COEFF] : s->coeff) * d / r;
-	item1->force += coeff * dxy;
-	item2->force -= coeff * dxy;
-}
-int relativeCCW(float x1, float y1, float x2, float y2, float px, float py) {
-	x2 -= x1;
-	y2 -= y1;
-	px -= x1;
-	py -= y1;
-	float ccw = px * y2 - py * x2;
-	if (ccw == 0.0f) {
-		ccw = px * x2 + py * y2;
-		if (ccw > 0.0f) {
-			px -= x2;
-			py -= y2;
-			ccw = px * x2 + py * y2;
-			if (ccw < 0.0f) {
-				ccw = 0.0f;
+		void ForceSimulator::addForce(const ForcePtr& f) {
+			std::lock_guard<std::mutex> lockMe(lock);
+			allforces.push_back(f);
+			if (f->isForceItem()) {
+				iforces.push_back(f);
+			}
+			if (f->isSpringItem()) {
+				sforces.push_back(f);
+			}
+			if (f->isBoundaryItem()) {
+				bforces.push_back(f);
 			}
 		}
-	}
-	return (ccw < 0.0f) ? -1 : ((ccw > 0.0f) ? 1 : 0);
-}
-float ptSegDistSq(float x1, float y1, float x2, float y2, float px, float py) {
-	x2 -= x1;
-	y2 -= y1;
-	px -= x1;
-	py -= y1;
-	float dotprod = px * x2 + py * y2;
-	float projlenSq;
-	if (dotprod <= 0.0f) {
-
-		projlenSq = 0.0f;
-	} else {
-
-		px = x2 - px;
-		py = y2 - py;
-		dotprod = px * x2 + py * y2;
-		if (dotprod <= 0.0f) {
-
-			projlenSq = 0.0f;
-		} else {
-
-			projlenSq = dotprod * dotprod / (x2 * x2 + y2 * y2);
+		std::vector<ForcePtr>& ForceSimulator::getForces() {
+			return allforces;
 		}
-	}
-	float lenSq = px * px + py * py - projlenSq;
-	if (lenSq < 0) {
-		lenSq = 0;
-	}
-	return lenSq;
-}
-WallForce::WallForce(float gravConst, float2 p1, float2 p2) :
-		p1(p1), p2(p2) {
-	params = std::vector<float> { gravConst };
-	minValues = std::vector<float> { DEFAULT_MIN_GRAV_CONSTANT };
-	maxValues = std::vector<float> { DEFAULT_MAX_GRAV_CONSTANT };
-	dxy = p2 - p1;
-	float r = length(dxy);
-	if (dxy.x != 0.0)
-		dxy.x /= r;
-	if (dxy.y != 0.0)
-		dxy.y /= r;
-}
-void WallForce::enforceBoundary(const std::shared_ptr<ForceItem>& forceItem) {
-	lineseg2f line(forceItem->plocation, forceItem->location);
-	lineseg2f boundary(p1, p2);
-	float t, s;
-	if (line.intersects(boundary, t, s)) {
-		forceItem->location = mix(line.start, line.end, t);
-	}
-}
-void WallForce::draw(AlloyContext* context, const pixel2& offset) {
-	if (!enabled)
-		return;
-	NVGcontext* nvg = context->nvgContext;
-	nvgStrokeWidth(nvg, 8.0f);
-	nvgStrokeColor(nvg, Color(1.0f, 1.0f, 1.0f, 1.0f));
-	nvgBeginPath(nvg);
-	nvgMoveTo(nvg, p1.x + offset.x, p1.y + offset.y);
-	nvgLineTo(nvg, p2.x + offset.x, p2.y + offset.y);
-	nvgStroke(nvg);
-}
-void WallForce::getForce(const ForceItemPtr& item) {
-	float2 n = item->location;
-	int ccw = relativeCCW(p1.x, p1.y, p2.x, p2.y, n.x, n.y);
-	float r = (float) std::sqrt(ptSegDistSq(p1.x, p1.y, p2.x, p2.y, n.x, n.y));
-	if (r < 1E-5f)
-		r = (float) RandomUniform(1E-5f, 0.01f);
-	float v = params[GRAVITATIONAL_CONST] * item->mass / (r * r * r);
-	if (n.x >= std::min(p1.x, p2.x) && n.x <= std::max(p1.x, p2.x))
-		item->force.y += ccw * v * dxy.x;
-	if (n.y >= std::min(p1.y, p2.y) && n.y <= std::max(p1.y, p2.y))
-		item->force.x += -1.0f * ccw * v * dxy.y;
-}
-void BoxForce::setBounds(const box2f& box) {
-	pts[0] = box.position;
-	pts[1] = box.position + float2(box.dimensions.x, 0.0f);
-	pts[2] = box.position + box.dimensions;
-	pts[3] = box.position + float2(0.0f, box.dimensions.x);
-
-	for (int k = 0; k < 4; k++) {
-		float2 p1 = pts[k];
-		float2 p2 = pts[(k + 1) % 4];
-		float2 dxy = p2 - p1;
-		float r = length(dxy);
-		if (dxy.x != 0.0)
-			dxy.x /= r;
-		if (dxy.y != 0.0)
-			dxy.y /= r;
-		this->dxy[k] = dxy;
-	}
-}
-void BoxForce::enforceBoundary(const std::shared_ptr<ForceItem>& forceItem) {
-	box2f box(pts[0], pts[2] - pts[0]);
-	box.clamp(forceItem->location);
-}
-BoxForce::BoxForce(float gravConst, const box2f& box) {
-	params = std::vector<float> { gravConst };
-	minValues = std::vector<float> { DEFAULT_MIN_GRAV_CONSTANT };
-	maxValues = std::vector<float> { DEFAULT_MAX_GRAV_CONSTANT };
-	setBounds(box);
-}
-void BoxForce::draw(AlloyContext* context, const pixel2& offset) {
-	if (!enabled)
-		return;
-	NVGcontext* nvg = context->nvgContext;
-	nvgStrokeWidth(nvg, 4.0f);
-	nvgStrokeColor(nvg, Color(0.8f, 0.8f, 0.8f, 1.0f));
-	nvgBeginPath(nvg);
-	nvgMoveTo(nvg, pts[0].x + offset.x + 2.0f, pts[0].y + offset.y + 2.0f);
-	nvgLineTo(nvg, pts[1].x + offset.x - 2.0f, pts[1].y + offset.y + 2.0f);
-	nvgLineTo(nvg, pts[2].x + offset.x - 2.0f, pts[2].y + offset.y - 2.0f);
-	nvgLineTo(nvg, pts[3].x + offset.x + 2.0f, pts[3].y + offset.y - 2.0f);
-	nvgClosePath(nvg);
-	nvgStroke(nvg);
-}
-void BoxForce::getForce(const ForceItemPtr& item) {
-	float2 n = item->location;
-	for (int k = 0; k < 4; k++) {
-		float2 p1 = pts[k];
-		float2 p2 = pts[(k + 1) % 4];
-		float2 dxy = this->dxy[k];
-		int ccw = relativeCCW(p1.x, p1.y, p2.x, p2.y, n.x, n.y);
-		float r = (float) std::sqrt(
-				ptSegDistSq(p1.x, p1.y, p2.x, p2.y, n.x, n.y));
-		if (r < 1E-5f)
-			r = (float) RandomUniform(1E-5f, 0.01f);
-		float v = params[GRAVITATIONAL_CONST] * item->mass / (r * r * r);
-		if (n.x >= std::min(p1.x, p2.x) && n.x <= std::max(p1.x, p2.x))
-			item->force.y += ccw * v * dxy.x;
-		if (n.y >= std::min(p1.y, p2.y) && n.y <= std::max(p1.y, p2.y))
-			item->force.x += -1.0f * ccw * v * dxy.y;
-	}
-}
-void CircularWallForce::getForce(const ForceItemPtr& item) {
-	float2 n = item->location;
-	float2 dxy = p - n;
-	float d = length(dxy);
-	float dr = r - d;
-	float c = (dr > 0) ? -1.0f : 1.0f;
-	float v = c * params[GRAVITATIONAL_CONST] * item->mass / (dr * dr);
-	if (d < 1E-5f) {
-		dxy = float2(RandomUniform(-0.5f, 0.5f) / 50.0f,
-				RandomUniform(-0.5f, 0.5f) / 50.0f);
-		d = length(dxy);
-	}
-	item->force += v * dxy / d;
-}
-void CircularWallForce::enforceBoundary(
-		const std::shared_ptr<ForceItem>& forceItem) {
-	float2 n = forceItem->location;
-	float2 dxy = p - n;
-	float d = length(dxy);
-	if (d > r) {
-		forceItem->location = p + dxy * r / d;
-	}
-}
-void GravitationalForce::getForce(const ForceItemPtr& item) {
-	float coeff = params[GRAVITATIONAL_CONST] * item->mass;
-	item->force += gDirection * coeff;
-}
-void BuoyancyForce::getForce(const ForceItemPtr& item) {
-	//1 means it sinks, 0 neutrally buoyant, -1 it floats
-	float coeff = params[GRAVITATIONAL_CONST] * item->mass * item->buoyancy;
-	item->force += gDirection * coeff;
-}
-void QuadTreeNode::reset() {
-	com = float2(0.0f);
-	mass = 0;
-	hasChildren = false;
-	for (QuadTreeNodePtr& child : children) {
-		child.reset();
-	}
-}
-void NBodyForce::insertHelper(const ForceItemPtr& p, const QuadTreeNodePtr& n,
-		box2f box) {
-	float2 pt = p->location;
-	float2 split = box.center();
-	int i = (pt.x >= split.x ? 1 : 0) + (pt.y >= split.y ? 2 : 0);
-	// create new child node, if necessary
-	if (n->children[i].get() == nullptr) {
-		n->children[i] = QuadTreeNodePtr(new QuadTreeNode());
-		n->hasChildren = true;
-	}
-	// update bounds
-	float2 pt1 = box.position;
-	float2 pt2 = box.position + box.dimensions;
-	if (i == 1 || i == 3)
-		pt1.x = split.x;
-	else
-		pt2.x = split.x;
-	if (i > 1)
-		pt1.y = split.y;
-	else
-		pt2.y = split.y;
-	insert(p, n->children[i], box2f(pt1, pt2 - pt1));
-}
-
-void NBodyForce::insert(const ForceItemPtr& p, QuadTreeNodePtr& n, box2f box) {
-	// try to insert particle p at node n in the quadtree
-	// by construction, each leaf will contain either 1 or 0 particles
-	if (n->hasChildren) {
-		// n contains more than 1 particle
-		insertHelper(p, n, box);
-	} else if (n->value.get() != nullptr) {
-		// n contains 1 particle
-		if (isSameLocation(n->value, p)) {
-			insertHelper(p, n, box);
-		} else {
-			ForceItemPtr v = n->value;
-			n->value.reset();
-			insertHelper(v, n, box);
-			insertHelper(p, n, box);
+		void ForceSimulator::addForceItem(const ForceItemPtr& item) {
+			std::lock_guard<std::mutex> lockMe(lock);
+			items.push_back(item);
 		}
-	} else {
-		// n is empty, so is a leaf
-		n->value = p;
-	}
-}
-void NBodyForce::clear() {
-	root->reset();
-}
-void NBodyForce::init(ForceSimulator& fsim) {
-	clear();
-	bounds = fsim.getForceItemBounds();
-	float2 dxy = bounds.dimensions;
-	float2 center = bounds.center();
-	float maxDim = std::max(dxy.x, dxy.y);
-	bounds = box2f(center - float2(maxDim * 0.5f), float2(maxDim));
-	for (ForceItemPtr item : fsim.getItems()) {
-		insert(item);
-	}
-	// calculate magnitudes and centers of mass
-	calcMass(root);
-}
-void NBodyForce::insert(ForceItemPtr item) {
-	// insert item into the quadtrees
-	insert(item, root, bounds);
-}
 
-bool NBodyForce::isSameLocation(const ForceItemPtr& f1,
-		const ForceItemPtr& f2) const {
-	float2 dxy = aly::abs(f1->location - f2->location);
-	return (dxy.x < 0.01f && dxy.y < 0.01f);
-}
-void NBodyForce::calcMass(const QuadTreeNodePtr& n) {
-	float2 com(0.0f);
-	n->mass = 0;
-	if (n->hasChildren) {
-		for (int i = 0; i < (int) n->children.size(); i++) {
-			if (n->children[i].get() != nullptr) {
-				calcMass(n->children[i]);
-				n->mass += n->children[i]->mass;
-				com += n->children[i]->mass * n->children[i]->com;
+		bool ForceSimulator::removeItem(ForceItemPtr item) {
+			std::lock_guard<std::mutex> lockMe(lock);
+			for (size_t i = 0; i < items.size(); i++) {
+				if (items[i].get() == item.get()) {
+					items.erase(items.begin() + i);
+					return true;
+				}
+			}
+			return false;
+		}
+
+		std::vector<ForceItemPtr>& ForceSimulator::getItems() {
+			return items;
+		}
+
+		std::vector<SpringItemPtr>& ForceSimulator::getSprings() {
+			return springs;
+		}
+		SpringItemPtr ForceSimulator::addSpringItem(const ForceItemPtr& item1,
+			const ForceItemPtr& item2, float coeff, float length) {
+			SpringItemPtr s = SpringItemPtr(
+				new SpringItem(item1, item2, coeff, length));
+			addSpringItem(s);
+			return s;
+		}
+		void ForceSimulator::addSpringItem(const SpringItemPtr& spring) {
+			std::lock_guard<std::mutex> lockMe(lock);
+			springs.push_back(spring);
+		}
+		SpringItemPtr ForceSimulator::addSpringItem(const ForceItemPtr& item1,
+			const ForceItemPtr& item2, float length) {
+			return addSpringItem(item1, item2, -1.f, length);
+		}
+
+		SpringItemPtr ForceSimulator::addSpringItem(const ForceItemPtr& item1,
+			const ForceItemPtr& item2) {
+			return addSpringItem(item1, item2, -1.f, -1.f);
+		}
+		void ForceSimulator::draw(AlloyContext* context) {
+			Region::draw(context);
+			std::lock_guard<std::mutex> lockMe(lock);
+			float2 offset = getBoundsPosition();
+			NVGcontext* nvg = context->nvgContext;
+			pushScissor(nvg, getCursorBounds());
+			for (ForcePtr f : iforces) {
+				f->draw(context, offset);
+			}
+			for (ForcePtr f : sforces) {
+				f->draw(context, offset);
+			}
+
+			for (SpringItemPtr item : springs) {
+				item->draw(context, offset);
+			}
+			for (ForceItemPtr item : items) {
+				item->draw(context, offset);
+			}
+
+			popScissor(nvg);
+		}
+		void ForceSimulator::drawDebug(AlloyContext* context) {
+			Region::drawDebug(context);
+			std::lock_guard<std::mutex> lockMe(lock);
+			float2 offset = getBoundsPosition();
+			NVGcontext* nvg = context->nvgContext;
+			pushScissor(nvg, getCursorBounds());
+			nvgStrokeWidth(nvg, 4.0f);
+			nvgStrokeColor(nvg, Color(0.3f, 0.3f, 0.3f, 1.0f));
+			nvgBeginPath(nvg);
+			nvgRect(nvg, forceBounds.position.x + offset.x,
+				forceBounds.position.y + offset.y, forceBounds.dimensions.x,
+				forceBounds.dimensions.y);
+			nvgStroke(nvg);
+			for (ForcePtr f : iforces) {
+				f->draw(context, offset);
+			}
+			for (ForcePtr f : sforces) {
+				f->draw(context, offset);
+			}
+			for (SpringItemPtr item : springs) {
+				item->draw(context, offset);
+			}
+			for (ForceItemPtr item : items) {
+				item->draw(context, offset);
+			}
+			popScissor(nvg);
+		}
+		void ForceSimulator::accumulate() {
+#pragma omp parallel for num_threads(NUM_THREADS)
+			for (int i = 0; i < (int)iforces.size(); i++) {
+				if (iforces[i]->isEnabled())
+					iforces[i]->init(*this);
+			}
+#pragma omp parallel for num_threads(NUM_THREADS)
+			for (int i = 0; i < (int)sforces.size(); i++) {
+				if (sforces[i]->isEnabled())
+					sforces[i]->init(*this);
+			}
+#pragma omp parallel for num_threads(NUM_THREADS)
+			for (int i = 0; i < (int)items.size(); i++) {
+				items[i]->force = float2(0.0f);
+				for (ForcePtr f : iforces) {
+					if (f->isEnabled())
+						f->getForce(items[i]);
+				}
+			}
+#pragma omp parallel for num_threads(NUM_THREADS)
+			for (int i = 0; i < (int)springs.size(); i++) {
+				for (ForcePtr f : sforces) {
+					if (f->isEnabled())
+						f->getSpring(springs[i]);
+				}
 			}
 		}
-	}
-	if (n->value.get() != nullptr) {
-		n->mass += n->value->mass;
-		com += n->value->mass * n->value->location;
-	}
-	n->com = com / n->mass;
-}
-void NBodyForce::forceHelper(const ForceItemPtr& item, const QuadTreeNodePtr& n,
-		const box2f& box) {
-	float2 dxy = n->com - item->location;
-	float r = length(dxy);
-	bool same = false;
-	if (r <1E-5f) {
-		// if items are in the exact same place, add some noise
-		dxy = float2(RandomUniform(-0.5f, 0.5f) / 50.0f,
-				RandomUniform(-0.5f, 0.5f) / 50.0f);
-		r = length(dxy);
-		same = true;
-	}
-	bool minDist = params[MIN_DISTANCE] > 0.0f && r > params[MIN_DISTANCE];
-	// the Barnes-Hut approximation criteria is if the ratio of the
-	// size of the quadtree box to the distance between the point and
-	// the box's center of mass is beneath some threshold theta.
-	if ((!n->hasChildren && n->value.get() != item.get())
-			|| (!same && box.dimensions.x / r < params[BARNES_HUT_THETA])) {
-		if (minDist)
-			return;
-		// either only 1 particle or we meet criteria
-		// for Barnes-Hut approximation, so calc force
-		float v = params[GRAVITATIONAL_CONST] * item->mass * n->mass
-				/ (r * r * r);
-		item->force += v * dxy;
-	} else if (n->hasChildren) {
-		// recurse for more accurate calculation
-		float2 split = box.center();
-		for (int i = 0; i < (int) n->children.size(); i++) {
-			if (n->children[i].get() != nullptr) {
-				float2 minPt = float2(
-						(i == 1 || i == 3 ? split.x : box.position.x),
-						(i > 1 ? split.y : box.position.y));
-				float2 maxPt = float2(
-						(i == 1 || i == 3 ?
-								box.position.x + box.dimensions.x : split.x),
-						(i > 1 ? box.position.y + box.dimensions.y : split.y));
-				forceHelper(item, n->children[i], box2f(minPt, maxPt - minPt));
+		void ForceSimulator::runSimulator(float timestep) {
+			std::lock_guard<std::mutex> lockMe(lock);
+			float2 p1(1E30f);
+			float2 p2(-1E30f);
+			for (ForceItemPtr item : getItems()) {
+				float2 p = item->location;
+				p1 = aly::min(p, p1);
+				p2 = aly::max(p, p2);
+			}
+			forceBounds = box2f(p1, p2 - p1);
+			if (forceBounds.dimensions.x > 2000.0f || forceBounds.dimensions.y > 2000.0f) {
+				std::cout << "Force Boudnary " << forceBounds << std::endl;
+			}
+			accumulate();
+			integrator->integrate(*this, timestep);
+			enforceBoundaries();
+		}
+		void ForceSimulator::enforceBoundaries() {
+#pragma omp parallel for num_threads(NUM_THREADS)
+			for (int i = 0; i < (int)items.size(); i++) {
+				for (ForcePtr f : bforces) {
+					if (f->isEnabled())
+						f->enforceBoundary(items[i]);
+				}
 			}
 		}
-		if (minDist)
-			return;
-		if (n->value.get() != nullptr && n->value.get() != item.get()) {
-			float v = params[GRAVITATIONAL_CONST] * item->mass * n->value->mass
-					/ (r * r * r);
-			item->force += v * dxy;
+		void EulerIntegrator::integrate(ForceSimulator& sim, float timestep) const {
+			float speedLimit = sim.getSpeedLimit();
+			float coeff, len;
+			for (ForceItemPtr item : sim.getItems()) {
+				item->location += timestep * item->velocity;
+				coeff = timestep / item->mass;
+				item->velocity += coeff * item->force;
+				float2 vel = item->velocity;
+				len = length(vel);
+				if (len > speedLimit) {
+					item->velocity = speedLimit * vel / len;
+				}
+			}
+		}
+		void RungeKuttaIntegrator::integrate(ForceSimulator& sim,
+			float timestep) const {
+			float speedLimit = sim.getSpeedLimit();
+			float coeff;
+			float len;
+			std::array<float2, 4> k, l;
+			for (ForceItemPtr item : sim.getItems()) {
+				coeff = timestep / item->mass;
+				k = item->k;
+				l = item->l;
+				item->plocation = item->location;
+				k[0] = timestep * item->velocity;
+				l[0] = coeff * item->force;
+				item->location += 0.5f * k[0];
+			}
+			sim.accumulate();
+			for (ForceItemPtr item : sim.getItems()) {
+				coeff = timestep / item->mass;
+				k = item->k;
+				l = item->l;
+				float2 vel = item->velocity + 0.5f * l[0];
+				len = length(vel);
+				if (len > speedLimit) {
+					vel = speedLimit * vel / len;
+				}
+				k[1] = timestep * vel;
+				l[1] = coeff * item->force;
+				// Set the position to the new predicted position
+				item->location = item->plocation + 0.5f * k[1];
+			}
+			// recalculate forces
+			sim.accumulate();
+			for (ForceItemPtr item : sim.getItems()) {
+				coeff = timestep / item->mass;
+				k = item->k;
+				l = item->l;
+				float2 vel = item->velocity + 0.5f * l[1];
+				len = length(vel);
+				if (len > speedLimit) {
+					vel = speedLimit * vel / len;
+				}
+				k[2] = timestep * vel;
+				l[2] = coeff * item->force;
+				item->location = item->plocation + 0.5f * k[2];
+			}
+			// recalculate forces
+			sim.accumulate();
+			for (ForceItemPtr item : sim.getItems()) {
+				coeff = timestep / item->mass;
+				k = item->k;
+				l = item->l;
+				float2 p = item->plocation;
+				float2 vel = item->velocity + 0.5f * l[1];
+				len = length(vel);
+				if (len > speedLimit) {
+					vel = speedLimit * vel / len;
+				}
+				k[3] = timestep * vel;
+				l[3] = coeff * item->force;
+				item->location = p + (k[0] + k[3]) / 6.0f + (k[1] + k[2]) / 3.0f;
+				vel = (l[0] + l[3]) / 6.0f + (l[1] + l[2]) / 3.0f;
+				len = length(vel);
+				if (len > speedLimit) {
+					vel = speedLimit * vel / len;
+				}
+				item->velocity += vel;
+			}
+		}
+		void SpringForce::getSpring(const SpringItemPtr& s) {
+			ForceItemPtr item1 = s->item1;
+			ForceItemPtr item2 = s->item2;
+			float len = (s->length < 0 ? params[SPRING_LENGTH] : s->length);
+			float2 p1 = item1->location;
+			float2 p2 = item2->location;
+			float2 dxy = p2 - p1;
+			float r = aly::length(dxy);
+			if (r == 0.0f) {
+				dxy = float2(RandomUniform(-0.5f, 0.5f) / 50.0f,
+					RandomUniform(-0.5f, 0.5f) / 50.0f);
+				r = aly::length(dxy);
+			}
+			float d = r - len;
+			float coeff = (s->coeff < 0 ? params[SPRING_COEFF] : s->coeff) * d / r;
+			item1->force += coeff * dxy;
+			item2->force -= coeff * dxy;
+		}
+		int relativeCCW(float x1, float y1, float x2, float y2, float px, float py) {
+			x2 -= x1;
+			y2 -= y1;
+			px -= x1;
+			py -= y1;
+			float ccw = px * y2 - py * x2;
+			if (ccw == 0.0f) {
+				ccw = px * x2 + py * y2;
+				if (ccw > 0.0f) {
+					px -= x2;
+					py -= y2;
+					ccw = px * x2 + py * y2;
+					if (ccw < 0.0f) {
+						ccw = 0.0f;
+					}
+				}
+			}
+			return (ccw < 0.0f) ? -1 : ((ccw > 0.0f) ? 1 : 0);
+		}
+		float ptSegDistSq(float x1, float y1, float x2, float y2, float px, float py) {
+			x2 -= x1;
+			y2 -= y1;
+			px -= x1;
+			py -= y1;
+			float dotprod = px * x2 + py * y2;
+			float projlenSq;
+			if (dotprod <= 0.0f) {
+
+				projlenSq = 0.0f;
+			}
+			else {
+
+				px = x2 - px;
+				py = y2 - py;
+				dotprod = px * x2 + py * y2;
+				if (dotprod <= 0.0f) {
+
+					projlenSq = 0.0f;
+				}
+				else {
+
+					projlenSq = dotprod * dotprod / (x2 * x2 + y2 * y2);
+				}
+			}
+			float lenSq = px * px + py * py - projlenSq;
+			if (lenSq < 0) {
+				lenSq = 0;
+			}
+			return lenSq;
+		}
+		WallForce::WallForce(float gravConst, float2 p1, float2 p2) :
+			p1(p1), p2(p2) {
+			params = std::vector<float>{ gravConst };
+			minValues = std::vector<float>{ DEFAULT_MIN_GRAV_CONSTANT };
+			maxValues = std::vector<float>{ DEFAULT_MAX_GRAV_CONSTANT };
+			dxy = p2 - p1;
+			float r = length(dxy);
+			if (dxy.x != 0.0)
+				dxy.x /= r;
+			if (dxy.y != 0.0)
+				dxy.y /= r;
+		}
+		void WallForce::enforceBoundary(const std::shared_ptr<ForceItem>& forceItem) {
+			lineseg2f line(forceItem->plocation, forceItem->location);
+			lineseg2f boundary(p1, p2);
+			float t, s;
+			if (line.intersects(boundary, t, s)) {
+				forceItem->location = mix(line.start, line.end, t);
+			}
+		}
+		void WallForce::draw(AlloyContext* context, const pixel2& offset) {
+			if (!enabled)
+				return;
+			NVGcontext* nvg = context->nvgContext;
+			nvgStrokeWidth(nvg, 8.0f);
+			nvgStrokeColor(nvg, Color(1.0f, 1.0f, 1.0f, 1.0f));
+			nvgBeginPath(nvg);
+			nvgMoveTo(nvg, p1.x + offset.x, p1.y + offset.y);
+			nvgLineTo(nvg, p2.x + offset.x, p2.y + offset.y);
+			nvgStroke(nvg);
+		}
+		void WallForce::getForce(const ForceItemPtr& item) {
+			float2 n = item->location;
+			int ccw = relativeCCW(p1.x, p1.y, p2.x, p2.y, n.x, n.y);
+			float r = (float)std::sqrt(ptSegDistSq(p1.x, p1.y, p2.x, p2.y, n.x, n.y));
+			if (r < 1E-5f)
+				r = (float)RandomUniform(1E-5f, 0.01f);
+			float v = params[GRAVITATIONAL_CONST] * item->mass / (r * r * r);
+			if (n.x >= std::min(p1.x, p2.x) && n.x <= std::max(p1.x, p2.x))
+				item->force.y += ccw * v * dxy.x;
+			if (n.y >= std::min(p1.y, p2.y) && n.y <= std::max(p1.y, p2.y))
+				item->force.x += -1.0f * ccw * v * dxy.y;
+		}
+		void BoxForce::setBounds(const box2f& box) {
+			pts[0] = box.position;
+			pts[1] = box.position + float2(box.dimensions.x, 0.0f);
+			pts[2] = box.position + box.dimensions;
+			pts[3] = box.position + float2(0.0f, box.dimensions.x);
+
+			for (int k = 0; k < 4; k++) {
+				float2 p1 = pts[k];
+				float2 p2 = pts[(k + 1) % 4];
+				float2 dxy = p2 - p1;
+				float r = length(dxy);
+				if (dxy.x != 0.0)
+					dxy.x /= r;
+				if (dxy.y != 0.0)
+					dxy.y /= r;
+				this->dxy[k] = dxy;
+			}
+		}
+		void BoxForce::enforceBoundary(const std::shared_ptr<ForceItem>& forceItem) {
+			box2f box(pts[0], pts[2] - pts[0]);
+			forceItem->location = box.clamp(forceItem->location);
+		}
+		BoxForce::BoxForce(float gravConst, const box2f& box) {
+			params = std::vector<float>{ gravConst };
+			minValues = std::vector<float>{ DEFAULT_MIN_GRAV_CONSTANT };
+			maxValues = std::vector<float>{ DEFAULT_MAX_GRAV_CONSTANT };
+			setBounds(box);
+		}
+		void BoxForce::draw(AlloyContext* context, const pixel2& offset) {
+			if (!enabled)
+				return;
+			NVGcontext* nvg = context->nvgContext;
+			nvgStrokeWidth(nvg, 4.0f);
+			nvgStrokeColor(nvg, Color(0.8f, 0.8f, 0.8f, 1.0f));
+			nvgBeginPath(nvg);
+			nvgMoveTo(nvg, pts[0].x + offset.x + 2.0f, pts[0].y + offset.y + 2.0f);
+			nvgLineTo(nvg, pts[1].x + offset.x - 2.0f, pts[1].y + offset.y + 2.0f);
+			nvgLineTo(nvg, pts[2].x + offset.x - 2.0f, pts[2].y + offset.y - 2.0f);
+			nvgLineTo(nvg, pts[3].x + offset.x + 2.0f, pts[3].y + offset.y - 2.0f);
+			nvgClosePath(nvg);
+			nvgStroke(nvg);
+		}
+		void BoxForce::getForce(const ForceItemPtr& item) {
+			float2 n = item->location;
+			for (int k = 0; k < 4; k++) {
+				float2 p1 = pts[k];
+				float2 p2 = pts[(k + 1) % 4];
+				float2 dxy = this->dxy[k];
+				int ccw = relativeCCW(p1.x, p1.y, p2.x, p2.y, n.x, n.y);
+				float r = (float)std::sqrt(
+					ptSegDistSq(p1.x, p1.y, p2.x, p2.y, n.x, n.y));
+				if (r < 1E-5f)
+					r = (float)RandomUniform(1E-5f, 0.01f);
+				float v = params[GRAVITATIONAL_CONST] * item->mass / (r * r * r);
+				if (n.x >= std::min(p1.x, p2.x) && n.x <= std::max(p1.x, p2.x))
+					item->force.y += ccw * v * dxy.x;
+				if (n.y >= std::min(p1.y, p2.y) && n.y <= std::max(p1.y, p2.y))
+					item->force.x += -1.0f * ccw * v * dxy.y;
+			}
+		}
+		void CircularWallForce::getForce(const ForceItemPtr& item) {
+			float2 n = item->location;
+			float2 dxy = p - n;
+			float d = length(dxy);
+			float dr = r - d;
+			float c = (dr > 0) ? -1.0f : 1.0f;
+			float v = c * params[GRAVITATIONAL_CONST] * item->mass / (dr * dr);
+			if (d < 1E-5f) {
+				dxy = float2(RandomUniform(-0.5f, 0.5f) / 50.0f,
+					RandomUniform(-0.5f, 0.5f) / 50.0f);
+				d = length(dxy);
+			}
+			item->force += v * dxy / d;
+		}
+		void CircularWallForce::enforceBoundary(
+			const std::shared_ptr<ForceItem>& forceItem) {
+			float2 n = forceItem->location;
+			float2 dxy = n - p;
+			float d = length(dxy);
+			if (d > r) {
+				forceItem->location = p + dxy * r / d;
+			}
+		}
+		void GravitationalForce::getForce(const ForceItemPtr& item) {
+			float coeff = params[GRAVITATIONAL_CONST] * item->mass;
+			item->force += gDirection * coeff;
+		}
+		void BuoyancyForce::getForce(const ForceItemPtr& item) {
+			//1 means it sinks, 0 neutrally buoyant, -1 it floats
+			float coeff = params[GRAVITATIONAL_CONST] * item->mass * item->buoyancy;
+			item->force += gDirection * coeff;
+		}
+		void QuadTreeNode::reset() {
+			com = float2(0.0f);
+			mass = 0;
+			hasChildren = false;
+			values.clear();
+			for (QuadTreeNodePtr& child : children) {
+				child.reset();
+			}
+		}
+		void QuadTreeNode::insert(const ForceItemPtr& p) {
+			if (values.size() < MAX_LEAFS && !hasChildren) {
+				values.push_back(p);
+			}
+			else {
+				if (depth >= MAX_DEPTH) {
+					values.push_back(p);
+				}
+				else {
+					if (!hasChildren) {
+						//move items from leafs into one of the children.
+						values.push_back(p);
+						for (ForceItemPtr& item : values) {
+							float2 pt = item->location;
+							float2 split = bounds.center();
+							int i = (pt.x >= split.x ? 1 : 0) + (pt.y >= split.y ? 2 : 0);
+							if (children[i].get() == nullptr) {
+								children[i] = QuadTreeNodePtr(new QuadTreeNode());
+								float2 pt1 = bounds.position;
+								float2 pt2 = bounds.position + bounds.dimensions;
+								if (i == 1 || i == 3)
+									pt1.x = split.x;
+								else
+									pt2.x = split.x;
+								if (i > 1)
+									pt1.y = split.y;
+								else
+									pt2.y = split.y;
+								children[i]->bounds = box2f(pt1, pt2 - pt1);
+								children[i]->depth = depth + 1;
+							}
+							children[i]->insert(item);
+						}
+						values.clear();
+						hasChildren = true;
+					}
+					else {
+						float2 pt = p->location;
+						float2 split = bounds.center();
+						int i = (pt.x >= split.x ? 1 : 0) + (pt.y >= split.y ? 2 : 0);
+						if (children[i].get() == nullptr) {
+							children[i] = QuadTreeNodePtr(new QuadTreeNode());
+							float2 pt1 = bounds.position;
+							float2 pt2 = bounds.position + bounds.dimensions;
+							if (i == 1 || i == 3)
+								pt1.x = split.x;
+							else
+								pt2.x = split.x;
+							if (i > 1)
+								pt1.y = split.y;
+							else
+								pt2.y = split.y;
+							children[i]->bounds = box2f(pt1, pt2 - pt1);
+							children[i]->depth = depth + 1;
+						}
+						children[i]->insert(p);
+					}
+				}
+			}
+		}
+		void NBodyForce::clear() {
+			root = QuadTreeNodePtr(new QuadTreeNode());
+		}
+		void NBodyForce::init(ForceSimulator& fsim) {
+			root.reset(new QuadTreeNode());
+			box2f bounds = fsim.getForceItemBounds();
+			float2 dxy = bounds.dimensions;
+			float2 center = bounds.center();
+			float maxDim = std::max(dxy.x, dxy.y);
+			root->bounds = box2f(center - float2(maxDim * 0.5f), float2(maxDim));
+			root->depth = 0;
+			for (ForceItemPtr item : fsim.getItems()) {
+				root->insert(item);
+			}
+			root->update();
+		}
+		void QuadTreeNode::update() {
+			com = float2(0.0f);
+			mass = 0;
+			for (QuadTreeNodePtr child : children) {
+				if (child.get() != nullptr) {
+					child->update();
+					mass += child->mass;
+					com += child->mass * child->com;
+				}
+			}
+			for (ForceItemPtr item : values) {
+				mass += item->mass;
+				com += item->mass * item->location;
+			}
+			if (mass > 0) {
+				com = com / mass;
+			}
+		}
+		void NBodyForce::getForce(const ForceItemPtr& item) {
+			std::queue<QuadTreeNode*> q;
+			q.push(root.get());
+			double2 forceTotal = double2(0.0f);
+			const float ZERO_TOL = 1E-6f;
+			while (q.size() > 0) {
+				QuadTreeNode* n = q.front();
+				q.pop();
+				box2f box = n->bounds;
+				float d = std::max(box.dimensions.x, box.dimensions.y);
+				float2 dxy = n->com - item->location;
+				double r = length(dxy);
+				//True if distance to center of mass is grater than threshold and thresholding enabled
+				bool minDist = params[MIN_DISTANCE] > 0.0f && r > params[MIN_DISTANCE];
+				if (r > ZERO_TOL&& d < params[BARNES_HUT_THETA] * r&&!box.contains(item->location)) {
+					//Make sure box does not contain location or else we'll accumulate force twice
+					if (!minDist) {
+						forceTotal += double2(dxy * n->mass * item->mass) / (r * r * r);
+					}
+				}
+				else {
+					for (QuadTreeNodePtr child : n->children) {
+						if (child.get() != nullptr) {
+							q.push(child.get());
+						}
+					}
+					if (!minDist) {
+						//Add up forces from leaf nodes.
+						for (ForceItemPtr& leaf : n->values) {
+							if (leaf.get() != item.get()) {
+								dxy = leaf->location - item->location;
+								r = length(dxy);
+								if (r > ZERO_TOL) {
+									forceTotal += double2(dxy * leaf->mass * item->mass) / (r * r * r);
+								}
+							}
+						}
+					}
+				}
+			}
+			//apply update to item force
+			item->force += float2(forceTotal*(double)params[GRAVITATIONAL_CONST]);
+		}
+		void QuadTreeNode::draw(AlloyContext* context, const pixel2& offset) {
+			static std::vector<Color> colors;
+			if (colors.size() == 0) {
+				colors.resize(QuadTreeNode::MAX_DEPTH);
+				std::srand(123181);
+				for (int i = 0; i < MAX_DEPTH; i++) {
+					colors[i] = HSVAtoColor(HSVA((std::rand()%256)/255.0f, 0.8f, 0.7f, 1.0f));
+				}
+			}
+			Color c = colors[depth];
+			NVGcontext* nvg = context->nvgContext;
+			nvgFillColor(nvg, c);
+			nvgStrokeColor(nvg, Color(255, 255, 255));
+			nvgStrokeWidth(nvg, 2.0f);
+			nvgBeginPath(nvg);
+			nvgRect(nvg, bounds.position.x + offset.x, bounds.position.y + offset.y,
+				bounds.dimensions.x, bounds.dimensions.y);
+			nvgFill(nvg);
+			nvgStroke(nvg);
+			for (QuadTreeNodePtr& child : children) {
+				if (child.get() != nullptr) {
+					child->draw(context, offset);
+				}
+			}
+			nvgFillColor(nvg, c);
+			nvgStrokeColor(nvg, Color(255, 255, 255));
+			if (hasChildren) {
+				nvgBeginPath(nvg);
+				nvgCircle(nvg, com.x + offset.x, com.y + offset.y, 6.0f);
+				nvgFill(nvg);
+				nvgStroke(nvg);
+			}
+		}
+		void NBodyForce::draw(AlloyContext* context, const pixel2& offset) {
+			if (!enabled)
+				return;
+			if (root.get() != nullptr)root->draw(context, offset);
+		}
+
+		void CircularWallForce::draw(AlloyContext* context, const pixel2& offset) {
+			if (!enabled)
+				return;
+			NVGcontext* nvg = context->nvgContext;
+			nvgStrokeWidth(nvg, 4.0f);
+			nvgStrokeColor(nvg, Color(0.8f, 0.8f, 0.8f, 1.0f));
+			nvgBeginPath(nvg);
+			nvgCircle(nvg, p.x + offset.x, p.y + offset.y, r);
+			nvgStroke(nvg);
 		}
 	}
-}
-void NBodyForce::getForce(const ForceItemPtr& item) {
-	forceHelper(item, root, bounds);
-}
-void NBodyForce::draw(AlloyContext* context, const pixel2& offset) {
-	if (!enabled)
-		return;
-	NVGcontext* nvg = context->nvgContext;
-	nvgStrokeWidth(nvg, 2.0f);
-	nvgStrokeColor(nvg, Color(0.5f, 0.5f, 0.5f, 1.0f));
-	nvgBeginPath(nvg);
-	nvgRect(nvg, bounds.position.x + offset.x, bounds.position.y + offset.y,
-			bounds.dimensions.x, bounds.dimensions.y);
-	nvgStroke(nvg);
-}
-
-void CircularWallForce::draw(AlloyContext* context, const pixel2& offset) {
-	if (!enabled)
-		return;
-	NVGcontext* nvg = context->nvgContext;
-	nvgStrokeWidth(nvg, 4.0f);
-	nvgStrokeColor(nvg, Color(0.8f, 0.8f, 0.8f, 1.0f));
-	nvgBeginPath(nvg);
-	nvgCircle(nvg, p.x + offset.x, p.y + offset.y, r);
-	nvgStroke(nvg);
-}
-}
 }
 

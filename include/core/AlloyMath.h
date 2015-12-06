@@ -679,10 +679,16 @@ template<class T, int N> T dot(const vec<T, N> & l, const vec<T, N> & r) {
 	return sum(l * r);
 }
 template<class T> vec<T, 3> cross(const vec<T, 3> & l, const vec<T, 3> & r) {
-	return {l.y*r.z-l.z*r.y, l.z*r.x-l.x*r.z, l.x*r.y-l.y*r.x};
+	return vec<T, 3>(l.y*r.z-l.z*r.y, l.z*r.x-l.x*r.z, l.x*r.y-l.y*r.x);
 }
-template<class T> T cross(const vec<T, 2> & l, const vec<T, 2> & r) {
+template<class T> vec<T,3> cross(const vec<T, 2> & l, const vec<T, 2> & r) {
+	return vec<T,3>(0,0,l.x * r.y - l.y * r.x);
+}
+template<class T> T crossMag(const vec<T, 2> & l, const vec<T, 2> & r) {
 	return l.x * r.y - l.y * r.x;
+}
+template<class T> T crossMag(const vec<T, 3> & l, const vec<T, 3> & r) {
+	return  length(vec<T, 3>(l.y*r.z - l.z*r.y, l.z*r.x - l.x*r.z, l.x*r.y - l.y*r.x));
 }
 // Compute the length/square length of a vector
 template<class T, int N> T lengthSqr(const vec<T, N> & v) {
@@ -1628,11 +1634,11 @@ public:
 		vec<T, M> a = (line.end - line.start);
 		vec<T, M> b = (end - start);
 		vec<T, M> c = (line.start - start);
-		T cb=cross(c,b);
-		T ab=cross(a,b);
-		T len=ab*ab;
+		vec<T, 3> cb=cross(c,b);
+		vec<T, 3> ab=cross(a,b);
+		T len= lengthSqr(ab);
 		if (len >= tolerance) {
-			t =(cb*ab) / len;
+			t =dot(cb,ab) / len;
 			s = dot(a,start+b*t-line.start)/lengthSqr(a);
 			if (t >= T(0) && t <= T(1) && s >= T(0) && s <= T(1)) {
 				return true;
