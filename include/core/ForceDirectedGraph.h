@@ -536,9 +536,6 @@ public:
 	virtual void init(ForceSimulator& fsim) override;
 	void getForce(const ForceItemPtr& item) override;
 
-private:
-	//void insert(ForceItemPtr item);
-	void forceHelper(const ForceItemPtr& item, const QuadTreeNodePtr& n);
 };
 typedef std::shared_ptr<NBodyForce> NBodyForcePtr;
 }

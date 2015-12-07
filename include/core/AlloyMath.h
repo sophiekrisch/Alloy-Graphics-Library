@@ -1631,8 +1631,8 @@ public:
 	}
 	bool intersects(const lineseg<T, M>& line, T& t, T& s,
 			T tolerance = T(1E-15)) const {
-		vec<T, M> a = (line.end - line.start);
-		vec<T, M> b = (end - start);
+		vec<T, M> a = (end - start);
+		vec<T, M> b = (line.end - line.start);
 		vec<T, M> c = (line.start - start);
 		vec<T, 3> cb=cross(c,b);
 		vec<T, 3> ab=cross(a,b);

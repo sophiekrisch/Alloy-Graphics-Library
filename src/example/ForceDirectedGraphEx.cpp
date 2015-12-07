@@ -80,7 +80,7 @@ bool ForceDirectedGraphEx::init(Composite& rootNode) {
 	graph->addForce(DragForcePtr(new DragForce(0.001f)));
 	graph->addForce(GravitationalForcePtr(new GravitationalForce()));
 	graph->addForce(BuoyancyForcePtr(new BuoyancyForce()));
-	//graph->addForce(WallForcePtr(new WallForce(float2(100.0f, 1800.0f), float2(1900.0f, 1700.0f))));
+	graph->addForce(WallForcePtr(new WallForce(float2(100.0f, 1800.0f), float2(1900.0f, 1700.0f))));
 	graph->addForce(BoxForcePtr(new BoxForce(box2f(float2(0.0f,0.0f), float2(2000.0f,2000.0f)))));
 	graph->addForce(CircularWallForcePtr(new CircularWallForce(float2(1000.0f, 1000.0f), 960.0f)));
 

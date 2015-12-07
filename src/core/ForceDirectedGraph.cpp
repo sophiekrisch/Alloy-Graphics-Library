@@ -23,7 +23,6 @@
 #include "AlloyDataFlow.h"
 #include "AlloyContext.h"
 #include "AlloyDrawUtil.h"
-#define NUM_THREADS 4
 namespace aly {
 	namespace dataflow {
 		const std::string SpringForce::pnames[2] =
@@ -157,7 +156,7 @@ namespace aly {
 			Region(name, pos, dims), integrator(integr) {
 			simWorker = RecurrentTaskPtr(new RecurrentTask([this](uint64_t iter) {
 				return update(iter);
-			}, 10));
+			}, 20));
 		}
 		bool ForceSimulator::update(uint64_t iter) {
 			if (renderCount == 0) {
@@ -315,17 +314,15 @@ namespace aly {
 			popScissor(nvg);
 		}
 		void ForceSimulator::accumulate() {
-#pragma omp parallel for num_threads(NUM_THREADS)
 			for (int i = 0; i < (int)iforces.size(); i++) {
 				if (iforces[i]->isEnabled())
 					iforces[i]->init(*this);
 			}
-#pragma omp parallel for num_threads(NUM_THREADS)
 			for (int i = 0; i < (int)sforces.size(); i++) {
 				if (sforces[i]->isEnabled())
 					sforces[i]->init(*this);
 			}
-#pragma omp parallel for num_threads(NUM_THREADS)
+#pragma omp parallel for 
 			for (int i = 0; i < (int)items.size(); i++) {
 				items[i]->force = float2(0.0f);
 				for (ForcePtr f : iforces) {
@@ -333,7 +330,7 @@ namespace aly {
 						f->getForce(items[i]);
 				}
 			}
-#pragma omp parallel for num_threads(NUM_THREADS)
+#pragma omp parallel for 
 			for (int i = 0; i < (int)springs.size(); i++) {
 				for (ForcePtr f : sforces) {
 					if (f->isEnabled())
@@ -351,15 +348,12 @@ namespace aly {
 				p2 = aly::max(p, p2);
 			}
 			forceBounds = box2f(p1, p2 - p1);
-			if (forceBounds.dimensions.x > 2000.0f || forceBounds.dimensions.y > 2000.0f) {
-				std::cout << "Force Boudnary " << forceBounds << std::endl;
-			}
 			accumulate();
 			integrator->integrate(*this, timestep);
 			enforceBoundaries();
 		}
 		void ForceSimulator::enforceBoundaries() {
-#pragma omp parallel for num_threads(NUM_THREADS)
+#pragma omp parallel for 
 			for (int i = 0; i < (int)items.size(); i++) {
 				for (ForcePtr f : bforces) {
 					if (f->isEnabled())
