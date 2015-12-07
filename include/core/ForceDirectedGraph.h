@@ -193,10 +193,12 @@ class ForceSimulator: public Region {
 	std::chrono::steady_clock::time_point lastTime;
 	bool update(uint64_t iter);
 	void runSimulator(float timestep = DEFAULT_TIME_STEP);
+
 public:
 	static const float RADIUS;
 	static const float DEFAULT_TIME_STEP;
 	static const int DEFAULT_INTEGRATION_CYCLES;
+	static const float DEFAULT_TIME_OUT;
 	std::mutex& getLock(){
 		return lock;
 	}
@@ -222,7 +224,7 @@ public:
 	std::vector<ForcePtr>& getForces();
 	void addForceItem(const ForceItemPtr& item);
 	bool removeItem(ForceItemPtr item);
-	std::vector<ForceItemPtr>& getItems();
+	std::vector<ForceItemPtr>& getForceItems();
 	std::vector<SpringItemPtr>& getSprings();
 	SpringItemPtr addSpringItem(const ForceItemPtr& item1,
 			const ForceItemPtr& item2, float coeff, float length);

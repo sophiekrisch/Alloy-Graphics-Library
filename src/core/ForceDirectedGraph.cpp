@@ -23,6 +23,7 @@
 #include "AlloyDataFlow.h"
 #include "AlloyContext.h"
 #include "AlloyDrawUtil.h"
+#define NUM_THREADS 4
 namespace aly {
 	namespace dataflow {
 		const std::string SpringForce::pnames[2] =
@@ -91,6 +92,7 @@ namespace aly {
 
 		const float ForceSimulator::RADIUS = 20.0f;
 		const float ForceSimulator::DEFAULT_TIME_STEP = 30.0f;
+		const float ForceSimulator::DEFAULT_TIME_OUT=20.0f;
 		const int ForceSimulator::DEFAULT_INTEGRATION_CYCLES = 4;
 		void ForceItem::draw(AlloyContext* context, const pixel2& offset) {
 			const float lineWidth = 4.0f;
@@ -156,7 +158,7 @@ namespace aly {
 			Region(name, pos, dims), integrator(integr) {
 			simWorker = RecurrentTaskPtr(new RecurrentTask([this](uint64_t iter) {
 				return update(iter);
-			}, 20));
+			}, DEFAULT_TIME_OUT));
 		}
 		bool ForceSimulator::update(uint64_t iter) {
 			if (renderCount == 0) {
@@ -237,7 +239,7 @@ namespace aly {
 			return false;
 		}
 
-		std::vector<ForceItemPtr>& ForceSimulator::getItems() {
+		std::vector<ForceItemPtr>& ForceSimulator::getForceItems() {
 			return items;
 		}
 
@@ -322,7 +324,7 @@ namespace aly {
 				if (sforces[i]->isEnabled())
 					sforces[i]->init(*this);
 			}
-#pragma omp parallel for 
+#pragma omp parallel for num_threads(NUM_THREADS)
 			for (int i = 0; i < (int)items.size(); i++) {
 				items[i]->force = float2(0.0f);
 				for (ForcePtr f : iforces) {
@@ -330,7 +332,7 @@ namespace aly {
 						f->getForce(items[i]);
 				}
 			}
-#pragma omp parallel for 
+#pragma omp parallel for num_threads(NUM_THREADS)
 			for (int i = 0; i < (int)springs.size(); i++) {
 				for (ForcePtr f : sforces) {
 					if (f->isEnabled())
@@ -342,7 +344,7 @@ namespace aly {
 			std::lock_guard<std::mutex> lockMe(lock);
 			float2 p1(1E30f);
 			float2 p2(-1E30f);
-			for (ForceItemPtr item : getItems()) {
+			for (ForceItemPtr item : getForceItems()) {
 				float2 p = item->location;
 				p1 = aly::min(p, p1);
 				p2 = aly::max(p, p2);
@@ -353,7 +355,7 @@ namespace aly {
 			enforceBoundaries();
 		}
 		void ForceSimulator::enforceBoundaries() {
-#pragma omp parallel for 
+#pragma omp parallel for num_threads(NUM_THREADS)
 			for (int i = 0; i < (int)items.size(); i++) {
 				for (ForcePtr f : bforces) {
 					if (f->isEnabled())
@@ -363,8 +365,11 @@ namespace aly {
 		}
 		void EulerIntegrator::integrate(ForceSimulator& sim, float timestep) const {
 			float speedLimit = sim.getSpeedLimit();
-			float coeff, len;
-			for (ForceItemPtr item : sim.getItems()) {
+			std::vector<ForceItemPtr>& items=sim.getForceItems();
+#pragma omp parallel for num_threads(NUM_THREADS)
+			for (int i = 0; i < (int)items.size(); i++) {
+				float coeff, len;
+				ForceItemPtr item=items[i];
 				item->plocation = item->location;
 				item->location = item->plocation + timestep * item->velocity;
 				coeff = timestep / item->mass;
@@ -379,10 +384,13 @@ namespace aly {
 		void RungeKuttaIntegrator::integrate(ForceSimulator& sim,
 			float timestep) const {
 			float speedLimit = sim.getSpeedLimit();
-			float coeff;
-			float len;
-			std::array<float2, 4> k, l;
-			for (ForceItemPtr item : sim.getItems()) {
+
+			std::vector<ForceItemPtr>& items=sim.getForceItems();
+#pragma omp parallel for num_threads(NUM_THREADS)
+			for (int i = 0; i < (int)items.size(); i++) {
+				float coeff;
+				std::array<float2, 4> k, l;
+				ForceItemPtr item=items[i];
 				coeff = timestep / item->mass;
 				k = item->k;
 				l = item->l;
@@ -392,7 +400,12 @@ namespace aly {
 				item->location += 0.5f * k[0];
 			}
 			sim.accumulate();
-			for (ForceItemPtr item : sim.getItems()) {
+#pragma omp parallel for num_threads(NUM_THREADS)
+			for (int i = 0; i < (int)items.size(); i++) {
+				float coeff;
+				float len;
+				std::array<float2, 4> k, l;
+				ForceItemPtr item=items[i];
 				coeff = timestep / item->mass;
 				k = item->k;
 				l = item->l;
@@ -408,7 +421,12 @@ namespace aly {
 			}
 			// recalculate forces
 			sim.accumulate();
-			for (ForceItemPtr item : sim.getItems()) {
+#pragma omp parallel for num_threads(NUM_THREADS)
+			for (int i = 0; i < (int)items.size(); i++) {
+				float coeff;
+				float len;
+				std::array<float2, 4> k, l;
+				ForceItemPtr item=items[i];
 				coeff = timestep / item->mass;
 				k = item->k;
 				l = item->l;
@@ -423,7 +441,12 @@ namespace aly {
 			}
 			// recalculate forces
 			sim.accumulate();
-			for (ForceItemPtr item : sim.getItems()) {
+#pragma omp parallel for num_threads(NUM_THREADS)
+			for (int i = 0; i < (int)items.size(); i++) {
+				float coeff;
+				float len;
+				std::array<float2, 4> k, l;
+				ForceItemPtr item=items[i];
 				coeff = timestep / item->mass;
 				k = item->k;
 				l = item->l;
@@ -733,7 +756,7 @@ namespace aly {
 			float maxDim = std::max(dxy.x, dxy.y);
 			root->bounds = box2f(center - float2(maxDim * 0.5f), float2(maxDim));
 			root->depth = 0;
-			for (ForceItemPtr item : fsim.getItems()) {
+			for (ForceItemPtr item : fsim.getForceItems()) {
 				root->insert(item);
 			}
 			root->update();
@@ -835,7 +858,7 @@ namespace aly {
 		void NBodyForce::draw(AlloyContext* context, const pixel2& offset) {
 			if (!enabled)
 				return;
-			if (root.get() != nullptr)root->draw(context, offset);
+			//if (root.get() != nullptr)root->draw(context, offset);
 		}
 
 		void CircularWallForce::draw(AlloyContext* context, const pixel2& offset) {
