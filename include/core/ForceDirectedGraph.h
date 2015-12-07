@@ -257,8 +257,8 @@ struct SpringForce: public Force {
 		maxValues = std::vector<float> { DEFAULT_MAX_SPRING_COEFF,
 				DEFAULT_MAX_SPRING_LENGTH };
 	}
-	SpringForce() :
-			SpringForce(DEFAULT_SPRING_COEFF, DEFAULT_SPRING_LENGTH) {
+	SpringForce(float springCoeff=DEFAULT_SPRING_COEFF) :
+			SpringForce(springCoeff, DEFAULT_SPRING_LENGTH) {
 	}
 	virtual std::string getName() const override {
 		return "Spring Force";
@@ -279,13 +279,10 @@ struct DragForce: public Force {
 	static const float DEFAULT_MIN_DRAG_COEFF;
 	static const float DEFAULT_MAX_DRAG_COEFF;
 	static const int DRAG_COEFF;
-	DragForce(float dragCoeff) {
+	DragForce(float dragCoeff=DEFAULT_DRAG_COEFF) {
 		params = std::vector<float> { dragCoeff };
 		minValues = std::vector<float> { DEFAULT_MIN_DRAG_COEFF };
 		maxValues = std::vector<float> { DEFAULT_MAX_DRAG_COEFF };
-	}
-	DragForce() :
-			DragForce(DEFAULT_DRAG_COEFF) {
 	}
 	virtual std::string getName() const override {
 		return "Drag Force";
@@ -386,8 +383,8 @@ struct GravitationalForce: public Force {
 		float theta = params[DIRECTION];
 		gDirection = float2(std::cos(theta), std::sin(theta));
 	}
-	GravitationalForce() :
-			GravitationalForce(DEFAULT_FORCE_CONSTANT, DEFAULT_DIRECTION) {
+	GravitationalForce(float force=DEFAULT_FORCE_CONSTANT) :
+			GravitationalForce(force, DEFAULT_DIRECTION) {
 	}
 	virtual std::string getName() const override {
 		return "Gravity";
@@ -428,8 +425,8 @@ struct BuoyancyForce: public Force {
 		float theta = params[DIRECTION];
 		gDirection = float2(std::cos(theta), std::sin(theta));
 	}
-	BuoyancyForce() :
-			BuoyancyForce(DEFAULT_FORCE_CONSTANT, DEFAULT_DIRECTION) {
+	BuoyancyForce(float force=DEFAULT_FORCE_CONSTANT) :
+			BuoyancyForce(force, DEFAULT_DIRECTION) {
 	}
 	virtual std::string getName() const override {
 		return "Buoyancy";
@@ -494,8 +491,9 @@ public:
 			DEFAULT_MAX_DISTANCE, DEFAULT_MAX_THETA};
 		
 	}
-	NBodyForce() :NBodyForce(DEFAULT_GRAV_CONSTANT, DEFAULT_DISTANCE, DEFAULT_THETA) {
+	NBodyForce(float grav=DEFAULT_GRAV_CONSTANT) :NBodyForce(grav, DEFAULT_DISTANCE, DEFAULT_THETA) {
 	}
+
 	virtual bool isForceItem() const override {
 		return true;
 	}

@@ -24,16 +24,67 @@
 using namespace aly;
 using namespace aly::dataflow;
 ForceDirectedGraphEx::ForceDirectedGraphEx() :
-		Application(2400,2000, "Force Directed Graph Example") {
+		Application(2400, 2000, "Force Directed Graph Example") {
+
 }
+void ForceDirectedGraphEx::createDescendantGraph(
+		const aly::dataflow::ForceSimulatorPtr& graph,
+		const aly::dataflow::ForceItemPtr& node) {
+	std::vector<ForceItemPtr> childNodes;
+	int D=3;
+	int N=2;
+	childNodes.push_back(node);
+	for (int d = 0; d < D; d++) {
+		std::vector<ForceItemPtr> tmpList;
+		for (ForceItemPtr parent : childNodes) {
+			for (int n = 0; n < N; n++) {
+				ForceItemPtr child=ForceItemPtr(new ForceItem());
+				child->location=parent->location+float2(n*ForceSimulator::RADIUS*2.0f,ForceSimulator::RADIUS*2);
+				child->color=Compute::COLOR.toRGBAf();
+				child->shape=NodeShape::Hexagon;
+				child->buoyancy=1.0f;
+				graph->addSpringItem(parent, child);
+				graph->addForceItem(child);
+				tmpList.push_back(child);
+			}
+		}
+		childNodes = tmpList;
+	}
+}
+void ForceDirectedGraphEx::createAncestorGraph(
+		const aly::dataflow::ForceSimulatorPtr& graph,
+		const aly::dataflow::ForceItemPtr& node) {
+	std::vector<ForceItemPtr> childNodes;
+	int D=3;
+	int N=2;
+	childNodes.push_back(node);
+	for (int d = 0; d < D; d++) {
+		std::vector<ForceItemPtr> tmpList;
+		for (ForceItemPtr parent : childNodes) {
+			for (int n = 0; n < N; n++) {
+				ForceItemPtr child=ForceItemPtr(new ForceItem());
+				child->location=parent->location+float2(n*ForceSimulator::RADIUS*2.0f,-ForceSimulator::RADIUS*2);
+				child->color=Source::COLOR.toRGBAf();
+				child->shape=NodeShape::Square;
+				child->buoyancy=-1.0f;
+				graph->addSpringItem(parent, child);
+				graph->addForceItem(child);
+				tmpList.push_back(child);
+			}
+		}
+		childNodes = tmpList;
+	}
+}
+
 void ForceDirectedGraphEx::createRadialGraph(const ForceSimulatorPtr& graph) {
-	int D =3;
+	int D = 3;
 	int N = 6;
 	float armLength = 500.0f;
-	float2 center(1000.0f,1000.0f);
+	float2 center(1000.0f, 1000.0f);
 	std::vector<ForceItemPtr> childNodes;
 	ForceItemPtr child = ForceItemPtr(new ForceItem(center));
-	child->buoyancy = -1;
+	child->buoyancy = 0;
+	child->color=Data::COLOR.toRGBAf();
 	childNodes.push_back(child);
 	graph->addForceItem(childNodes.front());
 	for (int d = 0; d < D; d++) {
@@ -41,78 +92,105 @@ void ForceDirectedGraphEx::createRadialGraph(const ForceSimulatorPtr& graph) {
 		for (ForceItemPtr parent : childNodes) {
 			for (int n = 0; n < N; n++) {
 				float2 pt = parent->location
-						+ (armLength*std::pow(0.3f,(float)d))
+						+ (armLength * std::pow(0.3f, (float) d))
 								* float2(
 										std::cos(n * ALY_PI * 2.0f / (float) N),
 										std::sin(
 												n * ALY_PI * 2.0f / (float) N));
 				child = ForceItemPtr(new ForceItem(pt));
-				child->buoyancy = -1;
+				child->buoyancy = 0;
+				child->color=Data::COLOR.toRGBAf();
 				graph->addForceItem(child);
-				graph->addSpringItem(parent,child);
+				graph->addSpringItem(parent, child);
 				tmpList.push_back(child);
 			}
 		}
 		childNodes = tmpList;
 	}
-
+	std::sort(childNodes.begin(),childNodes.end(),[=](const ForceItemPtr& a,const ForceItemPtr& b){
+		return (a->location.y>b->location.y);
+	});
+	for(int k=0;k<4;k++){
+		createDescendantGraph(graph,childNodes[k]);
+	}
+	for(int k=childNodes.size()-1;k>=(int)childNodes.size()-4;k--){
+		createAncestorGraph(graph,childNodes[k]);
+	}
 }
 bool ForceDirectedGraphEx::init(Composite& rootNode) {
 
-	ExpandBarPtr controlRegion = ExpandBarPtr(new ExpandBar("Controls", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)));
-	CompositePtr displayRegion = MakeComposite("Display", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f));
+	ExpandBarPtr controlRegion = ExpandBarPtr(
+			new ExpandBar("Controls", CoordPX(0.0f, 0.0f),
+					CoordPercent(1.0f, 1.0f)));
+	CompositePtr displayRegion = MakeComposite("Display", CoordPX(0.0f, 0.0f),
+			CoordPercent(1.0f, 1.0f));
 	displayRegion->setScrollEnabled(true);
 	controlRegion->setScrollEnabled(true);
 	controlRegion->setOrientation(Orientation::Vertical);
-	controlRegion->backgroundColor = MakeColor(32,32,32);
+	controlRegion->backgroundColor = MakeColor(32, 32, 32);
 	controlRegion->borderColor = MakeColor(200, 200, 200);
 	controlRegion->borderWidth = UnitPX(1.0f);
-	BorderCompositePtr borderRegion = BorderCompositePtr(new BorderComposite("Layout", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f),true));
+	BorderCompositePtr borderRegion = BorderCompositePtr(
+			new BorderComposite("Layout", CoordPX(0.0f, 0.0f),
+					CoordPercent(1.0f, 1.0f), true));
 	borderRegion->setWest(controlRegion, UnitPX(300.0f));
 	borderRegion->setCenter(displayRegion);
-	graph = ForceSimulatorPtr(new ForceSimulator("Force Simulator", CoordPX(0.0f, 0.0f),CoordPX(2000,2000)));
+	graph = ForceSimulatorPtr(
+			new ForceSimulator("Force Simulator", CoordPX(0.0f, 0.0f),
+					CoordPX(2000, 2000)));
 	displayRegion->add(graph);
 	createRadialGraph(graph);
-	graph->backgroundColor = MakeColor(64,64,64);
+	graph->backgroundColor = MakeColor(64, 64, 64);
 	graph->setClampDragToParentBounds(false);
-	graph->addForce(NBodyForcePtr(new NBodyForce()));
+	graph->addForce(NBodyForcePtr(new NBodyForce(-0.7f)));
 	graph->addForce(SpringForcePtr(new SpringForce()));
 	graph->addForce(DragForcePtr(new DragForce(0.001f)));
-	graph->addForce(GravitationalForcePtr(new GravitationalForce()));
+	//graph->addForce(GravitationalForcePtr(new GravitationalForce()));
 	graph->addForce(BuoyancyForcePtr(new BuoyancyForce()));
-	graph->addForce(BoxForcePtr(new BoxForce(box2f(float2(0.0f,0.0f), float2(2000.0f,2000.0f)))));
-	graph->addForce(CircularWallForcePtr(new CircularWallForce(float2(1000.0f, 1000.0f), 960.0f)));
+	graph->addForce(
+			BoxForcePtr(
+					new BoxForce(
+							box2f(float2(0.0f, 0.0f),
+									float2(2000.0f, 2000.0f)))));
+	graph->addForce(
+			CircularWallForcePtr(
+					new CircularWallForce(float2(1000.0f, 1000.0f), 1000.0f)));
 
-	bool firstTime=true;
+	bool firstTime = true;
 	for (ForcePtr f : graph->getForces()) {
-		int N = (int)f->getParameterCount();
-		CompositePtr paramRegion = MakeComposite(f->getName(), CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f));
-		paramRegion->setOrientation(Orientation::Vertical,pixel2(5.0f),pixel2(5.0f));
-		ToggleBoxPtr enabledToggle = ToggleBoxPtr(new ToggleBox("Force Enabled", CoordPX(5.0f,5.0f),CoordPerPX(1.0f,0.0f,-10.0f,25.0f),true));
+		int N = (int) f->getParameterCount();
+		CompositePtr paramRegion = MakeComposite(f->getName(),
+				CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f));
+		paramRegion->setOrientation(Orientation::Vertical, pixel2(5.0f),
+				pixel2(5.0f));
+		ToggleBoxPtr enabledToggle = ToggleBoxPtr(
+				new ToggleBox("Force Enabled", CoordPX(5.0f, 5.0f),
+						CoordPerPX(1.0f, 0.0f, -10.0f, 25.0f), true));
 		enabledToggle->onChange = [=](bool b) {
-			graph->getLock().lock();
 			f->setEnabled(b);
-			graph->getLock().unlock();
 		};
 		paramRegion->add(enabledToggle);
 		for (int n = 0; n < N; n++) {
-			HorizontalSliderPtr hslider = HorizontalSliderPtr(new HorizontalSlider(f->getParameterName(n), CoordPX(5.0f, 5.0f), CoordPerPX(1.0f, 0.0f, -10.0f, 40.0f),Float(f->getMinValue(n)),Float(f->getMaxValue(n)),Float(f->getParameterValue(n))));
+			HorizontalSliderPtr hslider = HorizontalSliderPtr(
+					new HorizontalSlider(f->getParameterName(n),
+							CoordPX(5.0f, 5.0f),
+							CoordPerPX(1.0f, 0.0f, -10.0f, 40.0f),
+							Float(f->getMinValue(n)), Float(f->getMaxValue(n)),
+							Float(f->getParameterValue(n))));
 			paramRegion->add(hslider);
-			hslider->setOnChangeEvent(
-				[=](const Number& val) {
-				graph->getLock().lock();
+			hslider->setOnChangeEvent([=](const Number& val) {
 				f->setParameter(n,val.toFloat());
-				graph->getLock().unlock();
 			});
 		}
-		controlRegion->add(paramRegion, 30.0f+N * (40.0f +5.0f)+5.0f, firstTime);
-		firstTime=false;
+		controlRegion->add(paramRegion, 30.0f + N * (40.0f + 5.0f) + 5.0f,
+				firstTime);
+		firstTime = false;
 	}
 	rootNode.add(borderRegion);
 	getContext()->addDeferredTask([this]() {
 		graph->start();
 	});
-	
+
 	return true;
 }
 

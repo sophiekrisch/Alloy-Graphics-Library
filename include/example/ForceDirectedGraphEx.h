@@ -28,6 +28,9 @@ class ForceDirectedGraphEx: public aly::Application {
 protected:
 	aly::dataflow::ForceSimulatorPtr graph;
 	void createRadialGraph(const aly::dataflow::ForceSimulatorPtr& graph);
+	void createDescendantGraph(const aly::dataflow::ForceSimulatorPtr& graph,const aly::dataflow::ForceItemPtr& parent);
+	void createAncestorGraph(const aly::dataflow::ForceSimulatorPtr& graph,const aly::dataflow::ForceItemPtr& parent);
+
 public:
 	ForceDirectedGraphEx();
 	bool init(aly::Composite& rootNode);

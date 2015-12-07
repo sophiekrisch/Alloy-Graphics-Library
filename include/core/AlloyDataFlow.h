@@ -462,9 +462,10 @@ public:
 };
 class Data: public Node {
 protected:
-	static const Color COLOR;
 	virtual void setup() override;
 public:
+
+	static const Color COLOR;
 	virtual NodeType getType() const override {
 		return NodeType::Data;
 	}
@@ -525,10 +526,11 @@ public:
 };
 class Source: public Node {
 protected:
-	static const Color COLOR;
 	virtual void setup() override;
 
 public:
+
+	static const Color COLOR;
 	virtual NodeType getType() const override {
 		return NodeType::Source;
 	}
@@ -548,9 +550,10 @@ public:
 
 class Destination: public Node {
 protected:
-	static const Color COLOR;
 	virtual void setup() override;
 public:
+
+	static const Color COLOR;
 	virtual NodeType getType() const override {
 		return NodeType::Destination;
 	}

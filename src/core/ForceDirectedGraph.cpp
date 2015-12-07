@@ -103,17 +103,15 @@ namespace aly {
 				nvgCircle(nvg, location.x, location.y, r - lineWidth * 0.5f);
 			}
 			else if (shape == NodeShape::Square) {
-				nvgRoundedRect(nvg, location.x + lineWidth * 0.5f,
-					location.y + lineWidth * 0.5f, 2 * r - lineWidth,
+				nvgRoundedRect(nvg, location.x-r + lineWidth * 0.5f,
+					location.y-r + lineWidth * 0.5f, 2 * r - lineWidth,
 					2 * r - lineWidth, r * 0.5f);
 			}
 			else if (shape == NodeShape::Triangle) {
 				nvgLineJoin(nvg, NVG_ROUND);
-				nvgMoveTo(nvg, location.x - r, location.y - r - lineWidth);
-				nvgLineTo(nvg, location.x + r + lineWidth * 0.5f,
-					location.y + r + lineWidth * 0.5f);
-				nvgLineTo(nvg, location.x - r - lineWidth,
-					location.y - r + lineWidth * 0.5f);
+				nvgMoveTo(nvg, location.x, location.y + r - lineWidth);
+				nvgLineTo(nvg, location.x + r + lineWidth * 0.5f,location.y - r + lineWidth * 0.5f);
+				nvgLineTo(nvg, location.x - r - lineWidth,location.y- r + lineWidth * 0.5f);
 				nvgClosePath(nvg);
 			}
 			else if (shape == NodeShape::Hexagon) {
