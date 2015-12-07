@@ -576,8 +576,8 @@ namespace aly {
 			float2 n = item->location;
 			int ccw = relativeCCW(p1.x, p1.y, p2.x, p2.y, n.x, n.y);
 			float r = (float)std::sqrt(ptSegDistSq(p1.x, p1.y, p2.x, p2.y, n.x, n.y));
-			if (r < 1E-5f)
-				r = (float)RandomUniform(1E-5f, 0.01f);
+			if (r < 1E-6f)
+				r = (float)RandomUniform(1E-6f, 0.01f);
 			float v = params[GRAVITATIONAL_CONST] * item->mass / (r * r * r);
 			if (n.x >= std::min(p1.x, p2.x) && n.x <= std::max(p1.x, p2.x))
 				item->force.y += ccw * v * dxy.x;
