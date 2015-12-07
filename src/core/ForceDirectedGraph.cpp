@@ -23,7 +23,7 @@
 #include "AlloyDataFlow.h"
 #include "AlloyContext.h"
 #include "AlloyDrawUtil.h"
-#define NUM_THREADS 4
+#define NUM_THREADS 2
 namespace aly {
 	namespace dataflow {
 		const std::string SpringForce::pnames[2] =
