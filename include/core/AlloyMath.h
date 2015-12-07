@@ -1639,7 +1639,7 @@ public:
 		T len= lengthSqr(ab);
 		if (len >= tolerance) {
 			t =dot(cb,ab) / len;
-			s = dot(a,start+b*t-line.start)/lengthSqr(a);
+			s = dot(b,start+a*t-line.start)/lengthSqr(b);
 			if (t >= T(0) && t <= T(1) && s >= T(0) && s <= T(1)) {
 				return true;
 			} else {

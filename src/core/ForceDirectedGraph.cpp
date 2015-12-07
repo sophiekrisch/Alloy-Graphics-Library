@@ -365,7 +365,8 @@ namespace aly {
 			float speedLimit = sim.getSpeedLimit();
 			float coeff, len;
 			for (ForceItemPtr item : sim.getItems()) {
-				item->location += timestep * item->velocity;
+				item->plocation = item->location;
+				item->location = item->plocation + timestep * item->velocity;
 				coeff = timestep / item->mass;
 				item->velocity += coeff * item->force;
 				float2 vel = item->velocity;
@@ -528,7 +529,12 @@ namespace aly {
 			lineseg2f boundary(p1, p2);
 			float t, s;
 			if (line.intersects(boundary, t, s)) {
-				forceItem->location = mix(line.start, line.end, t);
+				if (t > 1E-6f) {
+					forceItem->location = mix(line.start, line.end, 0.5f*t);
+				}
+				else {
+					forceItem->location = forceItem->plocation;
+				}
 			}
 		}
 		void WallForce::draw(AlloyContext* context, const pixel2& offset) {
@@ -543,6 +549,7 @@ namespace aly {
 			nvgStroke(nvg);
 		}
 		void WallForce::getForce(const ForceItemPtr& item) {
+			
 			float2 n = item->location;
 			int ccw = relativeCCW(p1.x, p1.y, p2.x, p2.y, n.x, n.y);
 			float r = (float)std::sqrt(ptSegDistSq(p1.x, p1.y, p2.x, p2.y, n.x, n.y));
