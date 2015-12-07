@@ -573,6 +573,11 @@ namespace aly {
 		}
 		void BoxForce::getForce(const ForceItemPtr& item) {
 			float2 n = item->location;
+			box2f box(pts[0], pts[2] - pts[0]);
+			if(!box.contains(n)){
+				float2 dxy = float2(RandomUniform(-0.5f, 0.5f) / 50.0f,RandomUniform(-0.5f, 0.5f) / 50.0f);
+				item->force += dxy*distance(item->location,item->plocation);
+			}
 			for (int k = 0; k < 4; k++) {
 				float2 p1 = pts[k];
 				float2 p2 = pts[(k + 1) % 4];
@@ -596,7 +601,7 @@ namespace aly {
 			float dr = r - d;
 			float c = (dr > 0) ? -1.0f : 1.0f;
 			float v = c * params[GRAVITATIONAL_CONST] * item->mass / (dr * dr);
-			if (d < 1E-5f) {
+			if (d < 1E-5f||d>r) {
 				dxy = float2(RandomUniform(-0.5f, 0.5f) / 50.0f,
 					RandomUniform(-0.5f, 0.5f) / 50.0f);
 				d = length(dxy);
