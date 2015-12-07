@@ -23,7 +23,7 @@
 #include "AlloyDataFlow.h"
 #include "AlloyContext.h"
 #include "AlloyDrawUtil.h"
-#define NUM_THREADS 2
+#define NUM_THREADS 3
 namespace aly {
 	namespace dataflow {
 		const std::string SpringForce::pnames[2] =
@@ -86,8 +86,8 @@ namespace aly {
 
 		const float ForceSimulator::RADIUS = 20.0f;
 		const float ForceSimulator::DEFAULT_TIME_STEP = 30.0f;
-		const int ForceSimulator::DEFAULT_TIME_OUT=20;
-		const int ForceSimulator::DEFAULT_INTEGRATION_CYCLES = 4;
+		const int ForceSimulator::DEFAULT_TIME_OUT=10;
+		const int ForceSimulator::DEFAULT_INTEGRATION_CYCLES = 2;
 		void ForceItem::draw(AlloyContext* context, const pixel2& offset) {
 			const float lineWidth = 4.0f;
 			NVGcontext* nvg = context->nvgContext;
@@ -260,24 +260,24 @@ namespace aly {
 		}
 		void ForceSimulator::draw(AlloyContext* context) {
 			Region::draw(context);
-			std::lock_guard<std::mutex> lockMe(lock);
 			float2 offset = getBoundsPosition();
 			NVGcontext* nvg = context->nvgContext;
 			pushScissor(nvg, getCursorBounds());
-			for (ForcePtr f : iforces) {
-				f->draw(context, offset);
+			{
+				std::lock_guard<std::mutex> lockMe(lock);
+				for (ForcePtr f : iforces) {
+					f->draw(context, offset);
+				}
+				for (ForcePtr f : sforces) {
+					f->draw(context, offset);
+				}
+				for (SpringItemPtr item : springs) {
+					item->draw(context, offset);
+				}
+				for (ForceItemPtr item : items) {
+					item->draw(context, offset);
+				}
 			}
-			for (ForcePtr f : sforces) {
-				f->draw(context, offset);
-			}
-
-			for (SpringItemPtr item : springs) {
-				item->draw(context, offset);
-			}
-			for (ForceItemPtr item : items) {
-				item->draw(context, offset);
-			}
-
 			popScissor(nvg);
 		}
 		void ForceSimulator::drawDebug(AlloyContext* context) {
@@ -474,8 +474,14 @@ namespace aly {
 			}
 			float d = r - len;
 			float coeff = (s->coeff < 0 ? params[SPRING_COEFF] : s->coeff) * d / r;
-			item1->force += coeff * dxy;
-			item2->force -= coeff * dxy;
+//#pragma omp critical //could deadlock!
+			{
+				item1->force += coeff * dxy;
+			}
+//#pragma omp critical //could deadlock!
+			{
+				item2->force -= coeff * dxy;
+			}
 		}
 		int relativeCCW(float x1, float y1, float x2, float y2, float px, float py) {
 			x2 -= x1;
