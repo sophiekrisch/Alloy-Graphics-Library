@@ -56,7 +56,7 @@ struct ForceItem {
 		velocity = float2(0.0f);
 		plocation = location;
 	}
-	void draw(AlloyContext* context, const pixel2& offset);
+	void draw(AlloyContext* context, const pixel2& offset,bool selected);
 };
 typedef std::shared_ptr<ForceItem> ForceItemPtr;
 struct SpringItem {
@@ -191,6 +191,9 @@ class ForceSimulator: public Region {
 	int renderCount = 0;
 	float frameRate = 0.0f;
 	box2f forceBounds;
+	pixel2 cursorDownPosition;
+	bool dragging;
+	
 	std::chrono::steady_clock::time_point lastTime;
 	bool update(uint64_t iter);
 	void runSimulator(float timestep = DEFAULT_TIME_STEP);
@@ -200,6 +203,7 @@ public:
 	static const float DEFAULT_TIME_STEP;
 	static const int DEFAULT_INTEGRATION_CYCLES;
 	static const int DEFAULT_TIME_OUT;
+	ForceItem* selected;
 	std::mutex& getLock(){
 		return lock;
 	}
@@ -237,6 +241,8 @@ public:
 	void accumulate();
 	virtual void draw(AlloyContext* context) override;
 	virtual void drawDebug(AlloyContext* context) override;
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
+		override;
 };
 typedef std::shared_ptr<ForceSimulator> ForceSimulatorPtr;
 

@@ -23,6 +23,7 @@
 #include "AlloyDataFlow.h"
 #include "AlloyContext.h"
 #include "AlloyDrawUtil.h"
+#include "AlloyApplication.h"
 #define NUM_THREADS 3
 namespace aly {
 	namespace dataflow {
@@ -88,13 +89,21 @@ namespace aly {
 		const float ForceSimulator::DEFAULT_TIME_STEP = 30.0f;
 		const int ForceSimulator::DEFAULT_TIME_OUT=10;
 		const int ForceSimulator::DEFAULT_INTEGRATION_CYCLES = 2;
-		void ForceItem::draw(AlloyContext* context, const pixel2& offset) {
+		void ForceItem::draw(AlloyContext* context, const pixel2& offset,bool selected) {
 			const float lineWidth = 4.0f;
 			NVGcontext* nvg = context->nvgContext;
 
 			nvgStrokeWidth(nvg, lineWidth);
-			nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
-			nvgFillColor(nvg, Color(color));
+			if (selected) {
+				nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+
+				nvgFillColor(nvg, Color(color).toLighter(0.25f));
+			}
+			else {
+
+				nvgFillColor(nvg, Color(color));
+				nvgStrokeColor(nvg, Color(context->theme.LIGHT_TEXT));
+			}
 			nvgStrokeWidth(nvg, lineWidth);
 			nvgBeginPath(nvg);
 			float r = ForceSimulator::RADIUS;
@@ -151,6 +160,42 @@ namespace aly {
 			simWorker = RecurrentTaskPtr(new RecurrentTask([this](uint64_t iter) {
 				return update(iter);
 			}, DEFAULT_TIME_OUT));
+			dragging = false;
+			selected = nullptr;
+			cursorDownPosition = pixel2(-1, -1);
+			Application::addListener(this);
+		}
+		bool ForceSimulator::onEventHandler(AlloyContext* context, const InputEvent& e) {
+			if (Region::onEventHandler(context, e))
+				return true;
+
+			if (e.type == InputType::MouseButton && e.button == GLFW_MOUSE_BUTTON_LEFT
+				&& e.isDown()&&!dragging) {
+				selected = nullptr;
+				float2 cursor= e.cursor-getBoundsPosition();
+				for (int i = (int)items.size() - 1; i >= 0; i--) {
+					ForceItemPtr item = items[i];
+					float2 dxy = item->location - cursor;
+					if (std::abs(dxy.x) < RADIUS&&std::abs(dxy.y) < RADIUS) {
+						selected = item.get();
+						break;
+					}
+				}
+				if (selected != nullptr) {
+					cursorDownPosition = e.cursor;
+					dragging = true;
+				}
+			}
+			if (dragging && e.type == InputType::Cursor) {
+				float2 offset = getBoundsPosition();
+				selected->plocation=selected->location = e.cursor-offset;
+				selected->velocity = float2(0.0f);
+			}
+			else if (e.type == InputType::MouseButton && e.isUp()) {
+				dragging = false;
+				selected = nullptr;
+			}
+			return false;
 		}
 		bool ForceSimulator::update(uint64_t iter) {
 			if (renderCount == 0) {
@@ -275,7 +320,7 @@ namespace aly {
 					item->draw(context, offset);
 				}
 				for (ForceItemPtr item : items) {
-					item->draw(context, offset);
+					item->draw(context, offset,item.get()==selected);
 				}
 			}
 			popScissor(nvg);
@@ -303,7 +348,7 @@ namespace aly {
 				item->draw(context, offset);
 			}
 			for (ForceItemPtr item : items) {
-				item->draw(context, offset);
+				item->draw(context, offset, item.get() == selected);
 			}
 			popScissor(nvg);
 		}
@@ -362,6 +407,7 @@ namespace aly {
 			for (int i = 0; i < (int)items.size(); i++) {
 				float coeff, len;
 				ForceItemPtr item=items[i];
+				if (item.get() == sim.selected)continue;
 				item->plocation = item->location;
 				item->location = item->plocation + timestep * item->velocity;
 				coeff = timestep / item->mass;
@@ -383,6 +429,7 @@ namespace aly {
 				float coeff;
 				std::array<float2, 4> k, l;
 				ForceItemPtr item=items[i];
+				if (item.get() == sim.selected)continue;
 				coeff = timestep / item->mass;
 				k = item->k;
 				l = item->l;
@@ -398,6 +445,7 @@ namespace aly {
 				float len;
 				std::array<float2, 4> k, l;
 				ForceItemPtr item=items[i];
+				if (item.get() == sim.selected)continue;
 				coeff = timestep / item->mass;
 				k = item->k;
 				l = item->l;
@@ -419,6 +467,7 @@ namespace aly {
 				float len;
 				std::array<float2, 4> k, l;
 				ForceItemPtr item=items[i];
+				if (item.get() == sim.selected)continue;
 				coeff = timestep / item->mass;
 				k = item->k;
 				l = item->l;
@@ -439,6 +488,7 @@ namespace aly {
 				float len;
 				std::array<float2, 4> k, l;
 				ForceItemPtr item=items[i];
+				if (item.get() == sim.selected)continue;
 				coeff = timestep / item->mass;
 				k = item->k;
 				l = item->l;

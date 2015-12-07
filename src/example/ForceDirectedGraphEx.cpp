@@ -39,7 +39,7 @@ void ForceDirectedGraphEx::createDescendantGraph(
 		for (ForceItemPtr parent : childNodes) {
 			for (int n = 0; n < N; n++) {
 				ForceItemPtr child=ForceItemPtr(new ForceItem());
-				child->location=parent->location+float2(n*ForceSimulator::RADIUS*2.0f,ForceSimulator::RADIUS*2);
+				child->location=parent->location+float2(n*ForceSimulator::RADIUS*2.0f - n*ForceSimulator::RADIUS,ForceSimulator::RADIUS*2);
 				child->color=Compute::COLOR.toRGBAf();
 				child->shape=NodeShape::Hexagon;
 				child->buoyancy=1.0f;
@@ -63,7 +63,7 @@ void ForceDirectedGraphEx::createAncestorGraph(
 		for (ForceItemPtr parent : childNodes) {
 			for (int n = 0; n < N; n++) {
 				ForceItemPtr child=ForceItemPtr(new ForceItem());
-				child->location=parent->location+float2(n*ForceSimulator::RADIUS*2.0f,-ForceSimulator::RADIUS*2);
+				child->location=parent->location+float2(n*ForceSimulator::RADIUS*2.0f - n*ForceSimulator::RADIUS,-ForceSimulator::RADIUS*2);
 				child->color=Source::COLOR.toRGBAf();
 				child->shape=NodeShape::Square;
 				child->buoyancy=-1.0f;
