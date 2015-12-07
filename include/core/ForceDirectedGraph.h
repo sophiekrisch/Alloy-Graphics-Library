@@ -199,7 +199,7 @@ public:
 	static const float RADIUS;
 	static const float DEFAULT_TIME_STEP;
 	static const int DEFAULT_INTEGRATION_CYCLES;
-	static const float DEFAULT_TIME_OUT;
+	static const int DEFAULT_TIME_OUT;
 	std::mutex& getLock(){
 		return lock;
 	}

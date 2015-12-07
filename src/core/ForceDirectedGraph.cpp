@@ -86,7 +86,7 @@ namespace aly {
 
 		const float ForceSimulator::RADIUS = 20.0f;
 		const float ForceSimulator::DEFAULT_TIME_STEP = 30.0f;
-		const float ForceSimulator::DEFAULT_TIME_OUT=20.0f;
+		const int ForceSimulator::DEFAULT_TIME_OUT=20;
 		const int ForceSimulator::DEFAULT_INTEGRATION_CYCLES = 4;
 		void ForceItem::draw(AlloyContext* context, const pixel2& offset) {
 			const float lineWidth = 4.0f;
