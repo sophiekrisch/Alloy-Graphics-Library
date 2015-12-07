@@ -43,12 +43,6 @@ namespace aly {
 		const float DragForce::DEFAULT_MAX_DRAG_COEFF = 0.1f;
 		const int DragForce::DRAG_COEFF = 0;
 
-		const std::string WallForce::pnames[1] = { "Gravitational Constant" };
-		const float WallForce::DEFAULT_GRAV_CONSTANT = -0.1f;
-		const float WallForce::DEFAULT_MIN_GRAV_CONSTANT = -1.0f;
-		const float WallForce::DEFAULT_MAX_GRAV_CONSTANT = 1.0f;
-		const int WallForce::GRAVITATIONAL_CONST = 0;
-
 		const std::string BoxForce::pnames[1] = { "Gravitational Constant" };
 		const float BoxForce::DEFAULT_GRAV_CONSTANT = -0.1f;
 		const float BoxForce::DEFAULT_MIN_GRAV_CONSTANT = -1.0f;
@@ -100,7 +94,7 @@ namespace aly {
 
 			nvgStrokeWidth(nvg, lineWidth);
 			nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
-			nvgFillColor(nvg, Color(255, 64, 64));
+			nvgFillColor(nvg, Color(color));
 			nvgStrokeWidth(nvg, lineWidth);
 			nvgBeginPath(nvg);
 			float r = ForceSimulator::RADIUS;
@@ -534,55 +528,6 @@ namespace aly {
 				lenSq = 0;
 			}
 			return lenSq;
-		}
-		WallForce::WallForce(float gravConst, float2 p1, float2 p2) :
-			p1(p1), p2(p2) {
-			params = std::vector<float>{ gravConst };
-			minValues = std::vector<float>{ DEFAULT_MIN_GRAV_CONSTANT };
-			maxValues = std::vector<float>{ DEFAULT_MAX_GRAV_CONSTANT };
-			dxy = p2 - p1;
-			float r = length(dxy);
-			if (dxy.x != 0.0)
-				dxy.x /= r;
-			if (dxy.y != 0.0)
-				dxy.y /= r;
-		}
-		void WallForce::enforceBoundary(const std::shared_ptr<ForceItem>& forceItem) {
-			lineseg2f line(forceItem->plocation, forceItem->location);
-			lineseg2f boundary(p1, p2);
-			float t, s;
-			if (line.intersects(boundary, t, s)) {
-				if (t > 1E-6f) {
-					forceItem->location = mix(line.start, line.end, 0.5f*t);
-				}
-				else {
-					forceItem->location = forceItem->plocation;
-				}
-			}
-		}
-		void WallForce::draw(AlloyContext* context, const pixel2& offset) {
-			if (!enabled)
-				return;
-			NVGcontext* nvg = context->nvgContext;
-			nvgStrokeWidth(nvg, 8.0f);
-			nvgStrokeColor(nvg, Color(1.0f, 1.0f, 1.0f, 1.0f));
-			nvgBeginPath(nvg);
-			nvgMoveTo(nvg, p1.x + offset.x, p1.y + offset.y);
-			nvgLineTo(nvg, p2.x + offset.x, p2.y + offset.y);
-			nvgStroke(nvg);
-		}
-		void WallForce::getForce(const ForceItemPtr& item) {
-			
-			float2 n = item->location;
-			int ccw = relativeCCW(p1.x, p1.y, p2.x, p2.y, n.x, n.y);
-			float r = (float)std::sqrt(ptSegDistSq(p1.x, p1.y, p2.x, p2.y, n.x, n.y));
-			if (r < 1E-6f)
-				r = (float)RandomUniform(1E-6f, 0.01f);
-			float v = params[GRAVITATIONAL_CONST] * item->mass / (r * r * r);
-			if (n.x >= std::min(p1.x, p2.x) && n.x <= std::max(p1.x, p2.x))
-				item->force.y += ccw * v * dxy.x;
-			if (n.y >= std::min(p1.y, p2.y) && n.y <= std::max(p1.y, p2.y))
-				item->force.x += -1.0f * ccw * v * dxy.y;
 		}
 		void BoxForce::setBounds(const box2f& box) {
 			pts[0] = box.position;

@@ -730,7 +730,6 @@ void DataFlow::setup() {
 	forceSim->addForce(SpringForcePtr(new SpringForce()));
 	forceSim->addForce(NBodyForcePtr(new NBodyForce()));
 	forceSim->addForce(GravitationalForcePtr(new GravitationalForce()));
-	forceSim->addForce(WallForcePtr(new WallForce(float2(0.0f, 1280.0f), float2(1920.0f,1080.0f))));
 	forceSim->addForce(CircularWallForcePtr(new CircularWallForce(float2(960.0f,540.0f), 960.0f)));
 	forceSim->addForce(DragForcePtr(new DragForce(0.001f)));
 

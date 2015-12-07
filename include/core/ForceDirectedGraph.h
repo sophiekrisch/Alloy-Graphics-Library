@@ -44,11 +44,12 @@ struct ForceItem {
 	float2 location;
 	float2 plocation;
 	NodeShape shape;
+	RGBAf color;
 	std::array<float2, 4> k;
 	std::array<float2, 4> l;
 	ForceItem(const float2& pt = float2(0.0f)) :
 			mass(1.0f), buoyancy(1.0f), force(0.0f), velocity(0.0f), location(
-					pt), plocation(pt), shape(NodeShape::Circle) {
+					pt), plocation(pt), shape(NodeShape::Circle) ,color(1.0f,0.2f,0.2f,1.0f){
 	}
 	void reset() {
 		force = float2(0.0f);
@@ -300,35 +301,6 @@ struct DragForce: public Force {
 	}
 };
 typedef std::shared_ptr<DragForce> DragForcePtr;
-struct WallForce: public Force {
-	static const std::string pnames[1];
-	static const float DEFAULT_GRAV_CONSTANT;
-	static const float DEFAULT_MIN_GRAV_CONSTANT;
-	static const float DEFAULT_MAX_GRAV_CONSTANT;
-	static const int GRAVITATIONAL_CONST;
-	float2 p1, p2, dxy;
-	WallForce(float gravConst, float2 p1, float2 p2);
-	WallForce(float2 p1, float2 p2) :
-			WallForce(DEFAULT_GRAV_CONSTANT, p1, p2) {
-	}
-	virtual void enforceBoundary(const std::shared_ptr<ForceItem>& forceItem) override;
-	virtual bool isForceItem() const override {
-		return true;
-	}
-	virtual std::string getName() const override {
-		return "Wall Boundary";
-	}
-	virtual std::string getParameterName(size_t i) const override {
-		return pnames[i];
-	}
-	virtual bool isBoundaryItem() const override {
-		return true;
-	}
-	virtual void draw(AlloyContext* context, const pixel2& offset) override;
-	virtual void getForce(const ForceItemPtr& item) override;
-};
-typedef std::shared_ptr<WallForce> WallForcePtr;
-
 struct BoxForce: public Force {
 	static const std::string pnames[1];
 	static const float DEFAULT_GRAV_CONSTANT;
