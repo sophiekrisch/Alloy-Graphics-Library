@@ -113,7 +113,7 @@ void ForceDirectedGraphEx::createRadialGraph(const ForceSimulatorPtr& graph) {
 	for(int k=0;k<4;k++){
 		createDescendantGraph(graph,childNodes[k]);
 	}
-	for(int k=childNodes.size()-1;k>=(int)childNodes.size()-4;k--){
+	for(int k=(int)childNodes.size()-1;k>=(int)childNodes.size()-4;k--){
 		createAncestorGraph(graph,childNodes[k]);
 	}
 }
