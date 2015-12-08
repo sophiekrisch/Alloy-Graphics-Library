@@ -220,6 +220,11 @@ namespace aly {
 					return true;
 				}
 			}
+			else {
+				draggingNode = false;
+				draggingView = false;
+				selected = nullptr;
+			}
 			return false;
 		}
 		bool ForceSimulator::update(uint64_t iter) {
