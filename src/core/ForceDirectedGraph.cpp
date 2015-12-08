@@ -188,6 +188,7 @@ namespace aly {
 					}
 					if (selected != nullptr) {
 						cursorDownPosition = e.cursor;
+						lastDragOffset = selected->location - cursor;
 						draggingNode = true;
 					}
 				}
@@ -200,7 +201,7 @@ namespace aly {
 				if (e.type == InputType::Cursor) {
 					if (draggingNode) {
 						float2 offset = getBoundsPosition() + dragOffset;
-						selected->plocation = selected->location = e.cursor / scale - offset;
+						selected->plocation = selected->location = e.cursor / scale - offset+lastDragOffset;
 						selected->velocity = float2(0.0f);
 					}
 					if (draggingView) {
@@ -214,7 +215,7 @@ namespace aly {
 				}
 				if (e.type == InputType::Scroll) {
 					float2 pw = e.cursor / scale - dragOffset;
-					scale = clamp(scale*(1.0f + e.scroll.y*0.1f), 0.01f, 10.0f);
+					scale = clamp(scale*(1.0f + e.scroll.y*0.1f), 0.05f, 20.0f);
 					dragOffset = e.cursor / scale - pw;
 					return true;
 				}
@@ -349,33 +350,7 @@ namespace aly {
 			}
 			popScissor(nvg);
 		}
-		void ForceSimulator::drawDebug(AlloyContext* context) {
-			Region::drawDebug(context);
-			std::lock_guard<std::mutex> lockMe(lock);
-			float2 offset = getBoundsPosition();
-			NVGcontext* nvg = context->nvgContext;
-			pushScissor(nvg, getCursorBounds());
-			nvgStrokeWidth(nvg, 4.0f);
-			nvgStrokeColor(nvg, Color(0.3f, 0.3f, 0.3f, 1.0f));
-			nvgBeginPath(nvg);
-			nvgRect(nvg, forceBounds.position.x + offset.x,
-				forceBounds.position.y + offset.y, forceBounds.dimensions.x,
-				forceBounds.dimensions.y);
-			nvgStroke(nvg);
-			for (ForcePtr f : iforces) {
-				f->draw(context, offset, scale);
-			}
-			for (ForcePtr f : sforces) {
-				f->draw(context, offset, scale);
-			}
-			for (SpringItemPtr item : springs) {
-				item->draw(context, offset,scale);
-			}
-			for (ForceItemPtr item : items) {
-				item->draw(context, offset,scale, item.get() == selected);
-			}
-			popScissor(nvg);
-		}
+	
 		void ForceSimulator::accumulate() {
 			for (int i = 0; i < (int)iforces.size(); i++) {
 				if (iforces[i]->isEnabled())

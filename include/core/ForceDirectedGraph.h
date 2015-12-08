@@ -249,7 +249,6 @@ public:
 	void addSpringItem(const SpringItemPtr& spring);
 	void accumulate();
 	virtual void draw(AlloyContext* context) override;
-	virtual void drawDebug(AlloyContext* context) override;
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
 		override;
 };
