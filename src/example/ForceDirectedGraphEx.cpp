@@ -137,7 +137,6 @@ bool ForceDirectedGraphEx::init(Composite& rootNode) {
 	borderRegion->setCenter(graph);
 	createRadialGraph(graph);
 	graph->backgroundColor = MakeColor(64, 64, 64);
-	graph->setRoundCorners(true);
 	graph->setZoom(0.5f);
 	graph->setOffset(pixel2(900.0f,75.0f));
 	graph->addForce(NBodyForcePtr(new NBodyForce(-0.7f)));
