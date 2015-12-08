@@ -29,7 +29,7 @@ bool SANITY_CHECK_SPARSE_SOLVE();
 template<class T, int C> void SolveVecCG(const Vector<T, C>& b,
 		const SparseMatrix<T, C>& A, Vector<T, C>& x, int iters = 100,
 		T tolerance = 1E-6f,
-		const std::function<void(int, double)>& iterationMonitor = nullptr) {
+		const std::function<bool(int, double)>& iterationMonitor = nullptr) {
 	const double ZERO_TOLERANCE = 1E-16;
 	vec<double, C> err(0.0);
 	size_t N = b.size();
@@ -43,8 +43,9 @@ template<class T, int C> void SolveVecCG(const Vector<T, C>& b,
 	p = *rcurrent;
 	err = lengthVecSqr(*rcurrent);
 	double e = lengthL1(err) / N;
-	if (iterationMonitor)
-		iterationMonitor(0, e);
+	if (iterationMonitor) {
+		if (!iterationMonitor(0, e))return;
+	}
 	for (int iter = 0; iter < iters; iter++) {
 		MultiplyVec(Ap, A, p);
 		vec<double, C> denom = dotVec(p, Ap);
@@ -58,8 +59,9 @@ template<class T, int C> void SolveVecCG(const Vector<T, C>& b,
 		ScaleSubtract(*rnext, *rcurrent, vec<T, C>(alpha), Ap);
 		vec<double, C> err = lengthVecSqr(*rnext);
 		double e = lengthL1(err) / N;
-		if (iterationMonitor)
-			iterationMonitor(iter + 1, e);
+		if (iterationMonitor) {
+			if (!iterationMonitor(iter + 1, e))return;
+		}
 		if (e < tolerance)
 			break;
 		denom = lengthVecSqr(*rcurrent);
@@ -76,7 +78,7 @@ template<class T, int C> void SolveVecCG(const Vector<T, C>& b,
 template<class T, int C> void SolveCG(const Vector<T, C>& b,
 		const SparseMatrix<T, 1>& A, Vector<T, C>& x, int iters = 100,
 		T tolerance = 1E-6f,
-		const std::function<void(int, double)>& iterationMonitor = nullptr) {
+		const std::function<bool(int, double)>& iterationMonitor = nullptr) {
 	const double ZERO_TOLERANCE = 1E-16;
 	vec<double, C> err(0.0);
 	size_t N = b.size();
@@ -90,8 +92,9 @@ template<class T, int C> void SolveCG(const Vector<T, C>& b,
 	p = *rcurrent;
 	err = lengthVecSqr(*rcurrent);
 	double e = lengthL1(err) / N;
-	if (iterationMonitor)
-		iterationMonitor(0, e);
+	if (iterationMonitor) {
+		if (!iterationMonitor(0, e))return;
+	}
 	for (int iter = 0; iter < iters; iter++) {
 		Multiply(Ap, A, p);
 		vec<double, C> denom = dotVec(p, Ap);
@@ -105,8 +108,9 @@ template<class T, int C> void SolveCG(const Vector<T, C>& b,
 		ScaleSubtract(*rnext, *rcurrent, vec<T, C>(alpha), Ap);
 		vec<double, C> err = lengthVecSqr(*rnext);
 		double e = lengthL1(err) / N;
-		if (iterationMonitor)
-			iterationMonitor(iter + 1, e);
+		if (iterationMonitor) {
+			if (!iterationMonitor(iter + 1, e))return;
+		}
 		if (e < tolerance)
 			break;
 		denom = lengthVecSqr(*rcurrent);
@@ -123,7 +127,7 @@ template<class T, int C> void SolveCG(const Vector<T, C>& b,
 template<class T, int C> void SolveVecBICGStab(const Vector<T, C>& b,
 		const SparseMatrix<T, C>& A, Vector<T, C>& x, int iters = 100,
 		T tolerance = 1E-6f,
-		const std::function<void(int, double)>& iterationMonitor = nullptr) {
+		const std::function<bool(int, double)>& iterationMonitor = nullptr) {
 	const double ZERO_TOLERANCE = 1E-16;
 	size_t N = b.size();
 	Vector<T, C> p(N);
@@ -150,9 +154,9 @@ template<class T, int C> void SolveVecBICGStab(const Vector<T, C>& b,
 	rinit = r;
 	err = lengthVecSqr(r);
 	double e = lengthL1(err) / N;
-	if (iterationMonitor)
-		iterationMonitor(0, e);
-
+	if (iterationMonitor) {
+		if (!iterationMonitor(0, e))return;
+	}
 	for (int iter = 0; iter < iters; iter++) {
 		rhoNext = dotVec(rinit, r);
 		beta = vec<T, C>((rhoNext / rho)) * (alpha / omega);
@@ -174,8 +178,9 @@ template<class T, int C> void SolveVecBICGStab(const Vector<T, C>& b,
 		SubtractMultiplyVec(delta, b, A, x);
 		vec<double, C> err = lengthVecSqr(delta);
 		double e = lengthL1(err) / N;
-		if (iterationMonitor)
-			iterationMonitor(iter + 1, e);
+		if (iterationMonitor) {
+			if (!iterationMonitor(iter + 1, e))return;
+		}
 		if (e < tolerance)
 			break;
 
@@ -184,7 +189,7 @@ template<class T, int C> void SolveVecBICGStab(const Vector<T, C>& b,
 template<class T, int C> void SolveBICGStab(const Vector<T, C>& b,
 		const SparseMatrix<T, 1>& A, Vector<T, C>& x, int iters = 100,
 		T tolerance = 1E-6f,
-		const std::function<void(int, double)>& iterationMonitor = nullptr) {
+		const std::function<bool(int, double)>& iterationMonitor = nullptr) {
 	const double ZERO_TOLERANCE = 1E-16;
 
 	size_t N = b.size();
@@ -209,8 +214,9 @@ template<class T, int C> void SolveBICGStab(const Vector<T, C>& b,
 	rinit = r;
 	err = lengthVecSqr(r);
 	double e = lengthL1(err) / N;
-	if (iterationMonitor)
-		iterationMonitor(0, e);
+	if (iterationMonitor) {
+		if (!iterationMonitor(0, e))return;
+	}
 	for (int iter = 0; iter < iters; iter++) {
 		rhoNext = dotVec(rinit, r);
 		beta = vec<T, C>((rhoNext / rho)) * (alpha / omega);
@@ -232,8 +238,9 @@ template<class T, int C> void SolveBICGStab(const Vector<T, C>& b,
 		SubtractMultiply(delta, b, A, x);
 		vec<double, C> err = lengthVecSqr(delta);
 		double e = lengthL1(err) / N;
-		if (iterationMonitor)
-			iterationMonitor(iter + 1, e);
+		if (iterationMonitor) {
+			if (!iterationMonitor(iter + 1, e))return;
+		}
 		if (e < tolerance)
 			break;
 

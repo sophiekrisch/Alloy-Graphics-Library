@@ -145,6 +145,7 @@ void MeshSmoothEx::smooth() {
 	SolveBICGStab(b, A, mesh.vertexLocations, 100, 1E-6f,
 			[this](int iter,double error) {
 				textLabel->setLabel( MakeString() << "Smooth [" << iter << "] Error: " << error);
+				return true;
 			});
 	mesh.updateVertexNormals();
 }

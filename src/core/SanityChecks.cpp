@@ -885,6 +885,7 @@ namespace aly {
 		SolveBICGStab(b, L, mesh.vertexLocations, 500, 1E-6f,
 			[=](int iter, double err) {
 			std::cout << "Iteration " << iter << ":: " << err << std::endl;
+			return true;
 		});
 		return true;
 	}
