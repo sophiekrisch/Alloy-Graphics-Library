@@ -394,6 +394,7 @@ namespace aly {
 		void ForceSimulator::enforceBoundaries() {
 #pragma omp parallel for num_threads(NUM_THREADS)
 			for (int i = 0; i < (int)items.size(); i++) {
+				if(items[i].get()==selected) continue;
 				for (ForcePtr f : bforces) {
 					if (f->isEnabled())
 						f->enforceBoundary(items[i]);
