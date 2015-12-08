@@ -89,10 +89,9 @@ namespace aly {
 		const float ForceSimulator::DEFAULT_TIME_STEP = 30.0f;
 		const int ForceSimulator::DEFAULT_TIME_OUT=10;
 		const int ForceSimulator::DEFAULT_INTEGRATION_CYCLES = 2;
-		void ForceItem::draw(AlloyContext* context, const pixel2& offset,bool selected) {
-			const float lineWidth = 4.0f;
+		void ForceItem::draw(AlloyContext* context, const pixel2& offset,float scale,bool selected) {
 			NVGcontext* nvg = context->nvgContext;
-
+			float lineWidth = scale*4.0f;
 			nvgStrokeWidth(nvg, lineWidth);
 			if (selected) {
 				nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
@@ -106,8 +105,8 @@ namespace aly {
 			}
 			nvgStrokeWidth(nvg, lineWidth);
 			nvgBeginPath(nvg);
-			float r = ForceSimulator::RADIUS;
-			pixel2 location = this->location + offset;
+			float r = scale*ForceSimulator::RADIUS;
+			pixel2 location = scale*(this->location + offset);
 			if (shape == NodeShape::Circle) {
 				nvgCircle(nvg, location.x, location.y, r - lineWidth * 0.5f);
 			}
@@ -142,14 +141,14 @@ namespace aly {
 			nvgFill(nvg);
 			nvgStroke(nvg);
 		}
-		void SpringItem::draw(AlloyContext* context, const pixel2& offset) {
+		void SpringItem::draw(AlloyContext* context, const pixel2& offset,float scale) {
 			NVGcontext* nvg = context->nvgContext;
 			nvgStrokeColor(nvg, context->theme.NEUTRAL);
-			nvgStrokeWidth(nvg, 4.0f);
+			nvgStrokeWidth(nvg, scale*4.0f);
 			nvgLineCap(nvg, NVG_ROUND);
 			nvgBeginPath(nvg);
-			float2 objectPt = item2->location + offset;
-			float2 subjectPt = item1->location + offset;
+			float2 objectPt = scale*(item2->location + offset);
+			float2 subjectPt = scale*(item1->location + offset);
 			nvgMoveTo(nvg, objectPt.x, objectPt.y);
 			nvgLineTo(nvg, subjectPt.x, subjectPt.y);
 			nvgStroke(nvg);
@@ -160,40 +159,65 @@ namespace aly {
 			simWorker = RecurrentTaskPtr(new RecurrentTask([this](uint64_t iter) {
 				return update(iter);
 			}, DEFAULT_TIME_OUT));
-			dragging = false;
+			draggingNode = false;
+			draggingView = false;
 			selected = nullptr;
 			cursorDownPosition = pixel2(-1, -1);
+			lastDragOffset = pixel2(0.0f, 0.0f);
+			dragOffset = pixel2(0.0f, 0.0f);
+			scale = 1.0f;
 			Application::addListener(this);
 		}
 		bool ForceSimulator::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			if (Region::onEventHandler(context, e))
 				return true;
 
-			if (e.type == InputType::MouseButton && e.button == GLFW_MOUSE_BUTTON_LEFT
-				&& e.isDown()&&!dragging) {
-				selected = nullptr;
-				float2 cursor= e.cursor-getBoundsPosition();
-				for (int i = (int)items.size() - 1; i >= 0; i--) {
-					ForceItemPtr item = items[i];
-					float2 dxy = item->location - cursor;
-					if (std::abs(dxy.x) < RADIUS&&std::abs(dxy.y) < RADIUS) {
-						selected = item.get();
-						break;
+			if (context->isMouseOver(this)) {
+				if (e.type == InputType::MouseButton && e.button == GLFW_MOUSE_BUTTON_LEFT
+					&& e.isDown() && !draggingNode&& !draggingView) {
+					selected = nullptr;
+					float2 cursor = e.cursor / scale - getBoundsPosition() - dragOffset;
+					float r = RADIUS;
+					for (int i = (int)items.size() - 1; i >= 0; i--) {
+						ForceItemPtr item = items[i];
+						float2 dxy = item->location - cursor;
+						if (std::abs(dxy.x) < r&&std::abs(dxy.y) < r) {
+							selected = item.get();
+							break;
+						}
+					}
+					if (selected != nullptr) {
+						cursorDownPosition = e.cursor;
+						draggingNode = true;
 					}
 				}
-				if (selected != nullptr) {
+				if (e.type == InputType::MouseButton && e.button == GLFW_MOUSE_BUTTON_RIGHT
+					&& e.isDown() && !draggingView&&!draggingNode) {
+					draggingView = true;
+					lastDragOffset = dragOffset;
 					cursorDownPosition = e.cursor;
-					dragging = true;
 				}
-			}
-			if (dragging && e.type == InputType::Cursor) {
-				float2 offset = getBoundsPosition();
-				selected->plocation=selected->location = e.cursor-offset;
-				selected->velocity = float2(0.0f);
-			}
-			else if (e.type == InputType::MouseButton && e.isUp()) {
-				dragging = false;
-				selected = nullptr;
+				if (e.type == InputType::Cursor) {
+					if (draggingNode) {
+						float2 offset = getBoundsPosition() + dragOffset;
+						selected->plocation = selected->location = e.cursor / scale - offset;
+						selected->velocity = float2(0.0f);
+					}
+					if (draggingView) {
+						dragOffset = lastDragOffset + (e.cursor - cursorDownPosition) / scale;
+					}
+				}
+				if (e.type == InputType::MouseButton && e.isUp()) {
+					draggingNode = false;
+					draggingView = false;
+					selected = nullptr;
+				}
+				if (e.type == InputType::Scroll) {
+					float2 pw = e.cursor / scale - dragOffset;
+					scale = clamp(scale*(1.0f + e.scroll.y*0.1f), 0.01f, 10.0f);
+					dragOffset = e.cursor / scale - pw;
+					return true;
+				}
 			}
 			return false;
 		}
@@ -305,22 +329,22 @@ namespace aly {
 		}
 		void ForceSimulator::draw(AlloyContext* context) {
 			Region::draw(context);
-			float2 offset = getBoundsPosition();
+			float2 offset = getBoundsPosition()+dragOffset;
 			NVGcontext* nvg = context->nvgContext;
 			pushScissor(nvg, getCursorBounds());
 			{
 				std::lock_guard<std::mutex> lockMe(lock);
 				for (ForcePtr f : iforces) {
-					f->draw(context, offset);
+					f->draw(context, offset,scale);
 				}
 				for (ForcePtr f : sforces) {
-					f->draw(context, offset);
+					f->draw(context, offset, scale);
 				}
 				for (SpringItemPtr item : springs) {
-					item->draw(context, offset);
+					item->draw(context, offset, scale);
 				}
 				for (ForceItemPtr item : items) {
-					item->draw(context, offset,item.get()==selected);
+					item->draw(context, offset, scale,item.get()==selected);
 				}
 			}
 			popScissor(nvg);
@@ -339,16 +363,16 @@ namespace aly {
 				forceBounds.dimensions.y);
 			nvgStroke(nvg);
 			for (ForcePtr f : iforces) {
-				f->draw(context, offset);
+				f->draw(context, offset, scale);
 			}
 			for (ForcePtr f : sforces) {
-				f->draw(context, offset);
+				f->draw(context, offset, scale);
 			}
 			for (SpringItemPtr item : springs) {
-				item->draw(context, offset);
+				item->draw(context, offset,scale);
 			}
 			for (ForceItemPtr item : items) {
-				item->draw(context, offset, item.get() == selected);
+				item->draw(context, offset,scale, item.get() == selected);
 			}
 			popScissor(nvg);
 		}
@@ -612,17 +636,17 @@ namespace aly {
 			maxValues = std::vector<float>{ DEFAULT_MAX_GRAV_CONSTANT };
 			setBounds(box);
 		}
-		void BoxForce::draw(AlloyContext* context, const pixel2& offset) {
+		void BoxForce::draw(AlloyContext* context, const pixel2& offset, float scale) {
 			if (!enabled)
 				return;
 			NVGcontext* nvg = context->nvgContext;
-			nvgStrokeWidth(nvg, 4.0f);
+			nvgStrokeWidth(nvg,scale* 4.0f);
 			nvgStrokeColor(nvg, Color(0.8f, 0.8f, 0.8f, 1.0f));
 			nvgBeginPath(nvg);
-			nvgMoveTo(nvg, pts[0].x + offset.x + 2.0f, pts[0].y + offset.y + 2.0f);
-			nvgLineTo(nvg, pts[1].x + offset.x - 2.0f, pts[1].y + offset.y + 2.0f);
-			nvgLineTo(nvg, pts[2].x + offset.x - 2.0f, pts[2].y + offset.y - 2.0f);
-			nvgLineTo(nvg, pts[3].x + offset.x + 2.0f, pts[3].y + offset.y - 2.0f);
+			nvgMoveTo(nvg, scale*(pts[0].x + offset.x + 2.0f),scale*(pts[0].y + offset.y + 2.0f));
+			nvgLineTo(nvg, scale*(pts[1].x + offset.x - 2.0f),scale*(pts[1].y + offset.y + 2.0f));
+			nvgLineTo(nvg, scale*(pts[2].x + offset.x - 2.0f),scale*(pts[2].y + offset.y - 2.0f));
+			nvgLineTo(nvg, scale*(pts[3].x + offset.x + 2.0f),scale*(pts[3].y + offset.y - 2.0f));
 			nvgClosePath(nvg);
 			nvgStroke(nvg);
 		}
@@ -827,7 +851,7 @@ namespace aly {
 			//apply update to item force
 			item->force += float2(forceTotal*(double)params[GRAVITATIONAL_CONST]);
 		}
-		void QuadTreeNode::draw(AlloyContext* context, const pixel2& offset) {
+		void QuadTreeNode::draw(AlloyContext* context, const pixel2& offset,float scale) {
 			static std::vector<Color> colors;
 			if (colors.size() == 0) {
 				colors.resize(QuadTreeNode::MAX_DEPTH);
@@ -840,40 +864,41 @@ namespace aly {
 			NVGcontext* nvg = context->nvgContext;
 			nvgFillColor(nvg, c);
 			nvgStrokeColor(nvg, Color(255, 255, 255));
-			nvgStrokeWidth(nvg, 2.0f);
+			nvgStrokeWidth(nvg, scale*2.0f);
 			nvgBeginPath(nvg);
-			nvgRect(nvg, bounds.position.x + offset.x, bounds.position.y + offset.y,
-				bounds.dimensions.x, bounds.dimensions.y);
+			nvgRect(nvg,scale*( bounds.position.x + offset.x),
+				scale*(bounds.position.y + offset.y),
+				scale*bounds.dimensions.x, scale*bounds.dimensions.y);
 			nvgFill(nvg);
 			nvgStroke(nvg);
 			for (QuadTreeNodePtr& child : children) {
 				if (child.get() != nullptr) {
-					child->draw(context, offset);
+					child->draw(context, offset,scale);
 				}
 			}
 			nvgFillColor(nvg, c);
 			nvgStrokeColor(nvg, Color(255, 255, 255));
 			if (hasChildren) {
 				nvgBeginPath(nvg);
-				nvgCircle(nvg, com.x + offset.x, com.y + offset.y, 6.0f);
+				nvgCircle(nvg, scale*(com.x + offset.x),scale*( com.y + offset.y), scale*6.0f);
 				nvgFill(nvg);
 				nvgStroke(nvg);
 			}
 		}
-		void NBodyForce::draw(AlloyContext* context, const pixel2& offset) {
+		void NBodyForce::draw(AlloyContext* context, const pixel2& offset,float scale) {
 			if (!enabled)
 				return;
-			//if (root.get() != nullptr)root->draw(context, offset);
+			//if (root.get() != nullptr)root->draw(context, offset,scale);
 		}
 
-		void CircularWallForce::draw(AlloyContext* context, const pixel2& offset) {
+		void CircularWallForce::draw(AlloyContext* context, const pixel2& offset, float scale) {
 			if (!enabled)
 				return;
 			NVGcontext* nvg = context->nvgContext;
-			nvgStrokeWidth(nvg, 4.0f);
+			nvgStrokeWidth(nvg,scale* 4.0f);
 			nvgStrokeColor(nvg, Color(0.8f, 0.8f, 0.8f, 1.0f));
 			nvgBeginPath(nvg);
-			nvgCircle(nvg, p.x + offset.x, p.y + offset.y, r);
+			nvgCircle(nvg,scale*( p.x + offset.x),scale*( p.y + offset.y), scale*(r-2.0f));
 			nvgStroke(nvg);
 		}
 	}

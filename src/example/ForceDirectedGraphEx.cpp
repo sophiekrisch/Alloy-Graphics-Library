@@ -24,7 +24,7 @@
 using namespace aly;
 using namespace aly::dataflow;
 ForceDirectedGraphEx::ForceDirectedGraphEx() :
-		Application(2400, 2000, "Force Directed Graph Example") {
+		Application(1920,1080, "Force Directed Graph Example") {
 
 }
 void ForceDirectedGraphEx::createDescendantGraph(
@@ -122,9 +122,6 @@ bool ForceDirectedGraphEx::init(Composite& rootNode) {
 	ExpandBarPtr controlRegion = ExpandBarPtr(
 			new ExpandBar("Controls", CoordPX(0.0f, 0.0f),
 					CoordPercent(1.0f, 1.0f)));
-	CompositePtr displayRegion = MakeComposite("Display", CoordPX(0.0f, 0.0f),
-			CoordPercent(1.0f, 1.0f));
-	displayRegion->setScrollEnabled(true);
 	controlRegion->setScrollEnabled(true);
 	controlRegion->setOrientation(Orientation::Vertical);
 	controlRegion->backgroundColor = MakeColor(32, 32, 32);
@@ -134,14 +131,13 @@ bool ForceDirectedGraphEx::init(Composite& rootNode) {
 			new BorderComposite("Layout", CoordPX(0.0f, 0.0f),
 					CoordPercent(1.0f, 1.0f), true));
 	borderRegion->setWest(controlRegion, UnitPX(300.0f));
-	borderRegion->setCenter(displayRegion);
 	graph = ForceSimulatorPtr(
 			new ForceSimulator("Force Simulator", CoordPX(0.0f, 0.0f),
-					CoordPX(2000, 2000)));
-	displayRegion->add(graph);
+					CoordPercent(1.0, 1.0)));
+	borderRegion->setCenter(graph);
 	createRadialGraph(graph);
 	graph->backgroundColor = MakeColor(64, 64, 64);
-	graph->setClampDragToParentBounds(false);
+	graph->setRoundCorners(true);
 	graph->addForce(NBodyForcePtr(new NBodyForce(-0.7f)));
 	graph->addForce(SpringForcePtr(new SpringForce()));
 	graph->addForce(DragForcePtr(new DragForce(0.001f)));

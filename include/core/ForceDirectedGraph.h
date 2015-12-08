@@ -56,7 +56,7 @@ struct ForceItem {
 		velocity = float2(0.0f);
 		plocation = location;
 	}
-	void draw(AlloyContext* context, const pixel2& offset,bool selected);
+	void draw(AlloyContext* context, const pixel2& offset, float scale,bool selected);
 };
 typedef std::shared_ptr<ForceItem> ForceItemPtr;
 struct SpringItem {
@@ -68,7 +68,7 @@ struct SpringItem {
 			float len) :
 			item1(fi1), item2(fi2), coeff(k), length(len) {
 	}
-	void draw(AlloyContext* context, const pixel2& offset);
+	void draw(AlloyContext* context, const pixel2& offset,float scale);
 };
 
 typedef std::shared_ptr<SpringItem> SpringItemPtr;
@@ -154,7 +154,7 @@ public:
 	virtual void getSpring(const SpringItemPtr& spring) {
 		throw std::runtime_error("Get spring item not implemented.");
 	}
-	virtual void draw(AlloyContext* context, const pixel2& offset) {
+	virtual void draw(AlloyContext* context, const pixel2& offset, float scale) {
 
 	}
 	;
@@ -192,8 +192,11 @@ class ForceSimulator: public Region {
 	float frameRate = 0.0f;
 	box2f forceBounds;
 	pixel2 cursorDownPosition;
-	bool dragging;
-	
+	pixel2 dragOffset, lastDragOffset;
+	float scale;
+	bool draggingNode;
+	bool draggingView;
+
 	std::chrono::steady_clock::time_point lastTime;
 	bool update(uint64_t iter);
 	void runSimulator(float timestep = DEFAULT_TIME_STEP);
@@ -331,7 +334,7 @@ struct BoxForce: public Force {
 	virtual std::string getParameterName(size_t i) const override {
 		return pnames[i];
 	}
-	virtual void draw(AlloyContext* context, const pixel2& offset) override;
+	virtual void draw(AlloyContext* context, const pixel2& offset, float scale) override;
 	virtual void getForce(const ForceItemPtr& item) override;
 };
 typedef std::shared_ptr<BoxForce> BoxForcePtr;
@@ -366,7 +369,7 @@ struct CircularWallForce: public Force {
 		return pnames[i];
 	}
 	virtual void getForce(const ForceItemPtr& item) override;
-	virtual void draw(AlloyContext* context, const pixel2& offset) override;
+	virtual void draw(AlloyContext* context, const pixel2& offset, float scale) override;
 };
 typedef std::shared_ptr<CircularWallForce> CircularWallForcePtr;
 struct GravitationalForce: public Force {
@@ -468,7 +471,7 @@ struct QuadTreeNode {
 			mass(mass), com(com), hasChildren(false),depth(depth),bounds(box2f()) {
 	}
 	void insert(const ForceItemPtr& item);
-	void draw(AlloyContext* context, const pixel2& offset);
+	void draw(AlloyContext* context, const pixel2& offset, float scale);
 	void reset();
 };
 typedef std::shared_ptr<QuadTreeNode> QuadTreeNodePtr;
@@ -503,7 +506,7 @@ public:
 	virtual bool isForceItem() const override {
 		return true;
 	}
-	virtual void draw(AlloyContext* context, const pixel2& offset) override;
+	virtual void draw(AlloyContext* context, const pixel2& offset, float scale) override;
 	virtual std::string getParameterName(size_t i) const override {
 		return pnames[i];
 	}
