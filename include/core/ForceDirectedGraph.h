@@ -207,6 +207,12 @@ public:
 	static const int DEFAULT_INTEGRATION_CYCLES;
 	static const int DEFAULT_TIME_OUT;
 	ForceItem* selected;
+	void setOffset(const pixel2& offset) {
+		dragOffset = offset;
+	}
+	void setZoom(float z) {
+		scale = z;
+	}
 	std::mutex& getLock(){
 		return lock;
 	}
