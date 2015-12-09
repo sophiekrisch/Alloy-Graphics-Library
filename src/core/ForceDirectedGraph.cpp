@@ -290,7 +290,14 @@ namespace aly {
 		std::vector<ForcePtr>& ForceSimulator::getForces() {
 			return allforces;
 		}
+		void ForceSimulator::addRigidItem(const RigidItemPtr& item) {
+			std::lock_guard<std::mutex> lockMe(lock);
+			groups.push_back(item);
+		}
 		void ForceSimulator::addForceItem(const ForceItemPtr& item) {
+			if (item->group != nullptr) {
+				throw std::runtime_error("Could not add force item because it already belongs to a rigid group. Add the rigid group instead.");
+			}
 			std::lock_guard<std::mutex> lockMe(lock);
 			items.push_back(item);
 		}
@@ -379,6 +386,10 @@ namespace aly {
 					if (f->isEnabled())
 						f->getSpring(springs[i]);
 				}
+			}
+#pragma omp parallel for num_threads(NUM_THREADS)
+			for (int i = 0; i < (int)groups.size(); i++) {
+				groups[i]->update();
 			}
 		}
 		void ForceSimulator::runSimulator(float timestep) {
@@ -880,6 +891,30 @@ namespace aly {
 			nvgBeginPath(nvg);
 			nvgCircle(nvg,scale*( p.x + offset.x),scale*( p.y + offset.y), scale*(r-2.0f));
 			nvgStroke(nvg);
+		}
+		void RigidItem::update() {
+			com = float2(0.0f);
+			if (children.size() > 0) {
+				for (ForceItemPtr& item : children) {
+					com += item->location*item->mass;
+				}
+				com /= mass;
+				force = float2(0.0f);
+				torque = 0.0f;
+				for (ForceItemPtr& item : children) {
+					float2 dxy = item->location - com;
+					force += dot(dxy, item->force);
+					torque += crossMag(dxy, item->force);
+				}
+			}
+		}
+		void RigidItem::add(const std::shared_ptr<ForceItem>& item) {
+			if (item->group != nullptr) {
+				throw std::runtime_error("Could not add force item because it already belongs to a rigid group.");
+			}
+			mass += item->mass;
+			item->group = this;
+			children.push_back(item);
 		}
 	}
 }
