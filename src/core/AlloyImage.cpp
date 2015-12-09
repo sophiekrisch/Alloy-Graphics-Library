@@ -561,13 +561,13 @@ void WriteImageToFile(const std::string& file, const ImageRGBAf& img) {
 		}
 #ifdef _WIN32
 		exrImage.channel_names[0] = _strdup("A");
-		exrImage.channel_names[1] = _strdup("G");
-		exrImage.channel_names[2] = _strdup("B");
+		exrImage.channel_names[1] = _strdup("B");
+		exrImage.channel_names[2] = _strdup("G");
 		exrImage.channel_names[3] = _strdup("R");
 #else
 		exrImage.channel_names[0] = strdup("A");
-		exrImage.channel_names[1] = strdup("G");
-		exrImage.channel_names[2] = strdup("B");
+		exrImage.channel_names[1] = strdup("B");
+		exrImage.channel_names[2] = strdup("G");
 		exrImage.channel_names[3] = strdup("R");
 #endif
 		int ret = SaveMultiChannelEXRToFile(&exrImage, file.c_str(), &err);
