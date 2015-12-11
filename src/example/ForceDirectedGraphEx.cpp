@@ -44,12 +44,14 @@ void ForceDirectedGraphEx::createDescendantGraph(
 				child->shape=NodeShape::Hexagon;
 				child->buoyancy=1.0f;
 				SpringItemPtr spring=graph->addSpringItem(parent, child);
+				//Add oriented springs to preserve shape of tree
 				spring->length = distance(parent->location, child->location);
 				spring->gamma=0.1f;
 				graph->addForceItem(child);
 				tmpList.push_back(child);
 			}
-			for (int n = 1; n < tmpList.size(); n++) {
+			for (int n = 1; n < (int)tmpList.size(); n++) {
+				//Add oriented springs between children to preserve shape of tree
 				ForceItemPtr item1 = tmpList[n - 1];
 				ForceItemPtr item2 = tmpList[n];
 				SpringItemPtr spring = graph->addSpringItem(item1,item2);
