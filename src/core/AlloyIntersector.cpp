@@ -1207,7 +1207,7 @@ double Intersector::closestPoint(const float3& pt, const float& maxDistance,
 		throw new std::runtime_error("KD-Tree has not been initialized.");
 	double d;
 	double triangleDist = maxDistance;
-	std::priority_queue<KDBoxDistance> queue;
+	std::priority_queue<KDBoxDistance,std::vector<KDBoxDistance>,CompareKDBox> queue;
 	queue.push(KDBoxDistance(pt, getRoot()));
 	lastTriangle = nullptr;
 	lastPoint = NO_HIT_POINT;
@@ -1245,7 +1245,7 @@ double Intersector::closestPoint(const float3& pt, float3& lastPoint,
 	double d;
 	double mind = 1E30;
 	double triangleDist = 1E30;
-	std::priority_queue<KDBoxDistance> queue;
+	std::priority_queue<KDBoxDistance,std::vector<KDBoxDistance>,CompareKDBox> queue;
 	queue.push(KDBoxDistance(pt, getRoot()));
 	lastTriangle = nullptr;
 	lastPoint = NO_HIT_POINT;
@@ -1286,7 +1286,7 @@ double Intersector::closestPointOutside(const float3& r, const float3& v,
 	double d;
 	double mind = 1E30;
 	double triangleDist = 1E30;
-	std::priority_queue<KDBoxDistance> queue;
+	std::priority_queue<KDBoxDistance,std::vector<KDBoxDistance>,CompareKDBox> queue;
 	queue.push(KDBoxDistance(r, getRoot()));
 
 	lastTriangle = nullptr;
