@@ -19,7 +19,7 @@
  * THE SOFTWARE.
  */
 
-//Re-implementation of force directed graph in Prefuse (http://prefuse.org)
+//Based on force directed graph implementation in Prefuse (http://prefuse.org)
 //originally written by Jeffrey Heer (http://jheer.org) at UC Berkeley.
 #ifndef INCLUDE_CORE_FORCEDIRECTEDGRAPH_H_
 #define INCLUDE_CORE_FORCEDIRECTEDGRAPH_H_
@@ -209,13 +209,14 @@ protected:
 	bool requestFitToBounds;
 	std::chrono::steady_clock::time_point lastTime;
 	bool update(uint64_t iter);
-	void runSimulator(float timestep = DEFAULT_TIME_STEP);
+	float runSimulator(float timestep = DEFAULT_TIME_STEP);
 public:
 	static const float RADIUS;
 	static const float DEFAULT_TIME_STEP;
 	static const int DEFAULT_INTEGRATION_CYCLES;
 	static const int DEFAULT_TIME_OUT;
 	ForceItem* selected;
+	std::function<void(float)> onStep;
 	void accumulate();
 	void fit();
 	void setOffset(const pixel2& offset) {
@@ -229,6 +230,7 @@ public:
 	std::mutex& getLock(){
 		return lock;
 	}
+	void optimize(float tolerance = 0.25f, int maxIterations = 32000, float timestep = DEFAULT_TIME_STEP);
 	ForceSimulator(const std::string& name, const AUnit2D& pos,
 			const AUnit2D& dims, const std::shared_ptr<Integrator>& integr =
 					std::shared_ptr<Integrator>(new RungeKuttaIntegrator()));

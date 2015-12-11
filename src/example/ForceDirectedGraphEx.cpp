@@ -195,10 +195,8 @@ bool ForceDirectedGraphEx::init(Composite& rootNode) {
 		firstTime = false;
 	}
 	rootNode.add(borderRegion);
-	getContext()->addDeferredTask([this]() {
-		graph->start();
-	});
-
+	graph->optimize(0.5f,256);
+	graph->start();
 	return true;
 }
 

@@ -236,8 +236,9 @@ namespace aly {
 			if (renderCount == 0) {
 				lastTime = std::chrono::steady_clock::now();
 			}
+			float maxDisplacement=0;
 			for (int c = 0; c < DEFAULT_INTEGRATION_CYCLES; c++) {
-				runSimulator();
+				maxDisplacement=runSimulator();
 			}
 			renderCount++;
 			std::chrono::steady_clock::time_point currentTime =
@@ -250,7 +251,9 @@ namespace aly {
 					(float)(DEFAULT_INTEGRATION_CYCLES * renderCount / elapsed);
 				//std::cout << "Frame Rate " << << " fps" << std::endl;
 				renderCount = 0;
-
+			}
+			if (onStep) {
+				onStep(maxDisplacement);
 			}
 			return true;
 		}
@@ -399,7 +402,7 @@ namespace aly {
 			}
 
 		}
-		void ForceSimulator::runSimulator(float timestep) {
+		float ForceSimulator::runSimulator(float timestep) {
 			std::lock_guard<std::mutex> lockMe(lock);
 			float2 p1(1E30f);
 			float2 p2(-1E30f);
@@ -412,6 +415,21 @@ namespace aly {
 			accumulate();
 			integrator->integrate(*this, timestep);
 			enforceBoundaries();
+			float maxDisplacement = 0.0f;
+			for (ForceItemPtr item : getForceItems()) {
+				float2 p1 = item->location;
+				float2 p2 = item->plocation;
+				maxDisplacement = std::max(distanceSqr(p1, p2),maxDisplacement);
+			}
+			return std::sqrt(maxDisplacement);
+		}
+		void ForceSimulator::optimize(float tolerance, int maxIterations, float timestep) {
+			for (int i = 0; i < maxIterations; i++) {
+				float maxDisplacement = runSimulator(timestep);
+				if (i>0&& maxDisplacement <=tolerance) {
+					break;
+				}
+			}
 		}
 		void ForceSimulator::enforceBoundaries() {
 #pragma omp parallel for num_threads(NUM_THREADS)
