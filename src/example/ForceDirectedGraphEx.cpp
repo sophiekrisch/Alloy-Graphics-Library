@@ -39,13 +39,23 @@ void ForceDirectedGraphEx::createDescendantGraph(
 		for (ForceItemPtr parent : childNodes) {
 			for (int n = 0; n < N; n++) {
 				ForceItemPtr child=ForceItemPtr(new ForceItem());
-				child->location=parent->location+float2(n*ForceSimulator::RADIUS*2.0f - n*ForceSimulator::RADIUS,ForceSimulator::RADIUS*2);
+				child->location=parent->location+float2((n*(float)pow(N, D-1-d))*ForceSimulator::RADIUS*2.0f - (float)pow(N, D - 1 - d)*ForceSimulator::RADIUS,4*ForceSimulator::RADIUS);
 				child->color=Compute::COLOR.toRGBAf();
 				child->shape=NodeShape::Hexagon;
 				child->buoyancy=1.0f;
-				graph->addSpringItem(parent, child);
+				SpringItemPtr spring=graph->addSpringItem(parent, child);
+				spring->length = distance(parent->location, child->location);
+				spring->gamma=0.1f;
 				graph->addForceItem(child);
 				tmpList.push_back(child);
+			}
+			for (int n = 1; n < tmpList.size(); n++) {
+				ForceItemPtr item1 = tmpList[n - 1];
+				ForceItemPtr item2 = tmpList[n];
+				SpringItemPtr spring = graph->addSpringItem(item1,item2);
+				spring->length = distance(item1->location,item2->location);
+				spring->gamma = 0.1f;
+				spring->visible = false;
 			}
 		}
 		childNodes = tmpList;
@@ -63,11 +73,12 @@ void ForceDirectedGraphEx::createAncestorGraph(
 		for (ForceItemPtr parent : childNodes) {
 			for (int n = 0; n < N; n++) {
 				ForceItemPtr child=ForceItemPtr(new ForceItem());
-				child->location=parent->location+float2(n*ForceSimulator::RADIUS*2.0f - n*ForceSimulator::RADIUS,-ForceSimulator::RADIUS*2);
+				child->location = parent->location + float2((n*(float)pow(N, D - 1 - d))*ForceSimulator::RADIUS*2.0f - (float)pow(N, D - 1 - d)*ForceSimulator::RADIUS, -4 * ForceSimulator::RADIUS);
 				child->color=Source::COLOR.toRGBAf();
 				child->shape=NodeShape::Square;
 				child->buoyancy=-1.0f;
-				graph->addSpringItem(parent, child);
+				SpringItemPtr item=graph->addSpringItem(parent, child);
+				item->direction = 0.1f*normalize(child->location - parent->location);
 				graph->addForceItem(child);
 				tmpList.push_back(child);
 			}
@@ -101,21 +112,23 @@ void ForceDirectedGraphEx::createRadialGraph(const ForceSimulatorPtr& graph) {
 				child->buoyancy = 0;
 				child->color=Data::COLOR.toRGBAf();
 				graph->addForceItem(child);
-				graph->addSpringItem(parent, child);
+				SpringItemPtr item=graph->addSpringItem(parent, child);
 				tmpList.push_back(child);
 			}
 		}
 		childNodes = tmpList;
 	}
+	
 	std::sort(childNodes.begin(),childNodes.end(),[=](const ForceItemPtr& a,const ForceItemPtr& b){
 		return (a->location.y>b->location.y);
 	});
-	for(int k=0;k<4;k++){
+	for(int k=0;k<2;k++){
 		createDescendantGraph(graph,childNodes[k]);
 	}
 	for(int k=(int)childNodes.size()-1;k>=(int)childNodes.size()-4;k--){
 		createAncestorGraph(graph,childNodes[k]);
 	}
+	
 }
 bool ForceDirectedGraphEx::init(Composite& rootNode) {
 

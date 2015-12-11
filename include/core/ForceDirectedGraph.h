@@ -35,7 +35,6 @@ namespace aly {
 class AlloyContext;
 namespace dataflow {
 class ForceSimulator;
-struct RigidItem;
 struct ForceItem {
 	float mass;
 	float buoyancy;
@@ -45,44 +44,31 @@ struct ForceItem {
 	float2 plocation;
 	NodeShape shape;
 	RGBAf color;
-	RigidItem* group;
 	std::array<float2, 4> k;
 	std::array<float2, 4> l;
 	ForceItem(const float2& pt = float2(0.0f)) :
 			mass(1.0f), buoyancy(1.0f), force(0.0f), velocity(0.0f), location(
-					pt), plocation(pt), shape(NodeShape::Circle) ,color(1.0f,0.2f,0.2f,1.0f),group(nullptr){
+					pt), plocation(pt), shape(NodeShape::Circle) ,color(1.0f,0.2f,0.2f,1.0f){
 	}
 	void reset() {
 		force = float2(0.0f);
 		velocity = float2(0.0f);
 		plocation = location;
 	}
-	bool isRigid() const {
-		return (group != nullptr);
-	}
-	void draw(AlloyContext* context, const pixel2& offset, float scale,bool selected);
+	virtual void draw(AlloyContext* context, const pixel2& offset, float scale,bool selected);
 };
 typedef std::shared_ptr<ForceItem> ForceItemPtr;
-struct RigidItem {
-	std::vector<std::shared_ptr<ForceItem>> children;
-	float2 com;
-	float2 force;
-	float torque;
-	float mass;
-	RigidItem():com(0.0f),mass(0.0f),torque(0.0f) {
-	}
-	void add(const std::shared_ptr<ForceItem>& item);
-	void update();
-};
-typedef std::shared_ptr<RigidItem> RigidItemPtr;
 struct SpringItem {
 	ForceItemPtr item1;
 	ForceItemPtr item2;
-	float coeff;
+	float kappa;
+	float gamma;
 	float length;
+	float2 direction;
+	bool visible;
 	SpringItem(const ForceItemPtr& fi1, const ForceItemPtr& fi2, float k,
 			float len) :
-			item1(fi1), item2(fi2), coeff(k), length(len) {
+			item1(fi1), item2(fi2), kappa(k), gamma(0.0f), length(len), direction(fi2->location-fi1->location),visible(true){
 	}
 	void draw(AlloyContext* context, const pixel2& offset,float scale);
 };
@@ -200,7 +186,6 @@ protected:
 	std::mutex lock;
 	std::vector<ForceItemPtr> items;
 	std::vector<SpringItemPtr> springs;
-	std::vector<RigidItemPtr> groups;
 	std::vector<ForcePtr> iforces;
 	std::vector<ForcePtr> sforces;
 	std::vector<ForcePtr> bforces;
@@ -255,10 +240,8 @@ public:
 	void addForce(const ForcePtr& f);
 	std::vector<ForcePtr>& getForces();
 	void addForceItem(const ForceItemPtr& item);
-	void addRigidItem(const RigidItemPtr& item);
 	bool removeItem(ForceItemPtr item);
 	std::vector<ForceItemPtr>& getForceItems();
-	std::vector<RigidItemPtr>& getRigidItems();
 	std::vector<SpringItemPtr>& getSprings();
 	SpringItemPtr addSpringItem(const ForceItemPtr& item1,
 			const ForceItemPtr& item2, float coeff, float length);

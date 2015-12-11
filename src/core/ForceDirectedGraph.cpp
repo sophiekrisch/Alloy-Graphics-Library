@@ -142,6 +142,7 @@ namespace aly {
 			nvgStroke(nvg);
 		}
 		void SpringItem::draw(AlloyContext* context, const pixel2& offset,float scale) {
+			if (!visible)return;
 			NVGcontext* nvg = context->nvgContext;
 			nvgStrokeColor(nvg, context->theme.NEUTRAL);
 			nvgStrokeWidth(nvg, scale*4.0f);
@@ -290,14 +291,7 @@ namespace aly {
 		std::vector<ForcePtr>& ForceSimulator::getForces() {
 			return allforces;
 		}
-		void ForceSimulator::addRigidItem(const RigidItemPtr& item) {
-			std::lock_guard<std::mutex> lockMe(lock);
-			groups.push_back(item);
-		}
 		void ForceSimulator::addForceItem(const ForceItemPtr& item) {
-			if (item->group != nullptr) {
-				throw std::runtime_error("Could not add force item because it already belongs to a rigid group. Add the rigid group instead.");
-			}
 			std::lock_guard<std::mutex> lockMe(lock);
 			items.push_back(item);
 		}
@@ -368,17 +362,19 @@ namespace aly {
 				if (iforces[i]->isEnabled())
 					iforces[i]->init(*this);
 			}
+
 			for (int i = 0; i < (int)sforces.size(); i++) {
 				if (sforces[i]->isEnabled())
 					sforces[i]->init(*this);
 			}
 #pragma omp parallel for num_threads(NUM_THREADS)
 			for (int i = 0; i < (int)items.size(); i++) {
-				items[i]->force = float2(0.0f);
-				for (ForcePtr f : iforces) {
-					if (f->isEnabled())
-						f->getForce(items[i]);
-				}
+
+					items[i]->force = float2(0.0f);
+					for (ForcePtr f : iforces) {
+						if (f->isEnabled())
+							f->getForce(items[i]);
+					}
 			}
 #pragma omp parallel for num_threads(NUM_THREADS)
 			for (int i = 0; i < (int)springs.size(); i++) {
@@ -387,10 +383,7 @@ namespace aly {
 						f->getSpring(springs[i]);
 				}
 			}
-#pragma omp parallel for num_threads(NUM_THREADS)
-			for (int i = 0; i < (int)groups.size(); i++) {
-				groups[i]->update();
-			}
+
 		}
 		void ForceSimulator::runSimulator(float timestep) {
 			std::lock_guard<std::mutex> lockMe(lock);
@@ -539,14 +532,19 @@ namespace aly {
 				r = aly::length(dxy);
 			}
 			float d = r - len;
-			float coeff = (s->coeff < 0 ? params[SPRING_COEFF] : s->coeff) * d / r;
-//#pragma omp critical //could deadlock!
-			{
-				item1->force += coeff * dxy;
-			}
-//#pragma omp critical //could deadlock!
-			{
-				item2->force -= coeff * dxy;
+			float coeff = (s->kappa < 0 ? params[SPRING_COEFF] : s->kappa) * d / r;
+			
+			item1->force += coeff * dxy;
+			item2->force -= coeff * dxy;
+			
+			float2 dir = s->direction;
+			if(s->gamma > 0.0f) {
+				float2 pivot = 0.5f*(p1+p2);
+				dxy = normalize(dxy);
+				float2 ortho = float2(-dxy.y,dxy.x);
+				float2 arm = s->gamma*crossMag(normalize(p2 - pivot),dir)*ortho/r;
+				item1->force -=  arm;
+				item2->force +=  arm;
 			}
 		}
 		int relativeCCW(float x1, float y1, float x2, float y2, float px, float py) {
@@ -804,6 +802,7 @@ namespace aly {
 			q.push(root.get());
 			double2 forceTotal = double2(0.0f);
 			const float ZERO_TOL = 1E-6f;
+			//if (item->group != nullptr)return;
 			while (q.size() > 0) {
 				QuadTreeNode* n = q.front();
 				q.pop();
@@ -891,30 +890,6 @@ namespace aly {
 			nvgBeginPath(nvg);
 			nvgCircle(nvg,scale*( p.x + offset.x),scale*( p.y + offset.y), scale*(r-2.0f));
 			nvgStroke(nvg);
-		}
-		void RigidItem::update() {
-			com = float2(0.0f);
-			if (children.size() > 0) {
-				for (ForceItemPtr& item : children) {
-					com += item->location*item->mass;
-				}
-				com /= mass;
-				force = float2(0.0f);
-				torque = 0.0f;
-				for (ForceItemPtr& item : children) {
-					float2 dxy = item->location - com;
-					force += dot(dxy, item->force);
-					torque += crossMag(dxy, item->force);
-				}
-			}
-		}
-		void RigidItem::add(const std::shared_ptr<ForceItem>& item) {
-			if (item->group != nullptr) {
-				throw std::runtime_error("Could not add force item because it already belongs to a rigid group.");
-			}
-			mass += item->mass;
-			item->group = this;
-			children.push_back(item);
 		}
 	}
 }
