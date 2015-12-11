@@ -154,12 +154,16 @@ namespace aly {
 			nvgLineTo(nvg, subjectPt.x, subjectPt.y);
 			nvgStroke(nvg);
 		}
+		void ForceSimulator::fit() {
+			requestFitToBounds = true;
+		}
 		ForceSimulator::ForceSimulator(const std::string& name, const AUnit2D& pos,
 			const AUnit2D& dims, const std::shared_ptr<Integrator>& integr) :
 			Region(name, pos, dims), integrator(integr) {
 			simWorker = RecurrentTaskPtr(new RecurrentTask([this](uint64_t iter) {
 				return update(iter);
 			}, DEFAULT_TIME_OUT));
+			requestFitToBounds = true;
 			draggingNode = false;
 			draggingView = false;
 			selected = nullptr;
@@ -335,6 +339,16 @@ namespace aly {
 			return addSpringItem(item1, item2, -1.f, -1.f);
 		}
 		void ForceSimulator::draw(AlloyContext* context) {
+			if (requestFitToBounds&&forceBounds.dimensions.x*forceBounds.dimensions.y>0) {
+				box2px bounds=getBounds();
+				float df = std::max(forceBounds.dimensions.x, forceBounds.dimensions.y)+2*RADIUS;
+				float db = std::min(bounds.dimensions.x, bounds.dimensions.y);
+				scale = db/df;
+				float2 cf = forceBounds.center();
+				float2 cb = bounds.center();
+				dragOffset=cb / scale - cf-bounds.position;
+				requestFitToBounds = false;
+			}
 			Region::draw(context);
 			float2 offset = getBoundsPosition()+dragOffset;
 			NVGcontext* nvg = context->nvgContext;
@@ -626,7 +640,7 @@ namespace aly {
 			setBounds(box);
 		}
 		void BoxForce::draw(AlloyContext* context, const pixel2& offset, float scale) {
-			if (!enabled)
+			if (!enabled||!visible)
 				return;
 			NVGcontext* nvg = context->nvgContext;
 			nvgStrokeWidth(nvg,scale* 4.0f);
@@ -876,13 +890,13 @@ namespace aly {
 			}
 		}
 		void NBodyForce::draw(AlloyContext* context, const pixel2& offset,float scale) {
-			if (!enabled)
+			if (!enabled || !visible)
 				return;
-			//if (root.get() != nullptr)root->draw(context, offset,scale);
+			if (root.get() != nullptr)root->draw(context, offset,scale);
 		}
 
 		void CircularWallForce::draw(AlloyContext* context, const pixel2& offset, float scale) {
-			if (!enabled)
+			if (!enabled|| !visible)
 				return;
 			NVGcontext* nvg = context->nvgContext;
 			nvgStrokeWidth(nvg,scale* 4.0f);

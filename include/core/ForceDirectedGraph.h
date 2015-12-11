@@ -89,12 +89,12 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(
 			<< "," << param.max << "]";
 }
 class Force {
-
 protected:
 	std::vector<float> params;
 	std::vector<float> minValues;
 	std::vector<float> maxValues;
 	bool enabled = true;
+	bool visible = true;
 public:
 	virtual void init(ForceSimulator& fsim) {
 	}
@@ -110,6 +110,12 @@ public:
 	}
 	void setEnabled(bool b) {
 		enabled = b;
+	}
+	void setVisible(bool b) {
+		visible = b;
+	}
+	bool isVisible() const {
+		return visible;
 	}
 	bool isEnabled() const {
 		return enabled;
@@ -200,6 +206,7 @@ protected:
 	float scale;
 	bool draggingNode;
 	bool draggingView;
+	bool requestFitToBounds;
 	std::chrono::steady_clock::time_point lastTime;
 	bool update(uint64_t iter);
 	void runSimulator(float timestep = DEFAULT_TIME_STEP);
@@ -210,10 +217,13 @@ public:
 	static const int DEFAULT_TIME_OUT;
 	ForceItem* selected;
 	void accumulate();
+	void fit();
 	void setOffset(const pixel2& offset) {
+		requestFitToBounds = false;
 		dragOffset = offset;
 	}
 	void setZoom(float z) {
+		requestFitToBounds = false;
 		scale = z;
 	}
 	std::mutex& getLock(){
@@ -322,7 +332,6 @@ struct BoxForce: public Force {
 	static const int GRAVITATIONAL_CONST;
 	float2 pts[4];
 	float2 dxy[4];
-
 	BoxForce(float gravConst, const box2f& box);
 	BoxForce(const box2f& box) :
 			BoxForce(DEFAULT_GRAV_CONSTANT, box) {
@@ -499,13 +508,13 @@ struct NBodyForce: public Force {
 	static const int BARNES_HUT_THETA = 2;
 	QuadTreeNodePtr root;
 public:
-	NBodyForce(float gravConstant, float minDistance, float theta) {
+	NBodyForce(float gravConstant, float minDistance, float theta){
 		params = {gravConstant, minDistance, theta};
 		minValues = {DEFAULT_MIN_GRAV_CONSTANT,
 			DEFAULT_MIN_DISTANCE, DEFAULT_MIN_THETA};
 		maxValues = {DEFAULT_MAX_GRAV_CONSTANT,
 			DEFAULT_MAX_DISTANCE, DEFAULT_MAX_THETA};
-		
+		visible = false;
 	}
 	NBodyForce(float grav=DEFAULT_GRAV_CONSTANT) :NBodyForce(grav, DEFAULT_DISTANCE, DEFAULT_THETA) {
 	}
