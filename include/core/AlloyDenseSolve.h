@@ -26,30 +26,18 @@
 namespace aly {
 	bool SANITY_CHECK_DENSE_SOLVE();
 	bool SANITY_CHECK_ROBUST_SOLVE();
-	void PoissonBlend(const Image4f& in, Image4f& out, int iterations, int levels,
-		float lambda = 0.99f);
-	void PoissonBlend(const Image4f& in, Image4f& out, int iterations,
-		float lambda = 0.99f);
-	void PoissonBlend(const Image2f& in, Image2f& out, int iterations, int levels,
-		float lambda = 0.99f);
-	void PoissonBlend(const Image2f& in, Image2f& out, int iterations,
-		float lambda = 0.99f);
-	void PoissonInpaint(const Image4f& source, const Image4f& target, Image4f& out,
-		int iterations, int levels, float lambda = 0.99f);
-	void PoissonInpaint(const Image4f& source, const Image4f& target, Image4f& out,
-		int iterations, float lambda = 0.99f);
-	void PoissonInpaint(const Image2f& source, const Image2f& target, Image2f& out,
-		int iterations, int levels, float lambda = 0.99f);
-	void PoissonInpaint(const Image2f& source, const Image2f& target, Image2f& out,
-		int iterations, float lambda = 0.99f);
-	void LaplaceFill(const Image4f& sourceImg, Image4f& targetImg, int iterations,
-		int levels, float lambda = 0.99f);
-	void LaplaceFill(const Image4f& sourceImg, Image4f& targetImg, int iterations,
-		float lambda = 0.99f);
-	void LaplaceFill(const Image2f& sourceImg, Image2f& targetImg, int iterations,
-		float lambda = 0.99f);
-	void LaplaceFill(const Image2f& sourceImg, Image2f& targetImg, int iterations,
-		int levels, float lambda = 0.99f);
+	void PoissonBlend(const Image4f& in, Image4f& out, int iterations, int levels,float lambda = 0.99f, const std::function<bool(int,int)>& iterationMonitor = nullptr);
+	void PoissonBlend(const Image4f& in, Image4f& out, int iterations,float lambda = 0.99f, const std::function<bool(int)>& iterationMonitor = nullptr);
+	void PoissonBlend(const Image2f& in, Image2f& out, int iterations, int levels,float lambda = 0.99f, const std::function<bool(int,int)>& iterationMonitor = nullptr);
+	void PoissonBlend(const Image2f& in, Image2f& out, int iterations,float lambda = 0.99f, const std::function<bool(int)>& iterationMonitor = nullptr);
+	void PoissonInpaint(const Image4f& source, const Image4f& target, Image4f& out,int iterations, int levels, float lambda = 0.99f , const std::function<bool(int, int)>& iterationMonitor = nullptr);
+	void PoissonInpaint(const Image4f& source, const Image4f& target, Image4f& out,int iterations, float lambda = 0.99f, const std::function<bool(int)>& iterationMonitor = nullptr);
+	void PoissonInpaint(const Image2f& source, const Image2f& target, Image2f& out,int iterations, int levels, float lambda = 0.99f, const std::function<bool(int, int)>& iterationMonitor = nullptr);
+	void PoissonInpaint(const Image2f& source, const Image2f& target, Image2f& out,int iterations, float lambda = 0.99f, const std::function<bool(int)>& iterationMonitor = nullptr);
+	void LaplaceFill(const Image4f& sourceImg, Image4f& targetImg, int iterations,int levels, float lambda = 0.99f, const std::function<bool(int, int)>& iterationMonitor=nullptr);
+	void LaplaceFill(const Image4f& sourceImg, Image4f& targetImg, int iterations,float lambda = 0.99f , const std::function<bool(int)>& iterationMonitor=nullptr);
+	void LaplaceFill(const Image2f& sourceImg, Image2f& targetImg, int iterations,float lambda = 0.99f, const std::function<bool(int)>& iterationMonitor = nullptr);
+	void LaplaceFill(const Image2f& sourceImg, Image2f& targetImg, int iterations,int levels, float lambda = 0.99f, const std::function<bool(int, int)>& iterationMonitor = nullptr);
 
 	/******************************************************************************
 	 * XLISP-STAT 2.1 Copyright (c) 1990, by Luke Tierney
