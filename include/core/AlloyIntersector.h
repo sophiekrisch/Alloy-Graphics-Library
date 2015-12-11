@@ -187,7 +187,11 @@ namespace aly {
 		//Priority queue puts largest first, so we need to use a >= operator to get ascending order.
 		return (a.dist > b.dist);
 	}
-
+        struct CompareKDBox{
+                bool operator()(const KDBoxDistance& a, const KDBoxDistance& b){
+                    return (a.dist > b.dist);
+                }
+        };
 	class Intersector {
 	protected:
 		std::shared_ptr<KDBox> root;
