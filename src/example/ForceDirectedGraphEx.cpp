@@ -140,11 +140,9 @@ bool ForceDirectedGraphEx::init(Composite& rootNode) {
 	controlRegion->setScrollEnabled(true);
 	controlRegion->setOrientation(Orientation::Vertical);
 	controlRegion->backgroundColor = MakeColor(32, 32, 32);
-	controlRegion->borderColor = MakeColor(200, 200, 200);
-	controlRegion->borderWidth = UnitPX(1.0f);
 	BorderCompositePtr borderRegion = BorderCompositePtr(
 			new BorderComposite("Layout", CoordPX(0.0f, 0.0f),
-					CoordPercent(1.0f, 1.0f), true));
+					CoordPercent(1.0f, 1.0f),false));
 	borderRegion->setWest(controlRegion, UnitPX(300.0f));
 	graph = ForceSimulatorPtr(
 			new ForceSimulator("Force Simulator", CoordPX(0.0f, 0.0f),
