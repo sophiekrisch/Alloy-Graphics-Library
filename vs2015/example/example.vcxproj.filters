@@ -109,6 +109,9 @@
     <ClCompile Include="..\..\src\example\ForceDirectedGraphEx.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\example\OneEuroFilterEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\example\UnitsEx.h">
@@ -217,6 +220,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\example\ForceDirectedGraphEx.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\example\OneEuroFilterEx.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

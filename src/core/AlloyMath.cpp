@@ -372,5 +372,11 @@ double RandomGaussian(double mean, double stddev) {
 	std::normal_distribution<double> noise(mean, stddev);
 	return noise(gen);
 }
+float RandomGaussian(float mean, float stddev) {
+	static std::random_device rd;
+	static std::mt19937 gen(rd());
+	std::normal_distribution<float> noise(mean, stddev);
+	return noise(gen);
+}
 
 }

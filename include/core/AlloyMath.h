@@ -2039,7 +2039,7 @@ float RandomUniform(float min, float max);
 int RandomUniform(int min, int max);
 double RandomUniform(double min, double max);
 double RandomGaussian(double mean, double stddev);
-
+float RandomGaussian(float mean, float stddev);
 /*
  *
  * OneEuroFilter.cc -
@@ -2082,7 +2082,7 @@ private:
 	double last_time_;
 	double frequency;
 	T alpha(T cutoff) {
-		double tau = 1.0 / (2 * M_PI * cutoff);
+		double tau = 1.0 / (2 * ALY_PI * cutoff);
 		double te = 1.0 / frequency;
 		return T(1.0 / (1.0 + tau / te));
 	}
@@ -2090,7 +2090,7 @@ private:
 
 	T minCutoff, beta, derivativeCutoff;
 public:
-	PointFilter(double _freq, T _mincutoff, T _beta, T _dcutoff) :
+	PointFilter(double _freq=0, T _mincutoff=T(0), T _beta = T(0), T _dcutoff = T(0)) :
 			frequency(_freq), minCutoff(_mincutoff), beta(_beta), derivativeCutoff(
 					_dcutoff), last_time_(std::numeric_limits<double>::min()) {
 	}
