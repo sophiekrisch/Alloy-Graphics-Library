@@ -35,10 +35,13 @@ Alloy is yet another 2D/3D graphics library written in C++11. As mundane as that
 - Catmull-Clark and Loop mesh sub-division.
 - Mesh primitives for box, icosahedron, sphere, cylinder, torus, plane, cone, pyramid, frustum, capsule, tessellated sphere, grid, and asteroid.
 - Iso-contour generation (with connectivity rules)
+- Dataflow UI for graphics/imaging pipelines
+- Force directed graph (Prefuse)
+- "One Euro" filter
 
 ## Future Work
 - Tab panel
-- Dataflow UI for graphics/imaging pipelines
+
 - Active contour segmentation
 - Iso-surface
 - Image processing for anisotropic image diffusion, Mumford-Shah, Rudin-Osher-Fatemi, Chan-Esedolgu-Nikolova
@@ -50,8 +53,6 @@ Alloy is yet another 2D/3D graphics library written in C++11. As mundane as that
 - DAISY features
 - SLIC super pixels 
 - Spring Level Sets
-- Force directed graph and other visualizations (Prefuse)
-- "One Euro" filter
 - 2D physics (box2D)
 
 ## Dependencies
@@ -192,6 +193,11 @@ Distance Field Example
 Expand Tree Example
 -------------------------
 ![ExpandTreeEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0032.png)
+
+
+One Euro Filter Example
+-------------------------
+![ForceDirectedGraphEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0035.png)
 
 DataFlow Example
 -------------------------
