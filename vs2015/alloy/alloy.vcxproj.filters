@@ -350,5 +350,8 @@
     <ClInclude Include="..\..\include\core\ForceDirectedGraph.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\core\OneEuroFilter.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

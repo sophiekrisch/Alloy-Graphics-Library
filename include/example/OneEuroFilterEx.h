@@ -21,7 +21,7 @@
 
 #ifndef ONEEUROFILTER_EX_H_
 #define ONEEUROFILTER_EX_H_
-#include "AlloyMath.h"
+#include "OneEuroFilter.h"
 #include "AlloyApplication.h"
 class OneEuroFilterEx: public aly::Application {
 protected:
