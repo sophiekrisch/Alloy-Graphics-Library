@@ -1549,6 +1549,9 @@ template<class T, int M> struct box {
 				other.position + other.dimensions - dimensions);
 
 	}
+	inline vec<T,M> clamp(const vec<T,M>& qt) const {
+		return aly::clamp(qt, position,position + dimensions);
+	}
 	inline void intersect(const box<T, M>& other) {
 		vec<T, M> mn = aly::max(position, other.position);
 		vec<T, M> mx = aly::min(max(), other.max());

@@ -25,8 +25,8 @@ using namespace aly;
 OneEuroFilterEx::OneEuroFilterEx() :
 	Application(800, 800, "One Euro Filter Example",false) {
 	for(int i=0;i<(int)dataBuffer.size();i++){
-		dataBuffer[i]=pixel2(-1, -1);
-		filterBuffer[i]=pixel2(-1, -1);
+		dataBuffer[i]=pixel2(-10.0f);
+		filterBuffer[i]=pixel2(-10.0f);
 	}
 	filter.setBeta(0.007f);
 	filter.setMinCutoff(1.0f);
@@ -80,27 +80,29 @@ void OneEuroFilterEx::drawCursor(AlloyContext* context, const box2px& bounds) {
 	pixel2 offset(w, h);
 
 	pixel2 pt,fpt;
-	pixel2 cursor = context->getCursorPosition();
-	if (bounds.contains(cursor) && cursor.x >= offset.x&&cursor.y >= offset.y) {
-		noiseCursor = aly::max(float2(RandomGaussian(cursor.x, noise), RandomGaussian(cursor.y, noise)), pixel2(0.0f, 0.0f));
+	pixel2 noiseCursor;
+	pixel2 filterCursor;
+	pixel2 cursor =context->getCursorPosition();
+	noiseCursor=cursor;
+	filterCursor=cursor;
+	if (bounds.contains(cursor)) {
+		noiseCursor =aly::clamp(float2(RandomGaussian(cursor.x, noise), RandomGaussian(cursor.y, noise)),offset,bounds.position+bounds.dimensions);
 		pt = (noiseCursor - offset)*(bounds.dimensions) / (bounds.dimensions - offset);
-		dataBuffer[index] = pt;
+		dataBuffer[index] =pt;
 		fpt = filter.evaluate(pt);
-		filterBuffer[index] = fpt;
-		fpt = fpt* (bounds.dimensions - offset) / (bounds.dimensions)+offset;
+		filterBuffer[index] =fpt;
+		fpt = aly::clamp(fpt*((bounds.dimensions - offset) / (bounds.dimensions))+offset,offset,bounds.position+bounds.dimensions);
 		index = (index + 1) % BUFFER_SIZE;
 		nvgStrokeColor(nvg, Color(1.0f, 0.6f, 0.6f));
 		nvgStrokeWidth(nvg, 3.0f);
 		nvgBeginPath(nvg);
 		nvgCircle(nvg, noiseCursor.x, noiseCursor.y, 12.0f);
 		nvgStroke(nvg);
-
 		nvgStrokeColor(nvg, Color(0.6f, 1.0f, 0.6f));
 		nvgStrokeWidth(nvg, 3.0f);
 		nvgBeginPath(nvg);
 		nvgCircle(nvg, fpt.x, fpt.y, 8.0f);
 		nvgStroke(nvg);
-
 		context->setCursor(&aly::Cursor::CrossHairs);
 	}
 
@@ -112,7 +114,7 @@ void OneEuroFilterEx::drawCursor(AlloyContext* context, const box2px& bounds) {
 	pt = (cursor - offset)*(bounds.dimensions) / (bounds.dimensions - offset);
 	nvgBeginPath(nvg);
 	nvgStrokeWidth(nvg, 2.0f);
-	nvgStrokeColor(nvg, Color(0.8f,0.8f,0.8f));
+	nvgStrokeColor(nvg, Color(0.6f,0.6f,0.6f));
 	nvgMoveTo(nvg, 0, h*pt.y / bounds.dimensions.y);
 	nvgLineTo(nvg, w, h*pt.y / bounds.dimensions.y);
 	nvgMoveTo(nvg, w*pt.x / bounds.dimensions.x, 0);
@@ -142,11 +144,13 @@ void OneEuroFilterEx::drawCursor(AlloyContext* context, const box2px& bounds) {
 	nvgStrokeColor(nvg, Color(1.0f, 0.6f, 0.6f));
 	nvgStrokeWidth(nvg, 2.0f);
 
+
+	pushScissor(nvg,box2px(pixel2(0,h),pixel2(w, bounds.dimensions.y - h)));
 	int count = 0;
 	nvgBeginPath(nvg);
 	for (int i = BUFFER_SIZE - 1; i >= 0; i--) {
 		pt = dataBuffer[(i + index) % BUFFER_SIZE];
-		if (pt.x > 0) {
+		if (pt.x >-1) {
 			if (count == 0) {
 				nvgMoveTo(nvg, w*pt.x / bounds.dimensions.x, (bounds.dimensions.y - h) *count / BUFFER_SIZE + h);
 			}
@@ -157,12 +161,14 @@ void OneEuroFilterEx::drawCursor(AlloyContext* context, const box2px& bounds) {
 		}
 	}
 	nvgStroke(nvg);
+	popScissor(nvg);
 
+	pushScissor(nvg,box2px(pixel2(w,0),pixel2(bounds.dimensions.x - w, h)));
 	count = 0;
 	nvgBeginPath(nvg);
 	for (int i = BUFFER_SIZE - 1; i >= 0; i--) {
 		pt = dataBuffer[(i + index) % BUFFER_SIZE];
-		if (pt.x > 0) {
+		if (pt.x >-1) {
 			if (count == 0) {
 				nvgMoveTo(nvg, (bounds.dimensions.x - w) *count / BUFFER_SIZE + w, h*pt.y / bounds.dimensions.y);
 			}
@@ -173,14 +179,15 @@ void OneEuroFilterEx::drawCursor(AlloyContext* context, const box2px& bounds) {
 		}
 	}
 	nvgStroke(nvg);
+	popScissor(nvg);
 
+	pushScissor(nvg,box2px(pixel2(0,h),pixel2(w, bounds.dimensions.y - h)));
 	nvgStrokeColor(nvg, Color(0.6f, 1.0f, 0.6f));
 	count = 0;
-	
 	nvgBeginPath(nvg);
 	for (int i = BUFFER_SIZE - 1; i >= 0; i--) {
 		pt = filterBuffer[(i + index) % BUFFER_SIZE];
-		if (pt.x > 0) {
+		if (pt.x >-1) {
 			if (count == 0) {
 				nvgMoveTo(nvg, w*pt.x / bounds.dimensions.x, (bounds.dimensions.y - h) *count / BUFFER_SIZE + h);
 			}
@@ -191,12 +198,13 @@ void OneEuroFilterEx::drawCursor(AlloyContext* context, const box2px& bounds) {
 		}
 	}
 	nvgStroke(nvg);
-
+	popScissor(nvg);
+	pushScissor(nvg,box2px(pixel2(w,0),pixel2(bounds.dimensions.x - w, h)));
 	count = 0;
 	nvgBeginPath(nvg);
 	for (int i = BUFFER_SIZE - 1; i >= 0; i--) {
 		pt = filterBuffer[(i + index) % BUFFER_SIZE];
-		if (pt.x > 0) {
+		if (pt.x >-1) {
 			if (count == 0) {
 				nvgMoveTo(nvg, (bounds.dimensions.x - w) *count / BUFFER_SIZE + w, h*pt.y / bounds.dimensions.y);
 			}
@@ -207,7 +215,7 @@ void OneEuroFilterEx::drawCursor(AlloyContext* context, const box2px& bounds) {
 		}
 	}
 	nvgStroke(nvg);
-	
+	popScissor(nvg);
 	nvgBeginPath(nvg);
 	nvgStrokeWidth(nvg, 2.0f);
 	nvgStrokeColor(nvg, Color(0.5f, 0.5f, 0.5f));

@@ -28,8 +28,6 @@ protected:
 	aly::DrawPtr drawRegion;
 	static const int BUFFER_SIZE = 256;
 	float noise=10.0f;
-	aly::pixel2 noiseCursor;
-	aly::pixel2 filterCursor;
 	int index = 0;
 	std::array<aly::pixel2, BUFFER_SIZE> dataBuffer;
 	std::array<aly::pixel2, BUFFER_SIZE> filterBuffer;
