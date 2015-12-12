@@ -10,13 +10,13 @@ CC = gcc
 INC = -Iinclude/core/ -Iinclude/example/ -I/usr/local/include/ -I/usr/include/
 CXXFLAGS:= -std=c++0x -DGL_GLEXT_PROTOTYPES=1 -O3 -Wall -c -fmessage-length=0 -MMD -MP -fopenmp $(INC)
 CFLAGS:= -DGL_GLEXT_PROTOTYPES=1 -O3 -Wall -c -fmessage-length=0 -MMD -MP -fopenmp $(INC)
-LDLIBS =-L./ -L/usr/lib/ -L/usr/local/lib/ -L/usr/lib/x86_64-linux-gnu/
+LDLIBS =-static-libstdc++ -static-libgcc -L./ -L/usr/lib/ -L/usr/local/lib/ -L/usr/lib/x86_64-linux-gnu/
 #Pacakge dependencies are glfw 3.x, and glew, which are avaiable through apt-get and brew. 
 #Make sure the libraries are compiled with the same version of g++/gcc as alloy.
 #Ubuntu may also require GLU, GLX, Xrandr, Xxf86vm, Xinerama, and Xi to build glfw from source.
 #Other dependencies are standard on Ubuntu and MacOS.
 #Some systems will use -lglfw3 
-LIBS =-lalloy -lglfw -lgomp -lGL -lXext -lGLU -lGLEW -lXi -lXrandr -lX11 -lXxf86vm -lXinerama -lXcursor -lXdamage -lpthread -lm -ldl -lstdc++
+LIBS =-lalloy -lglfw -lgomp -lGL -lXext -lGLU -lGLEW -lXi -lXrandr -lX11 -lXxf86vm -lXinerama -lXcursor -lXdamage -lpthread -lm -ldl
 RM=rm -f
 
 alloy : $(OBJS)

@@ -24,8 +24,10 @@
 using namespace aly;
 OneEuroFilterEx::OneEuroFilterEx() :
 	Application(800, 800, "One Euro Filter Example",false) {
-	dataBuffer.assign(pixel2(-1, -1));
-	filterBuffer.assign(pixel2(-1, -1));
+	for(int i=0;i<(int)dataBuffer.size();i++){
+		dataBuffer[i]=pixel2(-1, -1);
+		filterBuffer[i]=pixel2(-1, -1);
+	}
 	filter.setBeta(0.007f);
 	filter.setMinCutoff(1.0f);
 	filter.setDerivativeCutoff(1.0f);
@@ -99,7 +101,7 @@ void OneEuroFilterEx::drawCursor(AlloyContext* context, const box2px& bounds) {
 		nvgCircle(nvg, fpt.x, fpt.y, 8.0f);
 		nvgStroke(nvg);
 
-		context->setCursor(&Cursor::CrossHairs);
+		context->setCursor(&aly::Cursor::CrossHairs);
 	}
 
 	nvgBeginPath(nvg);
