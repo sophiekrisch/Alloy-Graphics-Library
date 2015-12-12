@@ -50,7 +50,7 @@ bool OneEuroFilterEx::init(Composite& rootNode) {
 		controlRegion->add(noiseSlider);
 	}
 	{
-		HorizontalSliderPtr betaSlider = HorizontalSliderPtr(new HorizontalSlider("Beta", CoordPX(5.0f, 0.0f), CoordPerPX(1.0f, 0.0f, -10.0f, 40.0f),Float(0.0f),Float(1.0f),Float(0.007f)));
+		HorizontalSliderPtr betaSlider = HorizontalSliderPtr(new HorizontalSlider("Beta", CoordPX(5.0f, 0.0f), CoordPerPX(1.0f, 0.0f, -10.0f, 40.0f),Float(0.0f),Float(0.05f),Float(0.007f)));
 		betaSlider->setOnChangeEvent([this](const Number& value) {
 			filter.setBeta(std::max(value.toFloat(), 1E-5f));
 		});
