@@ -110,19 +110,23 @@ void OneEuroFilterEx::drawCursor(AlloyContext* context, const box2px& bounds) {
 	pt = (cursor - offset)*(bounds.dimensions) / (bounds.dimensions - offset);
 	nvgBeginPath(nvg);
 	nvgStrokeWidth(nvg, 2.0f);
-	nvgStrokeColor(nvg, Color(1.0f, 0.6f, 0.6f));
+	nvgStrokeColor(nvg, Color(0.8f,0.8f,0.8f));
 	nvgMoveTo(nvg, 0, h*pt.y / bounds.dimensions.y);
 	nvgLineTo(nvg, w, h*pt.y / bounds.dimensions.y);
 	nvgMoveTo(nvg, w*pt.x / bounds.dimensions.x, 0);
 	nvgLineTo(nvg, w*pt.x / bounds.dimensions.x, h);
 	nvgStroke(nvg);
 
+	nvgFillColor(nvg, Color(0.6f, 0.6f, 0.6f));
 	nvgBeginPath(nvg);
-	nvgFillColor(nvg, Color(0.8f, 0.8f, 0.8f));
 	nvgCircle(nvg, w*pt.x / bounds.dimensions.x, h*pt.y / bounds.dimensions.y, 4.0f);
 	nvgFill(nvg);
 
-
+	pt = (fpt - offset)*(bounds.dimensions) / (bounds.dimensions - offset);
+	nvgBeginPath(nvg);
+	nvgStrokeColor(nvg, Color(0.6f, 1.0f, 0.6f));
+	nvgCircle(nvg, w*pt.x / bounds.dimensions.x, h*pt.y / bounds.dimensions.y, 4.0f);
+	nvgStroke(nvg);
 
 	nvgBeginPath(nvg);
 	nvgFillColor(nvg, Color(0.3f, 0.3f, 0.3f));
