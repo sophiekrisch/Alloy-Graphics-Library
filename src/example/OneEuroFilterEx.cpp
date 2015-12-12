@@ -218,7 +218,7 @@ void OneEuroFilterEx::drawCursor(AlloyContext* context, const box2px& bounds) {
 	popScissor(nvg);
 	nvgBeginPath(nvg);
 	nvgStrokeWidth(nvg, 2.0f);
-	nvgStrokeColor(nvg, Color(0.5f, 0.5f, 0.5f));
+	nvgStrokeColor(nvg, Color(0.8f, 0.8f, 0.8f));
 	nvgRect(nvg, 1, 1, w - 2, h - 2);
 	nvgStroke(nvg);
 }
