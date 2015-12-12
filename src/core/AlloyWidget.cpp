@@ -1917,31 +1917,32 @@ bool ListBox::onMouseDown(ListEntry* entry, AlloyContext* context,
 		const InputEvent& e) {
 	if (e.isDown()) {
 		if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
-			if (enableMultiSelection) {
-				if (entry->isSelected()) {
-					entry->setSelected(false);
-					for (auto iter = lastSelected.begin();
-							iter != lastSelected.end(); iter++) {
-						if (*iter == entry) {
-							lastSelected.erase(iter);
-							break;
+				if (enableMultiSelection) {
+					if (entry->isSelected()) {
+						entry->setSelected(false);
+						for (auto iter = lastSelected.begin();
+						iter != lastSelected.end(); iter++) {
+							if (*iter == entry) {
+								lastSelected.erase(iter);
+								break;
+							}
 						}
 					}
-				} else {
-					entry->setSelected(true);
-					lastSelected.push_back(entry);
-				}
-
-			} else {
-				if (!entry->isSelected()) {
-					for (ListEntry* child : lastSelected) {
-						child->setSelected(false);
+					else {
+						entry->setSelected(true);
+						lastSelected.push_back(entry);
 					}
-					entry->setSelected(true);
-					lastSelected.clear();
-					lastSelected.push_back(entry);
 				}
-			}
+				else {
+					if (!entry->isSelected()) {
+						for (ListEntry* child : lastSelected) {
+							child->setSelected(false);
+						}
+						entry->setSelected(true);
+						lastSelected.clear();
+						lastSelected.push_back(entry);
+					}
+				}
 			if (onSelect)
 				onSelect(entry,e);
 			return true;
