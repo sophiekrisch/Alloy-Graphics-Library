@@ -554,7 +554,7 @@ public:
 	}
 	bool onMouseDown(ListEntry* entry, AlloyContext* context,
 			const InputEvent& e);
-	std::function<void(ListEntry*)> onSelect;
+	std::function<void(ListEntry*, const InputEvent&)> onSelect;
 };
 class FileDialog: public Composite {
 private:

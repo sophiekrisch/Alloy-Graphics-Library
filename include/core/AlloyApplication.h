@@ -30,11 +30,13 @@
 #include "CommonShaders.h"
 #include <memory>
 #include <list>
+#include <chrono>
 namespace aly {
 class Application {
 private:
 	float frameRate;
 	InputEvent inputEvent;
+	std::chrono::steady_clock::time_point lastClickTime;
 	static std::shared_ptr<AlloyContext>& context;
 	void drawUI();
 	void drawDebugUI();

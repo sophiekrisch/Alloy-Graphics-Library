@@ -147,6 +147,7 @@ struct InputEvent {
 	int mods = 0;
 	int scancode = 0;
 	int key = 0;
+	int clicks = 0;
 	int button = -1;
 	bool isDown() const {
 		return (action != GLFW_RELEASE);
@@ -234,6 +235,7 @@ public:
 	ImageVAO vaoImageOnScreen;
 	ImageVAO vaoImageOffScreen;
 	pixel2 cursorPosition = pixel2(-1, -1);
+	int doubleClickTime = 300;
 	double2 dpmm;
 	bool hasFocus = false;
 	bool isOnScreenRender() const;
@@ -243,6 +245,7 @@ public:
 	void setCursor(const Cursor* cursor) {
 		this->cursor = cursor;
 	}
+
 	const Cursor* getCursor() const {
 		return cursor;
 	}

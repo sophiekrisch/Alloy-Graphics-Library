@@ -452,7 +452,17 @@ void Application::onMouseButton(int button, int action, int mods) {
 	InputEvent& e = inputEvent;
 	e.type = InputType::MouseButton;
 	e.cursor = context->cursorPosition;
+	std::chrono::steady_clock::time_point currentTime= std::chrono::steady_clock::now();
 	e.button = button;
+	if (std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastClickTime).count() <=context->doubleClickTime) {
+		e.clicks = 2;
+	}
+	else {
+		e.clicks = 1;
+	}
+	if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
+		lastClickTime = currentTime;
+	}
 	e.action = action;
 	e.mods = mods;
 	fireEvent(e);

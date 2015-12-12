@@ -1943,14 +1943,14 @@ bool ListBox::onMouseDown(ListEntry* entry, AlloyContext* context,
 				}
 			}
 			if (onSelect)
-				onSelect(entry);
+				onSelect(entry,e);
 			return true;
 		} else if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {
 			for (ListEntry* child : lastSelected) {
 				child->setSelected(false);
 			}
 			if (onSelect)
-				onSelect(nullptr);
+				onSelect(nullptr,e);
 			return true;
 		}
 	}
@@ -2495,42 +2495,47 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	directoryList->setEnableMultiSelection(
 			type == FileDialogType::OpenMultiFile);
 	directoryList->onSelect =
-			[this](ListEntry* lentry) {
-				if (lentry != nullptr) {
-					FileEntry* entry = dynamic_cast<FileEntry*>(lentry);
-					if (this->type == FileDialogType::OpenMultiFile) {
-						if (entry->fileDescription.fileType == FileType::Directory) {
-							setSelectedFile(entry->fileDescription.fileLocation);
-							fileLocation->setValue(entry->fileDescription.fileLocation);
-						}
-						updateValidity();
-
-					}
-					else if (this->type == FileDialogType::OpenFile) {
-						setSelectedFile(entry->fileDescription.fileLocation);
-						fileLocation->setValue(entry->fileDescription.fileLocation);
-						updateValidity();
-					}
-					else if (this->type == FileDialogType::SaveFile) {
-						if (entry->fileDescription.fileType == FileType::Directory) {
-							setSelectedFile(entry->fileDescription.fileLocation);
-							fileLocation->setValue(entry->fileDescription.fileLocation);
-						}
-						else {
-							fileLocation->setValue(entry->fileDescription.fileLocation);
-						}
-						updateValidity();
-					}
+			[this](ListEntry* lentry, const InputEvent& e) {
+				if (e.clicks == 2) {
+					actionButton->onMouseDown(AlloyApplicationContext().get(), e);
 				}
 				else {
-					if (this->type != FileDialogType::OpenMultiFile) {
-						ListEntry* entry = directoryList->getLastSelected();
-						if (entry != nullptr) {
-							fileLocation->setValue(
-									GetParentDirectory(dynamic_cast<FileEntry*>(entry)->fileDescription.fileLocation));
+					if (lentry != nullptr) {
+						FileEntry* entry = dynamic_cast<FileEntry*>(lentry);
+						if (this->type == FileDialogType::OpenMultiFile) {
+							if (entry->fileDescription.fileType == FileType::Directory) {
+								setSelectedFile(entry->fileDescription.fileLocation);
+								fileLocation->setValue(entry->fileDescription.fileLocation);
+							}
+							updateValidity();
+
+						}
+						else if (this->type == FileDialogType::OpenFile) {
+							setSelectedFile(entry->fileDescription.fileLocation);
+							fileLocation->setValue(entry->fileDescription.fileLocation);
+							updateValidity();
+						}
+						else if (this->type == FileDialogType::SaveFile) {
+							if (entry->fileDescription.fileType == FileType::Directory) {
+								setSelectedFile(entry->fileDescription.fileLocation);
+								fileLocation->setValue(entry->fileDescription.fileLocation);
+							}
+							else {
+								fileLocation->setValue(entry->fileDescription.fileLocation);
+							}
+							updateValidity();
 						}
 					}
-					updateValidity();
+					else {
+						if (this->type != FileDialogType::OpenMultiFile) {
+							ListEntry* entry = directoryList->getLastSelected();
+							if (entry != nullptr) {
+								fileLocation->setValue(
+									GetParentDirectory(dynamic_cast<FileEntry*>(entry)->fileDescription.fileLocation));
+							}
+						}
+						updateValidity();
+					}
 				}
 			};
 	directoryTree->borderColor = MakeColor(

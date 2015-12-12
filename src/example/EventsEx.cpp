@@ -48,7 +48,7 @@ bool EventsEx::init(Composite& rootNode) {
 	labelA->backgroundColor = MakeColor(255, 128, 64);
 	labelB->backgroundColor = MakeColor(64, 128, 255);
 	labelA->onMouseDown = [=](AlloyContext* context, const InputEvent& event) {
-		labelA->setLabel("Mouse Down A");
+		labelA->setLabel((event.clicks == 2) ? "Double Click A" : "Mouse Down A");
 		labelA->backgroundColor = MakeColor(128, 64, 32);
 		//Return false so event is not consumed. If event is consumed here, then onEvent() will not be called.
 			return false;
@@ -65,7 +65,7 @@ bool EventsEx::init(Composite& rootNode) {
 			return false;
 		};
 	labelB->onMouseDown = [=](AlloyContext* context, const InputEvent& event) {
-		labelB->setLabel("Mouse Down B");
+		labelB->setLabel((event.clicks==2)?"Double Click B":"Mouse Down B");
 		labelB->backgroundColor = MakeColor(32,64,128);
 		//Return false so event is not consumed. If event is consumed here, then onEvent() will not be called.
 			return false;

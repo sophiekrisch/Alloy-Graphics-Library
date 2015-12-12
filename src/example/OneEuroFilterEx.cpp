@@ -37,7 +37,7 @@ bool OneEuroFilterEx::init(Composite& rootNode) {
 	}));
 	rootNode.add(drawRegion);
 
-	CompositePtr controlRegion = MakeComposite("Controls", CoordPerPX(1.0f,1.0f,-200.0f, -190.0f), CoordPX(200,200));
+	CompositePtr controlRegion = MakeComposite("Controls", CoordPerPX(1.0f,1.0f,-200.0f, -185.0f), CoordPX(200,200));
 	controlRegion->setOrientation(Orientation::Vertical,pixel2(5.0f),pixel2(5.0f));
 	rootNode.add(controlRegion);
 	{
