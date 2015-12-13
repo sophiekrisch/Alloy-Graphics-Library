@@ -633,7 +633,7 @@ namespace aly {
 			pts[0] = box.position;
 			pts[1] = box.position + float2(box.dimensions.x, 0.0f);
 			pts[2] = box.position + box.dimensions;
-			pts[3] = box.position + float2(0.0f, box.dimensions.x);
+			pts[3] = box.position + float2(0.0f, box.dimensions.y);
 
 			for (int k = 0; k < 4; k++) {
 				float2 p1 = pts[k];

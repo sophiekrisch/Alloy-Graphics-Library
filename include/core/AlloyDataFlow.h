@@ -240,15 +240,17 @@ public:
 	virtual void draw(AlloyContext* context) override;
 };
 class Connection {
+protected:
+	std::shared_ptr<SpringItem> springItem;
 public:
 	std::shared_ptr<Port> source;
 	std::shared_ptr<Port> destination;
 	std::vector<float2> path;
+	std::shared_ptr<SpringItem>& getSpringItem();
 	Connection(const std::shared_ptr<Port>& source,
 			const std::shared_ptr<Port>& destination) :
 			source(source), destination(destination) {
 		source->setConnection(this);
-		destination->setConnection(this);
 	}
 	void draw(AlloyContext* context,DataFlow* flow);
 };
@@ -351,7 +353,6 @@ public:
 			const std::shared_ptr<Predicate>& predicate,
 			const std::shared_ptr<Node>& subject) :
 			subject(subject), object(object), predicate(predicate) {
-		getSpringItem();
 	}
 	void draw(AlloyContext* context);
 	void drawText(AlloyContext* context);
@@ -369,6 +370,9 @@ public:
 
 	void setShape(const NodeShape& s) {
 		shape = s;
+	}
+	NodeShape getShape() const{
+		return shape;
 	}
 	virtual void draw(AlloyContext* context) override;
 };

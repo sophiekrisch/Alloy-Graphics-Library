@@ -28,7 +28,19 @@
 #include <iomanip>
 #include <ios>
 #include <locale>
+#include <memory>
+
+
 namespace aly {
+	//GCC doesn't have this for some reason.
+	template <typename T, typename... Args> inline std::shared_ptr<T> MakeShared(Args&&... args)
+	{
+		return std::shared_ptr<T>(new T(std::forward<Args>(args)...));
+	}
+	template <typename T, typename... Args> inline std::unique_ptr<T> MakeUnique(Args&&... args)
+	{
+		return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+	}
 	struct MakeString {
 		std::ostringstream ss;
 		operator std::string() const {

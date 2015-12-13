@@ -307,6 +307,9 @@ void View::setup() {
 	nodeIcon->backgroundColor = MakeColor(COLOR);
 	nodeIcon->setShape(NodeShape::Square);
 	nodeIcon->borderWidth = borderWidth;
+	forceItem->shape = nodeIcon->getShape();
+	forceItem->color = nodeIcon->backgroundColor->toRGBAf();
+
 }
 void Data::setup() {
 
@@ -377,6 +380,9 @@ void Data::setup() {
 	setRoundCorners(true);
 	nodeIcon->backgroundColor = MakeColor(COLOR);
 	nodeIcon->borderWidth = borderWidth;
+	forceItem->shape = nodeIcon->getShape();
+	forceItem->color = nodeIcon->backgroundColor->toRGBAf();
+
 }
 void Compute::setup() {
 	setOrientation(Orientation::Horizontal, pixel2(0, 0));
@@ -441,6 +447,9 @@ void Compute::setup() {
 	nodeIcon->backgroundColor = MakeColor(COLOR);
 	nodeIcon->borderWidth = borderWidth;
 	nodeIcon->setShape(NodeShape::Hexagon);
+	forceItem->shape = nodeIcon->getShape();
+	forceItem->color = nodeIcon->backgroundColor->toRGBAf();
+
 }
 void Source::setup() {
 	setOrientation(Orientation::Vertical, pixel2(0, 0));
@@ -493,6 +502,9 @@ void Source::setup() {
 	setRoundCorners(true);
 	nodeIcon->backgroundColor = MakeColor(COLOR);
 	nodeIcon->borderWidth = borderWidth;
+	forceItem->shape = nodeIcon->getShape();
+	forceItem->color = nodeIcon->backgroundColor->toRGBAf();
+
 }
 void Destination::setup() {
 	setOrientation(Orientation::Vertical, pixel2(0, 0));
@@ -537,6 +549,9 @@ void Destination::setup() {
 	nodeIcon->backgroundColor = MakeColor(COLOR);
 	nodeIcon->setShape(NodeShape::Triangle);
 	nodeIcon->borderWidth = borderWidth;
+	forceItem->shape = nodeIcon->getShape();
+	forceItem->color = nodeIcon->backgroundColor->toRGBAf();
+
 }
 bool Node::isMouseOver() const {
 	if (parent != nullptr)
@@ -554,10 +569,21 @@ bool DataFlow::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			&& e.isUp()) {
 		if (currentPort != nullptr && currentPort != connectingPort
 				&& context->isMouseOver(currentPort)) {
-			add(
-					MakeConnection(connectingPort->getReference(),
-							currentPort->getReference()));
-			router.evaluate(connections.back());
+			PortPtr source = connectingPort->getReference();
+			PortPtr target = currentPort->getReference();
+			ConnectionPtr last;
+			if (source->getType() == PortType::Output&&target->getType() == PortType::Input) {
+				add(last=MakeConnection(source,target));
+			} else if (source->getType() == PortType::Input&&target->getType() == PortType::Output) {
+				add(last = MakeConnection(target,source));
+			} else if (source->getType() == PortType::Parent&&target->getType() == PortType::Child) {
+				add(last = MakeConnection(target,source));
+			} else if (source->getType() == PortType::Child&&target->getType() == PortType::Parent) {
+				add(last = MakeConnection(source,target));
+			}
+			if (last.get() != nullptr) {
+				router.evaluate(last);
+			}
 		}
 		connectingPort = nullptr;
 	}
@@ -672,9 +698,7 @@ void DataFlow::add(const std::shared_ptr<Region>& region) {
 	Composite::add(region);
 }
 void DataFlow::add(const std::shared_ptr<Relationship>& relationship) {
-	relationship->getSpringItem().reset(
-		new SpringItem(relationship->subject->getForceItem(), relationship->object->getForceItem(),
-			-1.0f, 2 * ForceSimulator::RADIUS));
+	relationship->getSpringItem().reset(new SpringItem(relationship->subject->getForceItem(), relationship->object->getForceItem(),-1.0f, 2 * ForceSimulator::RADIUS));
 	forceSim->addSpringItem(relationship->getSpringItem());
 	relationships.push_back(relationship);
 }
@@ -704,8 +728,13 @@ void DataFlow::add(const std::shared_ptr<Compute>& node) {
 	addNode(node);
 	computeNodes.push_back(node);
 }
-void DataFlow::add(const std::shared_ptr<Connection>& node) {
-	connections.push_back(node);
+void DataFlow::add(const std::shared_ptr<Connection>& connection) {
+	SpringItem* spring = new SpringItem(connection->source->getNode()->getForceItem(), connection->destination->getNode()->getForceItem(), -1.0f, 2 * ForceSimulator::RADIUS);
+	spring->gamma = 0.1f;
+	connection->getSpringItem().reset(spring);
+	forceSim->addSpringItem(connection->getSpringItem());
+
+	connections.push_back(connection);
 }
 void DataFlow::setup() {
 	setRoundCorners(true);
@@ -729,10 +758,10 @@ void DataFlow::setup() {
 	Application::addListener(this);
 	forceSim->addForce(SpringForcePtr(new SpringForce()));
 	forceSim->addForce(NBodyForcePtr(new NBodyForce()));
-	forceSim->addForce(GravitationalForcePtr(new GravitationalForce()));
-	forceSim->addForce(CircularWallForcePtr(new CircularWallForce(float2(960.0f,540.0f), 960.0f)));
+	forceSim->addForce(MakeShared<BuoyancyForce>());
+	forceSim->addForce(BoxForcePtr(new BoxForce(box2px(pixel2(0.0f,0.0f),pixel2(800,600)))));
 	forceSim->addForce(DragForcePtr(new DragForce(0.001f)));
-
+	//start();
 }
 void DataFlow::start() {
 	forceSim->start();
@@ -1280,6 +1309,9 @@ void Destination::draw(AlloyContext* context) {
 	Composite::draw(context);
 }
 SpringItemPtr& Relationship::getSpringItem() {
+	return springItem;
+}
+SpringItemPtr& Connection::getSpringItem() {
 	return springItem;
 }
 void Relationship::draw(AlloyContext* context) {
