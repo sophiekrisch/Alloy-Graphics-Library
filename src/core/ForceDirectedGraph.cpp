@@ -90,7 +90,7 @@ namespace aly {
 		const int ForceSimulator::DEFAULT_TIME_OUT=10;
 		const int ForceSimulator::DEFAULT_INTEGRATION_CYCLES = 2;
 		void ForceItem::draw(AlloyContext* context, const pixel2& offset,float scale,bool selected) {
-			if (shape == NodeShape::None)return;
+			if (shape == NodeShape::Hidden)return;
 			NVGcontext* nvg = context->nvgContext;
 			float lineWidth = scale*4.0f;
 			nvgStrokeWidth(nvg, lineWidth);

@@ -51,7 +51,7 @@ enum class NodeType {
 };
 
 enum class NodeShape {
-	None=0 , Circle = 1, Triangle = 2, Square = 3, Hexagon = 4
+	Hidden=0 , Circle = 1, Triangle = 2, Square = 3, Hexagon = 4
 };
 enum class PortType {
 	Unknown = 0, Input = 1, Output = 2, Child = 3, Parent = 4
