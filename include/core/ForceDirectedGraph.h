@@ -230,6 +230,9 @@ public:
 	std::mutex& getLock(){
 		return lock;
 	}
+	void setSelected(ForceItem* item) {
+		selected = item;
+	}
 	void optimize(float tolerance = 0.25f, int maxIterations = 32000, float timestep = DEFAULT_TIME_STEP);
 	ForceSimulator(const std::string& name, const AUnit2D& pos,
 			const AUnit2D& dims, const std::shared_ptr<Integrator>& integr =

@@ -143,6 +143,10 @@ std::shared_ptr<Destination> MakeDestinationNode(const std::string& name, const 
 std::shared_ptr<Destination> MakeDestinationNode(const std::string& name) {
 	return DestinationPtr(new Destination(name, pixel2(0.0f)));
 }
+
+DataFlow::~DataFlow() {
+	if(forceSim.get()!=nullptr)forceSim->stop();
+}
 void NodeIcon::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
@@ -211,18 +215,23 @@ ForceSimulatorPtr Node::getForceSimulator() {
 box2px Node::getObstacleBounds() const {
 	box2px box = nodeIcon->getBounds(false);
 	if (labelRegion.get() != nullptr) {
-		box.merge(labelRegion->getBounds(false));
+		box2px cbox = labelRegion->getBounds(false);
+		box.merge(cbox);
 	}
+	box.position += getForceOffset();
 	return box;
 }
 bool Node::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	if (Composite::onEventHandler(context, e))
 		return true;
 	bool over = context->isMouseOver(nodeIcon.get(), true);
-
+	if (over) {
+		parent->getForceSimulator()->setSelected(forceItem.get());
+	}
 	if (e.type == InputType::MouseButton && e.button == GLFW_MOUSE_BUTTON_LEFT
 			&& e.isDown() && over) {
 		dynamic_cast<Composite*>(this->parent)->putLast(this);
+		
 	}
 	if (dragging && e.type == InputType::Cursor) {
 		//box2px pbounds = parent->getBounds();
@@ -240,6 +249,12 @@ bool Node::onEventHandler(AlloyContext* context, const InputEvent& e) {
 		}
 	}
 	return false;
+}
+pixel2 Node::getForceOffset() const {
+	return forceItem->location -centerOffset;
+}
+float2 Port::getLocation() const {
+	return getBounds(false).center() + parent->getForceOffset();
 }
 void View::setup() {
 	setOrientation(Orientation::Horizontal, pixel2(0, 0));
@@ -307,6 +322,7 @@ void View::setup() {
 	nodeIcon->backgroundColor = MakeColor(COLOR);
 	nodeIcon->setShape(NodeShape::Square);
 	nodeIcon->borderWidth = borderWidth;
+	forceItem->buoyancy = 1;
 	forceItem->shape = nodeIcon->getShape();
 	forceItem->color = nodeIcon->backgroundColor->toRGBAf();
 
@@ -380,6 +396,7 @@ void Data::setup() {
 	setRoundCorners(true);
 	nodeIcon->backgroundColor = MakeColor(COLOR);
 	nodeIcon->borderWidth = borderWidth;
+	forceItem->buoyancy = 0;
 	forceItem->shape = nodeIcon->getShape();
 	forceItem->color = nodeIcon->backgroundColor->toRGBAf();
 
@@ -447,6 +464,7 @@ void Compute::setup() {
 	nodeIcon->backgroundColor = MakeColor(COLOR);
 	nodeIcon->borderWidth = borderWidth;
 	nodeIcon->setShape(NodeShape::Hexagon);
+	forceItem->buoyancy = 0;
 	forceItem->shape = nodeIcon->getShape();
 	forceItem->color = nodeIcon->backgroundColor->toRGBAf();
 
@@ -502,6 +520,7 @@ void Source::setup() {
 	setRoundCorners(true);
 	nodeIcon->backgroundColor = MakeColor(COLOR);
 	nodeIcon->borderWidth = borderWidth;
+	forceItem->buoyancy = -1;
 	forceItem->shape = nodeIcon->getShape();
 	forceItem->color = nodeIcon->backgroundColor->toRGBAf();
 
@@ -549,6 +568,7 @@ void Destination::setup() {
 	nodeIcon->backgroundColor = MakeColor(COLOR);
 	nodeIcon->setShape(NodeShape::Triangle);
 	nodeIcon->borderWidth = borderWidth;
+	forceItem->buoyancy = 1;
 	forceItem->shape = nodeIcon->getShape();
 	forceItem->color = nodeIcon->backgroundColor->toRGBAf();
 
@@ -565,6 +585,7 @@ void DataFlow::setCurrentPort(Port* currentPort) {
 	this->currentPort = currentPort;
 }
 bool DataFlow::onEventHandler(AlloyContext* context, const InputEvent& e) {
+	
 	if (connectingPort != nullptr && e.type == InputType::MouseButton
 			&& e.isUp()) {
 		if (currentPort != nullptr && currentPort != connectingPort
@@ -581,11 +602,13 @@ bool DataFlow::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			} else if (source->getType() == PortType::Child&&target->getType() == PortType::Parent) {
 				add(last = MakeConnection(source,target));
 			}
-			if (last.get() != nullptr) {
-				router.evaluate(last);
-			}
 		}
 		connectingPort = nullptr;
+	}
+
+	bool over = context->isMouseOver(this);
+	if (over) {
+		forceSim->setSelected(nullptr);
 	}
 	if (dragging && e.type == InputType::MouseButton && e.isUp()) {
 		dragging = false;
@@ -605,6 +628,7 @@ bool DataFlow::onEventHandler(AlloyContext* context, const InputEvent& e) {
 }
 
 void Connection::draw(AlloyContext* context, DataFlow* flow) {
+	if (path.size() == 0)return;
 	NVGcontext* nvg = context->nvgContext;
 	nvgStrokeWidth(nvg, 4.0f);
 	nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
@@ -698,15 +722,20 @@ void DataFlow::add(const std::shared_ptr<Region>& region) {
 	Composite::add(region);
 }
 void DataFlow::add(const std::shared_ptr<Relationship>& relationship) {
-	relationship->getSpringItem().reset(new SpringItem(relationship->subject->getForceItem(), relationship->object->getForceItem(),-1.0f, 2 * ForceSimulator::RADIUS));
+	relationship->getSpringItem().reset(new SpringItem(relationship->subject->getForceItem(), relationship->object->getForceItem(),-1.0f, 4 * ForceSimulator::RADIUS));
+	relationship->getSpringItem()->visible = false;
+	routingLock.lock();
 	forceSim->addSpringItem(relationship->getSpringItem());
 	relationships.push_back(relationship);
+	routingLock.unlock();
 }
 void DataFlow::addNode(const std::shared_ptr<Node>& node) {
 	Composite::add(node);
 	router.add(node);
+	routingLock.lock();
 	forceSim->addForceItem(node->getForceItem());
 	node->parent = this;
+	routingLock.unlock();
 }
 void DataFlow::add(const std::shared_ptr<Source>& node) {
 	addNode(node);
@@ -731,10 +760,13 @@ void DataFlow::add(const std::shared_ptr<Compute>& node) {
 void DataFlow::add(const std::shared_ptr<Connection>& connection) {
 	SpringItem* spring = new SpringItem(connection->source->getNode()->getForceItem(), connection->destination->getNode()->getForceItem(), -1.0f, 2 * ForceSimulator::RADIUS);
 	spring->gamma = 0.1f;
+	spring->visible = false;
+	spring->length = distance(spring->item1->location, spring->item2->location);
 	connection->getSpringItem().reset(spring);
+	routingLock.lock();
 	forceSim->addSpringItem(connection->getSpringItem());
-
 	connections.push_back(connection);
+	routingLock.unlock();
 }
 void DataFlow::setup() {
 	setRoundCorners(true);
@@ -746,22 +778,41 @@ void DataFlow::setup() {
 						for(RelationshipPtr& relationship:relationships) {
 							relationship->draw(context);
 						}
+						routingLock.lock();
 						for(ConnectionPtr& connection:connections) {
 							connection->draw(context,this);
 						}
+						routingLock.unlock();
 						for(RelationshipPtr& relationship:relationships) {
 							relationship->drawText(context);
 						}
 					}));
-	//Composite::add(forceSim);
+
+	Composite::add(forceSim);
 	Composite::add(pathsRegion);
 	Application::addListener(this);
 	forceSim->addForce(SpringForcePtr(new SpringForce()));
 	forceSim->addForce(NBodyForcePtr(new NBodyForce()));
 	forceSim->addForce(MakeShared<BuoyancyForce>());
-	forceSim->addForce(BoxForcePtr(new BoxForce(box2px(pixel2(0.0f,0.0f),pixel2(800,600)))));
+	forceSim->addForce(boxForce=BoxForcePtr(new BoxForce(box2px(pixel2(0.0f,0.0f),pixel2(1920,1080)))));
 	forceSim->addForce(DragForcePtr(new DragForce(0.001f)));
-	//start();
+	forceSim->setZoom(1.0f);
+	forceSim->setOffset(pixel2(0.0f, 0.0f));
+	
+	forceSim->onStep = [this](float stepSize) {
+		routingLock.lock();
+			router.update();
+			for (ConnectionPtr& connect : connections) {
+				router.evaluate(connect);
+			}
+		routingLock.unlock();
+		AlloyContext* context = AlloyApplicationContext().get();
+		if (context) {
+			context->requestPack();
+		}
+	};
+	
+	start();
 }
 void DataFlow::start() {
 	forceSim->start();
@@ -1074,6 +1125,12 @@ void ChildPort::draw(AlloyContext* context) {
 }
 void Data::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp) {
+	pixel2 dragOffset = getDragOffset();
+	if (lengthL1(dragOffset) > 0) {
+		std::lock_guard<std::mutex> lockMe(parent->getForceSimulator()->getLock());
+		forceItem->location += dragOffset;
+	}
+	setDragOffset(pixel2(0.0f));
 	this->dimensions = CoordPX(
 			std::max(
 					std::max(textWidth + 10.0f,
@@ -1083,22 +1140,18 @@ void Data::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 					2.0f
 							+ outputPorts.size()
 									* (OutputPort::DIMENSIONS.x + 2.0f)),
-			Node::DIMENSIONS.y);
-	/*
-	ForceItemPtr f;
-	if (forceItem.get() == nullptr||forceItem->mass<0.0f) {
-		f= getForceItem();
-		f->location = position.toPixels(dims, dpmm, pixelRatio)+Node::DIMENSIONS*0.5f;
-		f->mass = 1.0f;
-	} else {
-		f = getForceItem();
-		position = CoordPX(f->location - Node::DIMENSIONS*0.5f);
-	}
-	*/
+			Node::DIMENSIONS.y);	
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
+	centerOffset = nodeIcon->getBounds(false).center() - getBounds(false).position;
 }
 void View::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp) {
+	pixel2 dragOffset = getDragOffset();
+	if (lengthL1(dragOffset) > 0) {
+		std::lock_guard<std::mutex> lockMe(parent->getForceSimulator()->getLock());
+		forceItem->location += dragOffset;
+	}
+	setDragOffset(pixel2(0.0f));
 	this->dimensions = CoordPX(
 			std::max(
 					std::max(textWidth + 10.0f,
@@ -1110,9 +1163,16 @@ void View::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 									* (OutputPort::DIMENSIONS.x + 2.0f)),
 			Node::DIMENSIONS.y);
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
+	centerOffset = nodeIcon->getBounds(false).center() - getBounds(false).position;
 }
 void Compute::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp) {
+	pixel2 dragOffset=getDragOffset();
+	if (lengthL1(dragOffset) > 0) {
+		std::lock_guard<std::mutex> lockMe(parent->getForceSimulator()->getLock());
+		forceItem->location += dragOffset;
+	}
+	setDragOffset(pixel2(0.0f));
 	this->dimensions = CoordPX(
 			std::max(
 					std::max(textWidth + 14.0f,
@@ -1124,26 +1184,69 @@ void Compute::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 									* (OutputPort::DIMENSIONS.x + 2.0f)),
 			Node::DIMENSIONS.y);
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
+	centerOffset = nodeIcon->getBounds(false).center() - getBounds(false).position;
 }
 void Source::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 	double pixelRatio, bool clamp) {
+	pixel2 dragOffset = getDragOffset();
+	if (lengthL1(dragOffset) > 0) {
+		std::lock_guard<std::mutex> lockMe(parent->getForceSimulator()->getLock());
+		forceItem->location += dragOffset;
+	}
+	setDragOffset(pixel2(0.0f));
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
+	centerOffset = nodeIcon->getBounds(false).center() - getBounds(false).position;
 }
 void Destination::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 	double pixelRatio, bool clamp) {
+	pixel2 dragOffset = getDragOffset();
+	if (lengthL1(dragOffset) > 0) {
+		std::lock_guard<std::mutex> lockMe(parent->getForceSimulator()->getLock());
+		forceItem->location += dragOffset;
+	}
+	setDragOffset(pixel2(0.0f));
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
+	centerOffset = nodeIcon->getBounds(false).center() - getBounds(false).position;
 }
 Node::Node(const std::string& name, const pixel2& pt) :
-	Composite(name, CoordPX(pt), CoordPX(Node::DIMENSIONS)), label(name), parent(nullptr) {
-	forceItem = ForceItemPtr(new ForceItem());
-	forceItem->plocation = forceItem->location = pt+Node::DIMENSIONS*0.5f;
+	Composite(name, CoordPX(0.0f, 0.0f), CoordPX(Node::DIMENSIONS)), label(name), parent(nullptr) {
+	forceItem = ForceItemPtr(new ForceItem(pt + Node::DIMENSIONS*0.5f));
 	setup();
 }
 Node::Node(const std::string& name, const std::string& label, const pixel2& pt) :
-	Composite(name, CoordPX(pt), CoordPX(Node::DIMENSIONS)), label(label), parent(nullptr) {
-	forceItem = ForceItemPtr(new ForceItem());
-	forceItem->plocation = forceItem->location = pt+Node::DIMENSIONS*0.5f;
+	Composite(name, CoordPX(0.0f,0.0f), CoordPX(Node::DIMENSIONS)), label(label), parent(nullptr) {
+	forceItem = ForceItemPtr(new ForceItem(pt + Node::DIMENSIONS*0.5f));
 	setup();
+}
+box2px Node::getBounds(bool includeBounds) const {
+	box2px box=Composite::getBounds(includeBounds);
+	if (includeBounds) {
+		box.position += forceItem->location- centerOffset;
+	}
+	return box;
+}
+box2px Node::getCursorBounds(bool includeOffset) const {
+	box2px box = (isDetached() ? getBounds(includeOffset) : box2px(bounds.position+forceItem->location-centerOffset,bounds.dimensions));
+	box.position += getDragOffset();
+	if (parent != nullptr && (!isDetached() && includeOffset)) {
+		box.position += parent->getDrawOffset();
+		if (AlloyApplicationContext()->getOnTopRegion() != this) {
+			box.intersect(parent->getCursorBounds());
+		}
+	}
+
+	return box;
+
+}
+/*
+box2px Node::getExtents() const {
+	box2px box = Composite::getExtents();
+	box.position += forceItem->location-centerOffset;
+	return box;
+}
+*/
+pixel2 Node::getDrawOffset() const {
+	return Composite::getDrawOffset() +forceItem->location-centerOffset;
 }
 void Node::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
@@ -1580,13 +1683,10 @@ void DataFlow::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 	}
 	extents.dimensions = scrollExtent;
 	extents.position = currentDrawOffset;
+	boxForce->setBounds(box2f(pixel2(0.0f),forceSim->getBoundsDimensions()));
 	for (std::shared_ptr<Region>& region : children) {
 		if (region->onPack)
 			region->onPack();
-	}
-	router.update();
-	for (ConnectionPtr& connect : connections) {
-		router.evaluate(connect);
 	}
 }
 }

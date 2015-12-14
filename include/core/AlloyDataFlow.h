@@ -35,6 +35,7 @@ class Compute;
 class View;
 class DataFlow;
 class Connection;
+struct BoxForce;
 class ForceSimulator;
 struct ForceItem;
 struct SpringItem;
@@ -108,9 +109,7 @@ public:
 	void setParent(Node* parent) {
 		this->parent = parent;
 	}
-	float2 getLocation() const {
-		return getBounds(false).center();
-	}
+	float2 getLocation() const;
 	std::shared_ptr<Port> getReference();
 	Port(const std::string& name, const std::string& label) :
 			Region(name), parent(nullptr), label(label), portCursor(0xf05b,
@@ -393,8 +392,8 @@ protected:
 	CompositePtr outputPortComposite;
 	TextLabelPtr labelRegion;
 	float textWidth;
+	pixel2 centerOffset;
 	std::shared_ptr<ForceItem> forceItem;
-
 	virtual void setup();
 public:
 	std::shared_ptr<NodeIcon> nodeIcon;
@@ -427,6 +426,10 @@ public:
 	DataFlow* getGraph() const {
 		return parent;
 	}
+	virtual box2px getBounds(bool includeBounds = true) const override;
+	virtual box2px getCursorBounds(bool includeOffset = true) const override;
+	virtual pixel2 getDrawOffset() const override;
+	//virtual box2px getExtents() const override;
 	virtual NodeType getType() const {
 		return NodeType::Unknown;
 	}
@@ -434,7 +437,11 @@ public:
 			override;
 	bool isMouseOver() const;
 	pixel2 getCenter() const {
-		return nodeIcon->getBounds().center();
+		return getBoundsPosition() + centerOffset;
+	}
+	pixel2 getForceOffset() const;
+	pixel2 getCenterOffset() const {
+		return centerOffset;
 	}
 	std::shared_ptr<ForceItem>& getForceItem();
 	float getRadius() const {
@@ -583,11 +590,12 @@ protected:
 	std::vector<std::shared_ptr<Destination>> destinationNodes;
 	std::vector<std::shared_ptr<Connection>> connections;
 	std::vector<std::shared_ptr<Relationship>> relationships;
-
+	std::shared_ptr<BoxForce> boxForce;
 
 	Node* mouseOverNode;
 	Port* connectingPort;
 	Port* currentPort;
+	std::mutex routingLock;
 	AvoidanceRouting router;
 	std::shared_ptr<ForceSimulator> forceSim;
 	pixel2 currentDrawOffset;
@@ -622,6 +630,7 @@ public:
 					nullptr), currentPort(nullptr) {
 		setup();
 	}
+	~DataFlow();
 	bool isMouseOverNode(const Node* node) const {
 		return (node != nullptr && node == mouseOverNode);
 	}

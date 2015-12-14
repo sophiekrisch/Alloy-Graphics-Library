@@ -195,7 +195,9 @@ bool ForceDirectedGraphEx::init(Composite& rootNode) {
 		firstTime = false;
 	}
 	rootNode.add(borderRegion);
+	addListener(graph.get());
 	graph->optimize(0.5f,256);
+	graph->fit();
 	graph->start();
 	return true;
 }

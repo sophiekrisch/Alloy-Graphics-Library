@@ -24,7 +24,7 @@
 using namespace aly;
 using namespace aly::dataflow;
 DataFlowEx::DataFlowEx() :
-		Application(800,600, "Data Flow Graph Example") {
+		Application(1920,1080, "Data Flow Graph Example") {
 }
 bool DataFlowEx::init(Composite& rootNode) {
 	graph = MakeDataFlow("Data Flow", CoordPX(10, 10),
@@ -88,8 +88,9 @@ bool DataFlowEx::init(Composite& rootNode) {
 	 graph->add(dataNode3);
 	 graph->add(dataNode4);
 
-	 //graph->add(MakeConnection(computeNode3->getOutputPort(0), dataNode4->getInputPort(1)));
-	 //graph->add(MakeConnection(computeNode3->getOutputPort(1),destNode2->getInputPort()));
+	 graph->add(MakeConnection(computeNode3->getOutputPort(0), dataNode4->getInputPort(1)));
+	 graph->add(MakeConnection(computeNode3->getOutputPort(1),destNode2->getInputPort()));
+
 	 graph->add(MakeRelationship(dataNode1, "uses", dataNode2));
 	 graph->add(MakeRelationship(dataNode1, "uses", dataNode3));
 	 graph->add(MakeRelationship(dataNode2, "extends", dataNode3));

@@ -163,7 +163,7 @@ namespace aly {
 			simWorker = RecurrentTaskPtr(new RecurrentTask([this](uint64_t iter) {
 				return update(iter);
 			}, DEFAULT_TIME_OUT));
-			requestFitToBounds = true;
+			requestFitToBounds = false;
 			draggingNode = false;
 			draggingView = false;
 			selected = nullptr;
@@ -171,7 +171,6 @@ namespace aly {
 			lastDragOffset = pixel2(0.0f, 0.0f);
 			dragOffset = pixel2(0.0f, 0.0f);
 			scale = 1.0f;
-			Application::addListener(this);
 		}
 		bool ForceSimulator::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			if (Region::onEventHandler(context, e))
@@ -252,9 +251,11 @@ namespace aly {
 				//std::cout << "Frame Rate " << << " fps" << std::endl;
 				renderCount = 0;
 			}
-			if (onStep) {
+			
+			if (!simWorker->isCanceled()&&onStep) {
 				onStep(maxDisplacement);
 			}
+			
 			return true;
 		}
 		void ForceSimulator::start() {
