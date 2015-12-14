@@ -395,6 +395,8 @@ protected:
 	pixel2 centerOffset;
 	std::shared_ptr<ForceItem> forceItem;
 	virtual void setup();
+	void prePack();
+	void postPack();
 public:
 	std::shared_ptr<NodeIcon> nodeIcon;
 	friend class DataFlow;
@@ -592,6 +594,8 @@ protected:
 	std::vector<std::shared_ptr<Relationship>> relationships;
 	std::shared_ptr<BoxForce> boxForce;
 
+	box2px graphBounds;
+
 	Node* mouseOverNode;
 	Port* connectingPort;
 	Port* currentPort;
@@ -600,12 +604,12 @@ protected:
 	std::shared_ptr<ForceSimulator> forceSim;
 	pixel2 currentDrawOffset;
 	pixel2 cursorDownLocation;
-
 	bool dragging = false;
 	void setup();
 	bool updateSimulation(uint64_t iter);
 	void addNode(const std::shared_ptr<Node>& node);
 public:
+	friend class Node;
 	std::shared_ptr<ForceSimulator> getForceSimulator() {
 		return forceSim;
 	}

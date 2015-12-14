@@ -767,6 +767,7 @@ void DataFlow::add(const std::shared_ptr<Connection>& connection) {
 	routingLock.unlock();
 }
 void DataFlow::setup() {
+	graphBounds = box2px(pixel2(0.0f), pixel2(0.0f));
 	setRoundCorners(true);
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	forceSim= ForceSimulatorPtr(new ForceSimulator("Force Simulator",CoordPX(0.0f,0.0f),CoordPercent(1.0f,1.0f)));
@@ -793,6 +794,7 @@ void DataFlow::setup() {
 	forceSim->addForce(NBodyForcePtr(new NBodyForce()));
 	forceSim->addForce(MakeShared<BuoyancyForce>());
 	forceSim->addForce(boxForce=BoxForcePtr(new BoxForce(box2px(pixel2(0.0f,0.0f),pixel2(1920,1080)))));
+	boxForce->setVisible(false);
 	forceSim->addForce(DragForcePtr(new DragForce(0.001f)));
 	forceSim->setZoom(1.0f);
 	forceSim->setOffset(pixel2(0.0f, 0.0f));
@@ -800,6 +802,7 @@ void DataFlow::setup() {
 		AlloyContext* context = AlloyApplicationContext().get();
 		if (context) {
 			context->requestPack();
+			
 		}
 	};
 	
@@ -1113,12 +1116,13 @@ void ChildPort::draw(AlloyContext* context) {
 		nvgRestore(nvg);
 	}
 }
-void Data::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
-		double pixelRatio, bool clamp) {
+void Node::prePack() {
 	pixel2 dragOffset = getDragOffset();
 	if (lengthL1(dragOffset) > 0) {
 		std::lock_guard<std::mutex> lockMe(parent->getForceSimulator()->getLock());
 		forceItem->location += dragOffset;
+		parent->graphBounds.merge(box2px(forceItem->location-Node::DIMENSIONS*0.5f,Node::DIMENSIONS));
+		parent->boxForce->setBounds(parent->graphBounds);
 		for (ConnectionPtr connector : parent->getConnections()) {
 			connector->getSpringItem()->update();
 		}
@@ -1127,6 +1131,14 @@ void Data::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		}
 	}
 	setDragOffset(pixel2(0.0f));
+}
+void Node::postPack() {
+	centerOffset = nodeIcon->getBounds(false).center() - getBounds(false).position;
+
+}
+void Data::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
+		double pixelRatio, bool clamp) {
+	prePack();
 	this->dimensions = CoordPX(
 			std::max(
 					std::max(textWidth + 10.0f,
@@ -1138,22 +1150,11 @@ void Data::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 									* (OutputPort::DIMENSIONS.x + 2.0f)),
 			Node::DIMENSIONS.y);	
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
-	centerOffset = nodeIcon->getBounds(false).center() - getBounds(false).position;
+	postPack();
 }
 void View::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp) {
-	pixel2 dragOffset = getDragOffset();
-	if (lengthL1(dragOffset) > 0) {
-		std::lock_guard<std::mutex> lockMe(parent->getForceSimulator()->getLock());
-		forceItem->location += dragOffset;
-		for (ConnectionPtr connector : parent->getConnections()) {
-			connector->getSpringItem()->update();
-		}
-		for (RelationshipPtr relationship : parent->getRelationships()) {
-			relationship->getSpringItem()->update();
-		}
-	}
-	setDragOffset(pixel2(0.0f));
+	prePack();
 	this->dimensions = CoordPX(
 			std::max(
 					std::max(textWidth + 10.0f,
@@ -1165,22 +1166,11 @@ void View::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 									* (OutputPort::DIMENSIONS.x + 2.0f)),
 			Node::DIMENSIONS.y);
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
-	centerOffset = nodeIcon->getBounds(false).center() - getBounds(false).position;
+	postPack();
 }
 void Compute::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp) {
-	pixel2 dragOffset=getDragOffset();
-	if (lengthL1(dragOffset) > 0) {
-		std::lock_guard<std::mutex> lockMe(parent->getForceSimulator()->getLock());
-		forceItem->location += dragOffset;
-		for (ConnectionPtr connector : parent->getConnections()) {
-			connector->getSpringItem()->update();
-		}
-		for (RelationshipPtr relationship : parent->getRelationships()) {
-			relationship->getSpringItem()->update();
-		}
-	}
-	setDragOffset(pixel2(0.0f));
+	prePack();
 	this->dimensions = CoordPX(
 			std::max(
 					std::max(textWidth + 14.0f,
@@ -1192,41 +1182,19 @@ void Compute::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 									* (OutputPort::DIMENSIONS.x + 2.0f)),
 			Node::DIMENSIONS.y);
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
-	centerOffset = nodeIcon->getBounds(false).center() - getBounds(false).position;
+	postPack();
 }
 void Source::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 	double pixelRatio, bool clamp) {
-	pixel2 dragOffset = getDragOffset();
-	if (lengthL1(dragOffset) > 0) {
-		std::lock_guard<std::mutex> lockMe(parent->getForceSimulator()->getLock());
-		forceItem->location += dragOffset;
-		for (ConnectionPtr connector : parent->getConnections()) {
-			connector->getSpringItem()->update();
-		}
-		for (RelationshipPtr relationship : parent->getRelationships()) {
-			relationship->getSpringItem()->update();
-		}
-	}
-	setDragOffset(pixel2(0.0f));
+	prePack();
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
-	centerOffset = nodeIcon->getBounds(false).center() - getBounds(false).position;
+	postPack();
 }
 void Destination::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 	double pixelRatio, bool clamp) {
-	pixel2 dragOffset = getDragOffset();
-	if (lengthL1(dragOffset) > 0) {
-		std::lock_guard<std::mutex> lockMe(parent->getForceSimulator()->getLock());
-		forceItem->location += dragOffset;
-		for (ConnectionPtr connector : parent->getConnections()) {
-			connector->getSpringItem()->update();
-		}
-		for (RelationshipPtr relationship : parent->getRelationships()) {
-			relationship->getSpringItem()->update();
-		}
-	}
-	setDragOffset(pixel2(0.0f));
+	prePack();
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
-	centerOffset = nodeIcon->getBounds(false).center() - getBounds(false).position;
+	postPack();
 }
 Node::Node(const std::string& name, const pixel2& pt) :
 	Composite(name, CoordPX(0.0f, 0.0f), CoordPX(Node::DIMENSIONS)), label(name), parent(nullptr) {
@@ -1703,7 +1671,10 @@ void DataFlow::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 	}
 	extents.dimensions = scrollExtent;
 	extents.position = currentDrawOffset;
-	boxForce->setBounds(box2f(pixel2(0.0f),forceSim->getBoundsDimensions()));
+	if (graphBounds.dimensions.x*graphBounds.dimensions.y == 0) {
+		graphBounds = box2px(Node::DIMENSIONS*0.5f,forceSim->getBoundsDimensions()- Node::DIMENSIONS);
+		boxForce->setBounds(graphBounds);
+	}
 	for (std::shared_ptr<Region>& region : children) {
 		if (region->onPack)
 			region->onPack();
