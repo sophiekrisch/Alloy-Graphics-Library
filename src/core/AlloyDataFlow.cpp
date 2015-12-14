@@ -597,7 +597,7 @@ bool DataFlow::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	}
 	if (e.type == InputType::Cursor) {
 		if (context->isMouseOver(forceSim.get()) || !context->isMouseContainedIn(this)) {
-			forceSim->setSelected(false);
+			forceSim->setSelected(nullptr);
 		}
 	}
 	else if (e.type == InputType::MouseButton) {
