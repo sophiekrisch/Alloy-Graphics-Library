@@ -231,7 +231,6 @@ bool Node::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	if (e.type == InputType::MouseButton && e.button == GLFW_MOUSE_BUTTON_LEFT
 			&& e.isDown() && over) {
 		dynamic_cast<Composite*>(this->parent)->putLast(this);
-		
 	}
 	if (dragging && e.type == InputType::Cursor) {
 		//box2px pbounds = parent->getBounds();
@@ -613,6 +612,11 @@ bool DataFlow::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	if (dragging && e.type == InputType::MouseButton && e.isUp()) {
 		dragging = false;
 	}
+	if (e.type== InputType::MouseButton&&e.isDown()) {
+		forceSim->stop();
+	} else 	if (e.type == InputType::MouseButton&&e.isUp()){
+		forceSim->start();
+	}
 	if (e.type
 			== InputType::MouseButton&&e.isDown() && e.button == GLFW_MOUSE_BUTTON_RIGHT) {
 		currentDrawOffset = this->extents.position;
@@ -798,14 +802,7 @@ void DataFlow::setup() {
 	forceSim->addForce(DragForcePtr(new DragForce(0.001f)));
 	forceSim->setZoom(1.0f);
 	forceSim->setOffset(pixel2(0.0f, 0.0f));
-	
 	forceSim->onStep = [this](float stepSize) {
-		routingLock.lock();
-			router.update();
-			for (ConnectionPtr& connect : connections) {
-				router.evaluate(connect);
-			}
-		routingLock.unlock();
 		AlloyContext* context = AlloyApplicationContext().get();
 		if (context) {
 			context->requestPack();
@@ -906,7 +903,6 @@ void Port::setup() {
 	onMouseDown = [this](AlloyContext* context,const InputEvent& e) {
 		if(e.button==GLFW_MOUSE_BUTTON_LEFT&&e.isDown()) {
 			getGraph()->startConnection(this);
-			return true;
 		}
 		return false;
 	};
@@ -1129,6 +1125,12 @@ void Data::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 	if (lengthL1(dragOffset) > 0) {
 		std::lock_guard<std::mutex> lockMe(parent->getForceSimulator()->getLock());
 		forceItem->location += dragOffset;
+		for (ConnectionPtr connector : parent->getConnections()) {
+			connector->getSpringItem()->update();
+		}
+		for (RelationshipPtr relationship : parent->getRelationships()) {
+			relationship->getSpringItem()->update();
+		}
 	}
 	setDragOffset(pixel2(0.0f));
 	this->dimensions = CoordPX(
@@ -1150,6 +1152,12 @@ void View::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 	if (lengthL1(dragOffset) > 0) {
 		std::lock_guard<std::mutex> lockMe(parent->getForceSimulator()->getLock());
 		forceItem->location += dragOffset;
+		for (ConnectionPtr connector : parent->getConnections()) {
+			connector->getSpringItem()->update();
+		}
+		for (RelationshipPtr relationship : parent->getRelationships()) {
+			relationship->getSpringItem()->update();
+		}
 	}
 	setDragOffset(pixel2(0.0f));
 	this->dimensions = CoordPX(
@@ -1171,6 +1179,12 @@ void Compute::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 	if (lengthL1(dragOffset) > 0) {
 		std::lock_guard<std::mutex> lockMe(parent->getForceSimulator()->getLock());
 		forceItem->location += dragOffset;
+		for (ConnectionPtr connector : parent->getConnections()) {
+			connector->getSpringItem()->update();
+		}
+		for (RelationshipPtr relationship : parent->getRelationships()) {
+			relationship->getSpringItem()->update();
+		}
 	}
 	setDragOffset(pixel2(0.0f));
 	this->dimensions = CoordPX(
@@ -1192,6 +1206,12 @@ void Source::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 	if (lengthL1(dragOffset) > 0) {
 		std::lock_guard<std::mutex> lockMe(parent->getForceSimulator()->getLock());
 		forceItem->location += dragOffset;
+		for (ConnectionPtr connector : parent->getConnections()) {
+			connector->getSpringItem()->update();
+		}
+		for (RelationshipPtr relationship : parent->getRelationships()) {
+			relationship->getSpringItem()->update();
+		}
 	}
 	setDragOffset(pixel2(0.0f));
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
@@ -1203,6 +1223,12 @@ void Destination::pack(const pixel2& pos, const pixel2& dims, const double2& dpm
 	if (lengthL1(dragOffset) > 0) {
 		std::lock_guard<std::mutex> lockMe(parent->getForceSimulator()->getLock());
 		forceItem->location += dragOffset;
+		for (ConnectionPtr connector : parent->getConnections()) {
+			connector->getSpringItem()->update();
+		}
+		for (RelationshipPtr relationship : parent->getRelationships()) {
+			relationship->getSpringItem()->update();
+		}
 	}
 	setDragOffset(pixel2(0.0f));
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
@@ -1688,6 +1714,12 @@ void DataFlow::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		if (region->onPack)
 			region->onPack();
 	}
+	routingLock.lock();
+	router.update();
+	for (ConnectionPtr& connect : connections) {
+		router.evaluate(connect);
+	}
+	routingLock.unlock();
 }
 }
 }

@@ -680,6 +680,12 @@ public:
 	const std::vector<std::shared_ptr<Connection>>& getConnections() const {
 		return connections;
 	}
+	std::vector<std::shared_ptr<Relationship>>& getRelationships() {
+		return relationships;
+	}
+	const std::vector<std::shared_ptr<Relationship>>& getRelationships() const {
+		return relationships;
+	}
 };
 class Group: public Node {
 protected:

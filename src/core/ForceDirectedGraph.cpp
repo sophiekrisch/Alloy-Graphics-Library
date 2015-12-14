@@ -259,8 +259,10 @@ namespace aly {
 			return true;
 		}
 		void ForceSimulator::start() {
-			renderCount = 0;
-			simWorker->execute();
+			if (!simWorker->isRunning()) {
+				renderCount = 0;
+				simWorker->execute();
+			}
 		}
 		void ForceSimulator::stop() {
 			simWorker->cancel();

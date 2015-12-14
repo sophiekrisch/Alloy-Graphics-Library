@@ -66,9 +66,14 @@ struct SpringItem {
 	float length;
 	float2 direction;
 	bool visible;
+	
 	SpringItem(const ForceItemPtr& fi1, const ForceItemPtr& fi2, float k,
 			float len) :
-			item1(fi1), item2(fi2), kappa(k), gamma(0.0f), length(len), direction(fi2->location-fi1->location),visible(true){
+			item1(fi1), item2(fi2), kappa(k), gamma(0.0f), length(len), direction(normalize(fi2->location-fi1->location)),visible(true){
+	}
+	void update() {
+		length = distance(item1->location, item2->location);
+		direction = (item2->location - item1->location)/length;
 	}
 	void draw(AlloyContext* context, const pixel2& offset,float scale);
 };
