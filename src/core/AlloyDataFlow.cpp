@@ -322,8 +322,6 @@ void View::setup() {
 	nodeIcon->setShape(NodeShape::Square);
 	nodeIcon->borderWidth = borderWidth;
 	forceItem->buoyancy = 1;
-	forceItem->shape = nodeIcon->getShape();
-	forceItem->color = nodeIcon->backgroundColor->toRGBAf();
 
 }
 void Data::setup() {
@@ -396,8 +394,6 @@ void Data::setup() {
 	nodeIcon->backgroundColor = MakeColor(COLOR);
 	nodeIcon->borderWidth = borderWidth;
 	forceItem->buoyancy = 0;
-	forceItem->shape = nodeIcon->getShape();
-	forceItem->color = nodeIcon->backgroundColor->toRGBAf();
 
 }
 void Compute::setup() {
@@ -464,8 +460,6 @@ void Compute::setup() {
 	nodeIcon->borderWidth = borderWidth;
 	nodeIcon->setShape(NodeShape::Hexagon);
 	forceItem->buoyancy = 0;
-	forceItem->shape = nodeIcon->getShape();
-	forceItem->color = nodeIcon->backgroundColor->toRGBAf();
 
 }
 void Source::setup() {
@@ -520,8 +514,6 @@ void Source::setup() {
 	nodeIcon->backgroundColor = MakeColor(COLOR);
 	nodeIcon->borderWidth = borderWidth;
 	forceItem->buoyancy = -1;
-	forceItem->shape = nodeIcon->getShape();
-	forceItem->color = nodeIcon->backgroundColor->toRGBAf();
 
 }
 void Destination::setup() {
@@ -568,8 +560,6 @@ void Destination::setup() {
 	nodeIcon->setShape(NodeShape::Triangle);
 	nodeIcon->borderWidth = borderWidth;
 	forceItem->buoyancy = 1;
-	forceItem->shape = nodeIcon->getShape();
-	forceItem->color = nodeIcon->backgroundColor->toRGBAf();
 
 }
 bool Node::isMouseOver() const {
@@ -584,7 +574,6 @@ void DataFlow::setCurrentPort(Port* currentPort) {
 	this->currentPort = currentPort;
 }
 bool DataFlow::onEventHandler(AlloyContext* context, const InputEvent& e) {
-	
 	if (connectingPort != nullptr && e.type == InputType::MouseButton
 			&& e.isUp()) {
 		if (currentPort != nullptr && currentPort != connectingPort
@@ -604,19 +593,22 @@ bool DataFlow::onEventHandler(AlloyContext* context, const InputEvent& e) {
 		}
 		connectingPort = nullptr;
 	}
-
-	bool over = context->isMouseOver(this);
-	if (over) {
-		forceSim->setSelected(nullptr);
+	if (e.type == InputType::Cursor) {
+		if (context->isMouseOver(forceSim.get()) || !context->isMouseContainedIn(this)) {
+			forceSim->setSelected(false);
+		}
+	}
+	else if (e.type == InputType::MouseButton) {
+		if (e.isDown()) {
+			forceSim->stop();
+		} else if (e.isUp()) {
+			forceSim->start();
+		}
 	}
 	if (dragging && e.type == InputType::MouseButton && e.isUp()) {
 		dragging = false;
 	}
-	if (e.type== InputType::MouseButton&&e.isDown()) {
-		forceSim->stop();
-	} else 	if (e.type == InputType::MouseButton&&e.isUp()){
-		forceSim->start();
-	}
+
 	if (e.type
 			== InputType::MouseButton&&e.isDown() && e.button == GLFW_MOUSE_BUTTON_RIGHT) {
 		currentDrawOffset = this->extents.position;
@@ -792,8 +784,8 @@ void DataFlow::setup() {
 						}
 					}));
 
-	Composite::add(forceSim);
 	Composite::add(pathsRegion);
+	Composite::add(forceSim);
 	Application::addListener(this);
 	forceSim->addForce(SpringForcePtr(new SpringForce()));
 	forceSim->addForce(NBodyForcePtr(new NBodyForce()));

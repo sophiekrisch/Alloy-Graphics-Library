@@ -112,6 +112,7 @@ void ForceDirectedGraphEx::createRadialGraph(const ForceSimulatorPtr& graph) {
 												n * ALY_PI * 2.0f / (float) N));
 				child = ForceItemPtr(new ForceItem(pt));
 				child->buoyancy = 0;
+				child->shape = NodeShape::Circle;
 				child->color=Data::COLOR.toRGBAf();
 				graph->addForceItem(child);
 				SpringItemPtr item=graph->addSpringItem(parent, child);

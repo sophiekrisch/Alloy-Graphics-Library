@@ -48,7 +48,7 @@ struct ForceItem {
 	std::array<float2, 4> l;
 	ForceItem(const float2& pt = float2(0.0f)) :
 			mass(1.0f), buoyancy(1.0f), force(0.0f), velocity(0.0f), location(
-					pt), plocation(pt), shape(NodeShape::Circle) ,color(1.0f,0.2f,0.2f,1.0f){
+					pt), plocation(pt), shape(NodeShape::None) ,color(1.0f,0.2f,0.2f,1.0f){
 	}
 	void reset() {
 		force = float2(0.0f);
