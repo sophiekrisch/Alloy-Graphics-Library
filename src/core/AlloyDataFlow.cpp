@@ -225,8 +225,10 @@ bool Node::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	if (Composite::onEventHandler(context, e))
 		return true;
 	bool over = context->isMouseOver(nodeIcon.get(), true);
-	if (over) {
+	if (context->isMouseOver(this, true)) {
 		parent->getForceSimulator()->setSelected(forceItem.get());
+		forceItem->velocity = float2(0.0f);
+		forceItem->plocation = forceItem->location;
 	}
 	if (e.type == InputType::MouseButton && e.button == GLFW_MOUSE_BUTTON_LEFT
 			&& e.isDown() && over) {
