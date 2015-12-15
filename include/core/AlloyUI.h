@@ -463,7 +463,8 @@ protected:
 	bool showDefaultLabel = true;
 	std::string label;
 	std::string value;
-	float fontSize = 0;
+	AUnit1D fontSize;
+	float th=0;
 	float textOffsetX = 0;
 	bool showCursor = false;
 	std::chrono::high_resolution_clock::time_point lastTime;
@@ -723,6 +724,17 @@ public:
 	virtual void draw(AlloyContext* context) override;
 	virtual void setValue(const std::string& value) override;
 };
+struct ModifiableLabel : public TextField {
+public:
+	FontType fontType;
+	FontStyle fontStyle;
+	AColor textAltColor;
+	HorizontalAlignment horizontalAlignment = HorizontalAlignment::Left;
+	VerticalAlignment verticalAlignment = VerticalAlignment::Top;
+	
+	ModifiableLabel(const std::string& name, const AUnit2D& position,const AUnit2D& dimensions);
+	virtual void draw(AlloyContext* context) override;
+};
 std::shared_ptr<Composite> MakeComposite(const std::string& name,
 		const AUnit2D& position, const AUnit2D& dimensions,
 		const Color& bgColor = COLOR_NONE, const Color& lineColor = COLOR_NONE,
@@ -878,5 +890,6 @@ typedef std::shared_ptr<Draw> DrawPtr;
 typedef std::shared_ptr<NumberField> NumberFieldPtr;
 typedef std::shared_ptr<FileField> FileFieldPtr;
 typedef std::shared_ptr<AdjustableComposite> AdjustableCompositePtr;
+typedef std::shared_ptr<ModifiableLabel> ModifiableLabelPtr;
 }
 #endif /* ALLOYUI_H_ */

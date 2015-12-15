@@ -72,7 +72,19 @@ bool ControlsEx::init(Composite& rootNode) {
 	textLabel->borderWidth = UnitPX(1.0f);
 	textLabel->setRoundCorners(true);
 	textLabel->horizontalAlignment = HorizontalAlignment::Center;
+	textLabel->verticalAlignment = VerticalAlignment::Middle;
 	rootNode.add(textLabel);
+
+	ModifiableLabelPtr modifyLabel = ModifiableLabelPtr(
+		new ModifiableLabel("Click to edit", CoordPerPX(0.5f,1.0f,-80.0f,-50.0f), CoordPX(160, 30)));
+	modifyLabel->backgroundColor = MakeColor(32,32,32);
+	modifyLabel->borderColor = MakeColor(64,64,64);
+	modifyLabel->textColor = MakeColor(64, 200, 64);
+	modifyLabel->borderWidth = UnitPX(1.0f);
+	modifyLabel->setRoundCorners(false);
+	modifyLabel->horizontalAlignment = HorizontalAlignment::Center;
+	modifyLabel->verticalAlignment = VerticalAlignment::Middle;
+	rootNode.add(modifyLabel);
 
 	ColorSelectorPtr colorselect = ColorSelectorPtr(
 			new ColorSelector("Color", CoordPercent(0.5f, 0.4f),
