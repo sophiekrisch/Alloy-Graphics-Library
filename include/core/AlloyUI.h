@@ -463,7 +463,6 @@ protected:
 	bool showDefaultLabel = true;
 	std::string label;
 	std::string value;
-	AUnit1D fontSize;
 	float th=0;
 	float textOffsetX = 0;
 	bool showCursor = false;
@@ -481,6 +480,7 @@ protected:
 	std::string lastValue;
 public:
 	static const float PADDING;
+	AUnit1D fontSize;
 	AColor textColor = MakeColor(Theme::Default.LIGHT_TEXT);
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
 			override;
