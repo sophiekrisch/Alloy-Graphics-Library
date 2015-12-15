@@ -323,7 +323,7 @@ void View::setup() {
 	nodeIcon->backgroundColor = MakeColor(COLOR);
 	nodeIcon->setShape(NodeShape::Square);
 	nodeIcon->borderWidth = borderWidth;
-	forceItem->buoyancy = 1;
+	forceItem->buoyancy = 0;
 
 }
 void Data::setup() {
@@ -1121,7 +1121,51 @@ void Node::prePack() {
 	if (lengthL1(dragOffset) > 0) {
 		std::lock_guard<std::mutex> lockMe(parent->getForceSimulator()->getLock());
 		forceItem->location += dragOffset;
-		parent->graphBounds.merge(box2px(forceItem->location-Node::DIMENSIONS*0.5f,Node::DIMENSIONS));
+
+		setDragOffset(pixel2(0.0f));
+		pixel2 minPt = parent->graphBounds.min();
+		pixel2 maxPt = parent->graphBounds.max();
+		float minX =1E30f;
+		float maxX = -1E30f;
+		float minY = 1E30f;
+		float maxY = -1E30f;
+		Node* minXnode = nullptr;
+		Node* maxXnode = nullptr;
+		Node* minYnode = nullptr;
+		Node* maxYnode = nullptr;
+		for (RegionPtr region:parent->getChildren()) {
+			Node* node = dynamic_cast<Node*>(region.get());
+			if (node) {
+				box2px box= node->getBounds();
+				if (box.position.x < minX) {
+					minX = box.position.x;
+					minXnode = node;
+				} else if (box.position.x + box.dimensions.x> maxX) {
+					maxX = box.position.x+box.dimensions.x;
+					maxXnode = node;
+				}
+				if (box.position.y < minY) {
+					minY =box.position.y;
+					minYnode = node;
+				} else if (box.position.y + box.dimensions.y> maxY) {
+					maxY = box.position.y + box.dimensions.y;
+					maxYnode = node;
+				}
+			}
+		}
+		if (maxXnode == this) {
+			maxPt.x = maxX;
+		}
+		if (minXnode==this) {
+			minPt.x = minX;
+		}
+		if (maxYnode == this) {
+			maxPt.y = maxY;
+		}
+		if (minYnode == this) {
+			minPt.y = minY;
+		}
+		parent->graphBounds = box2px(minPt, maxPt - minPt);
 		parent->boxForce->setBounds(parent->graphBounds);
 		for (ConnectionPtr connector : parent->getConnections()) {
 			connector->getSpringItem()->update();
@@ -1130,7 +1174,6 @@ void Node::prePack() {
 			relationship->getSpringItem()->update();
 		}
 	}
-	setDragOffset(pixel2(0.0f));
 }
 void Node::postPack() {
 	centerOffset = nodeIcon->getBounds(false).center() - getBounds(false).position;
@@ -1226,13 +1269,6 @@ box2px Node::getCursorBounds(bool includeOffset) const {
 	return box;
 
 }
-/*
-box2px Node::getExtents() const {
-	box2px box = Composite::getExtents();
-	box.position += forceItem->location-centerOffset;
-	return box;
-}
-*/
 pixel2 Node::getDrawOffset() const {
 	return Composite::getDrawOffset() +forceItem->location-centerOffset;
 }
@@ -1488,6 +1524,7 @@ void Relationship::drawText(AlloyContext* context) {
 void DataFlow::draw(AlloyContext* context) {
 	mouseOverNode = nullptr;
 	const float nudge = context->theme.CORNER_RADIUS;
+
 	for (std::shared_ptr<Region> child : children) {
 		Node* node = dynamic_cast<Node*>(child.get());
 		if (node) {
@@ -1498,26 +1535,35 @@ void DataFlow::draw(AlloyContext* context) {
 		}
 	}
 	NVGcontext* nvg = context->nvgContext;
+
 	box2px bounds = getBounds();
 	float w = bounds.dimensions.x;
 	float h = bounds.dimensions.y;
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
-			context->pixelRatio);
+		context->pixelRatio);
 	pushScissor(nvg, getCursorBounds());
 	if (backgroundColor->a > 0) {
 		nvgBeginPath(nvg);
 		if (roundCorners) {
 			nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
-					bounds.dimensions.x, bounds.dimensions.y,
-					context->theme.CORNER_RADIUS);
-		} else {
+				bounds.dimensions.x, bounds.dimensions.y,
+				context->theme.CORNER_RADIUS);
+		}
+		else {
 			nvgRect(nvg, bounds.position.x, bounds.position.y,
-					bounds.dimensions.x, bounds.dimensions.y);
+				bounds.dimensions.x, bounds.dimensions.y);
 		}
 		nvgFillColor(nvg, *backgroundColor);
 		nvgFill(nvg);
 	}
-
+	{
+		nvgBeginPath(nvg);
+		nvgFillColor(nvg,context->theme.DARK.toDarker(0.75f));
+		nvgStrokeWidth(nvg, 1.0f);
+		float2 offset = getDrawOffset()+getBoundsPosition();
+		nvgRoundedRect(nvg, graphBounds.position.x+offset.x, graphBounds.position.y+offset.y , graphBounds.dimensions.x, graphBounds.dimensions.y,context->theme.CORNER_RADIUS);
+		nvgFill(nvg);
+	}
 	for (std::shared_ptr<Region>& region : children) {
 		if (region->isVisible()) {
 			region->draw(context);
@@ -1576,11 +1622,13 @@ void DataFlow::draw(AlloyContext* context) {
 			box2px bounds = connectingPort->getBounds();
 			pixel2 start;
 			Direction dir = Direction::Unkown;
+			bool flipDir = false;
 			switch (connectingPort->getType()) {
 			case PortType::Input:
 				start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
 						bounds.position.y + nudge);
-				dir = Direction::North;
+				dir = Direction::South;
+				flipDir = true;
 				break;
 			case PortType::Output:
 				start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
@@ -1595,7 +1643,8 @@ void DataFlow::draw(AlloyContext* context) {
 			case PortType::Parent:
 				start = pixel2(bounds.position.x + nudge,
 						bounds.position.y + bounds.dimensions.y * 0.5f);
-				dir = Direction::West;
+				dir = Direction::East;
+				flipDir = true;
 				break;
 			case PortType::Unknown:
 				start = pixel2(bounds.position.x + bounds.dimensions.x * 0.5f,
@@ -1604,7 +1653,12 @@ void DataFlow::draw(AlloyContext* context) {
 			start -= offset;
 			float2 end = cursor - offset;
 			std::vector<float2> path;
-			router.evaluate(path, start, end, dir);
+			if (flipDir) {
+				router.evaluate(path, end,start, dir);
+			}
+			else {
+				router.evaluate(path, start, end, dir);
+			}
 			nvgLineCap(nvg, NVG_ROUND);
 			nvgLineJoin(nvg, NVG_BEVEL);
 			nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
@@ -1672,7 +1726,7 @@ void DataFlow::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 	extents.dimensions = scrollExtent;
 	extents.position = currentDrawOffset;
 	if (graphBounds.dimensions.x*graphBounds.dimensions.y == 0) {
-		graphBounds = box2px(Node::DIMENSIONS*0.5f,forceSim->getBoundsDimensions()- Node::DIMENSIONS);
+		graphBounds = box2px(Node::DIMENSIONS*0.5f,forceSim->getBoundsDimensions() - Node::DIMENSIONS);
 		boxForce->setBounds(graphBounds);
 	}
 	for (std::shared_ptr<Region>& region : children) {
