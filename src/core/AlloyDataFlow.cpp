@@ -1136,7 +1136,7 @@ void Node::prePack() {
 		for (RegionPtr region:parent->getChildren()) {
 			Node* node = dynamic_cast<Node*>(region.get());
 			if (node) {
-				box2px box= node->getBounds();
+				box2px box = box2px(node->getForceItem()->location - Node::DIMENSIONS*0.5f, Node::DIMENSIONS);
 				if (box.position.x < minX) {
 					minX = box.position.x;
 					minXnode = node;
@@ -1561,7 +1561,7 @@ void DataFlow::draw(AlloyContext* context) {
 		nvgFillColor(nvg,context->theme.DARK.toDarker(0.75f));
 		nvgStrokeWidth(nvg, 1.0f);
 		float2 offset = getDrawOffset()+getBoundsPosition();
-		nvgRoundedRect(nvg, graphBounds.position.x+offset.x, graphBounds.position.y+offset.y , graphBounds.dimensions.x, graphBounds.dimensions.y,context->theme.CORNER_RADIUS);
+		nvgRoundedRect(nvg, graphBounds.position.x+offset.x- Node::DIMENSIONS.x*0.5f, graphBounds.position.y+offset.y- Node::DIMENSIONS.y*0.5f, graphBounds.dimensions.x+Node::DIMENSIONS.x, graphBounds.dimensions.y+Node::DIMENSIONS.y,context->theme.CORNER_RADIUS);
 		nvgFill(nvg);
 	}
 	for (std::shared_ptr<Region>& region : children) {
