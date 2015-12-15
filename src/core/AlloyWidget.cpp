@@ -1569,11 +1569,11 @@ void ColorWheel::draw(AlloyContext* context) {
 		M(1, 1) = row2.y;
 		pt = inverse(M) * bvec;
 
-		if (cross(pt - tPoints[2], tPoints[1] - tPoints[2]) < 0) {
+		if (crossMag(pt - tPoints[2], tPoints[1] - tPoints[2]) < 0) {
 			pt = dot(pt - tPoints[2], tPoints[1] - tPoints[2])
 					* (tPoints[1] - tPoints[2])
 					/ lengthSqr(tPoints[1] - tPoints[2]) + tPoints[2];
-		} else if (cross(tPoints[0] - tPoints[2], pt - tPoints[2]) < 0) {
+		} else if (crossMag(tPoints[0] - tPoints[2], pt - tPoints[2]) < 0) {
 			pt = dot(pt - tPoints[2], tPoints[0] - tPoints[2])
 					* (tPoints[0] - tPoints[2])
 					/ lengthSqr(tPoints[0] - tPoints[2]) + tPoints[2];
