@@ -376,7 +376,7 @@ protected:
 public:
 	std::function<void(TreeItem* item)> onExpand;
 	std::function<void(TreeItem* item)> onCollapse;
-	std::function<void(TreeItem* item)> onSelect;
+	std::function<void(TreeItem* item, const InputEvent& e)> onSelect;
 	bool isExpanded() const {
 		return expanded;
 	}

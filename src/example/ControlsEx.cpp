@@ -79,7 +79,7 @@ bool ControlsEx::init(Composite& rootNode) {
 		new ModifiableLabel("Click to edit", CoordPerPX(0.5f,1.0f,-80.0f,-50.0f), CoordPX(160, 40)));
 	modifyLabel->backgroundColor = MakeColor(32,32,32);
 	modifyLabel->borderColor = MakeColor(64,64,64);
-	modifyLabel->textColor = MakeColor(220,220,255);
+	modifyLabel->textColor = MakeColor(Color(51, 153, 255));
 	modifyLabel->borderWidth = UnitPX(1.0f);
 	modifyLabel->fontSize = UnitPX(30);
 	modifyLabel->setRoundCorners(false);

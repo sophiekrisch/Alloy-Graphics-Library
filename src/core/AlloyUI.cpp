@@ -1839,6 +1839,21 @@ void TextField::draw(AlloyContext* context) {
 		showDefaultLabel = true;
 	}
 }
+pixel2 ModifiableLabel::getTextDimensions(AlloyContext* context) {
+	NVGcontext* nvg = context->nvgContext;
+	box2px bounds = getBounds();
+	float th = fontSize.toPixels(bounds.dimensions.y, context->dpmm.y,context->pixelRatio);
+	nvgFontSize(nvg, th);
+	nvgFontFaceId(nvg, context->getFontHandle(fontType));
+	float tw;
+	if (showDefaultLabel) {
+		tw=nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
+	}
+	else {
+		tw=nvgTextBounds(nvg, 0, 0, value.c_str(), nullptr, nullptr);
+	}
+	return pixel2(tw, th);
+}
 ModifiableLabel::ModifiableLabel(const std::string& name, const AUnit2D& position,
 	const AUnit2D& dimensions) :TextField(name, position, dimensions), fontType(FontType::Normal),fontStyle(FontStyle::Normal) {
 	textAltColor = MakeColor(AlloyApplicationContext()->theme.DARK_TEXT);
@@ -1903,7 +1918,7 @@ void ModifiableLabel::draw(AlloyContext* context) {
 	float textY = y;
 	
 	if (isFocused) {
-		th=std::max(8.0f, h - 4 * PADDING);
+		th = std::min(std::max(8.0f, h - 4 * PADDING), this->fontSize.toPixels(bounds.dimensions.y, context->dpmm.y,context->pixelRatio));
 	}
 	else {
 		th= this->fontSize.toPixels(bounds.dimensions.y, context->dpmm.y,
@@ -1966,9 +1981,9 @@ void ModifiableLabel::draw(AlloyContext* context) {
 			nvgStrokeColor(nvg, context->theme.SHADOW);
 			nvgStroke(nvg);
 		}
+		popScissor(nvg);
 	}
 	else {
-		pushScissor(nvg, getCursorBounds());
 		nvgTextAlign(nvg,
 			static_cast<int>(horizontalAlignment)
 			| static_cast<int>(verticalAlignment));
@@ -2011,6 +2026,15 @@ void ModifiableLabel::draw(AlloyContext* context) {
 			start.y = offset.y - th;
 			break;
 		}
+		if (hover) {
+			nvgLineCap(nvg, NVG_SQUARE);
+			nvgStrokeWidth(nvg, (fontType==FontType::Bold)?2.0f:1.0f);
+			nvgStrokeColor(nvg,*textColor);
+			nvgBeginPath(nvg);
+			nvgMoveTo(nvg, bounds.position.x + start.x, bounds.position.y +start.y+ th-2);
+			nvgLineTo(nvg, bounds.position.x + start.x + tw, bounds.position.y + start.y + th-2);
+			nvgStroke(nvg);
+		}
 		if (showDefaultLabel) {
 			drawText(nvg, bounds.position + offset, label, fontStyle, *textColor, *textAltColor);
 			
@@ -2019,17 +2043,8 @@ void ModifiableLabel::draw(AlloyContext* context) {
 			drawText(nvg, bounds.position + offset, value, fontStyle, *textColor, *textAltColor);
 		
 		}
-		if (hover) {
-			nvgLineCap(nvg,NVG_SQUARE);
-			nvgStrokeWidth(nvg, 2.0f);
-			nvgStrokeColor(nvg,*textColor);
-			nvgBeginPath(nvg);
-			nvgMoveTo(nvg,bounds.position.x+start.x, bounds.position.y + th);
-			nvgLineTo(nvg, bounds.position.x+start.x+tw, bounds.position.y + th);
-			nvgStroke(nvg);
-		}
+
 	}
-	popScissor(nvg);
 	if (borderColor->a > 0) {
 		nvgLineJoin(nvg, NVG_ROUND);
 		nvgBeginPath(nvg);

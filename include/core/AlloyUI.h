@@ -731,7 +731,12 @@ public:
 	AColor textAltColor;
 	HorizontalAlignment horizontalAlignment = HorizontalAlignment::Left;
 	VerticalAlignment verticalAlignment = VerticalAlignment::Top;
-	
+	void setAlignment(const HorizontalAlignment& horizontalAlignment,
+		const VerticalAlignment& verticalAlignment) {
+		this->horizontalAlignment = horizontalAlignment;
+		this->verticalAlignment = verticalAlignment;
+	}
+	virtual pixel2 getTextDimensions(AlloyContext* context);
 	ModifiableLabel(const std::string& name, const AUnit2D& position,const AUnit2D& dimensions);
 	virtual void draw(AlloyContext* context) override;
 };

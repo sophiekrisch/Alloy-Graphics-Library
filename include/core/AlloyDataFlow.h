@@ -390,7 +390,7 @@ protected:
 	std::shared_ptr<ChildPort> childPort;
 	CompositePtr inputPortComposite;
 	CompositePtr outputPortComposite;
-	TextLabelPtr labelRegion;
+	ModifiableLabelPtr labelRegion;
 	float textWidth;
 	pixel2 centerOffset;
 	std::shared_ptr<ForceItem> forceItem;

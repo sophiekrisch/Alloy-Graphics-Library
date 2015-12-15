@@ -3259,7 +3259,7 @@ ExpandTree::ExpandTree(const std::string& name, const AUnit2D& pos,
 							selectedItem->setExpanded(!selectedItem->isExpanded());
 						} else {
 							if(selectedItem->onSelect) {
-								selectedItem->onSelect(selectedItem);
+								selectedItem->onSelect(selectedItem,e);
 							}
 						}
 						setDirty(true);
