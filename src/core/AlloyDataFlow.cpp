@@ -716,7 +716,7 @@ void DataFlow::add(const std::shared_ptr<Region>& region) {
 	Composite::add(region);
 }
 void DataFlow::add(const std::shared_ptr<Relationship>& relationship) {
-	relationship->getSpringItem().reset(new SpringItem(relationship->subject->getForceItem(), relationship->object->getForceItem(),-1.0f, 4 * ForceSimulator::RADIUS));
+	relationship->getSpringItem().reset(new SpringItem(relationship->subject->getForceItem(), relationship->object->getForceItem(), -1.0f, std::max(distance(relationship->subject->getForceItem()->location, relationship->object->getForceItem()->location), 2 * Node::DIMENSIONS.x)));
 	relationship->getSpringItem()->visible = false;
 	routingLock.lock();
 	forceSim->addSpringItem(relationship->getSpringItem());
