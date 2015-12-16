@@ -287,8 +287,9 @@ void View::setup() {
 	iconContainer->add(inputPort);
 	iconContainer->add(nodeIcon);
 	labelRegion = ModifiableLabelPtr(
-		new ModifiableLabel(label, CoordPX(0.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
+		new ModifiableLabel(name, CoordPX(0.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
 			CoordPerPX(0.0f, 1.0f, 10 + textWidth, -2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f)));
+	labelRegion->setValue(label);
 	labelRegion->setAlignment(HorizontalAlignment::Left, VerticalAlignment::Middle);
 	labelRegion->fontSize = UnitPX(fontSize);
 	labelRegion->fontType = FontType::Bold;
@@ -360,8 +361,9 @@ void Data::setup() {
 	iconContainer->add(outputPort);
 	iconContainer->add(nodeIcon);
 	labelRegion = ModifiableLabelPtr(
-			new ModifiableLabel(label,CoordPX(0.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
+			new ModifiableLabel(name,CoordPX(0.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
 				CoordPerPX(0.0f, 1.0f, 10 + textWidth, -2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f)));
+	labelRegion->setValue(label);
 	labelRegion->setAlignment(HorizontalAlignment::Left,VerticalAlignment::Middle);
 	labelRegion->fontSize = UnitPX(fontSize);
 	labelRegion->fontType = FontType::Bold;
@@ -425,8 +427,9 @@ void Compute::setup() {
 	iconContainer->add(inputPort);
 	iconContainer->add(nodeIcon);
 	labelRegion = ModifiableLabelPtr(
-		new ModifiableLabel(label, CoordPX(0.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
+		new ModifiableLabel(name, CoordPX(0.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
 			CoordPerPX(0.0f, 1.0f, 10 + textWidth, -2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f)));
+	labelRegion->setValue(label);
 	labelRegion->setAlignment(HorizontalAlignment::Left, VerticalAlignment::Middle);
 	labelRegion->fontSize = UnitPX(fontSize);
 	labelRegion->fontType = FontType::Bold;
@@ -461,7 +464,6 @@ void Compute::setup() {
 
 }
 void Source::setup() {
-	//setOrientation(Orientation::Vertical, pixel2(0, 0));
 	CompositePtr iconContainer = MakeComposite("Icon Container",
 			CoordPerPX(0.5f,0.0f, -Node::DIMENSIONS.x*0.5f , fontSize + 2 * TextField::PADDING),
 			CoordPX(Node::DIMENSIONS.x,Node::DIMENSIONS.y - InputPort::DIMENSIONS.y));
@@ -494,8 +496,9 @@ void Source::setup() {
 			AlloyApplicationContext()->getFont(FontType::Bold)->handle);
 	textWidth = nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
 	labelRegion = ModifiableLabelPtr(
-			new ModifiableLabel(label, CoordPerPX(0.5f, 0.0f,0.0f,0.0f),
+			new ModifiableLabel(name, CoordPerPX(0.5f, 0.0f,0.0f,0.0f),
 					CoordPX(textWidth + 10.0f, fontSize+2*TextField::PADDING)));
+	labelRegion->setValue(label);
 	labelRegion->setOrigin(Origin::TopCenter);
 	labelRegion->setAlignment(HorizontalAlignment::Center,
 			VerticalAlignment::Middle);
@@ -536,8 +539,9 @@ void Destination::setup() {
 			AlloyApplicationContext()->getFont(FontType::Bold)->handle);
 	textWidth= nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
 	labelRegion = ModifiableLabelPtr(
-			new ModifiableLabel(label, CoordPerPX(0.5f, 0.0f,0.0f, Node::DIMENSIONS.y - InputPort::DIMENSIONS.y),
+			new ModifiableLabel(name, CoordPerPX(0.5f, 0.0f,0.0f, Node::DIMENSIONS.y - InputPort::DIMENSIONS.y),
 					CoordPX(textWidth + 10.0f, fontSize + 2 * TextField::PADDING)));
+	labelRegion->setValue(label);
 	labelRegion->setOrigin(Origin::TopCenter);
 	labelRegion->setAlignment(HorizontalAlignment::Center,
 			VerticalAlignment::Middle);

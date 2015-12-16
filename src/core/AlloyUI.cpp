@@ -1846,7 +1846,7 @@ pixel2 ModifiableLabel::getTextDimensions(AlloyContext* context) {
 	nvgFontSize(nvg, th);
 	nvgFontFaceId(nvg, context->getFontHandle(fontType));
 	float tw;
-	if (showDefaultLabel) {
+	if (showDefaultLabel||value.size()==0) {
 		tw=nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
 	}
 	else {
