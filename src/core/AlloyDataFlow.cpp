@@ -288,14 +288,14 @@ void View::setup() {
 	iconContainer->add(nodeIcon);
 	labelRegion = ModifiableLabelPtr(
 		new ModifiableLabel(name, CoordPX(0.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
-			CoordPerPX(0.0f, 1.0f, 10 + textWidth, -2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f)));
+			CoordPerPX(0.0f, 1.0f, std::max(10 + textWidth, Node::DIMENSIONS.x), -2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f)));
 	labelRegion->setValue(label);
 	labelRegion->setAlignment(HorizontalAlignment::Left, VerticalAlignment::Middle);
 	labelRegion->fontSize = UnitPX(fontSize);
 	labelRegion->fontType = FontType::Bold;
 	labelRegion->onTextEntered = [this](TextField* field) {
 		textWidth = labelRegion->getTextDimensions(AlloyApplicationContext().get()).x;
-		labelRegion->dimensions = CoordPerPX(0.0f, 1.0f, 10 + textWidth, -2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f);
+		labelRegion->dimensions = CoordPerPX(0.0f, 1.0f, std::max(10 + textWidth,Node::DIMENSIONS.x), -2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f);
 	};
 	labelContainer->add(labelRegion);
 	inputPortComposite = CompositePtr(
@@ -362,14 +362,14 @@ void Data::setup() {
 	iconContainer->add(nodeIcon);
 	labelRegion = ModifiableLabelPtr(
 			new ModifiableLabel(name,CoordPX(0.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
-				CoordPerPX(0.0f, 1.0f, 10 + textWidth, -2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f)));
+				CoordPerPX(0.0f, 1.0f, std::max(10 + textWidth, Node::DIMENSIONS.x), -2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f)));
 	labelRegion->setValue(label);
 	labelRegion->setAlignment(HorizontalAlignment::Left,VerticalAlignment::Middle);
 	labelRegion->fontSize = UnitPX(fontSize);
 	labelRegion->fontType = FontType::Bold;
 	labelRegion->onTextEntered = [this](TextField* field) {
 		textWidth = labelRegion->getTextDimensions(AlloyApplicationContext().get()).x;
-		labelRegion->dimensions = CoordPerPX(0.0f, 1.0f, 10+textWidth, -2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f);
+		labelRegion->dimensions = CoordPerPX(0.0f, 1.0f, std::max(10 + textWidth, Node::DIMENSIONS.x), -2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f);
 	};
 	labelContainer->add(labelRegion);
 
@@ -428,14 +428,14 @@ void Compute::setup() {
 	iconContainer->add(nodeIcon);
 	labelRegion = ModifiableLabelPtr(
 		new ModifiableLabel(name, CoordPX(0.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
-			CoordPerPX(0.0f, 1.0f, 10 + textWidth, -2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f)));
+			CoordPerPX(0.0f, 1.0f, std::max(10 + textWidth, Node::DIMENSIONS.x), -2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f)));
 	labelRegion->setValue(label);
 	labelRegion->setAlignment(HorizontalAlignment::Left, VerticalAlignment::Middle);
 	labelRegion->fontSize = UnitPX(fontSize);
 	labelRegion->fontType = FontType::Bold;
 	labelRegion->onTextEntered = [this](TextField* field) {
 		textWidth = labelRegion->getTextDimensions(AlloyApplicationContext().get()).x;
-		labelRegion->dimensions = CoordPerPX(0.0f, 1.0f, 10 + textWidth, -2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f);
+		labelRegion->dimensions = CoordPerPX(0.0f, 1.0f, std::max(10 + textWidth, Node::DIMENSIONS.x), -2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f);
 	};
 	labelContainer->add(labelRegion);
 
