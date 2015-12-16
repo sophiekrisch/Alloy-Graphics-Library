@@ -1614,7 +1614,8 @@ private:
 				t0 = numer / denom;
 			}
 			return true;
-		} else if (denom < -tolerance) {
+		}
+		else if (denom < -tolerance) {
 			if (numer > denom * t0) {
 				return false;
 			}
@@ -1622,18 +1623,27 @@ private:
 				t1 = numer / denom;
 			}
 			return true;
-		} else {
+		}
+		else {
 			return (numer <= T(0));
 		}
 	}
 
 public:
 	lineseg(const vec<T, M>& start = vec<T, M>(T(0)), const vec<T, M>& end =
-			vec<T, M>(T(0))) :
-			start(start), end(end) {
+		vec<T, M>(T(0))) :
+		start(start), end(end) {
 	}
 	inline float length() const {
 		return distance(start, end);
+	}
+	T distance(const vec<T,M>& pt) const {
+		T l2 = aly::distanceSqr(start , end);
+		if (l2<1E-15f) return std::min(aly::distance(pt, start), aly::distance(pt, end));
+		T t = dot(pt - start, end - start) / l2;
+		if (t < T(0)) return aly::distance(pt, start);
+		else if (t > T(1)) return aly::distance(pt, end); 
+		return aly::distance(pt, start + t * (end - start));
 	}
 	bool intersects(const lineseg<T, M>& line, T& t, T& s,
 			T tolerance = T(1E-15)) const {
@@ -1665,7 +1675,7 @@ public:
 	bool intersects(const box<T, M>& box, T tolerance = T(1E-15)) const {
 		T t0 = -std::numeric_limits<T>::max();
 		T t1 = std::numeric_limits<T>::max();
-		T len = distance(start, end);
+		T len = aly::distance(start, end);
 		if (len < tolerance)
 			return box.contains(T(0.5) * (start + end));
 		vec<T, M> lineDirection = (end - start) / len;

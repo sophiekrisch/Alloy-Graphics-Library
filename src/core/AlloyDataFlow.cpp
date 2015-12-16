@@ -521,43 +521,43 @@ void Destination::setup() {
 		CoordPerPX(0.5f, 0.0f, -Node::DIMENSIONS.x*0.5f, 0.0f),
 		CoordPX(Node::DIMENSIONS.x,
 			Node::DIMENSIONS.y - InputPort::DIMENSIONS.y));
-	nodeIcon = NodeIconPtr(
-			new NodeIcon("Icon",
-					CoordPX(0.5f * ParentPort::DIMENSIONS.x,
-							InputPort::DIMENSIONS.y + 1.0f),
-					CoordPerPX(1.0f, 1.0f, -ParentPort::DIMENSIONS.x,
-							-OutputPort::DIMENSIONS.y - 2.0f)));
-	inputPort = MakeInputPort("Input");
-	inputPort->position = CoordPerPX(0.5f, 0.0f,
-			-InputPort::DIMENSIONS.x * 0.5f, 0.0f);
-	inputPort->setParent(this);
-	iconContainer->add(nodeIcon);
-	iconContainer->add(inputPort);
-	NVGcontext* nvg = AlloyApplicationContext()->nvgContext;
-	nvgFontSize(nvg, fontSize);
-	nvgFontFaceId(nvg,
-			AlloyApplicationContext()->getFont(FontType::Bold)->handle);
-	textWidth= nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
-	labelRegion = ModifiableLabelPtr(
-			new ModifiableLabel(name, CoordPerPX(0.5f, 0.0f,0.0f, Node::DIMENSIONS.y - InputPort::DIMENSIONS.y),
-					CoordPX(std::max(textWidth + 10.0f, Node::DIMENSIONS.x), fontSize + 2 * TextField::PADDING)));
-	labelRegion->setValue(label);
-	labelRegion->setOrigin(Origin::TopCenter);
-	labelRegion->setAlignment(HorizontalAlignment::Center,
-			VerticalAlignment::Middle);
-	labelRegion->fontSize = UnitPX(fontSize);
-	labelRegion->fontType = FontType::Bold;
-	labelRegion->onTextEntered = [this](TextField* field) {
-		textWidth = labelRegion->getTextDimensions(AlloyApplicationContext().get()).x;
-		labelRegion->dimensions=CoordPX(std::max(textWidth + 10.0f, Node::DIMENSIONS.x), fontSize + 2 * TextField::PADDING);
-	};
-	Composite::add(iconContainer);
-	Composite::add(labelRegion);
-	setRoundCorners(true);
-	nodeIcon->backgroundColor = MakeColor(COLOR);
-	nodeIcon->setShape(NodeShape::Triangle);
-	nodeIcon->borderWidth = borderWidth;
-	forceItem->buoyancy = 1;
+nodeIcon = NodeIconPtr(
+	new NodeIcon("Icon",
+		CoordPX(0.5f * ParentPort::DIMENSIONS.x,
+			InputPort::DIMENSIONS.y + 1.0f),
+		CoordPerPX(1.0f, 1.0f, -ParentPort::DIMENSIONS.x,
+			-OutputPort::DIMENSIONS.y - 2.0f)));
+inputPort = MakeInputPort("Input");
+inputPort->position = CoordPerPX(0.5f, 0.0f,
+	-InputPort::DIMENSIONS.x * 0.5f, 0.0f);
+inputPort->setParent(this);
+iconContainer->add(nodeIcon);
+iconContainer->add(inputPort);
+NVGcontext* nvg = AlloyApplicationContext()->nvgContext;
+nvgFontSize(nvg, fontSize);
+nvgFontFaceId(nvg,
+	AlloyApplicationContext()->getFont(FontType::Bold)->handle);
+textWidth = nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
+labelRegion = ModifiableLabelPtr(
+	new ModifiableLabel(name, CoordPerPX(0.5f, 0.0f, 0.0f, Node::DIMENSIONS.y - InputPort::DIMENSIONS.y),
+		CoordPX(std::max(textWidth + 10.0f, Node::DIMENSIONS.x), fontSize + 2 * TextField::PADDING)));
+labelRegion->setValue(label);
+labelRegion->setOrigin(Origin::TopCenter);
+labelRegion->setAlignment(HorizontalAlignment::Center,
+	VerticalAlignment::Middle);
+labelRegion->fontSize = UnitPX(fontSize);
+labelRegion->fontType = FontType::Bold;
+labelRegion->onTextEntered = [this](TextField* field) {
+	textWidth = labelRegion->getTextDimensions(AlloyApplicationContext().get()).x;
+	labelRegion->dimensions = CoordPX(std::max(textWidth + 10.0f, Node::DIMENSIONS.x), fontSize + 2 * TextField::PADDING);
+};
+Composite::add(iconContainer);
+Composite::add(labelRegion);
+setRoundCorners(true);
+nodeIcon->backgroundColor = MakeColor(COLOR);
+nodeIcon->setShape(NodeShape::Triangle);
+nodeIcon->borderWidth = borderWidth;
+forceItem->buoyancy = 1;
 
 }
 bool Node::isMouseOver() const {
@@ -573,20 +573,23 @@ void DataFlow::setCurrentPort(Port* currentPort) {
 }
 bool DataFlow::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	if (connectingPort != nullptr && e.type == InputType::MouseButton
-			&& e.isUp()) {
+		&& e.isUp()) {
 		if (currentPort != nullptr && currentPort != connectingPort
-				&& context->isMouseOver(currentPort)) {
+			&& context->isMouseOver(currentPort)) {
 			PortPtr source = connectingPort->getReference();
 			PortPtr target = currentPort->getReference();
 			ConnectionPtr last;
 			if (source->getType() == PortType::Output&&target->getType() == PortType::Input) {
-				add(last=MakeConnection(source,target));
-			} else if (source->getType() == PortType::Input&&target->getType() == PortType::Output) {
-				add(last = MakeConnection(target,source));
-			} else if (source->getType() == PortType::Parent&&target->getType() == PortType::Child) {
-				add(last = MakeConnection(target,source));
-			} else if (source->getType() == PortType::Child&&target->getType() == PortType::Parent) {
-				add(last = MakeConnection(source,target));
+				add(last = MakeConnection(source, target));
+			}
+			else if (source->getType() == PortType::Input&&target->getType() == PortType::Output) {
+				add(last = MakeConnection(target, source));
+			}
+			else if (source->getType() == PortType::Parent&&target->getType() == PortType::Child) {
+				add(last = MakeConnection(target, source));
+			}
+			else if (source->getType() == PortType::Child&&target->getType() == PortType::Parent) {
+				add(last = MakeConnection(source, target));
 			}
 		}
 		connectingPort = nullptr;
@@ -599,7 +602,8 @@ bool DataFlow::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	else if (e.type == InputType::MouseButton) {
 		if (e.isDown()) {
 			forceSim->stop();
-		} else if (e.isUp()) {
+		}
+		else if (e.isUp()) {
 			forceSim->start();
 		}
 	}
@@ -608,23 +612,36 @@ bool DataFlow::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	}
 
 	if (e.type
-			== InputType::MouseButton&&e.isDown() && e.button == GLFW_MOUSE_BUTTON_RIGHT) {
+		== InputType::MouseButton&&e.isDown() && e.button == GLFW_MOUSE_BUTTON_RIGHT) {
 		currentDrawOffset = this->extents.position;
 		cursorDownLocation = e.cursor;
 		dragging = true;
 	}
 	if (e.type == InputType::Cursor && dragging) {
 		this->extents.position = currentDrawOffset + e.cursor
-				- cursorDownLocation;
+			- cursorDownLocation;
 	}
 
 	return Composite::onEventHandler(context, e);
 }
-
+float Connection::distance(const float2& pt) {
+	float minD = 1E30f;
+	for (int i = 0; i < (int)path.size()-1; i++){
+		lineseg2f ls(path[i], path[i + 1]);
+		minD = std::min(ls.distance(pt), minD);
+	}
+	return minD;
+}
 void Connection::draw(AlloyContext* context, DataFlow* flow) {
 	if (path.size() == 0)return;
 	NVGcontext* nvg = context->nvgContext;
-	nvgStrokeWidth(nvg, 4.0f);
+	if (selected) {
+		nvgStrokeWidth(nvg, 6.0f);
+	}
+	else {
+		nvgStrokeWidth(nvg, 4.0f);
+	}
+
 	nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
 	box2px bounds = source->getBounds();
 	pixel2 start;
@@ -761,6 +778,17 @@ void DataFlow::add(const std::shared_ptr<Connection>& connection) {
 	forceSim->addSpringItem(connection->getSpringItem());
 	connections.push_back(connection);
 	routingLock.unlock();
+}
+Connection* DataFlow::closestConnection(const float2& pt, float tolernace) {
+	for (int i = (int)connections.size() - 1; i >= 0;i--) {
+		Connection* c = connections[i].get();
+		float d = c->distance(pt);
+
+		if (d < tolernace) {
+			return c;
+		}
+	}
+	return nullptr;
 }
 void DataFlow::setup() {
 	graphBounds = box2px(pixel2(0.0f), pixel2(0.0f));
@@ -1736,6 +1764,14 @@ void DataFlow::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 	router.update();
 	for (ConnectionPtr& connect : connections) {
 		router.evaluate(connect);
+	}
+	Connection* c = closestConnection(AlloyApplicationContext()->getCursorPosition() - getDrawOffset(), 4.0f);
+	if (selectedConnection != nullptr) {
+		selectedConnection->selected = false;
+	}
+	if (c != nullptr) {
+		selectedConnection = c;
+		selectedConnection->selected = true;
 	}
 	routingLock.unlock();
 }

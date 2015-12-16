@@ -242,6 +242,7 @@ class Connection {
 protected:
 	std::shared_ptr<SpringItem> springItem;
 public:
+	bool selected = false;
 	std::shared_ptr<Port> source;
 	std::shared_ptr<Port> destination;
 	std::vector<float2> path;
@@ -251,6 +252,7 @@ public:
 			source(source), destination(destination) {
 		source->setConnection(this);
 	}
+	float distance(const float2& pt);
 	void draw(AlloyContext* context,DataFlow* flow);
 };
 
@@ -604,10 +606,12 @@ protected:
 	std::shared_ptr<ForceSimulator> forceSim;
 	pixel2 currentDrawOffset;
 	pixel2 cursorDownLocation;
+	Connection* selectedConnection = nullptr;
 	bool dragging = false;
 	void setup();
 	bool updateSimulation(uint64_t iter);
 	void addNode(const std::shared_ptr<Node>& node);
+	Connection* closestConnection(const float2& pt, float tolernace);
 public:
 	friend class Node;
 	std::shared_ptr<ForceSimulator> getForceSimulator() {
@@ -622,6 +626,12 @@ public:
 	}
 	Port* getConnectingPort() const {
 		return connectingPort;
+	}
+	Connection* getSelectedConnection() {
+		return selectedConnection;
+	}
+	void setSelected(Connection* item) {
+		selectedConnection = item;
 	}
 	bool intersects(const lineseg2f& ln);
 	void startConnection(Port* port);
