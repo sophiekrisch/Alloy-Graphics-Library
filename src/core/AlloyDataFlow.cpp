@@ -497,7 +497,7 @@ void Source::setup() {
 	textWidth = nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
 	labelRegion = ModifiableLabelPtr(
 			new ModifiableLabel(name, CoordPerPX(0.5f, 0.0f,0.0f,0.0f),
-					CoordPX(textWidth + 10.0f, fontSize+2*TextField::PADDING)));
+					CoordPX(std::max(textWidth + 10.0f,Node::DIMENSIONS.x), fontSize+2*TextField::PADDING)));
 	labelRegion->setValue(label);
 	labelRegion->setOrigin(Origin::TopCenter);
 	labelRegion->setAlignment(HorizontalAlignment::Center,
@@ -540,7 +540,7 @@ void Destination::setup() {
 	textWidth= nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
 	labelRegion = ModifiableLabelPtr(
 			new ModifiableLabel(name, CoordPerPX(0.5f, 0.0f,0.0f, Node::DIMENSIONS.y - InputPort::DIMENSIONS.y),
-					CoordPX(textWidth + 10.0f, fontSize + 2 * TextField::PADDING)));
+					CoordPX(std::max(textWidth + 10.0f, Node::DIMENSIONS.x), fontSize + 2 * TextField::PADDING)));
 	labelRegion->setValue(label);
 	labelRegion->setOrigin(Origin::TopCenter);
 	labelRegion->setAlignment(HorizontalAlignment::Center,
