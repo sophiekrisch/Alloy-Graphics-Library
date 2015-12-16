@@ -98,6 +98,7 @@ void ForceDirectedGraphEx::createRadialGraph(const ForceSimulatorPtr& graph) {
 	ForceItemPtr child = ForceItemPtr(new ForceItem(center));
 	child->buoyancy = 0;
 	child->color=Data::COLOR.toRGBAf();
+	child->shape = NodeShape::Circle;
 	childNodes.push_back(child);
 	graph->addForceItem(childNodes.front());
 	for (int d = 0; d < D; d++) {

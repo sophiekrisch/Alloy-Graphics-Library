@@ -41,8 +41,8 @@ bool DataFlowEx::init(Composite& rootNode) {
 	 DataPtr dataNode3 = MakeDataNode("Data 3", pixel2(230, 230));
 	 DataPtr dataNode4 = MakeDataNode("Data 4", pixel2(340, 230));
 
-	 SourcePtr sourceNode1 = MakeSourceNode("Source 1", pixel2(10, 340));
-	 SourcePtr sourceNode2 = MakeSourceNode("Source 2", pixel2(120, 340));
+	 SourcePtr sourceNode1 = MakeSourceNode("Source Source 1", pixel2(10, 340));
+	 SourcePtr sourceNode2 = MakeSourceNode("Source Source 2", pixel2(120, 340));
 
 	 DestinationPtr destNode1 = MakeDestinationNode("Destination 1",
 	 pixel2(10, 450));

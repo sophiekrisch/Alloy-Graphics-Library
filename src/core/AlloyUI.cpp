@@ -249,13 +249,13 @@ box2px Region::getExtents() const {
 box2px Region::getCursorBounds(bool includeOffset) const {
 	box2px box = (isDetached() ? getBounds(includeOffset) : bounds);
 	box.position += dragOffset;
-	if (parent != nullptr && (!isDetached() && includeOffset)) {
+	if(parent != nullptr && (!isDetached() && includeOffset)) {
 		box.position += parent->getDrawOffset();
 		if (AlloyApplicationContext()->getOnTopRegion() != this) {
 			box.intersect(parent->getCursorBounds());
 		}
 	}
-
+	
 	return box;
 }
 void Draw::draw(AlloyContext* context) {

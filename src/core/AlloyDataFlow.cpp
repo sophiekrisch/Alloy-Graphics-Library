@@ -273,8 +273,6 @@ void View::setup() {
 	CompositePtr labelContainer = MakeComposite("label Container",
 			CoordPX(0.0f, 0.0f),
 			CoordPerPX(1.0f, 0.0f, 0.0f, Node::DIMENSIONS.y));
-	labelContainer->setAspectRule(AspectRule::FixedHeight);
-
 	nodeIcon = NodeIconPtr(
 			new NodeIcon("Icon", CoordPX(0.0f, InputPort::DIMENSIONS.y + 1.0f),
 					CoordPerPX(1.0f, 1.0f, 0.0f,
@@ -288,21 +286,17 @@ void View::setup() {
 	inputPort->setParent(this);
 	iconContainer->add(inputPort);
 	iconContainer->add(nodeIcon);
-
 	labelRegion = ModifiableLabelPtr(
-			new ModifiableLabel(label, CoordPX(0.0f, 2 * InputPort::DIMENSIONS.y),
-					CoordPerPX(1.0f, 1.0f, 0.0f,
-							-2 * OutputPort::DIMENSIONS.y
-									- 2 * InputPort::DIMENSIONS.y - 2.0f)));
-	labelRegion->setAlignment(HorizontalAlignment::Left,VerticalAlignment::Middle);
-	labelRegion->setAspectRule(AspectRule::FixedHeight);
+		new ModifiableLabel(label, CoordPX(0.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
+			CoordPerPX(0.0f, 1.0f, 10 + textWidth, -2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f)));
+	labelRegion->setAlignment(HorizontalAlignment::Left, VerticalAlignment::Middle);
 	labelRegion->fontSize = UnitPX(fontSize);
 	labelRegion->fontType = FontType::Bold;
-	labelRegion->onTextEntered=[this](TextField* field) {
-		textWidth =labelRegion->getTextDimensions(AlloyApplicationContext().get()).x;
+	labelRegion->onTextEntered = [this](TextField* field) {
+		textWidth = labelRegion->getTextDimensions(AlloyApplicationContext().get()).x;
+		labelRegion->dimensions = CoordPerPX(0.0f, 1.0f, 10 + textWidth, -2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f);
 	};
 	labelContainer->add(labelRegion);
-
 	inputPortComposite = CompositePtr(
 			new Composite("Input Ports", CoordPX(0.0f, InputPort::DIMENSIONS.y),
 					CoordPX(0.0f, InputPort::DIMENSIONS.y)));
@@ -366,20 +360,17 @@ void Data::setup() {
 	iconContainer->add(outputPort);
 	iconContainer->add(nodeIcon);
 	labelRegion = ModifiableLabelPtr(
-			new ModifiableLabel(label,
-					CoordPX(0.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
-					CoordPerPX(1.0f, 1.0f, 0.0f,
-							-2 * OutputPort::DIMENSIONS.y
-									- 2 * InputPort::DIMENSIONS.y - 2.0f)));
-	labelRegion->setAlignment(HorizontalAlignment::Left,
-			VerticalAlignment::Middle);
-	labelRegion->setAspectRule(AspectRule::FixedHeight);
+			new ModifiableLabel(label,CoordPX(0.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
+				CoordPerPX(0.0f, 1.0f, 10 + textWidth, -2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f)));
+	labelRegion->setAlignment(HorizontalAlignment::Left,VerticalAlignment::Middle);
 	labelRegion->fontSize = UnitPX(fontSize);
 	labelRegion->fontType = FontType::Bold;
-	labelContainer->add(labelRegion);
 	labelRegion->onTextEntered = [this](TextField* field) {
 		textWidth = labelRegion->getTextDimensions(AlloyApplicationContext().get()).x;
+		labelRegion->dimensions = CoordPerPX(0.0f, 1.0f, 10+textWidth, -2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f);
 	};
+	labelContainer->add(labelRegion);
+
 	inputPortComposite = CompositePtr(
 			new Composite("Input Ports", CoordPX(0.0f, InputPort::DIMENSIONS.y),
 					CoordPX(0.0f, InputPort::DIMENSIONS.y)));
@@ -434,20 +425,17 @@ void Compute::setup() {
 	iconContainer->add(inputPort);
 	iconContainer->add(nodeIcon);
 	labelRegion = ModifiableLabelPtr(
-			new ModifiableLabel(label,
-					CoordPX(4.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
-					CoordPerPX(1.0f, 1.0f, -4.0f,
-							-2 * OutputPort::DIMENSIONS.y
-									- 2 * InputPort::DIMENSIONS.y - 2.0f)));
-	labelRegion->setAlignment(HorizontalAlignment::Left,
-			VerticalAlignment::Middle);
-	labelRegion->setAspectRule(AspectRule::FixedHeight);
+		new ModifiableLabel(label, CoordPX(0.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
+			CoordPerPX(0.0f, 1.0f, 10 + textWidth, -2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f)));
+	labelRegion->setAlignment(HorizontalAlignment::Left, VerticalAlignment::Middle);
 	labelRegion->fontSize = UnitPX(fontSize);
 	labelRegion->fontType = FontType::Bold;
-	labelContainer->add(labelRegion);
 	labelRegion->onTextEntered = [this](TextField* field) {
 		textWidth = labelRegion->getTextDimensions(AlloyApplicationContext().get()).x;
+		labelRegion->dimensions = CoordPerPX(0.0f, 1.0f, 10 + textWidth, -2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f);
 	};
+	labelContainer->add(labelRegion);
+
 	inputPortComposite = CompositePtr(
 			new Composite("Input Ports", CoordPX(0.0f, InputPort::DIMENSIONS.y),
 					CoordPX(0.0f, InputPort::DIMENSIONS.y)));
@@ -473,13 +461,10 @@ void Compute::setup() {
 
 }
 void Source::setup() {
-	setOrientation(Orientation::Vertical, pixel2(0, 0));
+	//setOrientation(Orientation::Vertical, pixel2(0, 0));
 	CompositePtr iconContainer = MakeComposite("Icon Container",
-			CoordPX(0.0f, 0.0f),
-			CoordPX(Node::DIMENSIONS.x,
-					Node::DIMENSIONS.y - InputPort::DIMENSIONS.y));
-
-	//labelContainer->setAspectRatio(1.0f);
+			CoordPerPX(0.5f,0.0f, -Node::DIMENSIONS.x*0.5f , fontSize + 2 * TextField::PADDING),
+			CoordPX(Node::DIMENSIONS.x,Node::DIMENSIONS.y - InputPort::DIMENSIONS.y));
 	nodeIcon = NodeIconPtr(
 			new NodeIcon("Icon", CoordPX(ParentPort::DIMENSIONS.x + 1.0f, 1.0f),
 					CoordPerPX(1.0f, 1.0f,
@@ -507,18 +492,18 @@ void Source::setup() {
 	nvgFontSize(nvg, fontSize);
 	nvgFontFaceId(nvg,
 			AlloyApplicationContext()->getFont(FontType::Bold)->handle);
-	float tw = nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
+	textWidth = nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
 	labelRegion = ModifiableLabelPtr(
-			new ModifiableLabel(label, CoordPercent(0.5f, 0.0f),
-					CoordPX(tw + 10.0f, fontSize)));
+			new ModifiableLabel(label, CoordPerPX(0.5f, 0.0f,0.0f,0.0f),
+					CoordPX(textWidth + 10.0f, fontSize+2*TextField::PADDING)));
 	labelRegion->setOrigin(Origin::TopCenter);
 	labelRegion->setAlignment(HorizontalAlignment::Center,
 			VerticalAlignment::Middle);
-	labelRegion->setAspectRule(AspectRule::FixedHeight);
 	labelRegion->fontSize = UnitPX(fontSize);
 	labelRegion->fontType = FontType::Bold;
 	labelRegion->onTextEntered = [this](TextField* field) {
 		textWidth = labelRegion->getTextDimensions(AlloyApplicationContext().get()).x;
+		labelRegion->dimensions = CoordPX(std::max(textWidth + 10.0f,Node::DIMENSIONS.x), fontSize + 2 * TextField::PADDING);
 	};
 	Composite::add(labelRegion);
 	Composite::add(iconContainer);
@@ -529,21 +514,16 @@ void Source::setup() {
 
 }
 void Destination::setup() {
-	setOrientation(Orientation::Vertical, pixel2(0, 0));
 	CompositePtr iconContainer = MakeComposite("Icon Container",
-			CoordPX(0.0f, 0.0f),
-			CoordPX(Node::DIMENSIONS.x,
-					Node::DIMENSIONS.y - InputPort::DIMENSIONS.y));
-
-	//labelContainer->setAspectRatio(1.0f);
+		CoordPerPX(0.5f, 0.0f, -Node::DIMENSIONS.x*0.5f, 0.0f),
+		CoordPX(Node::DIMENSIONS.x,
+			Node::DIMENSIONS.y - InputPort::DIMENSIONS.y));
 	nodeIcon = NodeIconPtr(
 			new NodeIcon("Icon",
 					CoordPX(0.5f * ParentPort::DIMENSIONS.x,
 							InputPort::DIMENSIONS.y + 1.0f),
 					CoordPerPX(1.0f, 1.0f, -ParentPort::DIMENSIONS.x,
 							-OutputPort::DIMENSIONS.y - 2.0f)));
-	//nodeIcon->setAspectRatio(1.0f);
-	//nodeIcon->setAspectRule(AspectRule::FixedWidth);
 	inputPort = MakeInputPort("Input");
 	inputPort->position = CoordPerPX(0.5f, 0.0f,
 			-InputPort::DIMENSIONS.x * 0.5f, 0.0f);
@@ -554,18 +534,18 @@ void Destination::setup() {
 	nvgFontSize(nvg, fontSize);
 	nvgFontFaceId(nvg,
 			AlloyApplicationContext()->getFont(FontType::Bold)->handle);
-	float tw = nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
+	textWidth= nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
 	labelRegion = ModifiableLabelPtr(
-			new ModifiableLabel(label, CoordPercent(0.5f, 0.0f),
-					CoordPX(tw + 10.0f, fontSize)));
+			new ModifiableLabel(label, CoordPerPX(0.5f, 0.0f,0.0f, Node::DIMENSIONS.y - InputPort::DIMENSIONS.y),
+					CoordPX(textWidth + 10.0f, fontSize + 2 * TextField::PADDING)));
 	labelRegion->setOrigin(Origin::TopCenter);
 	labelRegion->setAlignment(HorizontalAlignment::Center,
 			VerticalAlignment::Middle);
-	labelRegion->setAspectRule(AspectRule::FixedHeight);
 	labelRegion->fontSize = UnitPX(fontSize);
 	labelRegion->fontType = FontType::Bold;
 	labelRegion->onTextEntered = [this](TextField* field) {
 		textWidth = labelRegion->getTextDimensions(AlloyApplicationContext().get()).x;
+		labelRegion->dimensions=CoordPX(std::max(textWidth + 10.0f, Node::DIMENSIONS.x), fontSize + 2 * TextField::PADDING);
 	};
 	Composite::add(iconContainer);
 	Composite::add(labelRegion);
@@ -1133,7 +1113,6 @@ void Node::prePack() {
 	if (lengthL1(dragOffset) > 0) {
 		std::lock_guard<std::mutex> lockMe(parent->getForceSimulator()->getLock());
 		forceItem->location += dragOffset;
-
 		setDragOffset(pixel2(0.0f));
 		pixel2 minPt = parent->graphBounds.min();
 		pixel2 maxPt = parent->graphBounds.max();
@@ -1242,12 +1221,14 @@ void Compute::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 void Source::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 	double pixelRatio, bool clamp) {
 	prePack();
+	this->dimensions = CoordPX(std::max(textWidth + 10.0f, Node::DIMENSIONS.x), Node::DIMENSIONS.y+OutputPort::DIMENSIONS.y+2);
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
 	postPack();
 }
 void Destination::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 	double pixelRatio, bool clamp) {
 	prePack();
+	this->dimensions = CoordPX(std::max(textWidth + 10.0f, Node::DIMENSIONS.x), Node::DIMENSIONS.y - InputPort::DIMENSIONS.y+fontSize+TextField::PADDING*2);
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
 	postPack();
 }
