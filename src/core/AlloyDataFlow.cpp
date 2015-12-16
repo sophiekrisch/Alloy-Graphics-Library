@@ -1161,6 +1161,7 @@ void Node::prePack() {
 			minPt.y = minY;
 		}
 		parent->graphBounds = box2px(minPt, maxPt - minPt);
+		parent->forceSim->setBounds(CoordPX(parent->graphBounds.position), CoordPX(parent->graphBounds.dimensions));
 		parent->boxForce->setBounds(parent->graphBounds);
 		for (ConnectionPtr connector : parent->getConnections()) {
 			connector->getSpringItem()->update();
@@ -1724,6 +1725,7 @@ void DataFlow::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 	extents.position = currentDrawOffset;
 	if (graphBounds.dimensions.x*graphBounds.dimensions.y == 0) {
 		graphBounds = box2px(Node::DIMENSIONS*0.5f,forceSim->getBoundsDimensions() - Node::DIMENSIONS);
+		forceSim->setBounds(CoordPX(graphBounds.position),CoordPX(graphBounds.dimensions));
 		boxForce->setBounds(graphBounds);
 	}
 	for (std::shared_ptr<Region>& region : children) {

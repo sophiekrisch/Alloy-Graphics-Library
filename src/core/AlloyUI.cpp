@@ -1655,6 +1655,7 @@ void TextField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 			if (onTextEntered) {
 				onTextEntered(this);
 			}
+			isFocused = false;
 			AlloyApplicationContext()->setMouseFocusObject(nullptr);
 			break;
 		}
@@ -1714,6 +1715,12 @@ void TextField::draw(AlloyContext* context) {
 	std::vector<NVGglyphPosition> positions(value.size());
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
+
+	bool f = context->isFocused(this);
+	if (!f&&isFocused&&onTextEntered) {
+		onTextEntered(this);
+	}
+	isFocused = f;
 	bool hover = context->isMouseOver(this);
 	float x = bounds.position.x;
 	float y = bounds.position.y;
@@ -1791,7 +1798,6 @@ void TextField::draw(AlloyContext* context) {
 	}
 	float cursorOffset = textOffsetX
 			+ (cursorStart ? positions[cursorStart - 1].maxx - 1 : 0);
-	bool isFocused = context->isFocused(this);
 
 	if (cursorEnd != cursorStart && isFocused) {
 		int lo = std::min(cursorEnd, cursorStart);
@@ -1873,7 +1879,11 @@ void ModifiableLabel::draw(AlloyContext* context) {
 	float y = bounds.position.y;
 	float w = bounds.dimensions.x;
 	float h = bounds.dimensions.y;	
-	bool isFocused = context->isFocused(this);
+	bool f = context->isFocused(this);
+	if (!f&&isFocused&&onTextEntered) {
+		onTextEntered(this);
+	}
+	isFocused = f;
 	if (hover) {
 		context->setCursor(&Cursor::TextInsert);
 	}
@@ -2665,7 +2675,11 @@ void FileField::draw(AlloyContext* context) {
 	float y = bounds.position.y;
 	float w = bounds.dimensions.x;
 	float h = bounds.dimensions.y;
-	bool isFocused = context->isFocused(this);
+	bool f = context->isFocused(this);
+	if (!f&&isFocused&&onTextEntered) {
+		onTextEntered(this);
+	}
+	isFocused = f;
 	if (!isFocused) {
 		showDefaultLabel = true;
 	}

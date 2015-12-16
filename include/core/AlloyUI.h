@@ -461,6 +461,7 @@ public:
 class TextField: public Composite {
 protected:
 	bool showDefaultLabel = true;
+	bool isFocused = false;
 	std::string label;
 	std::string value;
 	float th=0;
