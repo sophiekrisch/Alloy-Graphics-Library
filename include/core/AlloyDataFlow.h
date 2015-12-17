@@ -365,6 +365,8 @@ class NodeIcon: public Region {
 protected:
 	NodeShape shape;
 public:
+
+	bool selected = false;
 	NodeIcon(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
 			Region(name, pos, dims), shape(NodeShape::Circle) {
 	}
@@ -400,6 +402,12 @@ protected:
 	void prePack();
 	void postPack();
 public:
+	bool isSelected() const {
+		return nodeIcon->selected;
+	}
+	void setSelected(bool b) {
+		nodeIcon->selected = b;
+	}
 	std::shared_ptr<NodeIcon> nodeIcon;
 	friend class DataFlow;
 	friend class Port;

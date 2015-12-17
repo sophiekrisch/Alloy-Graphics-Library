@@ -154,14 +154,19 @@ void NodeIcon::draw(AlloyContext* context) {
 			context->pixelRatio);
 	nvgStrokeWidth(nvg, lineWidth);
 	if (context->isMouseOver(this)) {
-		nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
 		nvgFillColor(nvg, backgroundColor->toLighter(0.25f));
 		//context->setCursor(&Cursor::Position);
 	} else {
-		nvgStrokeColor(nvg, Color(context->theme.LIGHT_TEXT));
 		nvgFillColor(nvg, *backgroundColor);
 	}
-	nvgStrokeWidth(nvg, lineWidth);
+	if (selected) {
+		nvgStrokeWidth(nvg, 6.0f);
+		nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
+	}
+	else {
+		nvgStrokeWidth(nvg, 4.0f);
+		nvgStrokeColor(nvg, context->theme.HIGHLIGHT.toDarker(0.8f));
+	}
 	nvgBeginPath(nvg);
 	if (shape == NodeShape::Circle) {
 		nvgEllipse(nvg, bounds.position.x + bounds.dimensions.x * 0.5f,
@@ -233,6 +238,11 @@ bool Node::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	if (e.type == InputType::MouseButton && e.button == GLFW_MOUSE_BUTTON_LEFT
 			&& e.isDown() && over) {
 		dynamic_cast<Composite*>(this->parent)->putLast(this);
+		/*
+		if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
+			nodeIcon->selected = !nodeIcon->selected;
+		}
+		*/
 	}
 	if (dragging && e.type == InputType::Cursor) {
 		//box2px pbounds = parent->getBounds();
@@ -614,6 +624,7 @@ bool DataFlow::onEventHandler(AlloyContext* context, const InputEvent& e) {
 				for (ConnectionPtr connection : connections) {
 					connection->selected = false;
 				}
+				
 			}
 			forceSim->start();
 		}
@@ -653,12 +664,15 @@ void Connection::draw(AlloyContext* context, DataFlow* flow) {
 	NVGcontext* nvg = context->nvgContext;
 	if (selected) {
 		nvgStrokeWidth(nvg, 6.0f);
+
+		nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
 	}
 	else {
 		nvgStrokeWidth(nvg, 4.0f);
+
+		nvgStrokeColor(nvg, context->theme.HIGHLIGHT.toDarker(0.8f));
 	}
 
-	nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
 	box2px bounds = source->getBounds();
 	pixel2 start;
 	pixel2 end;
@@ -709,7 +723,6 @@ void Connection::draw(AlloyContext* context, DataFlow* flow) {
 	float2 offset = flow->getDrawOffset();
 	nvgLineCap(nvg, NVG_ROUND);
 	nvgLineJoin(nvg, NVG_BEVEL);
-	nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
 	nvgBeginPath(nvg);
 	float2 pt0 = offset + path.front();
 	nvgMoveTo(nvg, pt0.x, pt0.y);
