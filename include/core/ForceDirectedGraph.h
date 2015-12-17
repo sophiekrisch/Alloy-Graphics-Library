@@ -224,6 +224,10 @@ public:
 	std::function<void(float)> onStep;
 	void accumulate();
 	void fit();
+	void erase(const SpringItemPtr& item);
+	void erase(const std::list<SpringItemPtr>& item);
+	void erase(const ForceItemPtr& item);
+	void erase(const std::list<ForceItemPtr>& item);
 	void setOffset(const pixel2& offset) {
 		requestFitToBounds = false;
 		dragOffset = offset;

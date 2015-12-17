@@ -87,9 +87,9 @@ namespace aly {
 
 		const float ForceSimulator::RADIUS = 20.0f;
 		const float ForceSimulator::DEFAULT_TIME_STEP = 30.0f;
-		const int ForceSimulator::DEFAULT_TIME_OUT=10;
+		const int ForceSimulator::DEFAULT_TIME_OUT = 10;
 		const int ForceSimulator::DEFAULT_INTEGRATION_CYCLES = 2;
-		void ForceItem::draw(AlloyContext* context, const pixel2& offset,float scale,bool selected) {
+		void ForceItem::draw(AlloyContext* context, const pixel2& offset, float scale, bool selected) {
 			if (shape == NodeShape::Hidden)return;
 			NVGcontext* nvg = context->nvgContext;
 			float lineWidth = scale*4.0f;
@@ -112,15 +112,15 @@ namespace aly {
 				nvgCircle(nvg, location.x, location.y, r - lineWidth * 0.5f);
 			}
 			else if (shape == NodeShape::Square) {
-				nvgRoundedRect(nvg, location.x-r + lineWidth * 0.5f,
-					location.y-r + lineWidth * 0.5f, 2 * r - lineWidth,
+				nvgRoundedRect(nvg, location.x - r + lineWidth * 0.5f,
+					location.y - r + lineWidth * 0.5f, 2 * r - lineWidth,
 					2 * r - lineWidth, r * 0.5f);
 			}
 			else if (shape == NodeShape::Triangle) {
 				nvgLineJoin(nvg, NVG_ROUND);
 				nvgMoveTo(nvg, location.x, location.y + r - lineWidth);
-				nvgLineTo(nvg, location.x + r + lineWidth * 0.5f,location.y - r + lineWidth * 0.5f);
-				nvgLineTo(nvg, location.x - r - lineWidth,location.y- r + lineWidth * 0.5f);
+				nvgLineTo(nvg, location.x + r + lineWidth * 0.5f, location.y - r + lineWidth * 0.5f);
+				nvgLineTo(nvg, location.x - r - lineWidth, location.y - r + lineWidth * 0.5f);
 				nvgClosePath(nvg);
 			}
 			else if (shape == NodeShape::Hexagon) {
@@ -142,7 +142,7 @@ namespace aly {
 			nvgFill(nvg);
 			nvgStroke(nvg);
 		}
-		void SpringItem::draw(AlloyContext* context, const pixel2& offset,float scale) {
+		void SpringItem::draw(AlloyContext* context, const pixel2& offset, float scale) {
 			if (!visible)return;
 			NVGcontext* nvg = context->nvgContext;
 			nvgStrokeColor(nvg, context->theme.NEUTRAL);
@@ -154,6 +154,83 @@ namespace aly {
 			nvgMoveTo(nvg, objectPt.x, objectPt.y);
 			nvgLineTo(nvg, subjectPt.x, subjectPt.y);
 			nvgStroke(nvg);
+		}
+		void ForceSimulator::erase(const SpringItemPtr& item) {
+			std::lock_guard<std::mutex> lockMe(lock);
+			for (auto iter = springs.begin(); iter != springs.end(); iter++) {
+				if (item.get() == iter->get()) {
+					springs.erase(iter);
+					break;
+				}
+			}
+		}
+		void ForceSimulator::erase(const ForceItemPtr& item) {
+			std::lock_guard<std::mutex> lockMe(lock);
+			for (auto iter = items.begin(); iter != items.end(); iter++) {
+				if (item.get() == iter->get()) {
+					items.erase(iter);
+					break;
+				}
+			}
+			std::vector<SpringItemPtr> tmpList;
+			for (SpringItemPtr spring : springs) {
+				if (spring->item1.get() != item.get() && spring->item2.get() != item.get()) {
+					tmpList.push_back(spring);
+				}
+			}
+			springs = tmpList;
+		}
+		void ForceSimulator::erase(const std::list<ForceItemPtr>& deleteList) {
+			std::lock_guard<std::mutex> lockMe(lock);
+			{
+				std::vector<ForceItemPtr> tmpList;
+				for (ForceItemPtr item : items) {
+					bool del = false;
+					for (ForceItemPtr ditem : deleteList) {
+						if (item.get() == ditem.get()) {
+							del = true;
+							break;
+						}
+					}
+					if (!del) {
+						tmpList.push_back(item);
+					}
+				}
+				items = tmpList;
+			}
+			{
+				std::vector<SpringItemPtr> tmpList;
+				for (SpringItemPtr spring : springs) {
+					bool del = false;
+					for (ForceItemPtr ditem : deleteList) {
+						if (spring->item1.get() == ditem.get() || spring->item2.get() == ditem.get()) {
+							del = true;
+							break;
+						}
+					}
+					if (!del) {
+						tmpList.push_back(spring);
+					}
+				}
+				springs = tmpList;
+			}
+		}
+		void ForceSimulator::erase(const std::list<SpringItemPtr>& deleteList) {
+			std::lock_guard<std::mutex> lockMe(lock);
+			std::vector<SpringItemPtr> tmpList;
+			for (SpringItemPtr item : springs) {
+				bool del = false;
+				for (SpringItemPtr ditem : deleteList) {
+					if (item.get() == ditem.get()) {
+						del = true;
+						break;
+					}
+				}
+				if (!del) {
+					tmpList.push_back(item);
+				}
+			}
+			springs = tmpList;
 		}
 		void ForceSimulator::fit() {
 			requestFitToBounds = true;
@@ -206,7 +283,7 @@ namespace aly {
 				if (e.type == InputType::Cursor) {
 					if (draggingNode) {
 						float2 offset = getBoundsPosition() + dragOffset;
-						selected->plocation = selected->location = e.cursor / scale - offset+lastDragOffset;
+						selected->plocation = selected->location = e.cursor / scale - offset + lastDragOffset;
 						selected->velocity = float2(0.0f);
 					}
 					if (draggingView) {
@@ -236,9 +313,9 @@ namespace aly {
 			if (renderCount == 0) {
 				lastTime = std::chrono::steady_clock::now();
 			}
-			float maxDisplacement=0;
+			float maxDisplacement = 0;
 			for (int c = 0; c < DEFAULT_INTEGRATION_CYCLES; c++) {
-				maxDisplacement=runSimulator();
+				maxDisplacement = runSimulator();
 			}
 			renderCount++;
 			std::chrono::steady_clock::time_point currentTime =
@@ -252,11 +329,11 @@ namespace aly {
 				//std::cout << "Frame Rate " << << " fps" << std::endl;
 				renderCount = 0;
 			}
-			
-			if (!simWorker->isCanceled()&&onStep) {
+
+			if (!simWorker->isCanceled() && onStep) {
 				onStep(maxDisplacement);
 			}
-			
+
 			return true;
 		}
 		void ForceSimulator::start() {
@@ -346,24 +423,24 @@ namespace aly {
 			return addSpringItem(item1, item2, -1.f, -1.f);
 		}
 		void ForceSimulator::draw(AlloyContext* context) {
-			if (requestFitToBounds&&forceBounds.dimensions.x*forceBounds.dimensions.y>0) {
-				box2px bounds=getBounds();
-				float df = std::max(forceBounds.dimensions.x, forceBounds.dimensions.y)+2*RADIUS;
+			if (requestFitToBounds&&forceBounds.dimensions.x*forceBounds.dimensions.y > 0) {
+				box2px bounds = getBounds();
+				float df = std::max(forceBounds.dimensions.x, forceBounds.dimensions.y) + 2 * RADIUS;
 				float db = std::min(bounds.dimensions.x, bounds.dimensions.y);
-				scale = db/df;
+				scale = db / df;
 				float2 cf = forceBounds.center();
 				float2 cb = bounds.center();
-				dragOffset=cb / scale - cf-bounds.position;
+				dragOffset = cb / scale - cf - bounds.position;
 				requestFitToBounds = false;
 			}
 			Region::draw(context);
-			float2 offset = getBoundsPosition()+dragOffset;
+			float2 offset = getBoundsPosition() + dragOffset;
 			NVGcontext* nvg = context->nvgContext;
 			pushScissor(nvg, getCursorBounds());
 			{
 				std::lock_guard<std::mutex> lockMe(lock);
 				for (ForcePtr f : iforces) {
-					f->draw(context, offset,scale);
+					f->draw(context, offset, scale);
 				}
 				for (ForcePtr f : sforces) {
 					f->draw(context, offset, scale);
@@ -372,12 +449,12 @@ namespace aly {
 					item->draw(context, offset, scale);
 				}
 				for (ForceItemPtr item : items) {
-					item->draw(context, offset, scale,item.get()==selected);
+					item->draw(context, offset, scale, item.get() == selected);
 				}
 			}
 			popScissor(nvg);
 		}
-	
+
 		void ForceSimulator::accumulate() {
 			for (int i = 0; i < (int)iforces.size(); i++) {
 				if (iforces[i]->isEnabled())
@@ -391,11 +468,11 @@ namespace aly {
 #pragma omp parallel for num_threads(NUM_THREADS)
 			for (int i = 0; i < (int)items.size(); i++) {
 
-					items[i]->force = float2(0.0f);
-					for (ForcePtr f : iforces) {
-						if (f->isEnabled())
-							f->getForce(items[i]);
-					}
+				items[i]->force = float2(0.0f);
+				for (ForcePtr f : iforces) {
+					if (f->isEnabled())
+						f->getForce(items[i]);
+				}
 			}
 #pragma omp parallel for num_threads(NUM_THREADS)
 			for (int i = 0; i < (int)springs.size(); i++) {
@@ -423,14 +500,14 @@ namespace aly {
 			for (ForceItemPtr item : getForceItems()) {
 				float2 p1 = item->location;
 				float2 p2 = item->plocation;
-				maxDisplacement = std::max(distanceSqr(p1, p2),maxDisplacement);
+				maxDisplacement = std::max(distanceSqr(p1, p2), maxDisplacement);
 			}
 			return std::sqrt(maxDisplacement);
 		}
 		void ForceSimulator::optimize(float tolerance, int maxIterations, float timestep) {
 			for (int i = 0; i < maxIterations; i++) {
 				float maxDisplacement = runSimulator(timestep);
-				if (i>0&& maxDisplacement <=tolerance) {
+				if (i > 0 && maxDisplacement <= tolerance) {
 					break;
 				}
 			}
@@ -438,7 +515,7 @@ namespace aly {
 		void ForceSimulator::enforceBoundaries() {
 #pragma omp parallel for num_threads(NUM_THREADS)
 			for (int i = 0; i < (int)items.size(); i++) {
-				if(items[i].get()==selected) continue;
+				if (items[i].get() == selected) continue;
 				for (ForcePtr f : bforces) {
 					if (f->isEnabled())
 						f->enforceBoundary(items[i]);
@@ -447,11 +524,11 @@ namespace aly {
 		}
 		void EulerIntegrator::integrate(ForceSimulator& sim, float timestep) const {
 			float speedLimit = sim.getSpeedLimit();
-			std::vector<ForceItemPtr>& items=sim.getForceItems();
+			std::vector<ForceItemPtr>& items = sim.getForceItems();
 #pragma omp parallel for num_threads(NUM_THREADS)
 			for (int i = 0; i < (int)items.size(); i++) {
 				float coeff, len;
-				ForceItemPtr item=items[i];
+				ForceItemPtr item = items[i];
 				if (item.get() == sim.selected)continue;
 				item->plocation = item->location;
 				item->location = item->plocation + timestep * item->velocity;
@@ -468,12 +545,12 @@ namespace aly {
 			float timestep) const {
 			float speedLimit = sim.getSpeedLimit();
 
-			std::vector<ForceItemPtr>& items=sim.getForceItems();
+			std::vector<ForceItemPtr>& items = sim.getForceItems();
 #pragma omp parallel for num_threads(NUM_THREADS)
 			for (int i = 0; i < (int)items.size(); i++) {
 				float coeff;
 				std::array<float2, 4> k, l;
-				ForceItemPtr item=items[i];
+				ForceItemPtr item = items[i];
 				if (item.get() == sim.selected)continue;
 				coeff = timestep / item->mass;
 				k = item->k;
@@ -489,7 +566,7 @@ namespace aly {
 				float coeff;
 				float len;
 				std::array<float2, 4> k, l;
-				ForceItemPtr item=items[i];
+				ForceItemPtr item = items[i];
 				if (item.get() == sim.selected)continue;
 				coeff = timestep / item->mass;
 				k = item->k;
@@ -511,7 +588,7 @@ namespace aly {
 				float coeff;
 				float len;
 				std::array<float2, 4> k, l;
-				ForceItemPtr item=items[i];
+				ForceItemPtr item = items[i];
 				if (item.get() == sim.selected)continue;
 				coeff = timestep / item->mass;
 				k = item->k;
@@ -532,7 +609,7 @@ namespace aly {
 				float coeff;
 				float len;
 				std::array<float2, 4> k, l;
-				ForceItemPtr item=items[i];
+				ForceItemPtr item = items[i];
 				if (item.get() == sim.selected)continue;
 				coeff = timestep / item->mass;
 				k = item->k;
@@ -569,18 +646,18 @@ namespace aly {
 			}
 			float d = r - len;
 			float coeff = (s->kappa < 0 ? params[SPRING_COEFF] : s->kappa) * d / r;
-			
+
 			item1->force += coeff * dxy;
 			item2->force -= coeff * dxy;
-			
+
 			float2 dir = s->direction;
-			if(s->gamma > 0.0f) {
-				float2 pivot = 0.5f*(p1+p2);
+			if (s->gamma > 0.0f) {
+				float2 pivot = 0.5f*(p1 + p2);
 				dxy = normalize(dxy);
-				float2 ortho = float2(-dxy.y,dxy.x);
-				float2 arm = s->gamma*crossMag(normalize(p2 - pivot),dir)*ortho/r;
-				item1->force -=  arm;
-				item2->force +=  arm;
+				float2 ortho = float2(-dxy.y, dxy.x);
+				float2 arm = s->gamma*crossMag(normalize(p2 - pivot), dir)*ortho / r;
+				item1->force -= arm;
+				item2->force += arm;
 			}
 		}
 		int relativeCCW(float x1, float y1, float x2, float y2, float px, float py) {
@@ -662,25 +739,25 @@ namespace aly {
 			setBounds(box);
 		}
 		void BoxForce::draw(AlloyContext* context, const pixel2& offset, float scale) {
-			if (!enabled||!visible)
+			if (!enabled || !visible)
 				return;
 			NVGcontext* nvg = context->nvgContext;
-			nvgStrokeWidth(nvg,scale* 4.0f);
+			nvgStrokeWidth(nvg, scale* 4.0f);
 			nvgStrokeColor(nvg, Color(0.8f, 0.8f, 0.8f, 1.0f));
 			nvgBeginPath(nvg);
-			nvgMoveTo(nvg, scale*(pts[0].x + offset.x + 2.0f),scale*(pts[0].y + offset.y + 2.0f));
-			nvgLineTo(nvg, scale*(pts[1].x + offset.x - 2.0f),scale*(pts[1].y + offset.y + 2.0f));
-			nvgLineTo(nvg, scale*(pts[2].x + offset.x - 2.0f),scale*(pts[2].y + offset.y - 2.0f));
-			nvgLineTo(nvg, scale*(pts[3].x + offset.x + 2.0f),scale*(pts[3].y + offset.y - 2.0f));
+			nvgMoveTo(nvg, scale*(pts[0].x + offset.x + 2.0f), scale*(pts[0].y + offset.y + 2.0f));
+			nvgLineTo(nvg, scale*(pts[1].x + offset.x - 2.0f), scale*(pts[1].y + offset.y + 2.0f));
+			nvgLineTo(nvg, scale*(pts[2].x + offset.x - 2.0f), scale*(pts[2].y + offset.y - 2.0f));
+			nvgLineTo(nvg, scale*(pts[3].x + offset.x + 2.0f), scale*(pts[3].y + offset.y - 2.0f));
 			nvgClosePath(nvg);
 			nvgStroke(nvg);
 		}
 		void BoxForce::getForce(const ForceItemPtr& item) {
 			float2 n = item->location;
 			box2f box(pts[0], pts[2] - pts[0]);
-			if(!box.contains(n)){
-				float2 dxy = float2(RandomUniform(-0.5f, 0.5f) / 50.0f,RandomUniform(-0.5f, 0.5f) / 50.0f);
-				item->force += dxy*distance(item->location,item->plocation);
+			if (!box.contains(n)) {
+				float2 dxy = float2(RandomUniform(-0.5f, 0.5f) / 50.0f, RandomUniform(-0.5f, 0.5f) / 50.0f);
+				item->force += dxy*distance(item->location, item->plocation);
 			}
 			for (int k = 0; k < 4; k++) {
 				float2 p1 = pts[k];
@@ -705,7 +782,7 @@ namespace aly {
 			float dr = r - d;
 			float c = (dr > 0) ? -1.0f : 1.0f;
 			float v = c * params[GRAVITATIONAL_CONST] * item->mass / (dr * dr);
-			if (d < 1E-5f||d>r) {
+			if (d < 1E-5f || d>r) {
 				dxy = float2(RandomUniform(-0.5f, 0.5f) / 50.0f,
 					RandomUniform(-0.5f, 0.5f) / 50.0f);
 				d = length(dxy);
@@ -877,13 +954,13 @@ namespace aly {
 			//apply update to item force
 			item->force += float2(forceTotal*(double)params[GRAVITATIONAL_CONST]);
 		}
-		void QuadTreeNode::draw(AlloyContext* context, const pixel2& offset,float scale) {
+		void QuadTreeNode::draw(AlloyContext* context, const pixel2& offset, float scale) {
 			static std::vector<Color> colors;
 			if (colors.size() == 0) {
 				colors.resize(QuadTreeNode::MAX_DEPTH);
 				std::srand(123181);
 				for (int i = 0; i < MAX_DEPTH; i++) {
-					colors[i] = HSVAtoColor(HSVA((std::rand()%256)/255.0f, 0.8f, 0.7f, 1.0f));
+					colors[i] = HSVAtoColor(HSVA((std::rand() % 256) / 255.0f, 0.8f, 0.7f, 1.0f));
 				}
 			}
 			Color c = colors[depth];
@@ -892,39 +969,39 @@ namespace aly {
 			nvgStrokeColor(nvg, Color(255, 255, 255));
 			nvgStrokeWidth(nvg, scale*2.0f);
 			nvgBeginPath(nvg);
-			nvgRect(nvg,scale*( bounds.position.x + offset.x),
+			nvgRect(nvg, scale*(bounds.position.x + offset.x),
 				scale*(bounds.position.y + offset.y),
 				scale*bounds.dimensions.x, scale*bounds.dimensions.y);
 			nvgFill(nvg);
 			nvgStroke(nvg);
 			for (QuadTreeNodePtr& child : children) {
 				if (child.get() != nullptr) {
-					child->draw(context, offset,scale);
+					child->draw(context, offset, scale);
 				}
 			}
 			nvgFillColor(nvg, c);
 			nvgStrokeColor(nvg, Color(255, 255, 255));
 			if (hasChildren) {
 				nvgBeginPath(nvg);
-				nvgCircle(nvg, scale*(com.x + offset.x),scale*( com.y + offset.y), scale*6.0f);
+				nvgCircle(nvg, scale*(com.x + offset.x), scale*(com.y + offset.y), scale*6.0f);
 				nvgFill(nvg);
 				nvgStroke(nvg);
 			}
 		}
-		void NBodyForce::draw(AlloyContext* context, const pixel2& offset,float scale) {
+		void NBodyForce::draw(AlloyContext* context, const pixel2& offset, float scale) {
 			if (!enabled || !visible)
 				return;
-			if (root.get() != nullptr)root->draw(context, offset,scale);
+			if (root.get() != nullptr)root->draw(context, offset, scale);
 		}
 
 		void CircularWallForce::draw(AlloyContext* context, const pixel2& offset, float scale) {
-			if (!enabled|| !visible)
+			if (!enabled || !visible)
 				return;
 			NVGcontext* nvg = context->nvgContext;
-			nvgStrokeWidth(nvg,scale* 4.0f);
+			nvgStrokeWidth(nvg, scale* 4.0f);
 			nvgStrokeColor(nvg, Color(0.8f, 0.8f, 0.8f, 1.0f));
 			nvgBeginPath(nvg);
-			nvgCircle(nvg,scale*( p.x + offset.x),scale*( p.y + offset.y), scale*(r-2.0f));
+			nvgCircle(nvg, scale*(p.x + offset.x), scale*(p.y + offset.y), scale*(r - 2.0f));
 			nvgStroke(nvg);
 		}
 	}

@@ -600,15 +600,27 @@ bool DataFlow::onEventHandler(AlloyContext* context, const InputEvent& e) {
 		}
 	}
 	else if (e.type == InputType::MouseButton) {
+
 		if (e.isDown()) {
+			if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
+				if (selectedConnection) {
+					selectedConnection->selected = !selectedConnection->selected;
+				}
+			}
 			forceSim->stop();
 		}
 		else if (e.isUp()) {
+			if (e.button == GLFW_MOUSE_BUTTON_RIGHT&&!dragAction&&dragging) {
+				for (ConnectionPtr connection : connections) {
+					connection->selected = false;
+				}
+			}
 			forceSim->start();
 		}
 	}
 	if (dragging && e.type == InputType::MouseButton && e.isUp()) {
 		dragging = false;
+		dragAction = false;
 	}
 
 	if (e.type
@@ -616,10 +628,14 @@ bool DataFlow::onEventHandler(AlloyContext* context, const InputEvent& e) {
 		currentDrawOffset = this->extents.position;
 		cursorDownLocation = e.cursor;
 		dragging = true;
+		dragAction = false;
 	}
 	if (e.type == InputType::Cursor && dragging) {
 		this->extents.position = currentDrawOffset + e.cursor
 			- cursorDownLocation;
+		if (lengthL1(e.cursor- cursorDownLocation) > 0) {
+			dragAction = true;
+		}
 	}
 
 	return Composite::onEventHandler(context, e);
@@ -1550,7 +1566,9 @@ void Relationship::drawText(AlloyContext* context) {
 void DataFlow::draw(AlloyContext* context) {
 	mouseOverNode = nullptr;
 	const float nudge = context->theme.CORNER_RADIUS;
-
+	if (selectedConnection != nullptr&&context->getCursor()==nullptr) {
+		context->setCursor(&Cursor::Hand);
+	}
 	for (std::shared_ptr<Region> child : children) {
 		Node* node = dynamic_cast<Node*>(child.get());
 		if (node) {
@@ -1766,13 +1784,7 @@ void DataFlow::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		router.evaluate(connect);
 	}
 	Connection* c = closestConnection(AlloyApplicationContext()->getCursorPosition() - getDrawOffset(), 4.0f);
-	if (selectedConnection != nullptr) {
-		selectedConnection->selected = false;
-	}
-	if (c != nullptr) {
-		selectedConnection = c;
-		selectedConnection->selected = true;
-	}
+	selectedConnection = c;
 	routingLock.unlock();
 }
 }
