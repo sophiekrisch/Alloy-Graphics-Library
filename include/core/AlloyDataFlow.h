@@ -619,6 +619,7 @@ protected:
 	bool updateSimulation(uint64_t iter);
 	void addNode(const std::shared_ptr<Node>& node);
 	Connection* closestConnection(const float2& pt, float tolernace);
+	void deleteSelectedNodes();
 public:
 	friend class Node;
 	std::shared_ptr<ForceSimulator> getForceSimulator() {

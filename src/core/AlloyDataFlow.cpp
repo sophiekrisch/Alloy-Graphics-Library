@@ -548,6 +548,57 @@ namespace aly {
 		void DataFlow::setCurrentPort(Port* currentPort) {
 			this->currentPort = currentPort;
 		}
+		void DataFlow::deleteSelectedNodes() {
+			std::list<ForceItemPtr> deleteForceList;
+			std::list<Node*> deleteNodeList;
+			{
+				std::vector<RegionPtr> tmpList;
+				for (RegionPtr child : children) {
+					Node* node = dynamic_cast<Node*>(child.get());
+					if (node) {
+						if (node->isSelected()) {
+							deleteForceList.push_back(node->forceItem);
+							deleteNodeList.push_back(node);
+						}
+						else {
+							tmpList.push_back(child);
+						}
+					}
+					else {
+						tmpList.push_back(child);
+					}
+				}
+				children = tmpList;
+			}
+			
+			{
+				std::vector<ConnectionPtr> tmpList;
+				for (ConnectionPtr connection : connections) {
+					if (connection->source->getNode()->isSelected() || connection->destination->getNode()->isSelected()) {
+						if(connection->source->getNode()->isSelected() )connection->source->setConnection(nullptr);
+						if (connection->destination->getNode()->isSelected())connection->destination->setConnection(nullptr);
+					}
+					else {
+						tmpList.push_back(connection);
+					}
+				}
+
+				routingLock.lock();
+				connections = tmpList;
+				routingLock.unlock();
+			}
+			{
+				std::vector<RelationshipPtr> tmpList;
+				for (RelationshipPtr relationship : relationships) {
+					if (!relationship->subject->isSelected() && !relationship->object->isSelected()) {
+						tmpList.push_back(relationship);
+					}
+				}
+				relationships = tmpList;
+			}
+			
+			forceSim->erase(deleteForceList);
+		}
 		bool DataFlow::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			if (connectingPort != nullptr && e.type == InputType::MouseButton
 				&& e.isUp()) {
@@ -580,7 +631,7 @@ namespace aly {
 				mouseOverNode->forceItem->velocity = float2(0.0f);
 				mouseOverNode->forceItem->plocation = mouseOverNode->forceItem->location;
 			}
-			if (mouseDragNode!=nullptr) {
+			if (mouseDragNode != nullptr) {
 				if (draggingNode && e.type == InputType::Cursor) {
 					for (std::pair<Node*, pixel2> pr : dragList) {
 						pr.first->setDragOffset(e.cursor, pr.second);
@@ -596,7 +647,7 @@ namespace aly {
 					draggingNode = false;
 				}
 			}
-			if (!draggingNode&&mouseSelectedNode!=nullptr) {
+			if (!draggingNode&&mouseSelectedNode != nullptr) {
 				if (e.type == InputType::MouseButton&& e.button == GLFW_MOUSE_BUTTON_LEFT && e.isDown()) {
 					mouseDragNode = mouseSelectedNode;
 					if (context->isShiftDown()) {
@@ -621,7 +672,7 @@ namespace aly {
 			}
 			if (e.type == InputType::Cursor || e.type == InputType::MouseButton) {
 				if (context->isMouseDrag() && e.button == GLFW_MOUSE_BUTTON_LEFT) {
-					if (dragBox.dimensions.x*dragBox.dimensions.y > 0 || (connectingPort == nullptr&&mouseOverNode == nullptr&&mouseDragNode==nullptr)) {
+					if (dragBox.dimensions.x*dragBox.dimensions.y > 0 || (connectingPort == nullptr&&mouseOverNode == nullptr&&mouseDragNode == nullptr)) {
 						float2 cursorDown = context->getCursorDownPosition();
 						float2 stPt = aly::min(cursorDown, e.cursor);
 						float2 endPt = aly::max(cursorDown, e.cursor);
@@ -645,7 +696,7 @@ namespace aly {
 									connection->selected = false;
 								}
 							}
-							selectedConnection->selected =true;
+							selectedConnection->selected = true;
 						}
 					}
 					if (!context->isControlDown()) {
@@ -677,19 +728,20 @@ namespace aly {
 				else if (draggingNode) {
 					dragAction = false;
 					draggingNode = false;
-				} else 
-				if (dragBox.dimensions.x*dragBox.dimensions.y > 0) {
-					pixel2 offset = getDrawOffset();
-					for (RegionPtr child : children) {
-						Node* node = dynamic_cast<Node*>(child.get());
-						if (node) {
-							if (dragBox.contains(node->getForceItem()->location + offset)) {
-								node->setSelected(true);
+				}
+				else
+					if (dragBox.dimensions.x*dragBox.dimensions.y > 0) {
+						pixel2 offset = getDrawOffset();
+						for (RegionPtr child : children) {
+							Node* node = dynamic_cast<Node*>(child.get());
+							if (node) {
+								if (dragBox.contains(node->getForceItem()->location + offset)) {
+									node->setSelected(true);
+								}
 							}
 						}
+						dragBox = box2px(pixel2(0.0f), pixel2(0.0f));
 					}
-					dragBox = box2px(pixel2(0.0f), pixel2(0.0f));
-				}
 			}
 
 			if (e.type
@@ -706,7 +758,43 @@ namespace aly {
 					dragAction = true;
 				}
 			}
-
+			if (e.isDown() && e.type == InputType::Key) {
+				switch (e.key) {
+				case GLFW_KEY_DELETE:
+					deleteSelectedNodes();
+					break;
+				case GLFW_KEY_A:
+					if (e.isControlDown()) {
+						for (RegionPtr child : children) {
+							Node* node = dynamic_cast<Node*>(child.get());
+							if (node) {
+								node->setSelected(true);
+							}
+						}
+					}
+					break;
+				case GLFW_KEY_D:
+					if (e.isControlDown()) {
+						for (RegionPtr child : children) {
+							Node* node = dynamic_cast<Node*>(child.get());
+							if (node) {
+								node->setSelected(false);
+							}
+						}
+					}
+					break;
+				case GLFW_KEY_I:
+					if (e.isControlDown()) {
+						for (RegionPtr child : children) {
+							Node* node = dynamic_cast<Node*>(child.get());
+							if (node) {
+								node->setSelected(!node->isSelected());
+							}
+						}
+					}
+					break;
+				}
+			}
 			return Composite::onEventHandler(context, e);
 		}
 		float Connection::distance(const float2& pt) {
@@ -1850,14 +1938,14 @@ namespace aly {
 				nvgBeginPath(nvg);
 				nvgRect(nvg, dragBox.position.x, dragBox.position.y,
 					dragBox.dimensions.x, dragBox.dimensions.y);
-				nvgFillColor(nvg, Color(64, 64, 64,128));
+				nvgFillColor(nvg, Color(64, 64, 64, 128));
 				nvgFill(nvg);
 
 				nvgBeginPath(nvg);
 				nvgRect(nvg, dragBox.position.x, dragBox.position.y,
 					dragBox.dimensions.x, dragBox.dimensions.y);
 				nvgStrokeWidth(nvg, 2.0f);
-				nvgStrokeColor(nvg, Color(220,220,220));
+				nvgStrokeColor(nvg, Color(220, 220, 220));
 				nvgStroke(nvg);
 			}
 		}
