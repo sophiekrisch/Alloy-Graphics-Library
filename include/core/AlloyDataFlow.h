@@ -385,6 +385,7 @@ protected:
 	float fontSize;
 	DataFlow* parent;
 	bool dragging;
+	bool dragAction;
 	pixel2 cursorDownPosition;
 	std::vector<std::shared_ptr<InputPort>> inputPorts;
 	std::vector<std::shared_ptr<OutputPort>> outputPorts;
@@ -604,8 +605,8 @@ protected:
 	std::vector<std::shared_ptr<Relationship>> relationships;
 	std::shared_ptr<BoxForce> boxForce;
 
+	box2px dragBox;
 	box2px graphBounds;
-
 	Node* mouseOverNode;
 	Port* connectingPort;
 	Port* currentPort;

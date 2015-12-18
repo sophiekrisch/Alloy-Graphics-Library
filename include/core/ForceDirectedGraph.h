@@ -73,7 +73,7 @@ struct SpringItem {
 	}
 	void update() {
 		length = distance(item1->location, item2->location);
-		direction = (item2->location - item1->location)/length;
+		direction = (item2->location - item1->location)/std::max(1E-6f,length);
 	}
 	void draw(AlloyContext* context, const pixel2& offset,float scale);
 };
