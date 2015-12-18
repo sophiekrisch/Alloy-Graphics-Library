@@ -600,7 +600,7 @@ namespace aly {
 				if (e.type == InputType::MouseButton&& e.button == GLFW_MOUSE_BUTTON_LEFT && e.isDown()) {
 					mouseDragNode = mouseSelectedNode;
 					if (context->isShiftDown()) {
-						mouseDragNode->setSelected(true);
+						mouseDragNode->setSelected(!mouseDragNode->isSelected());
 					}
 					putLast(mouseDragNode);
 					dragList.clear();
