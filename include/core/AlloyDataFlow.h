@@ -616,7 +616,7 @@ protected:
 	pixel2 currentDrawOffset;
 	pixel2 cursorDownLocation;
 	Connection* selectedConnection = nullptr;
-	bool dragging = false; 
+	bool draggingGraph = false; 
 	bool dragAction = false;
 	void setup();
 	bool updateSimulation(uint64_t iter);

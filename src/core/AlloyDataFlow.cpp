@@ -648,7 +648,7 @@ namespace aly {
 
 				}
 				else if (e.isUp()) {
-					if (e.button == GLFW_MOUSE_BUTTON_RIGHT&&!dragAction&&dragging) {
+					if (e.button == GLFW_MOUSE_BUTTON_RIGHT&&!dragAction&&draggingGraph) {
 						for (ConnectionPtr connection : connections) {
 							connection->selected = false;
 						}
@@ -664,8 +664,8 @@ namespace aly {
 				}
 			}
 			if (e.type == InputType::MouseButton && e.isUp()) {
-				if (dragging) {
-					dragging = false;
+				if (draggingGraph) {
+					draggingGraph = false;
 					dragAction = false;
 				}
 				else if (dragBox.dimensions.x*dragBox.dimensions.y > 0) {
@@ -686,10 +686,10 @@ namespace aly {
 				== InputType::MouseButton&&e.isDown() && e.button == GLFW_MOUSE_BUTTON_RIGHT) {
 				currentDrawOffset = this->extents.position;
 				cursorDownLocation = e.cursor;
-				dragging = true;
+				draggingGraph = true;
 				dragAction = false;
 			}
-			if (e.type == InputType::Cursor && dragging) {
+			if (e.type == InputType::Cursor && draggingGraph) {
 				this->extents.position = currentDrawOffset + e.cursor
 					- cursorDownLocation;
 				if (lengthL1(e.cursor - cursorDownLocation) > 0) {
