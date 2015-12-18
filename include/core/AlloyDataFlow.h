@@ -383,10 +383,9 @@ class Node: public Composite {
 protected:
 	std::string label;
 	float fontSize;
+	float textWidth;
+	pixel2 centerOffset;
 	DataFlow* parent;
-	bool dragging;
-	bool dragAction;
-	pixel2 cursorDownPosition;
 	std::vector<std::shared_ptr<InputPort>> inputPorts;
 	std::vector<std::shared_ptr<OutputPort>> outputPorts;
 	std::shared_ptr<InputPort> inputPort;
@@ -396,8 +395,6 @@ protected:
 	CompositePtr inputPortComposite;
 	CompositePtr outputPortComposite;
 	ModifiableLabelPtr labelRegion;
-	float textWidth;
-	pixel2 centerOffset;
 	std::shared_ptr<ForceItem> forceItem;
 	virtual void setup();
 	void prePack();
@@ -442,12 +439,9 @@ public:
 	virtual box2px getBounds(bool includeBounds = true) const override;
 	virtual box2px getCursorBounds(bool includeOffset = true) const override;
 	virtual pixel2 getDrawOffset() const override;
-	//virtual box2px getExtents() const override;
 	virtual NodeType getType() const {
 		return NodeType::Unknown;
 	}
-	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
-			override;
 	bool isMouseOver() const;
 	pixel2 getCenter() const {
 		return getBoundsPosition() + centerOffset;
@@ -604,10 +598,12 @@ protected:
 	std::vector<std::shared_ptr<Connection>> connections;
 	std::vector<std::shared_ptr<Relationship>> relationships;
 	std::shared_ptr<BoxForce> boxForce;
-
+	std::list<std::pair<Node*, pixel2>> dragList;
 	box2px dragBox;
 	box2px graphBounds;
 	Node* mouseOverNode;
+	Node* mouseDragNode;
+	Node* mouseSelectedNode;
 	Port* connectingPort;
 	Port* currentPort;
 	std::mutex routingLock;
@@ -618,6 +614,7 @@ protected:
 	Connection* selectedConnection = nullptr;
 	bool draggingGraph = false; 
 	bool dragAction = false;
+	bool draggingNode = false;
 	void setup();
 	bool updateSimulation(uint64_t iter);
 	void addNode(const std::shared_ptr<Node>& node);

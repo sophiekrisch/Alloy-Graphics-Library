@@ -214,10 +214,6 @@ namespace aly {
 		void Node::setup() {
 			borderWidth = UnitPX(4.0f);
 			fontSize = 20.0f;
-			cursorDownPosition = pixel2(-1, -1);
-			dragging = false;
-			dragAction = false;
-			Application::addListener(this);
 		}
 		ForceSimulatorPtr Node::getForceSimulator() {
 			if (parent == nullptr)throw std::runtime_error("Node has no parent dataflow.");
@@ -231,48 +227,6 @@ namespace aly {
 			}
 			box.position += getForceOffset();
 			return box;
-		}
-		bool Node::onEventHandler(AlloyContext* context, const InputEvent& e) {
-			if (Composite::onEventHandler(context, e))
-				return true;
-			bool over = context->isMouseOver(nodeIcon.get(), true);
-			if (context->isMouseOver(this, true)) {
-				parent->getForceSimulator()->setSelected(forceItem.get());
-				forceItem->velocity = float2(0.0f);
-				forceItem->plocation = forceItem->location;
-			}
-
-			if (e.type == InputType::MouseButton && e.button == GLFW_MOUSE_BUTTON_LEFT
-				&& e.isDown() && over) {
-				dynamic_cast<Composite*>(this->parent)->putLast(this);
-			}
-
-			if (dragging && e.type == InputType::Cursor) {
-				//box2px pbounds = parent->getBounds();
-				this->setDragOffset(e.cursor, cursorDownPosition);
-				if (lengthL1(e.cursor - cursorDownPosition) > 0) {
-					dragAction = true;
-				}
-				context->requestPack();
-			}
-			else if (e.type == InputType::MouseButton && e.isUp()) {
-				context->requestPack();
-				if (dragging&&!dragAction&&e.button == GLFW_MOUSE_BUTTON_LEFT) {
-					nodeIcon->selected = !nodeIcon->selected;
-				}
-				dragAction = false;
-				dragging = false;
-
-			}
-			if (!dragging) {
-				if (over && e.type == InputType::MouseButton
-					&& e.button == GLFW_MOUSE_BUTTON_LEFT && e.isDown()) {
-					cursorDownPosition = e.cursor - getBoundsPosition();
-					dragging = true;
-					dragAction = false;
-				}
-			}
-			return false;
 		}
 		pixel2 Node::getForceOffset() const {
 			return forceItem->location - centerOffset;
@@ -617,9 +571,57 @@ namespace aly {
 				}
 				connectingPort = nullptr;
 			}
+
+			if (Composite::onEventHandler(context, e))
+				return true;
+
+			if (mouseOverNode != nullptr) {
+				forceSim->setSelected(mouseOverNode->forceItem.get());
+				mouseOverNode->forceItem->velocity = float2(0.0f);
+				mouseOverNode->forceItem->plocation = mouseOverNode->forceItem->location;
+			}
+			if (mouseDragNode!=nullptr) {
+				if (draggingNode && e.type == InputType::Cursor) {
+					for (std::pair<Node*, pixel2> pr : dragList) {
+						pr.first->setDragOffset(e.cursor, pr.second);
+					}
+					dragAction = true;
+					context->requestPack();
+				}
+				else if (e.type == InputType::MouseButton && e.isUp()) {
+					context->requestPack();
+					dragList.clear();
+					mouseDragNode = nullptr;
+					dragAction = false;
+					draggingNode = false;
+				}
+			}
+			if (!draggingNode&&mouseSelectedNode!=nullptr) {
+				if (e.type == InputType::MouseButton&& e.button == GLFW_MOUSE_BUTTON_LEFT && e.isDown()) {
+					mouseDragNode = mouseSelectedNode;
+					if (context->isShiftDown()) {
+						mouseDragNode->setSelected(true);
+					}
+					putLast(mouseDragNode);
+					dragList.clear();
+					if (mouseDragNode->isSelected()) {
+						for (RegionPtr child : children) {
+							Node* node = dynamic_cast<Node*>(child.get());
+							if (node&&node->isSelected()) {
+								dragList.push_back(std::pair<Node*, pixel2>(node, e.cursor - node->getBoundsPosition()));
+							}
+						}
+					}
+					else {
+						dragList.push_back(std::pair<Node*, pixel2>(mouseDragNode, e.cursor - mouseDragNode->getBoundsPosition()));
+					}
+					draggingNode = true;
+					dragAction = false;
+				}
+			}
 			if (e.type == InputType::Cursor || e.type == InputType::MouseButton) {
 				if (context->isMouseDrag() && e.button == GLFW_MOUSE_BUTTON_LEFT) {
-					if (dragBox.dimensions.x*dragBox.dimensions.y > 0 || (connectingPort == nullptr&&mouseOverNode == nullptr)) {
+					if (dragBox.dimensions.x*dragBox.dimensions.y > 0 || (connectingPort == nullptr&&mouseOverNode == nullptr&&mouseDragNode==nullptr)) {
 						float2 cursorDown = context->getCursorDownPosition();
 						float2 stPt = aly::min(cursorDown, e.cursor);
 						float2 endPt = aly::max(cursorDown, e.cursor);
@@ -635,11 +637,15 @@ namespace aly {
 				}
 			}
 			else if (e.type == InputType::MouseButton) {
-
 				if (e.isDown()) {
 					if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
 						if (selectedConnection) {
-							selectedConnection->selected = !selectedConnection->selected;
+							if (!context->isShiftDown()) {
+								for (ConnectionPtr connection : connections) {
+									connection->selected = false;
+								}
+							}
+							selectedConnection->selected =true;
 						}
 					}
 					if (!context->isControlDown()) {
@@ -668,7 +674,11 @@ namespace aly {
 					draggingGraph = false;
 					dragAction = false;
 				}
-				else if (dragBox.dimensions.x*dragBox.dimensions.y > 0) {
+				else if (draggingNode) {
+					dragAction = false;
+					draggingNode = false;
+				} else 
+				if (dragBox.dimensions.x*dragBox.dimensions.y > 0) {
 					pixel2 offset = getDrawOffset();
 					for (RegionPtr child : children) {
 						Node* node = dynamic_cast<Node*>(child.get());
@@ -869,6 +879,10 @@ namespace aly {
 			return nullptr;
 		}
 		void DataFlow::setup() {
+
+			mouseDragNode = nullptr;
+			mouseSelectedNode = nullptr;
+			mouseOverNode = nullptr;
 			dragBox = box2px(float2(0, 0), float2(0, 0));
 			graphBounds = box2px(pixel2(0.0f), pixel2(0.0f));
 			setRoundCorners(true);
@@ -1657,15 +1671,19 @@ namespace aly {
 
 		void DataFlow::draw(AlloyContext* context) {
 			mouseOverNode = nullptr;
+			mouseSelectedNode = nullptr;
 			const float nudge = context->theme.CORNER_RADIUS;
 			if (selectedConnection != nullptr&&context->getCursor() == nullptr) {
-				context->setCursor(&Cursor::Hand);
+				context->setCursor(&Cursor::CrossHairs);
 			}
 			for (std::shared_ptr<Region> child : children) {
 				Node* node = dynamic_cast<Node*>(child.get());
 				if (node) {
 					if (context->isMouseOver(node, true)) {
 						mouseOverNode = node;
+						if (context->isMouseOver(node->nodeIcon.get())) {
+							mouseSelectedNode = node;
+						}
 						break;
 					}
 				}
