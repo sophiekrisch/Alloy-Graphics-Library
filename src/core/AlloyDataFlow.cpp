@@ -619,12 +619,14 @@ namespace aly {
 			}
 			if (e.type == InputType::Cursor || e.type == InputType::MouseButton) {
 				if (context->isMouseDrag() && e.button == GLFW_MOUSE_BUTTON_LEFT) {
-					float2 cursorDown = context->getCursorDownPosition();
-					float2 stPt = aly::min(cursorDown, e.cursor);
-					float2 endPt = aly::max(cursorDown, e.cursor);
-					dragBox.position = stPt;
-					dragBox.dimensions = endPt - stPt;
-					dragBox.intersect(getBounds());
+					if (dragBox.dimensions.x*dragBox.dimensions.y > 0 || (connectingPort == nullptr&&mouseOverNode == nullptr)) {
+						float2 cursorDown = context->getCursorDownPosition();
+						float2 stPt = aly::min(cursorDown, e.cursor);
+						float2 endPt = aly::max(cursorDown, e.cursor);
+						dragBox.position = stPt;
+						dragBox.dimensions = endPt - stPt;
+						dragBox.intersect(getBounds());
+					}
 				}
 			}
 			if (e.type == InputType::Cursor) {
