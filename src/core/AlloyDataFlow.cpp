@@ -603,13 +603,16 @@ void DataFlow::deleteSelected() {
 		}
 		children = tmpList;
 	}
-
+	std::list<SpringItemPtr> deleteSpringList;
 	{
 		std::vector<ConnectionPtr> tmpList;
 		for (ConnectionPtr connection : connections) {
 			if (connection->source->getNode()->isSelected()
 					|| connection->destination->getNode()->isSelected()
 					|| connection->selected) {
+				if (connection->selected) {
+					deleteSpringList.push_back(connection->getSpringItem());
+				}
 				connection->source->setConnection(nullptr);
 				connection->destination->setConnection(nullptr);
 			} else {
@@ -633,6 +636,7 @@ void DataFlow::deleteSelected() {
 	}
 
 	forceSim->erase(deleteForceList);
+	forceSim->erase(deleteSpringList);
 }
 bool DataFlow::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	if (connectingPort != nullptr && e.type == InputType::MouseButton
