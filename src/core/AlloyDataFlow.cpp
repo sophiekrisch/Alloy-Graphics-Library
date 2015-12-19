@@ -901,6 +901,7 @@ namespace aly {
 				switch (e.key) {
 				case GLFW_KEY_DELETE:
 					deleteSelected();
+					return true;
 					break;
 				case GLFW_KEY_A:
 					if (e.isControlDown()) {
@@ -910,6 +911,7 @@ namespace aly {
 								node->setSelected(true);
 							}
 						}
+						return true;
 					}
 					break;
 				case GLFW_KEY_D:
@@ -920,6 +922,7 @@ namespace aly {
 								node->setSelected(false);
 							}
 						}
+						return true;
 					}
 					break;
 				case GLFW_KEY_I:
@@ -930,6 +933,7 @@ namespace aly {
 								node->setSelected(!node->isSelected());
 							}
 						}
+						return true;
 					}
 					break;
 				}
@@ -1071,11 +1075,40 @@ namespace aly {
 		void DataFlow::addNode(const std::shared_ptr<Node>& node) {
 			Composite::add(node);
 			data->nodes.push_back(node);
-			router.add(node);
 			routingLock.lock();
+			router.add(node);
+			routingLock.unlock();
 			forceSim->addForceItem(node->getForceItem());
 			node->parent = this;
+		}
+
+		void DataFlow::setGroup(const std::shared_ptr<Group>& g) {
+			routingLock.lock();
+			router.nodes = g->nodes;
+			router.update();
 			routingLock.unlock();
+			forceSim->clear();
+			std::vector<RegionPtr> tmpList;
+			for (RegionPtr child : children) {
+				Node* node = dynamic_cast<Node*>(child.get());
+				if (node == nullptr) {
+					tmpList.push_back(child);
+				}
+			}
+			children = tmpList;
+			for (NodePtr node : g->nodes) {
+				node->parent = this;
+				forceSim->addForceItem(node->getForceItem());
+				children.push_back(node);
+			}
+			for (ConnectionPtr connection : g->connections) {
+				forceSim->addSpringItem(connection->getSpringItem());
+			}
+			for (RelationshipPtr relationship : g->relationships) {
+				forceSim->addSpringItem(relationship->getSpringItem());
+			}
+			graphBounds = box2px(pixel2(0.0f), pixel2(0.0f));
+			AlloyApplicationContext()->requestPack();
 		}
 		void DataFlow::add(const std::shared_ptr<Source>& node) {
 			addNode(node);

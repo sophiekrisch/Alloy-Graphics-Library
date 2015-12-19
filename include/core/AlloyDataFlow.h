@@ -657,6 +657,7 @@ public:
 	Connection* getSelectedConnection() {
 		return selectedConnection;
 	}
+	void setGroup(const std::shared_ptr<Group>& g);
 	void setSelected(Connection* item) {
 		selectedConnection = item;
 	}
