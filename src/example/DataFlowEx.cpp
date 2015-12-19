@@ -49,6 +49,11 @@ bool DataFlowEx::init(Composite& rootNode) {
 	SourcePtr sourceNode2 = MakeSourceNode("Source 2", pixel2(200, 200));
 	SourcePtr sourceNode3 = MakeSourceNode("Source 3", pixel2(300, 200));
 
+
+	GroupPtr groupNode1 = MakeGroupNode("Group 1", pixel2(700, 100));
+	GroupPtr groupNode2 = MakeGroupNode("Group 2", pixel2(800, 100));
+
+	
 	DestinationPtr destNode1 = MakeDestinationNode("Destination 1",
 		pixel2(350, 900));
 	DestinationPtr destNode2 = MakeDestinationNode("Destination 2",
@@ -101,6 +106,9 @@ bool DataFlowEx::init(Composite& rootNode) {
 	
 	graph->add(viewNode1);
 	graph->add(viewNode2);
+
+	graph->add(groupNode1);
+	graph->add(groupNode2);
 
 	graph->add(dataNode1);
 	graph->add(dataNode2);

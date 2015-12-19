@@ -35,11 +35,13 @@ namespace aly {
 		const float NODE_LUMINANCE = 0.65f;
 		const float NODE_ALPHA = 0.75f;
 		const Color View::COLOR = HSVAtoColor(
-			HSVA(300 / 360.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
+			HSVA(300 / 360.0f, NODE_SATURATION, 0.5f*NODE_LUMINANCE, 1.0f));
 		const Color Compute::COLOR = HSVAtoColor(
 			HSVA(0.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
 		const Color Data::COLOR = HSVAtoColor(
 			HSVA(60.0f / 360.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
+		const Color Group::COLOR = HSVAtoColor(
+			HSVA(30.0f / 360.0f, NODE_SATURATION, 0.5f*NODE_LUMINANCE, 1.0f));
 		const Color Destination::COLOR = HSVAtoColor(
 			HSVA(120.0f / 360.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
 		const Color Source::COLOR = HSVAtoColor(
@@ -118,6 +120,18 @@ namespace aly {
 			return ComputePtr(new Compute(name, pixel2(0.0f)));
 		}
 
+		std::shared_ptr<Group> MakeGroupNode(const std::string& name, const std::string& label, const pixel2& pos) {
+			return GroupPtr(new Group(name, label, pos));
+		}
+		std::shared_ptr<Group> MakeGroupNode(const std::string& name, const pixel2& pos) {
+			return GroupPtr(new Group(name, pos));
+		}
+		std::shared_ptr<Group> MakeGroupNode(const std::string& name, const std::string& label) {
+			return GroupPtr(new Group(name, label, pixel2(0.0f)));
+		}
+		std::shared_ptr<Group> MakeGroupNode(const std::string& name) {
+			return GroupPtr(new Group(name, pixel2(0.0f)));
+		}
 		std::shared_ptr<Source> MakeSourceNode(const std::string& name, const std::string& label, const pixel2& pos) {
 			return SourcePtr(new Source(name, label, pos));
 		}
@@ -152,6 +166,14 @@ namespace aly {
 			box2px bounds = getBounds();
 			pixel lineWidth = 0;
 			nvgStrokeWidth(nvg, lineWidth);
+			static std::vector<float2> pentagon;
+			if (pentagon.size() == 0) {
+				pentagon.resize(6);
+				for (int k = 0; k < 5; k++) {
+					pentagon[k] = float2(std::sin(ALY_PI * 2 * k / 5.0f), -std::cos(ALY_PI * 2 * k / 5.0f));
+				}
+				pentagon[5] = float2(0.0f);
+			}
 			if (context->isMouseOver(this)) {
 				nvgFillColor(nvg, backgroundColor->toLighter(0.25f));
 				//context->setCursor(&Cursor::Position);
@@ -159,30 +181,61 @@ namespace aly {
 			else {
 				nvgFillColor(nvg, *backgroundColor);
 			}
+			Color strokeColor;
 			if (selected) {
 				nvgStrokeWidth(nvg, 6.0f);
 				lineWidth = 6;
-				nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
+				nvgStrokeColor(nvg, strokeColor=context->theme.HIGHLIGHT);
 			}
 			else {
 				nvgStrokeWidth(nvg, 4.0f);
 				lineWidth = 4;
-				nvgStrokeColor(nvg, context->theme.HIGHLIGHT.toDarker(0.8f));
+				nvgStrokeColor(nvg, strokeColor=context->theme.HIGHLIGHT.toDarker(0.8f));
 			}
-			nvgBeginPath(nvg);
 			if (shape == NodeShape::Circle) {
+				nvgBeginPath(nvg);
 				nvgEllipse(nvg, bounds.position.x + bounds.dimensions.x * 0.5f,
 					bounds.position.y + bounds.dimensions.y * 0.5f,
 					0.5f * bounds.dimensions.y - lineWidth * 0.5f,
 					0.5f * bounds.dimensions.y - lineWidth * 0.5f);
+
+				nvgFill(nvg);
+				nvgStroke(nvg);
+			} else if (shape == NodeShape::CircleGroup) {
+				nvgBeginPath(nvg);
+				nvgEllipse(nvg, bounds.position.x + bounds.dimensions.x * 0.5f,
+					bounds.position.y + bounds.dimensions.y * 0.5f,
+					0.5f * bounds.dimensions.y - lineWidth * 0.5f,
+					0.5f * bounds.dimensions.y - lineWidth * 0.5f);
+
+				nvgFill(nvg);
+				nvgStroke(nvg);
+				nvgFillColor(nvg, strokeColor);
+				float cx = bounds.position.x + bounds.dimensions.x * 0.5f;
+				float cy = bounds.position.y + bounds.dimensions.y * 0.5f;
+				float r = 4.0f;
+				float rx = 0.5f*(0.5f * bounds.dimensions.x);
+				float ry = 0.5f*(0.5f * bounds.dimensions.y);
+				for (int k = 0; k < (int)pentagon.size(); k++) {
+					nvgBeginPath(nvg);
+					float2 pt = pentagon[k];
+					float x = cx + rx*pt.x;
+					float y = cy + ry*pt.y;
+					nvgCircle(nvg,x,y,r);
+					nvgFill(nvg);
+				}
 			}
 			else if (shape == NodeShape::Square) {
+				nvgBeginPath(nvg);
 				nvgRoundedRect(nvg, bounds.position.x + lineWidth * 0.5f,
 					bounds.position.y + lineWidth * 0.5f,
 					bounds.dimensions.x - lineWidth,
 					bounds.dimensions.y - lineWidth, bounds.dimensions.x * 0.25f);
+				nvgFill(nvg);
+				nvgStroke(nvg);
 			}
 			else if (shape == NodeShape::Triangle) {
+				nvgBeginPath(nvg);
 				nvgLineJoin(nvg, NVG_ROUND);
 				nvgMoveTo(nvg, bounds.position.x + bounds.dimensions.x * 0.5f,
 					bounds.position.y + bounds.dimensions.y - lineWidth);
@@ -191,8 +244,11 @@ namespace aly {
 				nvgLineTo(nvg, bounds.position.x + bounds.dimensions.x - lineWidth,
 					bounds.position.y + lineWidth * 0.5f);
 				nvgClosePath(nvg);
+				nvgFill(nvg);
+				nvgStroke(nvg);
 			}
 			else if (shape == NodeShape::Hexagon) {
+				nvgBeginPath(nvg);
 				nvgLineJoin(nvg, NVG_ROUND);
 				float cx = bounds.position.x + bounds.dimensions.x * 0.5f;
 				float cy = bounds.position.y + bounds.dimensions.y * 0.5f;
@@ -207,9 +263,9 @@ namespace aly {
 				nvgLineTo(nvg, cx - rx * 0.5f, cy + ry);
 				nvgLineTo(nvg, cx + rx * 0.5f, cy + ry);
 				nvgClosePath(nvg);
+				nvgFill(nvg);
+				nvgStroke(nvg);
 			}
-			nvgFill(nvg);
-			nvgStroke(nvg);
 		}
 		void Node::setup() {
 			borderWidth = UnitPX(4.0f);
@@ -300,6 +356,77 @@ namespace aly {
 			forceItem->buoyancy = 0;
 
 		}
+		void Group::setup() {
+			setOrientation(Orientation::Horizontal, pixel2(0, 0));
+			NVGcontext* nvg = AlloyApplicationContext()->nvgContext;
+			nvgFontSize(nvg, fontSize);
+			nvgFontFaceId(nvg,
+				AlloyApplicationContext()->getFont(FontType::Bold)->handle);
+			textWidth = nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
+			CompositePtr iconContainer = MakeComposite("Icon Container",
+				CoordPX(0.0f, 0.0f),
+				CoordPX(
+					Node::DIMENSIONS.x - InputPort::DIMENSIONS.x
+					- OutputPort::DIMENSIONS.x, Node::DIMENSIONS.y));
+
+			CompositePtr labelContainer = MakeComposite("label Container",
+				CoordPX(Node::DIMENSIONS.x, 0.0f),
+				CoordPerPX(1.0f, 0.0f, 0.0f, Node::DIMENSIONS.y));
+
+			nodeIcon = NodeIconPtr(
+				new NodeIcon("Icon", CoordPX(0.0f, InputPort::DIMENSIONS.y + 1.0f),
+					CoordPerPX(1.0f, 1.0f, 0.0f,
+						-OutputPort::DIMENSIONS.y - InputPort::DIMENSIONS.y
+						- 2.0f)));
+			nodeIcon->setAspectRule(AspectRule::FixedHeight);
+			nodeIcon->setAspectRatio(1.0f);
+			inputPort = MakeInputPort("Input");
+			outputPort = MakeOutputPort("Output");
+			inputPort->position = CoordPerPX(0.5f, 0.0f,
+				-InputPort::DIMENSIONS.x * 0.5f, 0.0f);
+			outputPort->position = CoordPerPX(0.5f, 1.0f,
+				-OutputPort::DIMENSIONS.x * 0.5f, -OutputPort::DIMENSIONS.y);
+			inputPort->setParent(this);
+			outputPort->setParent(this);
+			iconContainer->add(inputPort);
+			iconContainer->add(outputPort);
+			iconContainer->add(nodeIcon);
+			labelRegion = ModifiableLabelPtr(
+				new ModifiableLabel(name, CoordPX(0.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
+					CoordPerPX(0.0f, 1.0f, std::max(10 + textWidth, Node::DIMENSIONS.x), -2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f)));
+			labelRegion->setValue(label);
+			labelRegion->setAlignment(HorizontalAlignment::Left, VerticalAlignment::Middle);
+			labelRegion->fontSize = UnitPX(fontSize);
+			labelRegion->fontType = FontType::Bold;
+			labelRegion->onTextEntered = [this](TextField* field) {
+				textWidth = labelRegion->getTextDimensions(AlloyApplicationContext().get()).x;
+				labelRegion->dimensions = CoordPerPX(0.0f, 1.0f, std::max(10 + textWidth, Node::DIMENSIONS.x), -2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f);
+			};
+			labelContainer->add(labelRegion);
+			inputPortComposite = CompositePtr(
+				new Composite("Input Ports", CoordPX(0.0f, InputPort::DIMENSIONS.y),
+					CoordPX(0.0f, InputPort::DIMENSIONS.y)));
+			outputPortComposite = CompositePtr(
+				new Composite("Output Ports",
+					CoordPerPX(0.0f, 1.0f, 0.0f, -2 * OutputPort::DIMENSIONS.y),
+					CoordPX(0.0f, OutputPort::DIMENSIONS.y)));
+
+			inputPortComposite->setOrientation(Orientation::Horizontal, pixel2(2, 0),
+				pixel2(2, 0));
+			outputPortComposite->setOrientation(Orientation::Horizontal, pixel2(2, 0),
+				pixel2(2, 0));
+			labelContainer->add(inputPortComposite);
+			labelContainer->add(outputPortComposite);
+
+			Composite::add(iconContainer);
+			Composite::add(labelContainer);
+			setRoundCorners(true);
+			nodeIcon->setShape(NodeShape::CircleGroup);
+			nodeIcon->backgroundColor = MakeColor(COLOR);
+			nodeIcon->borderWidth = borderWidth;
+			forceItem->buoyancy = 0;
+
+		}
 		void Data::setup() {
 
 			setOrientation(Orientation::Horizontal, pixel2(0, 0));
@@ -368,6 +495,7 @@ namespace aly {
 			Composite::add(iconContainer);
 			Composite::add(labelContainer);
 			setRoundCorners(true);
+			nodeIcon->setShape(NodeShape::Circle);
 			nodeIcon->backgroundColor = MakeColor(COLOR);
 			nodeIcon->borderWidth = borderWidth;
 			forceItem->buoyancy = 0;
@@ -918,6 +1046,9 @@ namespace aly {
 		}
 		void DataFlow::addNode(const std::shared_ptr<Node>& node) {
 			Composite::add(node);
+			if (data.get() == nullptr) {
+				data = MakeGroupNode(this->name);
+			}
 			router.add(node);
 			routingLock.lock();
 			forceSim->addForceItem(node->getForceItem());
@@ -926,23 +1057,21 @@ namespace aly {
 		}
 		void DataFlow::add(const std::shared_ptr<Source>& node) {
 			addNode(node);
-			sourceNodes.push_back(node);
 		}
 		void DataFlow::add(const std::shared_ptr<Destination>& node) {
 			addNode(node);
-			destinationNodes.push_back(node);
 		}
 		void DataFlow::add(const std::shared_ptr<Data>& node) {
 			addNode(node);
-			dataNodes.push_back(node);
+		}
+		void DataFlow::add(const std::shared_ptr<Group>& node) {
+			addNode(node);
 		}
 		void DataFlow::add(const std::shared_ptr<View>& node) {
 			addNode(node);
-			viewNodes.push_back(node);
 		}
 		void DataFlow::add(const std::shared_ptr<Compute>& node) {
 			addNode(node);
-			computeNodes.push_back(node);
 		}
 		void DataFlow::add(const std::shared_ptr<Connection>& connection) {
 			SpringItem* spring = new SpringItem(connection->source->getNode()->getForceItem(), connection->destination->getNode()->getForceItem(), -1.0f, 2 * ForceSimulator::RADIUS);
@@ -1419,6 +1548,22 @@ namespace aly {
 			Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
 			postPack();
 		}
+		void Group::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
+			double pixelRatio, bool clamp) {
+			prePack();
+			this->dimensions = CoordPX(
+				std::max(
+					std::max(textWidth + 10.0f,
+						2.0f
+						+ inputPorts.size()
+						* (InputPort::DIMENSIONS.x + 2.0f)),
+					2.0f
+					+ outputPorts.size()
+					* (OutputPort::DIMENSIONS.x + 2.0f)),
+				Node::DIMENSIONS.y);
+			Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
+			postPack();
+		}
 		void View::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 			double pixelRatio, bool clamp) {
 			prePack();
@@ -1573,7 +1718,38 @@ namespace aly {
 				}
 			}
 		}
+
 		void Data::draw(AlloyContext* context) {
+			Node::draw(context);
+			Port* p = getGraph()->getConnectingPort();
+			if (p == inputPort.get()) {
+				inputPort->setVisible(true);
+				if (!outputPort->isConnected())
+					outputPort->setVisible(false);
+			}
+			else if (p == outputPort.get()) {
+				if (!inputPort->isConnected())
+					inputPort->setVisible(false);
+				outputPort->setVisible(true);
+			}
+			else {
+				if (isMouseOver()) {
+
+					if (!inputPort->isVisible()) {
+						inputPort->setVisible(true);
+						outputPort->setVisible(true);
+					}
+				}
+				else {
+					if (!inputPort->isConnected())
+						inputPort->setVisible(false);
+
+					if (!outputPort->isConnected())
+						outputPort->setVisible(false);
+				}
+			}
+		}
+		void Group::draw(AlloyContext* context) {
 			Node::draw(context);
 			Port* p = getGraph()->getConnectingPort();
 			if (p == inputPort.get()) {

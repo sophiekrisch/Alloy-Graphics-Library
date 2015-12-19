@@ -51,7 +51,7 @@ enum class NodeType {
 };
 
 enum class NodeShape {
-	Hidden=0 , Circle = 1, Triangle = 2, Square = 3, Hexagon = 4
+	Hidden=0 , Circle = 1,CircleGroup=2, Triangle = 3, Square = 4, Hexagon = 5
 };
 enum class PortType {
 	Unknown = 0, Input = 1, Output = 2, Child = 3, Parent = 4
@@ -500,6 +500,31 @@ public:
 			const double2& dpmm, double pixelRatio, bool clamp = false)
 					override;
 };
+class Group : public Node {
+protected:
+	virtual void setup() override;
+public:
+	std::vector<std::shared_ptr<Node>> nodes;
+	std::vector<std::shared_ptr<Connection>> connections;
+	std::vector<std::shared_ptr<Relationship>> relationships;
+
+	static const Color COLOR;
+	virtual NodeType getType() const override {
+		return NodeType::Group;
+	}
+	Group(const std::string& name, const pixel2& pt) :
+		Node(name, pt) {
+		setup();
+	}
+	Group(const std::string& name, const std::string& label, const pixel2& pt) :
+		Node(name, label, pt) {
+		setup();
+	}
+	virtual void draw(AlloyContext* context) override;
+	virtual void pack(const pixel2& pos, const pixel2& dims,
+		const double2& dpmm, double pixelRatio, bool clamp = false)
+		override;
+};
 class View: public Node {
 protected:
 	virtual void setup() override;
@@ -590,11 +615,7 @@ public:
 };
 class DataFlow: public Composite {
 protected:
-	std::vector<std::shared_ptr<View>> viewNodes;
-	std::vector<std::shared_ptr<Data>> dataNodes;
-	std::vector<std::shared_ptr<Compute>> computeNodes;
-	std::vector<std::shared_ptr<Source>> sourceNodes;
-	std::vector<std::shared_ptr<Destination>> destinationNodes;
+	std::shared_ptr<Group> data;
 	std::vector<std::shared_ptr<Connection>> connections;
 	std::vector<std::shared_ptr<Relationship>> relationships;
 	std::shared_ptr<BoxForce> boxForce;
@@ -663,39 +684,9 @@ public:
 	void add(const std::shared_ptr<Data>& node);
 	void add(const std::shared_ptr<View>& node);
 	void add(const std::shared_ptr<Compute>& node);
+	void add(const std::shared_ptr<Group>& node);
 	void add(const std::shared_ptr<Connection>& node);
 
-	const std::vector<std::shared_ptr<Data>>& getDataNodes() const {
-		return dataNodes;
-	}
-	const std::vector<std::shared_ptr<View>>& getViewNodes() const {
-		return viewNodes;
-	}
-	const std::vector<std::shared_ptr<Compute>>& getComputeNodes() const {
-		return computeNodes;
-	}
-	const std::vector<std::shared_ptr<Source>>& getSourceNodes() const {
-		return sourceNodes;
-	}
-	const std::vector<std::shared_ptr<Destination>>& getDestinationNodes() const {
-		return destinationNodes;
-	}
-
-	std::vector<std::shared_ptr<Data>> getDataNodes() {
-		return dataNodes;
-	}
-	std::vector<std::shared_ptr<View>> getViewNodes() {
-		return viewNodes;
-	}
-	std::vector<std::shared_ptr<Compute>> getComputeNodes() {
-		return computeNodes;
-	}
-	std::vector<std::shared_ptr<Source>> getSourceNodes() {
-		return sourceNodes;
-	}
-	std::vector<std::shared_ptr<Destination>>& getDestinationNodes() {
-		return destinationNodes;
-	}
 	std::vector<std::shared_ptr<Connection>>& getConnections() {
 		return connections;
 	}
@@ -707,24 +698,6 @@ public:
 	}
 	const std::vector<std::shared_ptr<Relationship>>& getRelationships() const {
 		return relationships;
-	}
-};
-class Group: public Node {
-protected:
-	std::shared_ptr<DataFlow> graph;
-public:
-	NodeType getType() const override {
-		return NodeType::Group;
-	}
-	Group(const std::string& name, const pixel2& pt) :
-		Node(name, pt) {
-		setup();
-	}
-	void setGraph(std::shared_ptr<DataFlow>& graph) {
-		this->graph = graph;
-	}
-	std::shared_ptr<DataFlow> getGraph() {
-		return graph;
 	}
 };
 std::shared_ptr<Connection> MakeConnection(
@@ -751,6 +724,15 @@ std::shared_ptr<Compute> MakeComputeNode(const std::string& name,
 std::shared_ptr<Compute> MakeComputeNode(const std::string& name,
 		const std::string& label);
 std::shared_ptr<Compute> MakeComputeNode(const std::string& name);
+
+std::shared_ptr<Group> MakeGroupNode(const std::string& name,
+	const std::string& label, const pixel2& pos);
+std::shared_ptr<Group> MakeGroupNode(const std::string& name,
+	const pixel2& pos);
+std::shared_ptr<Group> MakeGroupNode(const std::string& name,
+	const std::string& label);
+std::shared_ptr<Group> MakeGroupNode(const std::string& name);
+
 
 std::shared_ptr<View> MakeViewNode(const std::string& name,
 		const std::string& label, const pixel2& pos);
