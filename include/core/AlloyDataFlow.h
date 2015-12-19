@@ -251,6 +251,7 @@ public:
 			const std::shared_ptr<Port>& destination) :
 			source(source), destination(destination) {
 		source->setConnection(this);
+		destination->setConnection(this);
 	}
 	float distance(const float2& pt);
 	void draw(AlloyContext* context,DataFlow* flow);
