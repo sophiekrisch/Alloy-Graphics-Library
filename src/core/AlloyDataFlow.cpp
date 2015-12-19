@@ -1820,9 +1820,10 @@ namespace aly {
 			}
 			else {
 				if (isMouseOver()) {
-
-					if (!inputPort->isVisible()) {
+					if (!inputPort->isVisible()){
 						inputPort->setVisible(true);
+					}
+					if (!outputPort->isVisible()) {
 						outputPort->setVisible(true);
 					}
 				}
