@@ -89,13 +89,13 @@ namespace aly {
 		};
 		class AvoidanceRouting {
 		protected:
-			std::vector<std::shared_ptr<Node>> nodes;
 			static const int DEPTH_LIMIT = 4;
 			static const int MAX_PATHS = 128;
 			std::vector<box2px> obstacles;
 			box2px getPathBounds(float2 from, float2 to) const;
 			void simplifyPath(std::vector<float2>& path,int parity);
 		public:
+			std::vector<std::shared_ptr<Node>> nodes;
 			void update();
 			const std::vector<box2px>& getObstacles() const {
 				return obstacles;
@@ -105,6 +105,8 @@ namespace aly {
 			void add(const std::shared_ptr<Node>& node) {
 				nodes.push_back(node);
 			}
+			void erase(const std::shared_ptr<Node>& node);
+			void erase(const std::list<std::shared_ptr<Node>>& node);
 			void clear() {
 				nodes.clear();
 			}

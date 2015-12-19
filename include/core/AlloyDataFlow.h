@@ -616,8 +616,6 @@ public:
 class DataFlow: public Composite {
 protected:
 	std::shared_ptr<Group> data;
-	std::vector<std::shared_ptr<Connection>> connections;
-	std::vector<std::shared_ptr<Relationship>> relationships;
 	std::shared_ptr<BoxForce> boxForce;
 	std::list<std::pair<Node*, pixel2>> dragList;
 	box2px dragBox;
@@ -687,18 +685,11 @@ public:
 	void add(const std::shared_ptr<Group>& node);
 	void add(const std::shared_ptr<Connection>& node);
 
-	std::vector<std::shared_ptr<Connection>>& getConnections() {
-		return connections;
-	}
-	const std::vector<std::shared_ptr<Connection>>& getConnections() const {
-		return connections;
-	}
-	std::vector<std::shared_ptr<Relationship>>& getRelationships() {
-		return relationships;
-	}
-	const std::vector<std::shared_ptr<Relationship>>& getRelationships() const {
-		return relationships;
-	}
+	std::vector<std::shared_ptr<Connection>>& getConnections();
+	std::vector<std::shared_ptr<Relationship>>& getRelationships();
+	const std::vector<std::shared_ptr<Connection>>& getConnections() const;
+	const std::vector<std::shared_ptr<Relationship>>& getRelationships() const ;
+
 };
 std::shared_ptr<Connection> MakeConnection(
 		const std::shared_ptr<Port>& source,

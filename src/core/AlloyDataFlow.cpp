@@ -682,6 +682,7 @@ namespace aly {
 			std::list<Node*> deleteNodeList;
 			{
 				std::vector<RegionPtr> tmpList;
+				router.nodes.clear();
 				for (RegionPtr child : children) {
 					Node* node = dynamic_cast<Node*>(child.get());
 					if (node) {
@@ -690,6 +691,7 @@ namespace aly {
 							deleteNodeList.push_back(node);
 						}
 						else {
+							router.nodes.push_back(std::dynamic_pointer_cast<Node>(child));
 							tmpList.push_back(child);
 						}
 					}
@@ -697,12 +699,13 @@ namespace aly {
 						tmpList.push_back(child);
 					}
 				}
+				router.update();
 				children = tmpList;
 			}
 			std::list<SpringItemPtr> deleteSpringList;
 			{
 				std::vector<ConnectionPtr> tmpList;
-				for (ConnectionPtr connection : connections) {
+				for (ConnectionPtr connection : data->connections) {
 					if (connection->source->getNode()->isSelected()
 						|| connection->destination->getNode()->isSelected()
 						|| connection->selected) {
@@ -718,18 +721,18 @@ namespace aly {
 				}
 
 				routingLock.lock();
-				connections = tmpList;
+				data->connections = tmpList;
 				routingLock.unlock();
 			}
 			{
 				std::vector<RelationshipPtr> tmpList;
-				for (RelationshipPtr relationship : relationships) {
+				for (RelationshipPtr relationship : data->relationships) {
 					if (!relationship->subject->isSelected()
 						&& !relationship->object->isSelected()) {
 						tmpList.push_back(relationship);
 					}
 				}
-				relationships = tmpList;
+				data->relationships = tmpList;
 			}
 
 			forceSim->erase(deleteForceList);
@@ -828,7 +831,7 @@ namespace aly {
 					if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
 						if (selectedConnection) {
 							if (!context->isShiftDown()) {
-								for (ConnectionPtr connection : connections) {
+								for (ConnectionPtr connection : data->connections) {
 									connection->selected = false;
 								}
 							}
@@ -842,7 +845,7 @@ namespace aly {
 				}
 				else if (e.isUp()) {
 					if (e.button == GLFW_MOUSE_BUTTON_RIGHT&&!dragAction&&draggingGraph) {
-						for (ConnectionPtr connection : connections) {
+						for (ConnectionPtr connection : data->connections) {
 							connection->selected = false;
 						}
 						for (RegionPtr child : children) {
@@ -1044,19 +1047,30 @@ namespace aly {
 		void DataFlow::add(const std::shared_ptr<Region>& region) {
 			Composite::add(region);
 		}
+		std::vector<std::shared_ptr<Connection>>& DataFlow::getConnections() {
+			return data->connections;
+		}
+		std::vector<std::shared_ptr<Relationship>>& DataFlow::getRelationships() {
+			return data->relationships;
+		}
+		const std::vector<std::shared_ptr<Connection>>& DataFlow::getConnections() const{
+			return data->connections;
+		}
+		const std::vector<std::shared_ptr<Relationship>>& DataFlow::getRelationships() const{
+			return data->relationships;
+		}
+
 		void DataFlow::add(const std::shared_ptr<Relationship>& relationship) {
 			relationship->getSpringItem().reset(new SpringItem(relationship->subject->getForceItem(), relationship->object->getForceItem(), -1.0f, std::max(distance(relationship->subject->getForceItem()->location, relationship->object->getForceItem()->location), 2 * Node::DIMENSIONS.x)));
 			relationship->getSpringItem()->visible = false;
 			routingLock.lock();
 			forceSim->addSpringItem(relationship->getSpringItem());
-			relationships.push_back(relationship);
+			data->relationships.push_back(relationship);
 			routingLock.unlock();
 		}
 		void DataFlow::addNode(const std::shared_ptr<Node>& node) {
 			Composite::add(node);
-			if (data.get() == nullptr) {
-				data = MakeGroupNode(this->name);
-			}
+			data->nodes.push_back(node);
 			router.add(node);
 			routingLock.lock();
 			forceSim->addForceItem(node->getForceItem());
@@ -1089,12 +1103,12 @@ namespace aly {
 			connection->getSpringItem().reset(spring);
 			routingLock.lock();
 			forceSim->addSpringItem(connection->getSpringItem());
-			connections.push_back(connection);
+			data->connections.push_back(connection);
 			routingLock.unlock();
 		}
 		Connection* DataFlow::closestConnection(const float2& pt, float tolernace) {
-			for (int i = (int)connections.size() - 1; i >= 0; i--) {
-				Connection* c = connections[i].get();
+			for (int i = (int)data->connections.size() - 1; i >= 0; i--) {
+				Connection* c = data->connections[i].get();
 				float d = c->distance(pt);
 
 				if (d < tolernace) {
@@ -1104,7 +1118,7 @@ namespace aly {
 			return nullptr;
 		}
 		void DataFlow::setup() {
-
+			data = MakeGroupNode(this->name);
 			mouseDragNode = nullptr;
 			mouseSelectedNode = nullptr;
 			mouseOverNode = nullptr;
@@ -1116,15 +1130,15 @@ namespace aly {
 			DrawPtr pathsRegion = DrawPtr(
 				new Draw("Paths", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f),
 					[this](AlloyContext* context, const box2px& bounds) {
-				for (RelationshipPtr& relationship : relationships) {
+				for (RelationshipPtr& relationship : data->relationships) {
 					relationship->draw(context);
 				}
 				routingLock.lock();
-				for (ConnectionPtr& connection : connections) {
+				for (ConnectionPtr& connection : data->connections) {
 					connection->draw(context, this);
 				}
 				routingLock.unlock();
-				for (RelationshipPtr& relationship : relationships) {
+				for (RelationshipPtr& relationship : data->relationships) {
 					relationship->drawText(context);
 				}
 			}));
@@ -2180,7 +2194,7 @@ namespace aly {
 			}
 			routingLock.lock();
 			router.update();
-			for (ConnectionPtr& connect : connections) {
+			for (ConnectionPtr& connect : data->connections) {
 				router.evaluate(connect);
 			}
 			Connection* c = closestConnection(AlloyApplicationContext()->getCursorPosition() - getDrawOffset(), 4.0f);

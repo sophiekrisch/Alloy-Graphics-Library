@@ -255,6 +255,32 @@ namespace aly {
 				obstacles.push_back(node->getObstacleBounds());
 			}
 		}
+		void AvoidanceRouting::erase(const std::shared_ptr<Node>& node) {
+			for (auto iter = nodes.begin(); iter != nodes.end(); iter++) {
+				if (node.get() == iter->get()) {
+					nodes.erase(iter);
+					break;
+				}
+			}
+			update();
+		}
+		void AvoidanceRouting::erase(const std::list<std::shared_ptr<Node>>& deleteList) {
+			std::vector<std::shared_ptr<Node>> tmpList;
+			for (std::shared_ptr<Node> item:nodes) {
+				bool del = false;
+				for (std::shared_ptr<Node> ditem : deleteList) {
+					if (item.get() == ditem.get()) {
+						del = true;
+						break;
+					}
+				}
+				if (!del) {
+					tmpList.push_back(item);
+				}
+			}
+			nodes = tmpList;
+			update();
+		}
 		void AvoidanceRouting::evaluate(std::vector<float2>& path, float2 from, float2 to, Direction direction) {
 			path.clear();
 			float2 origFrom = from;
