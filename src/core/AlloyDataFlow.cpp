@@ -779,9 +779,11 @@ namespace aly {
 			for (RelationshipPtr relationship : data->relationships) {
 				if (relationship->subject->isSelected() && !relationship->object->isSelected()) {
 					relationshipList.push_back(MakeRelationship(relationship->object, relationship->predicate, group));
+					group->relationships.push_back(MakeRelationship(relationship->object, relationship->predicate, relationship->subject));
 				}
 				else if (!relationship->subject->isSelected() && relationship->object->isSelected()) {
 					relationshipList.push_back(MakeRelationship(group, relationship->predicate, relationship->subject));
+					group->relationships.push_back(MakeRelationship(relationship->object, relationship->predicate, relationship->subject));
 				}
 				else if (relationship->subject->isSelected() && relationship->object->isSelected()) {
 					group->relationships.push_back(relationship);
