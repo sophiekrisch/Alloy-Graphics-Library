@@ -361,6 +361,7 @@ public:
 			const std::shared_ptr<Node>& subject) :
 			subject(subject), object(object), predicate(predicate) {
 	}
+	void update();
 	void draw(AlloyContext* context);
 	void drawText(AlloyContext* context);
 

@@ -691,6 +691,7 @@ namespace aly {
 			GroupPtr group=MakeGroupNode("Group");
 			float2 center(0.0f);
 			std::list<ConnectionPtr> connectionList;
+			std::list<RelationshipPtr> relationshipList;
 			for (NodePtr node : data->nodes) {
 				if (node->isSelected()) {
 					center += node->getLocation();
@@ -703,6 +704,9 @@ namespace aly {
 								if (!connection->source->getNode()->isSelected()) {
 									outside = true;
 									connectionList.push_back(MakeConnection(newPort, connection->source));
+								}
+								else {
+									group->connections.push_back(MakeConnection(connection->source, connection->destination));
 								}
 							}
 							if (outside) {
@@ -719,6 +723,9 @@ namespace aly {
 								if (!connection->destination->getNode()->isSelected()) {
 									outside = true;
 									connectionList.push_back(MakeConnection(newPort, connection->destination));
+								}
+								else {
+									group->connections.push_back(MakeConnection(connection->source, connection->destination));
 								}
 							}
 							if (outside) {
@@ -737,6 +744,9 @@ namespace aly {
 									outside = true;
 									connectionList.push_back(MakeConnection(newPort, connection->source));
 								}
+								else {
+									group->connections.push_back(MakeConnection(connection->source, connection->destination));
+								}
 							}
 							if (outside) {
 								port->setProxy(newPort.get());
@@ -753,12 +763,26 @@ namespace aly {
 									outside = true;
 									connectionList.push_back(MakeConnection(newPort, connection->destination));
 								}
+								else {
+									group->connections.push_back(MakeConnection(connection->source,connection->destination));
+								}
 							}
 							if (outside) {
 								port->setProxy(newPort.get());
 							}
 						}
 					}
+				}
+			}
+			for (RelationshipPtr relationship : data->relationships) {
+				if (relationship->subject->isSelected() && !relationship->object->isSelected()) {
+					relationshipList.push_back(MakeRelationship(relationship->object, relationship->predicate, group));
+				}
+				else if (!relationship->subject->isSelected() && relationship->object->isSelected()) {
+					relationshipList.push_back(MakeRelationship(group, relationship->predicate, relationship->subject));
+				}
+				else if (relationship->subject->isSelected() && relationship->object->isSelected()) {
+					group->relationships.push_back(relationship);
 				}
 			}
 			if (group->nodes.size() == 0)return;
@@ -772,6 +796,10 @@ namespace aly {
 			for (ConnectionPtr connection : connectionList) {
 				add(connection);
 				connection->update();
+			}
+			for (RelationshipPtr relationship : relationshipList) {
+				add(relationship);
+				relationship->update();
 			}
 		}
 		void DataFlow::ungroupSelected() {
@@ -2078,6 +2106,9 @@ namespace aly {
 		}
 		void Connection::update() {
 			if(springItem.get()==nullptr)springItem->update();
+		}
+		void Relationship::update() {
+			if (springItem.get() == nullptr)springItem->update();
 		}
 		void Relationship::draw(AlloyContext* context) {
 			pixel2 subjectPt = subject->getCenter();
