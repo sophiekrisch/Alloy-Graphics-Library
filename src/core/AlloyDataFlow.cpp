@@ -291,7 +291,7 @@ void Node::setup() {
 ForceSimulatorPtr Node::getForceSimulator() {
 	if (parent == nullptr)
 		throw std::runtime_error("Node has no parent dataflow.");
-	return parent->getForceSimulator();
+	return parentFlow->getForceSimulator();
 }
 box2px Node::getObstacleBounds() const {
 	box2px box = nodeIcon->getBounds(false);
@@ -404,16 +404,6 @@ void Group::setup() {
 									- 2.0f)));
 	nodeIcon->setAspectRule(AspectRule::FixedHeight);
 	nodeIcon->setAspectRatio(1.0f);
-	inputPort = MakeInputPort("Input");
-	outputPort = MakeOutputPort("Output");
-	inputPort->position = CoordPerPX(0.5f, 0.0f,
-			-InputPort::DIMENSIONS.x * 0.5f, 0.0f);
-	outputPort->position = CoordPerPX(0.5f, 1.0f,
-			-OutputPort::DIMENSIONS.x * 0.5f, -OutputPort::DIMENSIONS.y);
-	inputPort->setParent(this);
-	outputPort->setParent(this);
-	iconContainer->add(inputPort);
-	iconContainer->add(outputPort);
 	iconContainer->add(nodeIcon);
 	labelRegion = ModifiableLabelPtr(
 			new ModifiableLabel(name,
@@ -717,7 +707,7 @@ void Destination::setup() {
 }
 bool Node::isMouseOver() const {
 	if (parent != nullptr)
-		return parent->isMouseOverNode(this);
+		return parentFlow->isMouseOverNode(this);
 	return false;
 }
 ForceItemPtr& Node::getForceItem() {
@@ -766,7 +756,8 @@ void DataFlow::groupSelected() {
 						}
 					}
 					if (outside) {
-						port->setProxy(newPort.get());
+						port->setProxyIn(newPort);
+						newPort->setProxyOut(port);
 						group->add(newPort);
 					}
 				}
@@ -788,7 +779,8 @@ void DataFlow::groupSelected() {
 						}
 					}
 					if (outside) {
-						port->setProxy(newPort.get());
+						port->setProxyIn(newPort);
+						newPort->setProxyOut(port);
 						group->add(newPort);
 					}
 				}
@@ -816,7 +808,7 @@ void DataFlow::groupSelected() {
 			{
 				InputPortPtr port = node->getInputPort();
 				if (port.get() != nullptr && port->isConnected()) {
-					InputPortPtr& newPort = group->inputPort;
+					InputPortPtr newPort = MakeInputPort(port->name);;
 					bool outside = false;
 					for (ConnectionPtr connection : port->getConnections()) {
 						if (!connection->source->getNode()->isSelected()) {
@@ -830,14 +822,16 @@ void DataFlow::groupSelected() {
 						}
 					}
 					if (outside) {
-						port->setProxy(newPort.get());
+						port->setProxyIn(newPort);
+						newPort->setProxyOut(port);
+						group->add(newPort);
 					}
 				}
 			}
 			{
 				OutputPortPtr port = node->getOutputPort();
 				if (port.get() != nullptr && port->isConnected()) {
-					OutputPortPtr& newPort = group->outputPort;
+					OutputPortPtr newPort = MakeOutputPort(port->name);;
 					bool outside = false;
 					for (ConnectionPtr connection : port->getConnections()) {
 						if (!connection->destination->getNode()->isSelected()) {
@@ -852,7 +846,9 @@ void DataFlow::groupSelected() {
 						}
 					}
 					if (outside) {
-						port->setProxy(newPort.get());
+						port->setProxyIn(newPort);
+						newPort->setProxyOut(port);
+						group->add(newPort);
 					}
 				}
 			}
@@ -903,7 +899,58 @@ void DataFlow::groupSelected() {
 
 }
 void DataFlow::ungroupSelected() {
-
+	std::list<NodePtr> nodeList;
+	std::list<ConnectionPtr> connectionList;
+	std::list<RelationshipPtr> relationshipList;
+	for (NodePtr node : data->nodes) {
+		if (node->isSelected() && node->getType() == NodeType::Group) {
+			GroupPtr group = std::dynamic_pointer_cast<Group>(node);
+			float2 center(0.0f);
+			if (group->nodes.size() > 0) {
+				for (NodePtr node : group->nodes) {
+					center += node->getLocation();
+				}
+				center /= (float)group->nodes.size();
+				center -= group->getLocation();
+				for (NodePtr node : group->nodes) {
+					node->setLocation(node->getLocation() - center);
+				}
+				nodeList.insert(nodeList.end(), group->nodes.begin(), group->nodes.end());
+			}
+			relationshipList.insert(relationshipList.end(), group->relationships.begin(), group->relationships.end());
+			connectionList.insert(connectionList.end(),group->connections.begin(), group->connections.end());
+			for (InputPortPtr port : group->getInputPorts()) {
+				PortPtr proxy = port->getProxyOut();
+				if (proxy.get() != nullptr) {
+					proxy->setProxyIn();
+					for (ConnectionPtr connection : port->getConnections()) {
+						connectionList.push_back(MakeConnection(connection->source, proxy));
+					}
+				}
+				port->getConnections().clear();
+			}
+			for (OutputPortPtr port : group->getOutputPorts()) {
+				PortPtr proxy = port->getProxyOut();
+				if (proxy.get() != nullptr) {
+					proxy->setProxyIn();
+					for (ConnectionPtr connection : port->getConnections()) {
+						connectionList.push_back(MakeConnection(proxy, connection->destination));
+					}
+				}
+				port->getConnections().clear();
+			}
+		}
+	}
+	deleteSelected();
+	for (NodePtr node : nodeList) {
+		addNode(node);
+	}
+	for (ConnectionPtr connection : connectionList) {
+		add(connection);
+	}
+	for (RelationshipPtr connection : relationshipList) {
+		add(connection);
+	}
 }
 void DataFlow::deleteSelected() {
 	std::list<ForceItemPtr> deleteForceList;
@@ -918,6 +965,7 @@ void DataFlow::deleteSelected() {
 				if (node->isSelected()) {
 					deleteForceList.push_back(node->forceItem);
 					deleteNodeList.push_back(node);
+					node->parent=nullptr;
 				} else {
 					NodePtr nodePtr = std::dynamic_pointer_cast<Node>(child);
 					router.nodes.push_back(nodePtr);
@@ -935,9 +983,9 @@ void DataFlow::deleteSelected() {
 	{
 		std::vector<ConnectionPtr> tmpList;
 		for (ConnectionPtr connection : data->connections) {
-			if (connection->source->getNode()->isSelected()
-					|| connection->destination->getNode()->isSelected()
-					|| connection->selected) {
+			if (connection->source->getNode()->isSelected()|| connection->destination->getNode()->isSelected()|| connection->selected) {
+				connection->source->disconnect(connection);
+				connection->destination->disconnect(connection);
 				if (connection->selected) {
 					deleteSpringList.push_back(connection->getSpringItem());
 				}
@@ -1329,7 +1377,7 @@ void DataFlow::addNode(const std::shared_ptr<Node>& node) {
 	router.add(node);
 	routingLock.unlock();
 	forceSim->addForceItem(node->getForceItem());
-	node->parent = this;
+	node->parentFlow = this;
 }
 
 void DataFlow::setGroup(const std::shared_ptr<Group>& g) {
@@ -1553,7 +1601,7 @@ void Port::setup() {
 	};
 }
 DataFlow* Port::getGraph() const {
-	return (parent != nullptr) ? parent->parent : nullptr;
+	return (parent != nullptr) ? parent->parentFlow : nullptr;
 }
 void InputPort::setup() {
 	position = CoordPX(0.0f, 0.0f);
@@ -1595,11 +1643,11 @@ void InputPort::draw(AlloyContext* context) {
 		if (context->isMouseOver(this)) {
 			getGraph()->setCurrentPort(this);
 			over = true;
-			nvgFillColor(nvg, Group::COLOR.toLighter(0.25f));
-			nvgStrokeColor(nvg, Group::COLOR.toLighter(0.25f));
+			nvgFillColor(nvg, Color(context->theme.DARK));
+			nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
 		} else {
-			nvgFillColor(nvg, Group::COLOR);
-			nvgStrokeColor(nvg, Group::COLOR);
+			nvgFillColor(nvg, Color(context->theme.DARK));
+			nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
 		}
 	} else {
 		if (context->isMouseOver(this)) {
@@ -1691,11 +1739,12 @@ void OutputPort::draw(AlloyContext* context) {
 		if (context->isMouseOver(this)) {
 			getGraph()->setCurrentPort(this);
 			over = true;
-			nvgFillColor(nvg, Group::COLOR.toLighter(0.25f));
-			nvgStrokeColor(nvg, Group::COLOR.toLighter(0.25f));
-		} else {
-			nvgFillColor(nvg, Group::COLOR);
-			nvgStrokeColor(nvg, Group::COLOR);
+			nvgFillColor(nvg, Color(context->theme.DARK));
+			nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+		}
+		else {
+			nvgFillColor(nvg, Color(context->theme.DARK));
+			nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
 		}
 	} else {
 		if (context->isMouseOver(this)) {
@@ -1801,11 +1850,11 @@ void Node::prePack() {
 	pixel2 dragOffset = getDragOffset();
 	if (lengthL1(dragOffset) > 0) {
 		std::lock_guard<std::mutex> lockMe(
-				parent->getForceSimulator()->getLock());
+				parentFlow->getForceSimulator()->getLock());
 		forceItem->location += dragOffset;
 		setDragOffset(pixel2(0.0f));
-		pixel2 minPt = parent->graphBounds.min();
-		pixel2 maxPt = parent->graphBounds.max();
+		pixel2 minPt = parentFlow->graphBounds.min();
+		pixel2 maxPt = parentFlow->graphBounds.max();
 		float minX = 1E30f;
 		float maxX = -1E30f;
 		float minY = 1E30f;
@@ -1814,7 +1863,7 @@ void Node::prePack() {
 		Node* maxXnode = nullptr;
 		Node* minYnode = nullptr;
 		Node* maxYnode = nullptr;
-		for (RegionPtr region : parent->getChildren()) {
+		for (RegionPtr region : parentFlow->getChildren()) {
 			Node* node = dynamic_cast<Node*>(region.get());
 			if (node) {
 				box2px box = box2px(
@@ -1848,15 +1897,15 @@ void Node::prePack() {
 		if (minYnode == this) {
 			minPt.y = minY;
 		}
-		parent->graphBounds = box2px(minPt, maxPt - minPt);
-		parent->forceSim->setBounds(CoordPX(parent->graphBounds.position),
-				CoordPX(parent->graphBounds.dimensions));
-		parent->boxForce->setBounds(parent->graphBounds);
+		parentFlow->graphBounds = box2px(minPt, maxPt - minPt);
+		parentFlow->forceSim->setBounds(CoordPX(parentFlow->graphBounds.position),
+				CoordPX(parentFlow->graphBounds.dimensions));
+		parentFlow->boxForce->setBounds(parentFlow->graphBounds);
 		if (!AlloyApplicationContext()->isControlDown()) {
-			for (ConnectionPtr connector : parent->getConnections()) {
+			for (ConnectionPtr connector : parentFlow->getConnections()) {
 				connector->getSpringItem()->update();
 			}
-			for (RelationshipPtr relationship : parent->getRelationships()) {
+			for (RelationshipPtr relationship : parentFlow->getRelationships()) {
 				relationship->getSpringItem()->update();
 			}
 		}
@@ -1950,13 +1999,13 @@ void Destination::pack(const pixel2& pos, const pixel2& dims,
 }
 Node::Node(const std::string& name, const pixel2& pt) :
 		Composite(name, CoordPX(0.0f, 0.0f), CoordPX(Node::DIMENSIONS)), label(
-				name), parent(nullptr) {
+				name), parentFlow(nullptr) {
 	forceItem = ForceItemPtr(new ForceItem(pt + Node::DIMENSIONS * 0.5f));
 	setup();
 }
 Node::Node(const std::string& name, const std::string& label, const pixel2& pt) :
 		Composite(name, CoordPX(0.0f, 0.0f), CoordPX(Node::DIMENSIONS)), label(
-				label), parent(nullptr) {
+				label), parentFlow(nullptr) {
 	forceItem = ForceItemPtr(new ForceItem(pt + Node::DIMENSIONS * 0.5f));
 	setup();
 }
@@ -2088,31 +2137,6 @@ void Data::draw(AlloyContext* context) {
 }
 void Group::draw(AlloyContext* context) {
 	Node::draw(context);
-	Port* p = getGraph()->getConnectingPort();
-	if (p == inputPort.get()) {
-		inputPort->setVisible(true);
-		if (!outputPort->isConnected())
-			outputPort->setVisible(false);
-	} else if (p == outputPort.get()) {
-		if (!inputPort->isConnected())
-			inputPort->setVisible(false);
-		outputPort->setVisible(true);
-	} else {
-		if (isMouseOver()) {
-			if (!inputPort->isVisible()) {
-				inputPort->setVisible(true);
-			}
-			if (!outputPort->isVisible()) {
-				outputPort->setVisible(true);
-			}
-		} else {
-			if (!inputPort->isConnected())
-				inputPort->setVisible(false);
-
-			if (!outputPort->isConnected())
-				outputPort->setVisible(false);
-		}
-	}
 }
 void Source::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;

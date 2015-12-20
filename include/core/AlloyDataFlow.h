@@ -101,8 +101,8 @@ class Port: public Region {
 protected:
 	Node* parent;
 	std::string label;
-	Port* proxyIn;
-	Port* proxyOut;
+	std::shared_ptr<Port> proxyIn;
+	std::shared_ptr<Port> proxyOut;
 	ConnectionBundle connections;
 	virtual void setup();
 public:
@@ -112,11 +112,23 @@ public:
 	inline Node* getNode() const {
 		return parent;
 	}
-	void setProxy(Port* proxy) {
+	std::shared_ptr<Port> getProxyOut() const {
+		return proxyOut;
+	}
+	std::shared_ptr<Port> getProxyIn() const {
+		return proxyIn;
+	}
+	void setProxyOut(const std::shared_ptr<Port>& proxy) {
+		proxyOut = proxy;
+	}
+	void setProxyOut() {
+		proxyOut.reset();
+	}
+	void setProxyIn(const std::shared_ptr<Port>& proxy) {
 		proxyIn = proxy;
-		if (proxy != nullptr) {
-			proxy->proxyOut = this;
-		}
+	}
+	void setProxyIn() {
+		proxyIn.reset();
 	}
 	ConnectionBundle& getConnections(){
 		return connections;
@@ -125,6 +137,10 @@ public:
 		return connections;
 	}
 	void disconnect(Connection* connection);
+
+	void disconnect(const std::shared_ptr<Connection>& connection) {
+		disconnect(connection.get());
+	}
 	bool isExternalized() const {
 		return (proxyIn != nullptr);
 	}
@@ -406,7 +422,7 @@ protected:
 	float fontSize;
 	float textWidth;
 	pixel2 centerOffset;
-	DataFlow* parent;
+	DataFlow* parentFlow;
 	std::vector<std::shared_ptr<InputPort>> inputPorts;
 	std::vector<std::shared_ptr<OutputPort>> outputPorts;
 	std::shared_ptr<InputPort> inputPort;
@@ -434,8 +450,8 @@ public:
 	friend class Port;
 	static const pixel2 DIMENSIONS;
 	std::shared_ptr<ForceSimulator> getForceSimulator();
-	void setParent(DataFlow* parent) {
-		this->parent = parent;
+	void setParentFlow(DataFlow* parent) {
+		this->parentFlow = parent;
 	}
 	const std::shared_ptr<InputPort>& getInputPort(size_t i) const {
 		return inputPorts[i];
@@ -469,7 +485,7 @@ public:
 	}
 	box2px getObstacleBounds() const;
 	DataFlow* getGraph() const {
-		return parent;
+		return parentFlow;
 	}
 	virtual box2px getBounds(bool includeBounds = true) const override;
 	virtual box2px getCursorBounds(bool includeOffset = true) const override;
