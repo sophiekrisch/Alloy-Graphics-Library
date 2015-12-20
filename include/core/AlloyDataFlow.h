@@ -90,9 +90,9 @@ protected:
 	Node* parent;
 	std::string label;
 	Cursor portCursor;
-	Connection* connection;
+	Port* proxyIn;
+	Port* proxyOut;
 	virtual void setup();
-
 public:
 	friend class Connection;
 	friend class Node;
@@ -100,11 +100,21 @@ public:
 	inline Node* getNode() const {
 		return parent;
 	}
-	void setConnection(Connection* connect) {
-		connection = connect;
+	void setProxy(Port* proxy) {
+		proxyIn = proxy;
+		if (proxy != nullptr) {
+			proxy->proxyOut = this;
+		}
 	}
+	bool isExternalized() const {
+		return (proxyIn!=nullptr);
+	}
+	std::vector<Connection*> connections;
 	bool isConnected() const {
-		return (connection != nullptr);
+		return(connections.size() > 0);
+	}
+	void add(Connection* connection) {
+		connections.push_back(connection);
 	}
 	void setParent(Node* parent) {
 		this->parent = parent;
@@ -114,13 +124,13 @@ public:
 	Port(const std::string& name, const std::string& label) :
 			Region(name), parent(nullptr), label(label), portCursor(0xf05b,
 					16.0f, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER, FontType::Icon,
-					0.0f, pixel2(-0.25f, -0.25f)), connection(nullptr) {
+					0.0f, pixel2(-0.25f, -0.25f)), proxyIn(nullptr), proxyOut(nullptr) {
 		setup();
 	}
 	Port(const std::string& name) :
 			Region(name), parent(nullptr), label(name), portCursor(0xf05b,
 					16.0f, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER, FontType::Icon,
-					0.0f, pixel2(-0.25f, -0.25f)), connection(nullptr) {
+					0.0f, pixel2(-0.25f, -0.25f)), proxyIn(nullptr),proxyOut(nullptr) {
 		setup();
 	}
 	virtual PortType getType() const {
@@ -158,11 +168,9 @@ public:
 };
 class InputPort: public Port {
 protected:
-	std::vector<std::shared_ptr<Connection>> connections;
 	std::shared_ptr<Packet> value;
 	virtual void setup() override;
 public:
-
 	static const pixel2 DIMENSIONS;
 	InputPort(const std::string& name) :
 			Port(name) {
@@ -186,11 +194,9 @@ public:
 
 class OutputPort: public Port {
 protected:
-	std::vector<std::shared_ptr<Connection>> connections;
 	std::shared_ptr<Packet> value;
 	virtual void setup() override;
 public:
-
 	static const pixel2 DIMENSIONS;
 	OutputPort(const std::string& name) :
 			Port(name) {
@@ -250,9 +256,10 @@ public:
 	Connection(const std::shared_ptr<Port>& source,
 			const std::shared_ptr<Port>& destination) :
 			source(source), destination(destination) {
-		source->setConnection(this);
-		destination->setConnection(this);
+		source->add(this);
+		destination->add(this);
 	}
+	~Connection();
 	float distance(const float2& pt);
 	void draw(AlloyContext* context,DataFlow* flow);
 };
@@ -407,6 +414,8 @@ public:
 	void setSelected(bool b) {
 		nodeIcon->selected = b;
 	}
+	float2 getLocation() const;
+	void setLocation(const float2& pt);
 	std::shared_ptr<NodeIcon> nodeIcon;
 	friend class DataFlow;
 	friend class Port;
@@ -420,6 +429,18 @@ public:
 	}
 	const std::shared_ptr<OutputPort>& getOutputPort(size_t i) const {
 		return outputPorts[i];
+	}
+	const std::vector<std::shared_ptr<InputPort>>& getInputPorts() const {
+		return inputPorts;
+	}
+	const std::vector<std::shared_ptr<OutputPort>>& getOutputPorts() const {
+		return outputPorts;
+	}
+	std::vector<std::shared_ptr<InputPort>>& getInputPorts() {
+		return inputPorts;
+	}
+	std::vector<std::shared_ptr<OutputPort>>& getOutputPorts() {
+		return outputPorts;
 	}
 	const std::shared_ptr<InputPort>& getInputPort() const {
 		return inputPort;
@@ -640,6 +661,8 @@ protected:
 	void addNode(const std::shared_ptr<Node>& node);
 	Connection* closestConnection(const float2& pt, float tolernace);
 	void deleteSelected();
+	void groupSelected();
+	void ungroupSelected();
 public:
 	friend class Node;
 	std::shared_ptr<ForceSimulator> getForceSimulator() {

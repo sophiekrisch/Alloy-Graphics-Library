@@ -34,18 +34,12 @@ namespace aly {
 		const float NODE_SATURATION = 0.6f;
 		const float NODE_LUMINANCE = 0.65f;
 		const float NODE_ALPHA = 0.75f;
-		const Color View::COLOR = HSVAtoColor(
-			HSVA(300 / 360.0f, NODE_SATURATION, 0.5f*NODE_LUMINANCE, 1.0f));
-		const Color Compute::COLOR = HSVAtoColor(
-			HSVA(0.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
-		const Color Data::COLOR = HSVAtoColor(
-			HSVA(60.0f / 360.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
-		const Color Group::COLOR = HSVAtoColor(
-			HSVA(30.0f / 360.0f, NODE_SATURATION, 0.5f*NODE_LUMINANCE, 1.0f));
-		const Color Destination::COLOR = HSVAtoColor(
-			HSVA(120.0f / 360.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
-		const Color Source::COLOR = HSVAtoColor(
-			HSVA(225.0f / 360.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
+		const Color View::COLOR = HSVAtoColor(HSVA(30 / 360.0f, NODE_SATURATION, 0.5f*NODE_LUMINANCE, 1.0f));
+		const Color Compute::COLOR = HSVAtoColor(HSVA(0.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
+		const Color Data::COLOR = HSVAtoColor(HSVA(60.0f / 360.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
+		const Color Group::COLOR =  HSVAtoColor(HSVA(300.0f / 360.0f, NODE_SATURATION, 0.5f*NODE_LUMINANCE, 1.0f));
+		const Color Destination::COLOR = HSVAtoColor(HSVA(120.0f / 360.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
+		const Color Source::COLOR = HSVAtoColor(HSVA(225.0f / 360.0f, NODE_SATURATION, NODE_LUMINANCE, 1.0f));
 
 		std::shared_ptr<InputPort> MakeInputPort(const std::string& name) {
 			return InputPortPtr(new InputPort(name));
@@ -677,6 +671,102 @@ namespace aly {
 		void DataFlow::setCurrentPort(Port* currentPort) {
 			this->currentPort = currentPort;
 		}
+		Connection::~Connection() {
+			if (source.get() != nullptr) {
+				for (auto iter = source->connections.begin(); iter != source->connections.end(); iter++) {
+					if (*iter == this) {
+						source->connections.erase(iter);
+						break;
+					}
+				}
+				for (auto iter = destination->connections.begin(); iter != destination->connections.end(); iter++) {
+					if (*iter == this) {
+						destination->connections.erase(iter);
+						break;
+					}
+				}
+			}
+		}
+		void DataFlow::groupSelected() {
+			GroupPtr group=MakeGroupNode("Group");
+			float2 center(0.0f);
+			std::list<ConnectionPtr> connectionList;
+			for (NodePtr node : data->nodes) {
+				if (node->isSelected()) {
+					center += node->getLocation();
+					group->nodes.push_back(node);
+					for (InputPortPtr port : node->getInputPorts()) {
+						if (port->isConnected()) {
+							InputPortPtr newPort = MakeInputPort(port->name);
+							bool outside = false;
+							for (Connection* connection : port->connections) {
+								if (!connection->source->getNode()->isSelected()) {
+									outside = true;
+									connectionList.push_back(MakeConnection(newPort, connection->source));
+								}
+							}
+							if (outside) {
+								port->setProxy(newPort.get());
+								group->add(newPort);
+							}
+						}
+					}
+					for (OutputPortPtr port : node->getOutputPorts()) {
+						if (port->isConnected()) {
+							OutputPortPtr newPort = MakeOutputPort(port->name);
+							bool outside = false;
+							for (Connection* connection : port->connections) {
+								if (!connection->destination->getNode()->isSelected()) {
+									outside = true;
+									connectionList.push_back(MakeConnection(newPort, connection->destination));
+								}
+							}
+							if (outside) {
+								port->setProxy(newPort.get());
+								group->add(newPort);
+							}
+						}
+					}
+					{
+						InputPortPtr port = node->getInputPort();
+						if (port.get()!=nullptr&&port->isConnected()) {
+							InputPortPtr newPort = MakeInputPort(port->name);
+							port->setProxy(newPort.get());
+							group->add(newPort);
+							for (Connection* connection : port->connections) {
+								connectionList.push_back(MakeConnection(connection->source, newPort));
+							}
+						}
+					}
+					{
+						OutputPortPtr port = node->getOutputPort();
+						if (port.get()!=nullptr&&port->isConnected()) {
+							OutputPortPtr newPort = MakeOutputPort(port->name);
+							port->setProxy(newPort.get());
+							group->add(newPort);
+							for (Connection* connection : port->connections) {
+								connectionList.push_back(MakeConnection(newPort, connection->destination));
+							}
+						}
+					}
+				}
+			}
+			if (group->nodes.size() == 0)return;
+			center /= (float)group->nodes.size();
+			group->setLocation(center);
+			add(group);
+			deleteSelected();
+			for (NodePtr node : group->nodes) {
+				node->setSelected(false);
+			}
+			for (ConnectionPtr connection : connectionList) {
+				add(connection);
+				connection->getSpringItem()->update();
+			}
+		}
+		void DataFlow::ungroupSelected() {
+
+		}
 		void DataFlow::deleteSelected() {
 			std::list<ForceItemPtr> deleteForceList;
 			std::list<Node*> deleteNodeList;
@@ -712,8 +802,6 @@ namespace aly {
 						if (connection->selected) {
 							deleteSpringList.push_back(connection->getSpringItem());
 						}
-						connection->source->setConnection(nullptr);
-						connection->destination->setConnection(nullptr);
 					}
 					else {
 						tmpList.push_back(connection);
@@ -923,6 +1011,16 @@ namespace aly {
 							}
 						}
 						return true;
+					}
+					break;
+				case GLFW_KEY_G:
+					if (e.isControlDown()) {
+						groupSelected();
+					}
+					break;
+				case GLFW_KEY_U:
+					if (e.isControlDown()) {
+						ungroupSelected();
 					}
 					break;
 				case GLFW_KEY_I:
@@ -1339,21 +1437,35 @@ namespace aly {
 			pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 				context->pixelRatio);
 			bool over = false;
-			if (context->isMouseOver(this)) {
-				nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
-				nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
-				context->setCursor(&portCursor);
-				getGraph()->setCurrentPort(this);
-				over = true;
-			}
-			else {
-				if (isConnected()) {
-					nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
-					nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+			if (isExternalized()) {
+				if (context->isMouseOver(this)) {
+					getGraph()->setCurrentPort(this);
+					over = true;
+					nvgFillColor(nvg, Group::COLOR.toLighter(0.25f));
+					nvgStrokeColor(nvg, Group::COLOR.toLighter(0.25f));
 				}
 				else {
-					nvgFillColor(nvg, Color(context->theme.LIGHT));
-					nvgStrokeColor(nvg, Color(context->theme.LIGHT));
+					nvgFillColor(nvg, Group::COLOR);
+					nvgStrokeColor(nvg, Group::COLOR);
+				}
+			}
+			else {
+				if (context->isMouseOver(this)) {
+					nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
+					nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+					context->setCursor(&portCursor);
+					getGraph()->setCurrentPort(this);
+					over = true;
+				}
+				else {
+					if (isConnected()) {
+						nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
+						nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+					}
+					else {
+						nvgFillColor(nvg, Color(context->theme.LIGHT));
+						nvgStrokeColor(nvg, Color(context->theme.LIGHT));
+					}
 				}
 			}
 			nvgStrokeWidth(nvg, lineWidth);
@@ -1427,21 +1539,35 @@ namespace aly {
 			pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 				context->pixelRatio);
 			bool over = false;
-			if (context->isMouseOver(this)) {
-				nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
-				nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
-				context->setCursor(&portCursor);
-				getGraph()->setCurrentPort(this);
-				over = true;
-			}
-			else {
-				if (isConnected()) {
-					nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
-					nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+			if (isExternalized()) {
+				if (context->isMouseOver(this)) {
+					getGraph()->setCurrentPort(this);
+					over = true;
+					nvgFillColor(nvg, Group::COLOR.toLighter(0.25f));
+					nvgStrokeColor(nvg, Group::COLOR.toLighter(0.25f));
 				}
 				else {
-					nvgFillColor(nvg, Color(context->theme.LIGHT));
-					nvgStrokeColor(nvg, Color(context->theme.LIGHT));
+					nvgFillColor(nvg, Group::COLOR);
+					nvgStrokeColor(nvg, Group::COLOR);
+				}
+			}
+			else {
+				if (context->isMouseOver(this)) {
+					nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
+					nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+					context->setCursor(&portCursor);
+					getGraph()->setCurrentPort(this);
+					over = true;
+				}
+				else {
+					if (isConnected()) {
+						nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
+						nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+					}
+					else {
+						nvgFillColor(nvg, Color(context->theme.LIGHT));
+						nvgStrokeColor(nvg, Color(context->theme.LIGHT));
+					}
 				}
 			}
 			nvgLineCap(nvg, NVG_ROUND);
@@ -1519,6 +1645,14 @@ namespace aly {
 					context->theme.HIGHLIGHT, context->theme.DARK, nullptr);
 				nvgRestore(nvg);
 			}
+		}
+		float2 Node::getLocation() const {
+			return forceItem->location;
+		}
+		void Node::setLocation(const float2& pt) {
+			forceItem->location = pt;
+			forceItem->plocation = pt;
+			forceItem->velocity = float2(0.0f);
 		}
 		void Node::prePack() {
 			pixel2 dragOffset = getDragOffset();
@@ -1783,9 +1917,9 @@ namespace aly {
 					outputPort->setVisible(false);
 			}
 			else if (p == outputPort.get()) {
+				outputPort->setVisible(true);
 				if (!inputPort->isConnected())
 					inputPort->setVisible(false);
-				outputPort->setVisible(true);
 			}
 			else {
 				if (isMouseOver()) {
