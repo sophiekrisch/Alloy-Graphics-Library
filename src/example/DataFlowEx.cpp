@@ -50,15 +50,22 @@ bool DataFlowEx::init(Composite& rootNode) {
 	SourcePtr sourceNode3 = MakeSourceNode("Source 3", pixel2(300, 200));
 
 
-	GroupPtr groupNode1 = MakeGroupNode("Group 1", pixel2(700, 100));
-	GroupPtr groupNode2 = MakeGroupNode("Group 2", pixel2(800, 100));
+	GroupPtr groupNode1 = MakeGroupNode("Group 1", pixel2(600, 400));
+	GroupPtr groupNode2 = MakeGroupNode("Group 2", pixel2(800, 400));
 
 	
 	DestinationPtr destNode1 = MakeDestinationNode("Destination 1",
 		pixel2(350, 900));
 	DestinationPtr destNode2 = MakeDestinationNode("Destination 2",
 		pixel2(450, 900));
-
+	for (int i = 0; i <2; i++) {
+		groupNode1->add(MakeInputPort(MakeString() << "Input " << i));
+		groupNode2->add(MakeInputPort(MakeString() << "Input " << i));
+	}
+	for (int i = 0; i <2; i++) {
+		groupNode1->add(MakeOutputPort(MakeString() << "Output " << i));
+		groupNode2->add(MakeOutputPort(MakeString() << "Output " << i));
+	}
 	for (int i = 0; i < 4; i++) {
 		dataNode1->add(MakeInputPort(MakeString() << "Input " << i));
 		dataNode2->add(MakeInputPort(MakeString() << "Input " << i));
@@ -115,10 +122,8 @@ bool DataFlowEx::init(Composite& rootNode) {
 	graph->add(dataNode3);
 	graph->add(dataNode4);
 
-	/*
-	graph->add(MakeConnection(computeNode3->getOutputPort(0), dataNode4->getInputPort(1)));
-	graph->add(MakeConnection(computeNode3->getOutputPort(1), destNode2->getInputPort()));
-	*/
+	graph->add(MakeConnection(groupNode1->getOutputPort(0), computeNode2->getInputPort(3)));
+	graph->add(MakeConnection(groupNode2->getOutputPort(1), computeNode2->getInputPort(4)));
 
 	graph->add(MakeConnection(computeNode1->getOutputPort(0), computeNode3->getInputPort(1)));
 	graph->add(MakeConnection(computeNode1->getOutputPort(1), computeNode4->getInputPort(2)));

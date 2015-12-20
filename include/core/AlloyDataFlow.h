@@ -661,11 +661,12 @@ protected:
 	bool updateSimulation(uint64_t iter);
 	void addNode(const std::shared_ptr<Node>& node);
 	Connection* closestConnection(const float2& pt, float tolernace);
+
+public:
+	friend class Node;
 	void deleteSelected();
 	void groupSelected();
 	void ungroupSelected();
-public:
-	friend class Node;
 	std::shared_ptr<ForceSimulator> getForceSimulator() {
 		return forceSim;
 	}

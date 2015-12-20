@@ -676,13 +676,15 @@ namespace aly {
 				for (auto iter = source->connections.begin(); iter != source->connections.end(); iter++) {
 					if (*iter == this) {
 						source->connections.erase(iter);
-						break;
+						iter--;
 					}
 				}
+			}
+			if (destination.get() != nullptr) {
 				for (auto iter = destination->connections.begin(); iter != destination->connections.end(); iter++) {
 					if (*iter == this) {
 						destination->connections.erase(iter);
-						break;
+						iter--;
 					}
 				}
 			}
