@@ -1622,12 +1622,9 @@ void InputPort::draw(AlloyContext* context) {
 		if (context->isMouseOver(this)) {
 			getGraph()->setCurrentPort(this);
 			over = true;
-			nvgFillColor(nvg, Color(context->theme.DARK));
-			nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
-		} else {
-			nvgFillColor(nvg, Color(context->theme.DARK));
-			nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
 		}
+		nvgFillColor(nvg, Color(context->theme.LIGHT));
+		nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
 	} else {
 		if (context->isMouseOver(this)) {
 			nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
