@@ -705,7 +705,7 @@ namespace aly {
 							for (Connection* connection : port->connections) {
 								if (!connection->source->getNode()->isSelected()) {
 									outside = true;
-									connectionList.push_back(MakeConnection(newPort, connection->source));
+									connectionList.push_back(MakeConnection(connection->source,newPort));
 								}
 								else {
 									group->connections.push_back(MakeConnection(connection->source, connection->destination));
@@ -744,7 +744,7 @@ namespace aly {
 							for (Connection* connection : port->connections) {
 								if (!connection->source->getNode()->isSelected()) {
 									outside = true;
-									connectionList.push_back(MakeConnection(newPort, connection->source));
+									connectionList.push_back(MakeConnection( connection->source, newPort));
 								}
 								else {
 									group->connections.push_back(MakeConnection(connection->source, connection->destination));
@@ -787,14 +787,10 @@ namespace aly {
 					group->relationships.push_back(relationship);
 				}
 			}
-			if (group->nodes.size() == 0)return;
+			if (group->nodes.size() == 0 )return;
 			center /= (float)group->nodes.size();
 			group->setLocation(center);
 			add(group);
-			deleteSelected();
-			for (NodePtr node : group->nodes) {
-				node->setSelected(false);
-			}
 			for (ConnectionPtr connection : connectionList) {
 				add(connection);
 				connection->update();
@@ -802,6 +798,13 @@ namespace aly {
 			for (RelationshipPtr relationship : relationshipList) {
 				add(relationship);
 				relationship->update();
+			}
+			deleteSelected();
+			for (NodePtr node : group->nodes) {
+				node->setSelected(false);
+			}
+			for (ConnectionPtr connection : group->connections) {
+				connection->setSelected(false);
 			}
 		}
 		void DataFlow::ungroupSelected() {

@@ -249,6 +249,12 @@ public:
 	std::shared_ptr<Port> source;
 	std::shared_ptr<Port> destination;
 	std::vector<float2> path;
+	void setSelected(bool b) {
+		selected = b;
+	}
+	bool isSelected() const {
+		return selected;
+	}
 	std::shared_ptr<SpringItem>& getSpringItem();
 	Connection(const std::shared_ptr<Port>& source,
 			const std::shared_ptr<Port>& destination) :
