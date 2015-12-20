@@ -822,6 +822,7 @@ void DataFlow::groupSelected() {
 		}
 	}
 	for (RelationshipPtr relationship : data->relationships) {
+		/*
 		if (relationship->object->isSelected()
 				&& !relationship->subject->isSelected()) {
 			relationshipList.push_back(
@@ -838,7 +839,9 @@ void DataFlow::groupSelected() {
 			group->relationships.push_back(
 					MakeRelationship(relationship->subject,
 							relationship->predicate, relationship->object));
-		} else if (relationship->object->isSelected()
+		} else
+			*/
+			if (relationship->object->isSelected()
 				&& relationship->subject->isSelected()) {
 			group->relationships.push_back(relationship);
 		}
@@ -977,6 +980,7 @@ void DataFlow::deleteSelected() {
 		data->connections = tmpList;
 		routingLock.unlock();
 	}
+
 	{
 		std::vector<RelationshipPtr> tmpList;
 		for (RelationshipPtr relationship : data->relationships) {
