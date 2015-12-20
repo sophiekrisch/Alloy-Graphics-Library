@@ -367,14 +367,14 @@ class Relationship {
 protected:
 	std::shared_ptr<SpringItem> springItem;
 public:
-	std::shared_ptr<Node> object;
 	std::shared_ptr<Node> subject;
+	std::shared_ptr<Node> object;
 	std::shared_ptr<Predicate> predicate;
 	std::shared_ptr<SpringItem>& getSpringItem();
 	Relationship(const std::shared_ptr<Node>& subject,
 			const std::shared_ptr<Predicate>& predicate,
 			const std::shared_ptr<Node>& object) :
-			object(object), subject(subject), predicate(predicate) {
+				 subject(subject), object(object),predicate(predicate) {
 	}
 	void update();
 	void draw(AlloyContext* context);
@@ -747,8 +747,8 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(
 }
 template<class C, class R> std::basic_ostream<C, R> & operator <<(
 		std::basic_ostream<C, R> & ss, const Relationship& line) {
-	return ss << "[" << line.subject->getName() << "] "
-			<< line.predicate->getName() << " [" << line.object->getName()
+	return ss << "[" << line.subject->getName() << " <"
+			<< line.predicate->getName() << "> " << line.object->getName()
 			<< "]";
 }
 std::shared_ptr<Connection> MakeConnection(const std::shared_ptr<Port>& source,

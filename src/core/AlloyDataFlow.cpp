@@ -67,8 +67,8 @@ std::shared_ptr<Connection> MakeConnection(const std::shared_ptr<Port>& source,
 		const std::shared_ptr<Port>& destination) {
 	ConnectionPtr connection = ConnectionPtr(
 			new Connection(source, destination));
-	source->getConnections().push_back(connection);
-	destination->getConnections().push_back(connection);
+	source->connect(connection);
+	destination->connect(connection);
 	return connection;
 }
 std::shared_ptr<Relationship> MakeRelationship(
