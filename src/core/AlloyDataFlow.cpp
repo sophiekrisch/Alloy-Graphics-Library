@@ -737,7 +737,7 @@ namespace aly {
 					{
 						InputPortPtr port = node->getInputPort();
 						if (port.get()!=nullptr&&port->isConnected()) {
-							InputPortPtr newPort = group->inputPort;
+							InputPortPtr& newPort = group->inputPort;
 							bool outside = false;
 							for (Connection* connection : port->connections) {
 								if (!connection->source->getNode()->isSelected()) {
@@ -756,7 +756,7 @@ namespace aly {
 					{
 						OutputPortPtr port = node->getOutputPort();
 						if (port.get()!=nullptr&&port->isConnected()) {
-							OutputPortPtr newPort = group->outputPort;
+							OutputPortPtr& newPort = group->outputPort;
 							bool outside = false;
 							for (Connection* connection : port->connections) {
 								if (!connection->destination->getNode()->isSelected()) {
