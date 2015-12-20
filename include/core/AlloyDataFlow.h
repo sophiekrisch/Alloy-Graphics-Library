@@ -51,7 +51,12 @@ enum class NodeType {
 };
 
 enum class NodeShape {
-	Hidden=0 , Circle = 1,CircleGroup=2, Triangle = 3, Square = 4, Hexagon = 5
+	Hidden = 0,
+	Circle = 1,
+	CircleGroup = 2,
+	Triangle = 3,
+	Square = 4,
+	Hexagon = 5
 };
 enum class PortType {
 	Unknown = 0, Input = 1, Output = 2, Child = 3, Parent = 4
@@ -85,6 +90,13 @@ public:
 		this->name = name;
 	}
 };
+class ConnectionBundle: public std::vector<std::shared_ptr<Connection>> {
+public:
+	ConnectionBundle() :
+			std::vector<std::shared_ptr<Connection>>() {
+	}
+
+};
 class Port: public Region {
 protected:
 	Node* parent;
@@ -95,6 +107,7 @@ protected:
 public:
 	friend class Connection;
 	friend class Node;
+	ConnectionBundle connections;
 	DataFlow* getGraph() const;
 	inline Node* getNode() const {
 		return parent;
@@ -105,14 +118,14 @@ public:
 			proxy->proxyOut = this;
 		}
 	}
+	void disconnect(Connection* connection);
 	bool isExternalized() const {
-		return (proxyIn!=nullptr);
+		return (proxyIn != nullptr);
 	}
-	std::vector<Connection*> connections;
 	bool isConnected() const {
-		return(connections.size() > 0);
+		return (connections.size() > 0);
 	}
-	void add(Connection* connection) {
+	void add(const std::shared_ptr<Connection>& connection) {
 		connections.push_back(connection);
 	}
 	void setParent(Node* parent) {
@@ -121,11 +134,13 @@ public:
 	float2 getLocation() const;
 	std::shared_ptr<Port> getReference();
 	Port(const std::string& name, const std::string& label) :
-			Region(name), parent(nullptr), label(label), proxyIn(nullptr), proxyOut(nullptr) {
+			Region(name), parent(nullptr), label(label), proxyIn(nullptr), proxyOut(
+					nullptr) {
 		setup();
 	}
 	Port(const std::string& name) :
-			Region(name), parent(nullptr), label(name), proxyIn(nullptr),proxyOut(nullptr) {
+			Region(name), parent(nullptr), label(name), proxyIn(nullptr), proxyOut(
+					nullptr) {
 		setup();
 	}
 	virtual PortType getType() const {
@@ -216,11 +231,9 @@ public:
 
 class ParentPort: public Port {
 protected:
-	std::vector<std::shared_ptr<Connection>> connections;
 	std::shared_ptr<Packet> value;
 	virtual void setup() override;
 public:
-
 	static const pixel2 DIMENSIONS;
 	ParentPort(const std::string& name) :
 			Port(name) {
@@ -259,22 +272,15 @@ public:
 	Connection(const std::shared_ptr<Port>& source,
 			const std::shared_ptr<Port>& destination) :
 			source(source), destination(destination) {
-		source->add(this);
-		destination->add(this);
+
 	}
 	void update();
 	~Connection();
 	float distance(const float2& pt);
-	void draw(AlloyContext* context,DataFlow* flow);
+	void draw(AlloyContext* context, DataFlow* flow);
 };
 
-class ConnectionBundle: public std::vector<std::shared_ptr<Connection>> {
-public:
-	ConnectionBundle() :
-			std::vector<std::shared_ptr<Connection>>() {
-	}
 
-};
 class PacketBundle: public std::vector<std::shared_ptr<Packet>> {
 public:
 	PacketBundle() :
@@ -284,7 +290,6 @@ public:
 };
 class InputMultiPort: public Port, MultiPort {
 protected:
-	ConnectionBundle connections;
 	PacketBundle value;
 public:
 	virtual PortType getType() const override {
@@ -301,7 +306,6 @@ public:
 };
 class OutputMultiPort: public Port, MultiPort {
 protected:
-	ConnectionBundle connections;
 	PacketBundle value;
 public:
 	virtual PortType getType() const override {
@@ -318,7 +322,6 @@ public:
 
 class ChildPort: public Port {
 protected:
-	std::vector<std::shared_ptr<Connection>> connections;
 	std::shared_ptr<Packet> value;
 	virtual void setup() override;
 public:
@@ -358,21 +361,20 @@ class Relationship {
 protected:
 	std::shared_ptr<SpringItem> springItem;
 public:
-	std::shared_ptr<Node> subject;
 	std::shared_ptr<Node> object;
+	std::shared_ptr<Node> subject;
 	std::shared_ptr<Predicate> predicate;
 	std::shared_ptr<SpringItem>& getSpringItem();
-	Relationship(const std::shared_ptr<Node>& object,
+	Relationship(const std::shared_ptr<Node>& subject,
 			const std::shared_ptr<Predicate>& predicate,
-			const std::shared_ptr<Node>& subject) :
-			subject(subject), object(object), predicate(predicate) {
+			const std::shared_ptr<Node>& object) :
+			object(object), subject(subject), predicate(predicate) {
 	}
 	void update();
 	void draw(AlloyContext* context);
 	void drawText(AlloyContext* context);
 
 };
-
 
 class NodeIcon: public Region {
 protected:
@@ -387,7 +389,7 @@ public:
 	void setShape(const NodeShape& s) {
 		shape = s;
 	}
-	NodeShape getShape() const{
+	NodeShape getShape() const {
 		return shape;
 	}
 	virtual void draw(AlloyContext* context) override;
@@ -459,7 +461,7 @@ public:
 	const std::shared_ptr<ChildPort>& getChildPort() const {
 		return childPort;
 	}
-	box2px getObstacleBounds() const ;
+	box2px getObstacleBounds() const;
 	DataFlow* getGraph() const {
 		return parent;
 	}
@@ -491,12 +493,20 @@ public:
 	void add(const std::shared_ptr<InputPort>& port) {
 		inputPortComposite->add(port);
 		inputPorts.push_back(port);
-		port->parent = this;
+		if (parent == nullptr) {
+			port->parent = this;
+		} else
+			throw std::runtime_error(
+					"Could not add port because it already has parent.");
 	}
 	void add(const std::shared_ptr<OutputPort>& port) {
 		outputPortComposite->add(port);
 		outputPorts.push_back(port);
-		port->parent = this;
+		if (parent == nullptr) {
+			port->parent = this;
+		} else
+			throw std::runtime_error(
+					"Could not add port because it already has parent.");
 	}
 	std::string getLabel() const {
 		return label;
@@ -516,12 +526,12 @@ public:
 	virtual NodeType getType() const override {
 		return NodeType::Data;
 	}
-	Data(const std::string& name,const pixel2& pt) :
-			Node(name,pt) {
+	Data(const std::string& name, const pixel2& pt) :
+			Node(name, pt) {
 		setup();
 	}
 	Data(const std::string& name, const std::string& label, const pixel2& pt) :
-		Node(name, label, pt) {
+			Node(name, label, pt) {
 		setup();
 	}
 	virtual void draw(AlloyContext* context) override;
@@ -529,7 +539,7 @@ public:
 			const double2& dpmm, double pixelRatio, bool clamp = false)
 					override;
 };
-class Group : public Node {
+class Group: public Node {
 protected:
 	virtual void setup() override;
 public:
@@ -542,17 +552,17 @@ public:
 		return NodeType::Group;
 	}
 	Group(const std::string& name, const pixel2& pt) :
-		Node(name, pt) {
+			Node(name, pt) {
 		setup();
 	}
 	Group(const std::string& name, const std::string& label, const pixel2& pt) :
-		Node(name, label, pt) {
+			Node(name, label, pt) {
 		setup();
 	}
 	virtual void draw(AlloyContext* context) override;
 	virtual void pack(const pixel2& pos, const pixel2& dims,
-		const double2& dpmm, double pixelRatio, bool clamp = false)
-		override;
+			const double2& dpmm, double pixelRatio, bool clamp = false)
+					override;
 };
 class View: public Node {
 protected:
@@ -563,11 +573,11 @@ public:
 		return NodeType::View;
 	}
 	View(const std::string& name, const pixel2& pt) :
-		Node(name, pt) {
+			Node(name, pt) {
 		setup();
 	}
 	View(const std::string& name, const std::string& label, const pixel2& pt) :
-		Node(name,label, pt) {
+			Node(name, label, pt) {
 		setup();
 	}
 	virtual void pack(const pixel2& pos, const pixel2& dims,
@@ -584,11 +594,11 @@ public:
 		return NodeType::Compute;
 	}
 	Compute(const std::string& name, const pixel2& pt) :
-		Node(name, pt) {
+			Node(name, pt) {
 		setup();
 	}
 	Compute(const std::string& name, const std::string& label, const pixel2& pt) :
-		Node(name, label, pt) {
+			Node(name, label, pt) {
 		setup();
 	}
 	virtual void pack(const pixel2& pos, const pixel2& dims,
@@ -607,16 +617,16 @@ public:
 		return NodeType::Source;
 	}
 	Source(const std::string& name, const pixel2& pt) :
-		Node(name, pt) {
+			Node(name, pt) {
 		setup();
 	}
 	Source(const std::string& name, const std::string& label, const pixel2& pt) :
-		Node(name, label, pt) {
+			Node(name, label, pt) {
 		setup();
 	}
 	virtual void pack(const pixel2& pos, const pixel2& dims,
-		const double2& dpmm, double pixelRatio, bool clamp = false)
-		override;
+			const double2& dpmm, double pixelRatio, bool clamp = false)
+					override;
 	virtual void draw(AlloyContext* context) override;
 };
 
@@ -630,16 +640,17 @@ public:
 		return NodeType::Destination;
 	}
 	Destination(const std::string& name, const pixel2& pt) :
-		Node(name, pt) {
+			Node(name, pt) {
 		setup();
 	}
-	Destination(const std::string& name, const std::string& label, const pixel2& pt) :
-		Node(name, label, pt) {
+	Destination(const std::string& name, const std::string& label,
+			const pixel2& pt) :
+			Node(name, label, pt) {
 		setup();
 	}
 	virtual void pack(const pixel2& pos, const pixel2& dims,
-		const double2& dpmm, double pixelRatio, bool clamp = false)
-		override;
+			const double2& dpmm, double pixelRatio, bool clamp = false)
+					override;
 	virtual void draw(AlloyContext* context) override;
 };
 class DataFlow: public Composite {
@@ -660,7 +671,7 @@ protected:
 	pixel2 currentDrawOffset;
 	pixel2 cursorDownLocation;
 	Connection* selectedConnection = nullptr;
-	bool draggingGraph = false; 
+	bool draggingGraph = false;
 	bool dragAction = false;
 	bool draggingNode = false;
 	void setup();
@@ -678,8 +689,9 @@ public:
 	}
 	void start();
 	void stop();
-	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
-		double pixelRatio, bool clamp = false) override;
+	virtual void pack(const pixel2& pos, const pixel2& dims,
+			const double2& dpmm, double pixelRatio, bool clamp = false)
+					override;
 	bool isConnecting() const {
 		return (connectingPort != nullptr);
 	}
@@ -721,19 +733,29 @@ public:
 	std::vector<std::shared_ptr<Connection>>& getConnections();
 	std::vector<std::shared_ptr<Relationship>>& getRelationships();
 	const std::vector<std::shared_ptr<Connection>>& getConnections() const;
-	const std::vector<std::shared_ptr<Relationship>>& getRelationships() const ;
+	const std::vector<std::shared_ptr<Relationship>>& getRelationships() const;
 
 };
-std::shared_ptr<Connection> MakeConnection(
-		const std::shared_ptr<Port>& source,
+template<class C, class R> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, const Connection& line) {
+	return ss << "[" << line.source->getName() << "->"
+			<< line.destination->getName() << "]";
+}
+template<class C, class R> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, const Relationship& line) {
+	return ss << "[" << line.subject->getName() << "] "
+			<< line.predicate->getName() << " [" << line.object->getName()
+			<< "]";
+}
+std::shared_ptr<Connection> MakeConnection(const std::shared_ptr<Port>& source,
 		const std::shared_ptr<Port>& destination);
 std::shared_ptr<Relationship> MakeRelationship(
-		const std::shared_ptr<Node>& object,
+		const std::shared_ptr<Node>& subject,
 		const std::shared_ptr<Predicate>& predicate,
-		const std::shared_ptr<Node>& subject);
+		const std::shared_ptr<Node>& object);
 std::shared_ptr<Relationship> MakeRelationship(
-		const std::shared_ptr<Node>& object, const std::string& predicate,
-		const std::shared_ptr<Node>& subject);
+		const std::shared_ptr<Node>& subject, const std::string& predicate,
+		const std::shared_ptr<Node>& object);
 std::shared_ptr<Data> MakeDataNode(const std::string& name,
 		const std::string& label, const pixel2& pos);
 std::shared_ptr<Data> MakeDataNode(const std::string& name, const pixel2& pos);
@@ -750,13 +772,12 @@ std::shared_ptr<Compute> MakeComputeNode(const std::string& name,
 std::shared_ptr<Compute> MakeComputeNode(const std::string& name);
 
 std::shared_ptr<Group> MakeGroupNode(const std::string& name,
-	const std::string& label, const pixel2& pos);
+		const std::string& label, const pixel2& pos);
 std::shared_ptr<Group> MakeGroupNode(const std::string& name,
-	const pixel2& pos);
+		const pixel2& pos);
 std::shared_ptr<Group> MakeGroupNode(const std::string& name,
-	const std::string& label);
+		const std::string& label);
 std::shared_ptr<Group> MakeGroupNode(const std::string& name);
-
 
 std::shared_ptr<View> MakeViewNode(const std::string& name,
 		const std::string& label, const pixel2& pos);
