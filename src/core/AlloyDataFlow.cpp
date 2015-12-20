@@ -736,6 +736,9 @@ void DataFlow::groupSelected() {
 	float2 center(0.0f);
 	std::list<ConnectionPtr> connectionList;
 	std::list<RelationshipPtr> relationshipList;
+	for (ConnectionPtr connection : data->connections) {
+		connection->setSelected(false);//Do not delete connections on group
+	}
 	for (NodePtr node : data->nodes) {
 		if (node->isSelected()) {
 			center += node->getLocation();
@@ -906,6 +909,9 @@ void DataFlow::ungroupSelected() {
 			deleteList.push_back(group);
 		}
 		node->setSelected(false);//Do not delete things that are not groups.
+	}
+	for (ConnectionPtr connection : data->connections) {
+		connection->setSelected(false);//Do not delete connections on ungroup
 	}
 	for (GroupPtr group : deleteList) {
 		group->setSelected(true);
