@@ -903,9 +903,9 @@ void DataFlow::ungroupSelected() {
 	for (NodePtr node : data->nodes) {
 		if (node->isSelected() && node->getType() == NodeType::Group) {
 			GroupPtr group = std::dynamic_pointer_cast<Group>(node);
-			group->setSelected(false);
 			deleteList.push_back(group);
 		}
+		node->setSelected(false);//Do not delete things that are not groups.
 	}
 	for (GroupPtr group : deleteList) {
 		group->setSelected(true);
