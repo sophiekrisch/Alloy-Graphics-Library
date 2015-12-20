@@ -730,22 +730,32 @@ namespace aly {
 					{
 						InputPortPtr port = node->getInputPort();
 						if (port.get()!=nullptr&&port->isConnected()) {
-							InputPortPtr newPort = MakeInputPort(port->name);
-							port->setProxy(newPort.get());
-							group->add(newPort);
+							InputPortPtr newPort = group->inputPort;
+							bool outside = false;
 							for (Connection* connection : port->connections) {
-								connectionList.push_back(MakeConnection(connection->source, newPort));
+								if (!connection->source->getNode()->isSelected()) {
+									outside = true;
+									connectionList.push_back(MakeConnection(newPort, connection->source));
+								}
+							}
+							if (outside) {
+								port->setProxy(newPort.get());
 							}
 						}
 					}
 					{
 						OutputPortPtr port = node->getOutputPort();
 						if (port.get()!=nullptr&&port->isConnected()) {
-							OutputPortPtr newPort = MakeOutputPort(port->name);
-							port->setProxy(newPort.get());
-							group->add(newPort);
+							OutputPortPtr newPort = group->outputPort;
+							bool outside = false;
 							for (Connection* connection : port->connections) {
-								connectionList.push_back(MakeConnection(newPort, connection->destination));
+								if (!connection->destination->getNode()->isSelected()) {
+									outside = true;
+									connectionList.push_back(MakeConnection(newPort, connection->destination));
+								}
+							}
+							if (outside) {
+								port->setProxy(newPort.get());
 							}
 						}
 					}
@@ -761,7 +771,7 @@ namespace aly {
 			}
 			for (ConnectionPtr connection : connectionList) {
 				add(connection);
-				connection->getSpringItem()->update();
+				connection->update();
 			}
 		}
 		void DataFlow::ungroupSelected() {
@@ -1453,7 +1463,7 @@ namespace aly {
 				if (context->isMouseOver(this)) {
 					nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
 					nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
-					context->setCursor(&portCursor);
+					context->setCursor(&Cursor::CrossHairs);
 					getGraph()->setCurrentPort(this);
 					over = true;
 				}
@@ -1498,7 +1508,7 @@ namespace aly {
 			if (context->isMouseOver(this)) {
 				nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
 				nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
-				context->setCursor(&portCursor);
+				context->setCursor(&Cursor::CrossHairs);
 				getGraph()->setCurrentPort(this);
 				over = true;
 			}
@@ -1555,7 +1565,7 @@ namespace aly {
 				if (context->isMouseOver(this)) {
 					nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
 					nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
-					context->setCursor(&portCursor);
+					context->setCursor(&Cursor::CrossHairs);
 					getGraph()->setCurrentPort(this);
 					over = true;
 				}
@@ -1607,7 +1617,7 @@ namespace aly {
 			if (context->isMouseOver(this)) {
 				nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
 				nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
-				context->setCursor(&portCursor);
+				context->setCursor(&Cursor::CrossHairs);
 				getGraph()->setCurrentPort(this);
 				over = true;
 			}
@@ -1648,6 +1658,28 @@ namespace aly {
 		}
 		float2 Node::getLocation() const {
 			return forceItem->location;
+		}
+
+		std::shared_ptr<InputPort>& Node::set(const std::shared_ptr<InputPort>& port) {
+			if (inputPort.get() != nullptr) {
+				inputPort->connections = port->connections;
+				inputPort->label = port->label;
+				inputPort->proxyIn = port->proxyIn;
+				inputPort->proxyOut = port->proxyOut;
+				inputPort->value = port->value;
+			}
+			return inputPort;
+		}
+		std::shared_ptr<OutputPort>& Node::set(const std::shared_ptr<OutputPort>& port) {
+			if (outputPort.get() != nullptr) {
+				outputPort->connections = port->connections;
+				outputPort->label = port->label;
+				outputPort->proxyIn = port->proxyIn;
+				outputPort->proxyOut = port->proxyOut;
+				outputPort->value = port->value;
+			}
+
+			return outputPort;
 		}
 		void Node::setLocation(const float2& pt) {
 			forceItem->location = pt;
@@ -2043,6 +2075,9 @@ namespace aly {
 		}
 		SpringItemPtr& Connection::getSpringItem() {
 			return springItem;
+		}
+		void Connection::update() {
+			if(springItem.get()==nullptr)springItem->update();
 		}
 		void Relationship::draw(AlloyContext* context) {
 			pixel2 subjectPt = subject->getCenter();

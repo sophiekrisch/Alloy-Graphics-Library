@@ -89,7 +89,6 @@ class Port: public Region {
 protected:
 	Node* parent;
 	std::string label;
-	Cursor portCursor;
 	Port* proxyIn;
 	Port* proxyOut;
 	virtual void setup();
@@ -122,15 +121,11 @@ public:
 	float2 getLocation() const;
 	std::shared_ptr<Port> getReference();
 	Port(const std::string& name, const std::string& label) :
-			Region(name), parent(nullptr), label(label), portCursor(0xf05b,
-					16.0f, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER, FontType::Icon,
-					0.0f, pixel2(-0.25f, -0.25f)), proxyIn(nullptr), proxyOut(nullptr) {
+			Region(name), parent(nullptr), label(label), proxyIn(nullptr), proxyOut(nullptr) {
 		setup();
 	}
 	Port(const std::string& name) :
-			Region(name), parent(nullptr), label(name), portCursor(0xf05b,
-					16.0f, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER, FontType::Icon,
-					0.0f, pixel2(-0.25f, -0.25f)), proxyIn(nullptr),proxyOut(nullptr) {
+			Region(name), parent(nullptr), label(name), proxyIn(nullptr),proxyOut(nullptr) {
 		setup();
 	}
 	virtual PortType getType() const {
@@ -171,6 +166,7 @@ protected:
 	std::shared_ptr<Packet> value;
 	virtual void setup() override;
 public:
+	friend class Node;
 	static const pixel2 DIMENSIONS;
 	InputPort(const std::string& name) :
 			Port(name) {
@@ -197,6 +193,7 @@ protected:
 	std::shared_ptr<Packet> value;
 	virtual void setup() override;
 public:
+	friend class Node;
 	static const pixel2 DIMENSIONS;
 	OutputPort(const std::string& name) :
 			Port(name) {
@@ -259,6 +256,7 @@ public:
 		source->add(this);
 		destination->add(this);
 	}
+	void update();
 	~Connection();
 	float distance(const float2& pt);
 	void draw(AlloyContext* context,DataFlow* flow);
@@ -481,6 +479,8 @@ public:
 	void add(const std::shared_ptr<Region>& region) {
 		Composite::add(region);
 	}
+	std::shared_ptr<InputPort>& set(const std::shared_ptr<InputPort>& port);
+	std::shared_ptr<OutputPort>& set(const std::shared_ptr<OutputPort>& port);
 	void add(const std::shared_ptr<InputPort>& port) {
 		inputPortComposite->add(port);
 		inputPorts.push_back(port);
