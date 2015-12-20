@@ -822,27 +822,7 @@ void DataFlow::groupSelected() {
 		}
 	}
 	for (RelationshipPtr relationship : data->relationships) {
-		/*
-		if (relationship->object->isSelected()
-				&& !relationship->subject->isSelected()) {
-			relationshipList.push_back(
-					MakeRelationship(relationship->subject,
-							relationship->predicate, group));
-			group->relationships.push_back(
-					MakeRelationship(relationship->subject,
-							relationship->predicate, relationship->object));
-		} else if (!relationship->object->isSelected()
-				&& relationship->subject->isSelected()) {
-			relationshipList.push_back(
-					MakeRelationship(group, relationship->predicate,
-							relationship->object));
-			group->relationships.push_back(
-					MakeRelationship(relationship->subject,
-							relationship->predicate, relationship->object));
-		} else
-			*/
-			if (relationship->object->isSelected()
-				&& relationship->subject->isSelected()) {
+		if (relationship->object->isSelected()|| relationship->subject->isSelected()) {
 			group->relationships.push_back(relationship);
 		}
 	}
