@@ -758,14 +758,25 @@ public:
 };
 template<class C, class R> std::basic_ostream<C, R> & operator <<(
 		std::basic_ostream<C, R> & ss, const Connection& line) {
-	return ss << "[" << line.source->getName() << "->"
-			<< line.destination->getName() << "]";
+	return ss << "[" << line.source->getNode()->getName() << "::" << line.source->getName() << "->"
+			<< line.destination->getNode()->getName()<<"::"<<line.destination->getName() << "]";
 }
 template<class C, class R> std::basic_ostream<C, R> & operator <<(
 		std::basic_ostream<C, R> & ss, const Relationship& line) {
 	return ss << "[" << line.subject->getName() << " <"
-			<< line.predicate->getName() << "> " << line.object->getName()
+			<< line.predicate->getName() << "> "  << line.object->getName()
 			<< "]";
+}
+template<class C, class R> std::basic_ostream<C, R> & operator <<(
+	std::basic_ostream<C, R> & ss, const Group& group) {
+	ss << group.getName() << " Input Ports: " << group.getInputPorts().size() << " Output Ports: " << group.getOutputPorts().size()<<std::endl;
+	for (ConnectionPtr connection : group.connections) {
+		ss << "Connection: " << *connection << std::endl;
+	}
+	for (RelationshipPtr relationship : group.relationships) {
+		ss << "Relationship: " << *relationship << std::endl;
+	}
+	return ss;
 }
 std::shared_ptr<Connection> MakeConnection(const std::shared_ptr<Port>& source,
 		const std::shared_ptr<Port>& destination);

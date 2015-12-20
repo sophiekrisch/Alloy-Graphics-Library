@@ -717,7 +717,6 @@ void DataFlow::setCurrentPort(Port* currentPort) {
 	this->currentPort = currentPort;
 }
 Connection::~Connection() {
-
 	if (source.get() != nullptr)
 		source->disconnect(this);
 	if (destination.get() != nullptr)
@@ -738,6 +737,9 @@ void DataFlow::groupSelected() {
 	std::list<RelationshipPtr> relationshipList;
 	for (ConnectionPtr connection : data->connections) {
 		connection->setSelected(false);//Do not delete connections on group
+		if (connection->source->getNode()->isSelected() && connection->destination->getNode()->isSelected()) {
+			group->connections.push_back(connection);
+		}
 	}
 	for (NodePtr node : data->nodes) {
 		if (node->isSelected()) {
@@ -750,12 +752,8 @@ void DataFlow::groupSelected() {
 					for (ConnectionPtr connection : port->getConnections()) {
 						if (!connection->source->getNode()->isSelected()) {
 							outside = true;
-							connectionList.push_back(
-									MakeConnection(connection->source,
-											newPort));
+							connectionList.push_back(MakeConnection(connection->source,newPort));
 							connection->source->disconnect(connection.get());
-						} else {
-							group->connections.push_back(connection);
 						}
 					}
 					if (outside) {
@@ -772,39 +770,14 @@ void DataFlow::groupSelected() {
 					for (ConnectionPtr connection : port->getConnections()) {
 						if (!connection->destination->getNode()->isSelected()) {
 							outside = true;
-							connectionList.push_back(
-									MakeConnection(newPort,
-											connection->destination));
-							connection->destination->disconnect(
-									connection.get());
-						} else {
-							group->connections.push_back(connection);
+							connectionList.push_back(MakeConnection(newPort,connection->destination));
+							connection->destination->disconnect(connection.get());
 						}
 					}
 					if (outside) {
 						port->setProxyIn(newPort);
 						newPort->setProxyOut(port);
 						group->add(newPort);
-					}
-				}
-			}
-			{
-				ParentPortPtr port = node->getParentPort();
-				if (port.get() != nullptr && port->isConnected()) {
-					for (ConnectionPtr connection : port->getConnections()) {
-						if (connection->source->getNode()->isSelected()) {
-							group->connections.push_back(connection);
-						}
-					}
-				}
-			}
-			{
-				ChildPortPtr port = node->getChildPort();
-				if (port.get() != nullptr && port->isConnected()) {
-					for (ConnectionPtr connection : port->getConnections()) {
-						if (connection->destination->getNode()->isSelected()) {
-							group->connections.push_back(connection);
-						}
 					}
 				}
 			}
@@ -816,12 +789,8 @@ void DataFlow::groupSelected() {
 					for (ConnectionPtr connection : port->getConnections()) {
 						if (!connection->source->getNode()->isSelected()) {
 							outside = true;
-							connectionList.push_back(
-									MakeConnection(connection->source,
-											newPort));
+							connectionList.push_back(MakeConnection(connection->source,newPort));
 							connection->source->disconnect(connection.get());
-						} else {
-							group->connections.push_back(connection);
 						}
 					}
 					if (outside) {
@@ -839,13 +808,8 @@ void DataFlow::groupSelected() {
 					for (ConnectionPtr connection : port->getConnections()) {
 						if (!connection->destination->getNode()->isSelected()) {
 							outside = true;
-							connectionList.push_back(
-									MakeConnection(newPort,
-											connection->destination));
-							connection->destination->disconnect(
-									connection.get());
-						} else {
-							group->connections.push_back(connection);
+							connectionList.push_back(MakeConnection(newPort,connection->destination));
+							connection->destination->disconnect(connection.get());
 						}
 					}
 					if (outside) {
@@ -899,7 +863,6 @@ void DataFlow::groupSelected() {
 	for (ConnectionPtr connection : group->connections) {
 		connection->setSelected(false);
 	}
-
 }
 void DataFlow::ungroupSelected() {
 	std::vector<GroupPtr> deleteList;
@@ -913,9 +876,9 @@ void DataFlow::ungroupSelected() {
 	for (ConnectionPtr connection : data->connections) {
 		connection->setSelected(false);//Do not delete connections on ungroup
 	}
+	std::list<NodePtr> nodeList;
 	for (GroupPtr group : deleteList) {
 		group->setSelected(true);
-		std::list<NodePtr> nodeList;
 		std::list<ConnectionPtr> connectionList;
 		std::list<RelationshipPtr> relationshipList;
 			float2 center(0.0f);
@@ -938,6 +901,7 @@ void DataFlow::ungroupSelected() {
 					proxy->setProxyIn();
 					for (ConnectionPtr connection : port->getConnections()) {
 						connectionList.push_back(MakeConnection(connection->source, proxy));
+						connection->source->disconnect(connection);
 					}
 				}
 				port->getConnections().clear();
@@ -948,12 +912,14 @@ void DataFlow::ungroupSelected() {
 					proxy->setProxyIn();
 					for (ConnectionPtr connection : port->getConnections()) {
 						connectionList.push_back(MakeConnection(proxy, connection->destination));
+						connection->destination->disconnect(connection);
 					}
 				}
 				port->getConnections().clear();
 			}
 		deleteSelected();
-		for (NodePtr node : nodeList) {
+		for (NodePtr node :group->nodes) {
+			node->setSelected(false);
 			addNode(node);
 		}
 		for (ConnectionPtr connection : connectionList) {
@@ -963,7 +929,9 @@ void DataFlow::ungroupSelected() {
 			add(connection);
 		}
 	}
-
+	for (NodePtr node : nodeList) {
+		node->setSelected(true);
+	}
 }
 void DataFlow::deleteSelected() {
 	std::list<ForceItemPtr> deleteForceList;
@@ -997,8 +965,6 @@ void DataFlow::deleteSelected() {
 		std::vector<ConnectionPtr> tmpList;
 		for (ConnectionPtr connection : data->connections) {
 			if (connection->source->getNode()->isSelected()|| connection->destination->getNode()->isSelected()|| connection->selected) {
-				connection->source->disconnect(connection);
-				connection->destination->disconnect(connection);
 				if (connection->selected) {
 					deleteSpringList.push_back(connection->getSpringItem());
 				}
