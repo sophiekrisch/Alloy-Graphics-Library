@@ -899,12 +899,19 @@ void DataFlow::groupSelected() {
 
 }
 void DataFlow::ungroupSelected() {
-	std::list<NodePtr> nodeList;
-	std::list<ConnectionPtr> connectionList;
-	std::list<RelationshipPtr> relationshipList;
+	std::vector<GroupPtr> deleteList;
 	for (NodePtr node : data->nodes) {
 		if (node->isSelected() && node->getType() == NodeType::Group) {
 			GroupPtr group = std::dynamic_pointer_cast<Group>(node);
+			group->setSelected(false);
+			deleteList.push_back(group);
+		}
+	}
+	for (GroupPtr group : deleteList) {
+		group->setSelected(true);
+		std::list<NodePtr> nodeList;
+		std::list<ConnectionPtr> connectionList;
+		std::list<RelationshipPtr> relationshipList;
 			float2 center(0.0f);
 			if (group->nodes.size() > 0) {
 				for (NodePtr node : group->nodes) {
@@ -939,18 +946,18 @@ void DataFlow::ungroupSelected() {
 				}
 				port->getConnections().clear();
 			}
+		deleteSelected();
+		for (NodePtr node : nodeList) {
+			addNode(node);
+		}
+		for (ConnectionPtr connection : connectionList) {
+			add(connection);
+		}
+		for (RelationshipPtr connection : relationshipList) {
+			add(connection);
 		}
 	}
-	deleteSelected();
-	for (NodePtr node : nodeList) {
-		addNode(node);
-	}
-	for (ConnectionPtr connection : connectionList) {
-		add(connection);
-	}
-	for (RelationshipPtr connection : relationshipList) {
-		add(connection);
-	}
+
 }
 void DataFlow::deleteSelected() {
 	std::list<ForceItemPtr> deleteForceList;
