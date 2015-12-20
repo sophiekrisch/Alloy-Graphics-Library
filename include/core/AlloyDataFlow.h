@@ -770,10 +770,10 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(
 template<class C, class R> std::basic_ostream<C, R> & operator <<(
 	std::basic_ostream<C, R> & ss, const Group& group) {
 	ss << group.getName() << " Input Ports: " << group.getInputPorts().size() << " Output Ports: " << group.getOutputPorts().size()<<std::endl;
-	for (ConnectionPtr connection : group.connections) {
+	for (std::shared_ptr<Connection> connection : group.connections) {
 		ss << "Connection: " << *connection << std::endl;
 	}
-	for (RelationshipPtr relationship : group.relationships) {
+	for (std::shared_ptr<Relationship> relationship : group.relationships) {
 		ss << "Relationship: " << *relationship << std::endl;
 	}
 	return ss;
