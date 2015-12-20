@@ -67,8 +67,8 @@ std::shared_ptr<Connection> MakeConnection(const std::shared_ptr<Port>& source,
 		const std::shared_ptr<Port>& destination) {
 	ConnectionPtr connection = ConnectionPtr(
 			new Connection(source, destination));
-	source->connections.push_back(connection);
-	destination->connections.push_back(connection);
+	source->getConnections().push_back(connection);
+	destination->getConnections().push_back(connection);
 	return connection;
 }
 std::shared_ptr<Relationship> MakeRelationship(
@@ -754,7 +754,7 @@ void DataFlow::groupSelected() {
 				if (port->isConnected()) {
 					InputPortPtr newPort = MakeInputPort(port->name);
 					bool outside = false;
-					for (ConnectionPtr connection : port->connections) {
+					for (ConnectionPtr connection : port->getConnections()) {
 						if (!connection->source->getNode()->isSelected()) {
 							outside = true;
 							connectionList.push_back(
@@ -775,7 +775,7 @@ void DataFlow::groupSelected() {
 				if (port->isConnected()) {
 					OutputPortPtr newPort = MakeOutputPort(port->name);
 					bool outside = false;
-					for (ConnectionPtr connection : port->connections) {
+					for (ConnectionPtr connection : port->getConnections()) {
 						if (!connection->destination->getNode()->isSelected()) {
 							outside = true;
 							connectionList.push_back(
@@ -796,7 +796,7 @@ void DataFlow::groupSelected() {
 			{
 				ParentPortPtr port = node->getParentPort();
 				if (port.get() != nullptr && port->isConnected()) {
-					for (ConnectionPtr connection : port->connections) {
+					for (ConnectionPtr connection : port->getConnections()) {
 						if (connection->source->getNode()->isSelected()) {
 							group->connections.push_back(connection);
 						}
@@ -806,7 +806,7 @@ void DataFlow::groupSelected() {
 			{
 				ChildPortPtr port = node->getChildPort();
 				if (port.get() != nullptr && port->isConnected()) {
-					for (ConnectionPtr connection : port->connections) {
+					for (ConnectionPtr connection : port->getConnections()) {
 						if (connection->destination->getNode()->isSelected()) {
 							group->connections.push_back(connection);
 						}
@@ -818,7 +818,7 @@ void DataFlow::groupSelected() {
 				if (port.get() != nullptr && port->isConnected()) {
 					InputPortPtr& newPort = group->inputPort;
 					bool outside = false;
-					for (ConnectionPtr connection : port->connections) {
+					for (ConnectionPtr connection : port->getConnections()) {
 						if (!connection->source->getNode()->isSelected()) {
 							outside = true;
 							connectionList.push_back(
@@ -839,7 +839,7 @@ void DataFlow::groupSelected() {
 				if (port.get() != nullptr && port->isConnected()) {
 					OutputPortPtr& newPort = group->outputPort;
 					bool outside = false;
-					for (ConnectionPtr connection : port->connections) {
+					for (ConnectionPtr connection : port->getConnections()) {
 						if (!connection->destination->getNode()->isSelected()) {
 							outside = true;
 							connectionList.push_back(
@@ -1792,28 +1792,6 @@ float2 Node::getLocation() const {
 	return forceItem->location;
 }
 
-std::shared_ptr<InputPort>& Node::set(const std::shared_ptr<InputPort>& port) {
-	if (inputPort.get() != nullptr) {
-		inputPort->connections = port->connections;
-		inputPort->label = port->label;
-		inputPort->proxyIn = port->proxyIn;
-		inputPort->proxyOut = port->proxyOut;
-		inputPort->value = port->value;
-	}
-	return inputPort;
-}
-std::shared_ptr<OutputPort>& Node::set(
-		const std::shared_ptr<OutputPort>& port) {
-	if (outputPort.get() != nullptr) {
-		outputPort->connections = port->connections;
-		outputPort->label = port->label;
-		outputPort->proxyIn = port->proxyIn;
-		outputPort->proxyOut = port->proxyOut;
-		outputPort->value = port->value;
-	}
-
-	return outputPort;
-}
 void Node::setLocation(const float2& pt) {
 	forceItem->location = pt;
 	forceItem->plocation = pt;

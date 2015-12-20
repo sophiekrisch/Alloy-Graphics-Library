@@ -103,11 +103,11 @@ protected:
 	std::string label;
 	Port* proxyIn;
 	Port* proxyOut;
+	ConnectionBundle connections;
 	virtual void setup();
 public:
 	friend class Connection;
 	friend class Node;
-	ConnectionBundle connections;
 	DataFlow* getGraph() const;
 	inline Node* getNode() const {
 		return parent;
@@ -118,6 +118,12 @@ public:
 			proxy->proxyOut = this;
 		}
 	}
+	ConnectionBundle& getConnections(){
+		return connections;
+	}
+	const ConnectionBundle& getConnections() const {
+		return connections;
+	}
 	void disconnect(Connection* connection);
 	bool isExternalized() const {
 		return (proxyIn != nullptr);
@@ -125,7 +131,7 @@ public:
 	bool isConnected() const {
 		return (connections.size() > 0);
 	}
-	void add(const std::shared_ptr<Connection>& connection) {
+	void connect(const std::shared_ptr<Connection>& connection) {
 		connections.push_back(connection);
 	}
 	void setParent(Node* parent) {
@@ -488,8 +494,6 @@ public:
 	void add(const std::shared_ptr<Region>& region) {
 		Composite::add(region);
 	}
-	std::shared_ptr<InputPort>& set(const std::shared_ptr<InputPort>& port);
-	std::shared_ptr<OutputPort>& set(const std::shared_ptr<OutputPort>& port);
 	void add(const std::shared_ptr<InputPort>& port) {
 		inputPortComposite->add(port);
 		inputPorts.push_back(port);
