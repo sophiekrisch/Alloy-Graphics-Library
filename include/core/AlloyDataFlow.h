@@ -768,8 +768,38 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(
 			<< "]";
 }
 template<class C, class R> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, const Port& port) {
+	ss <<port.getNode()->getName()<<"::"<<port.getName()<<" ["<<port.getConnections().size()<<"]";
+	if(port.getProxyIn().get()!=nullptr){
+		ss<<" Proxy In <"<<port.getProxyOut()->getNode()->getName()<<"::"<<port.getProxyOut()->getName()<<">";
+	}
+	if(port.getProxyOut().get()!=nullptr){
+		ss<<" Proxy Out <"<<port.getProxyOut()->getNode()->getName()<<"::"<<port.getProxyOut()->getName()<<">";
+	}
+	return ss;
+}
+template<class C, class R> std::basic_ostream<C, R> & operator <<(
+	std::basic_ostream<C, R> & ss, const Node& group) {
+	ss << group.getName() << " Input Ports: " << group.getInputPorts().size() << " Output Ports: " << group.getOutputPorts().size()<<std::endl;
+	for (std::shared_ptr<Port> port : group.getInputPorts()) {
+		if(port->isConnected())ss<<"Input: "<<*port<<std::endl;
+	}
+	for (std::shared_ptr<Port> port : group.getOutputPorts()) {
+		if(port->isConnected())ss<<"Output: "<<*port<<std::endl;
+	}
+	if(group.getInputPort().get()!=nullptr)ss<<"Node Input: "<<*group.getInputPort()<<std::endl;
+	if(group.getOutputPort().get()!=nullptr)ss<<"Node Output: "<<*group.getOutputPort()<<std::endl;
+	return ss;
+}
+template<class C, class R> std::basic_ostream<C, R> & operator <<(
 	std::basic_ostream<C, R> & ss, const Group& group) {
 	ss << group.getName() << " Input Ports: " << group.getInputPorts().size() << " Output Ports: " << group.getOutputPorts().size()<<std::endl;
+	for (std::shared_ptr<Port> port : group.getInputPorts()) {
+		if(port->isConnected())ss<<"Input: "<<*port<<std::endl;
+	}
+	for (std::shared_ptr<Port> port : group.getOutputPorts()) {
+		if(port->isConnected())ss<<"Output: "<<*port<<std::endl;
+	}
 	for (std::shared_ptr<Connection> connection : group.connections) {
 		ss << "Connection: " << *connection << std::endl;
 	}
@@ -778,6 +808,7 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(
 	}
 	return ss;
 }
+
 std::shared_ptr<Connection> MakeConnection(const std::shared_ptr<Port>& source,
 		const std::shared_ptr<Port>& destination);
 std::shared_ptr<Relationship> MakeRelationship(
