@@ -3450,7 +3450,8 @@ void TreeItem::draw(ExpandTree* tree, AlloyContext* context,
 	}
 }
 TabHeader::TabHeader(const std::string& name, TabPane* parent) :
-		Composite(name, CoordPX(0, 0), CoordPX(120, 30)), parentPane(parent) {
+		Composite(name, CoordPX(0, 0), CoordPX(120, 30)), parentPane(parent), focused(
+		false) {
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	textLabel = TextLabelPtr(
 			new TextLabel(name, CoordPX(2, 2),
@@ -3464,9 +3465,9 @@ TabHeader::TabHeader(const std::string& name, TabPane* parent) :
 	add(textLabel);
 	textLabel->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& event) {
-				if(event.button==GLFW_MOUSE_BUTTON_LEFT){
+				if(event.button==GLFW_MOUSE_BUTTON_LEFT) {
 					setSelected();
-					return true;
+					return false;
 				}
 				return false;
 			};
@@ -3482,12 +3483,14 @@ TabHeader::TabHeader(const std::string& name, TabPane* parent) :
 	 return true;
 	 };
 	 */
+	setDragEnabled(true);
 }
 void TabHeader::setSelected() const {
 	getBar()->setSelected(parentPane);
 }
 void TabHeader::draw(AlloyContext* context) {
-	if (context->isMouseOver(textLabel.get())) {
+	focused = context->isMouseOver(textLabel.get());
+	if (focused) {
 		textLabel->textColor = MakeColor(
 				AlloyApplicationContext()->theme.HIGHLIGHT);
 	} else {
@@ -3512,14 +3515,35 @@ TabPane::TabPane(const std::shared_ptr<Composite>& region) :
 TabBar* TabHeader::getBar() const {
 	return parentPane->parent;
 }
-void TabBar::setSelected(TabPane* s){
-	selected=s;
+void TabBar::setSelected(TabPane* s) {
+	selectedPane = s;
 	contentRegion->putLast(s->region);
 }
-
+bool TabBar::onEventHandler(AlloyContext* context, const InputEvent& e) {
+	if (e.type == InputType::MouseButton) {
+		if (e.isDown() && e.button == GLFW_MOUSE_BUTTON_LEFT) {
+			for (std::shared_ptr<TabPane> pane : panes) {
+				if (pane->isFocused()) {
+					dragPane = pane.get();
+					break;
+				}
+			}
+		} else if (e.isUp()) {
+			dragPane = nullptr;
+		}
+	}
+	/*
+	if(dragPane!=nullptr&&(e.type==InputType::Cursor||e.type==InputType::MouseButton)){
+		dragPane->header->setDragOffset(e.cursor,context->getCursorDownPosition());
+		context->requestPack();
+	}
+	*/
+	return false;
+}
 TabBar::TabBar(const std::string& name, const AUnit2D& position,
 		const AUnit2D& dimensions) :
-		Composite(name, position, dimensions), selected(nullptr) {
+		Composite(name, position, dimensions), selectedPane(nullptr), dragPane(
+				nullptr) {
 	barRegion = std::shared_ptr<Composite>(
 			new Composite("Content", CoordPX(0, 0),
 					CoordPerPX(1.0f, 0.0f, 0.0f, 30.0f)));
@@ -3531,6 +3555,7 @@ TabBar::TabBar(const std::string& name, const AUnit2D& position,
 					CoordPerPX(1.0f, 1.0f, 0.0f, -30.0f)));
 	Composite::add(barRegion);
 	Composite::add(contentRegion);
+	Application::addListener(this);
 }
 
 }

@@ -704,6 +704,7 @@ class TabHeader: public Composite{
 protected:
 	TextLabelPtr textLabel;
 	TabPane* parentPane;
+	bool focused;
 public:
 	friend struct TabPane;
 	TabHeader(const std::string& name,TabPane* parent=nullptr);
@@ -715,6 +716,9 @@ struct TabPane {
 	std::shared_ptr<TabHeader> header;
 	std::shared_ptr<Composite> region;
 	TabBar* parent;
+	bool isFocused() const {
+		return header->focused;
+	}
 	TabPane(const std::shared_ptr<Composite>& region);
 };
 class TabBar: public Composite {
@@ -722,12 +726,14 @@ protected:
 	std::vector<std::shared_ptr<TabPane>> panes;
 	std::shared_ptr<Composite> barRegion;
 	std::shared_ptr<Composite> contentRegion;
-	TabPane* selected;
+	TabPane* selectedPane;
+	TabPane* dragPane;
 public:
 	void setSelected(TabPane* s);
 	void add(const std::shared_ptr<TabPane>& tabPane);
 	TabBar(const std::string& name, const AUnit2D& position,
 			const AUnit2D& dimensions);
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)override;
 };
 typedef std::shared_ptr<TextButton> TextButtonPtr;
 typedef std::shared_ptr<HorizontalSlider> HSliderPtr;
