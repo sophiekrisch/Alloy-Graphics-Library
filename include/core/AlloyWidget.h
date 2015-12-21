@@ -698,6 +698,37 @@ public:
 	WindowPane(const RegionPtr& content);
 	virtual void draw(AlloyContext* context) override;
 };
+class TabBar;
+class TabPane;
+class TabHeader: public Composite{
+protected:
+	TextLabelPtr textLabel;
+	TabPane* parentPane;
+public:
+	friend class TabPane;
+	TabHeader(const std::string& name,TabPane* parent=nullptr);
+	virtual void draw(AlloyContext* context) override;
+	TabBar* getBar() const ;
+	void setSelected() const ;
+};
+struct TabPane {
+	std::shared_ptr<TabHeader> header;
+	std::shared_ptr<Composite> region;
+	TabBar* parent;
+	TabPane(const std::shared_ptr<Composite>& region);
+};
+class TabBar: public Composite {
+protected:
+	std::vector<std::shared_ptr<TabPane>> panes;
+	std::shared_ptr<Composite> barRegion;
+	std::shared_ptr<Composite> contentRegion;
+	TabPane* selected;
+public:
+	void setSelected(TabPane* s);
+	void add(const std::shared_ptr<TabPane>& tabPane);
+	TabBar(const std::string& name, const AUnit2D& position,
+			const AUnit2D& dimensions);
+};
 typedef std::shared_ptr<TextButton> TextButtonPtr;
 typedef std::shared_ptr<HorizontalSlider> HSliderPtr;
 typedef std::shared_ptr<VerticalSlider> VSliderPtr;
@@ -724,6 +755,9 @@ typedef std::shared_ptr<MessageDialog> MessageDialogPtr;
 typedef std::shared_ptr<TreeItem> TreeItemPtr;
 typedef std::shared_ptr<LeafItem> LeafItemPtr;
 typedef std::shared_ptr<ExpandTree> ExpandTreePtr;
+typedef std::shared_ptr<TabHeader> TabHeaderPtr;
+typedef std::shared_ptr<TabPane> TabPanePtr;
+typedef std::shared_ptr<TabBar> TabBarPtr;
 }
 
 #endif /* ALLOYWIDGET_H_ */

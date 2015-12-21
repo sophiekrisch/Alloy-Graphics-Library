@@ -1917,41 +1917,39 @@ bool ListBox::onMouseDown(ListEntry* entry, AlloyContext* context,
 		const InputEvent& e) {
 	if (e.isDown()) {
 		if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
-				if (enableMultiSelection) {
-					if (entry->isSelected()) {
-						entry->setSelected(false);
-						for (auto iter = lastSelected.begin();
-						iter != lastSelected.end(); iter++) {
-							if (*iter == entry) {
-								lastSelected.erase(iter);
-								break;
-							}
+			if (enableMultiSelection) {
+				if (entry->isSelected()) {
+					entry->setSelected(false);
+					for (auto iter = lastSelected.begin();
+							iter != lastSelected.end(); iter++) {
+						if (*iter == entry) {
+							lastSelected.erase(iter);
+							break;
 						}
 					}
-					else {
-						entry->setSelected(true);
-						lastSelected.push_back(entry);
-					}
+				} else {
+					entry->setSelected(true);
+					lastSelected.push_back(entry);
 				}
-				else {
-					if (!entry->isSelected()) {
-						for (ListEntry* child : lastSelected) {
-							child->setSelected(false);
-						}
-						entry->setSelected(true);
-						lastSelected.clear();
-						lastSelected.push_back(entry);
+			} else {
+				if (!entry->isSelected()) {
+					for (ListEntry* child : lastSelected) {
+						child->setSelected(false);
 					}
+					entry->setSelected(true);
+					lastSelected.clear();
+					lastSelected.push_back(entry);
 				}
+			}
 			if (onSelect)
-				onSelect(entry,e);
+				onSelect(entry, e);
 			return true;
 		} else if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {
 			for (ListEntry* child : lastSelected) {
 				child->setSelected(false);
 			}
 			if (onSelect)
-				onSelect(nullptr,e);
+				onSelect(nullptr, e);
 			return true;
 		}
 	}
@@ -2361,7 +2359,8 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	fileLocation = std::shared_ptr<FileField>(
 			new FileField("File Location", CoordPX(10, 7),
 					CoordPerPX(1.0f, 0.0f, -55.0f, 30.0f)));
-	if (type == FileDialogType::SaveFile||type==FileDialogType::OpenMultiFile) {
+	if (type == FileDialogType::SaveFile
+			|| type == FileDialogType::OpenMultiFile) {
 		fileLocation->setEnableAutoSugest(false);
 	}
 	fileLocation->backgroundColor = MakeColor(
@@ -2370,11 +2369,12 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	fileLocation->onTextEntered = [this](TextField* field) {
 		this->updateDirectoryList();
 	};
-	fileLocation->onKeyInput = [this](TextField* field) {
-		if (this->type == FileDialogType::SaveFile || this->type == FileDialogType::OpenMultiFile) {
-			this->updateDirectoryList();
-		}
-	};
+	fileLocation->onKeyInput =
+			[this](TextField* field) {
+				if (this->type == FileDialogType::SaveFile || this->type == FileDialogType::OpenMultiFile) {
+					this->updateDirectoryList();
+				}
+			};
 	upDirButton = std::shared_ptr<IconButton>(
 			new IconButton(0xf062, CoordPerPX(1.0, 0.0, -40, 7),
 					CoordPX(30, 30)));
@@ -2387,12 +2387,12 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 			AlloyApplicationContext()->theme.DARK_TEXT);
 	upDirButton->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& event) {
-	                        std::string file=RemoveTrailingSlash(this->getValue());
-	                        if(IsFile(file)){
-	                            this->setValue(GetParentDirectory(RemoveTrailingSlash(GetParentDirectory(file))));
-	                        } else {
-                                    this->setValue(GetParentDirectory(file));
-	                        }
+				std::string file=RemoveTrailingSlash(this->getValue());
+				if(IsFile(file)) {
+					this->setValue(GetParentDirectory(RemoveTrailingSlash(GetParentDirectory(file))));
+				} else {
+					this->setValue(GetParentDirectory(file));
+				}
 				return true;
 			};
 	cancelButton = std::shared_ptr<IconButton>(
@@ -2532,7 +2532,7 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 							ListEntry* entry = directoryList->getLastSelected();
 							if (entry != nullptr) {
 								fileLocation->setValue(
-									GetParentDirectory(dynamic_cast<FileEntry*>(entry)->fileDescription.fileLocation));
+										GetParentDirectory(dynamic_cast<FileEntry*>(entry)->fileDescription.fileLocation));
 							}
 						}
 						updateValidity();
@@ -3293,7 +3293,7 @@ void ExpandTree::drawDebug(AlloyContext* context) {
 		nvgStrokeColor(nvg, Color(220, 64, 64));
 		nvgBeginPath(nvg);
 		box2px bounds = selectedItem->getBounds();
-		bounds.position+=drawRegion->getDrawOffset();
+		bounds.position += drawRegion->getDrawOffset();
 		bounds.intersect(getBounds());
 		nvgRect(nvg, bounds.position.x, bounds.position.y, bounds.dimensions.x,
 				bounds.dimensions.y);
@@ -3448,7 +3448,90 @@ void TreeItem::draw(ExpandTree* tree, AlloyContext* context,
 			item->draw(tree, context, offset);
 		}
 	}
+}
+TabHeader::TabHeader(const std::string& name, TabPane* parent) :
+		Composite(name, CoordPX(0, 0), CoordPX(120, 30)), parentPane(parent) {
+	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	textLabel = TextLabelPtr(
+			new TextLabel(name, CoordPX(2, 2),
+					CoordPerPX(1.0f, 1.0f, -30.0f, -4.0f)));
+	textLabel->fontSize = UnitPX(20.0f);
+	textLabel->fontType = FontType::Bold;
+	textLabel->textColor = MakeColor(
+			AlloyApplicationContext()->theme.LIGHT_TEXT);
+	textLabel->setAlignment(HorizontalAlignment::Left,
+			VerticalAlignment::Middle);
+	add(textLabel);
+	textLabel->onMouseDown =
+			[this](AlloyContext* context, const InputEvent& event) {
+				if(event.button==GLFW_MOUSE_BUTTON_LEFT){
+					setSelected();
+					return true;
+				}
+				return false;
+			};
+	IconButtonPtr closeButton = std::shared_ptr<IconButton>(
+			new IconButton(0xf00d, CoordPerPX(1.0, 0.0, -26, 4),
+					CoordPX(22, 22), IconType::CIRCLE));
+	closeButton->borderWidth = UnitPX(0.0f);
+	add(closeButton);
+	/*
+	 closeButton->onMouseDown =
+	 [this](AlloyContext* context, const InputEvent& event) {
+	 context->getGlassPane()->setVisible(false);
+	 return true;
+	 };
+	 */
+}
+void TabHeader::setSelected() const {
+	getBar()->setSelected(parentPane);
+}
+void TabHeader::draw(AlloyContext* context) {
+	if (context->isMouseOver(textLabel.get())) {
+		textLabel->textColor = MakeColor(
+				AlloyApplicationContext()->theme.HIGHLIGHT);
+	} else {
+		textLabel->textColor = MakeColor(
+				AlloyApplicationContext()->theme.LIGHT_TEXT);
+	}
+	Composite::draw(context);
+}
+void TabBar::add(const std::shared_ptr<TabPane>& tabPane) {
+	panes.push_back(tabPane);
+	barRegion->add(tabPane->header);
+	contentRegion->add(tabPane->region);
+	tabPane->parent = this;
+}
+TabPane::TabPane(const std::shared_ptr<Composite>& region) :
+		header(
+				std::shared_ptr<TabHeader>(
+						new TabHeader(region->getName(), this))), region(
+				region), parent(nullptr) {
 
 }
+TabBar* TabHeader::getBar() const {
+	return parentPane->parent;
+}
+void TabBar::setSelected(TabPane* s){
+	selected=s;
+	contentRegion->putLast(s->region);
+}
+
+TabBar::TabBar(const std::string& name, const AUnit2D& position,
+		const AUnit2D& dimensions) :
+		Composite(name, position, dimensions), selected(nullptr) {
+	barRegion = std::shared_ptr<Composite>(
+			new Composite("Content", CoordPX(0, 0),
+					CoordPerPX(1.0f, 0.0f, 0.0f, 30.0f)));
+	barRegion->setOrientation(Orientation::Horizontal);
+	barRegion->backgroundColor = MakeColor(
+			AlloyApplicationContext()->theme.SHADOW);
+	contentRegion = std::shared_ptr<Composite>(
+			new Composite("Content", CoordPX(0, 30),
+					CoordPerPX(1.0f, 1.0f, 0.0f, -30.0f)));
+	Composite::add(barRegion);
+	Composite::add(contentRegion);
+}
+
 }
 
