@@ -699,13 +699,13 @@ public:
 	virtual void draw(AlloyContext* context) override;
 };
 class TabBar;
-class TabPane;
+struct TabPane;
 class TabHeader: public Composite{
 protected:
 	TextLabelPtr textLabel;
 	TabPane* parentPane;
 public:
-	friend class TabPane;
+	friend struct TabPane;
 	TabHeader(const std::string& name,TabPane* parent=nullptr);
 	virtual void draw(AlloyContext* context) override;
 	TabBar* getBar() const ;
