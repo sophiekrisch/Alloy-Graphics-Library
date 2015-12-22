@@ -340,7 +340,7 @@ void Application::fireEvent(const InputEvent& event) {
 							context->cursorDownPosition);
 				}
 			}
-			if (context->mouseOverRegion->onMouseUp && event.isUp())
+			if (context->mouseOverRegion!=nullptr&&context->mouseOverRegion->onMouseUp && event.isUp())
 				consumed |= context->mouseOverRegion->onMouseUp(context.get(),
 						event);
 			context->requestPack();

@@ -232,6 +232,7 @@ protected:
 	pixel2 cellSpacing = pixel2(0, 0);
 	void updateExtents();
 public:
+	void erase(const std::shared_ptr<Region>& node);
 	bool isVerticalScrollVisible() const {
 		if (verticalScrollTrack.get() == nullptr) {
 			return false;

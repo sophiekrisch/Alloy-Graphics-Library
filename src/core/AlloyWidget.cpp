@@ -29,6 +29,7 @@
 
 using namespace std;
 namespace aly {
+const float TabBar::TAB_HEIGHT = 30.0f;
 bool CheckBox::handleMouseDown(AlloyContext* context, const InputEvent& event) {
 	if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
 		this->checked = !this->checked;
@@ -3449,6 +3450,9 @@ void TreeItem::draw(ExpandTree* tree, AlloyContext* context,
 		}
 	}
 }
+pixel2 TabHeader::getPreferredDimensions(AlloyContext* context) const {
+	return textLabel->getTextDimensions(context) + pixel2(TabBar::TAB_HEIGHT+4, TabBar::TAB_HEIGHT);
+}
 TabHeader::TabHeader(const std::string& name, TabPane* parent) :
 		Composite(name, CoordPX(0, 0), CoordPX(120, 30)), parentPane(parent), focused(
 		false) {
@@ -3479,17 +3483,21 @@ TabHeader::TabHeader(const std::string& name, TabPane* parent) :
 	closeButton->foregroundColor = MakeColor(0, 0, 0, 0);
 	setClampDragToParentBounds(true);
 	add(closeButton);
-	/*
 	 closeButton->onMouseDown =
 	 [this](AlloyContext* context, const InputEvent& event) {
-	 context->getGlassPane()->setVisible(false);
-	 return true;
+		 if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
+			 parentPane->parent->close(parentPane);
+			 context->requestPack();
+			 return true;
+		 }
+		 return false;
 	 };
-	 */
+
 }
 void TabHeader::setSelected() const {
 	getBar()->setSelected(parentPane);
 }
+
 bool TabHeader::isSelected() const {
 	return getBar()->isSelected(parentPane);
 }
@@ -3513,10 +3521,38 @@ void TabHeader::draw(AlloyContext* context) {
 	}
 	Composite::draw(context);
 }
-void TabBar::add(const std::shared_ptr<TabPane>& tabPane) {
+void TabBar::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm, double pixelRatio, bool clamp) {
+	for (TabPanePtr tabPane : panes) {
+		tabPane->header->position = CoordPX(tabPane->bounds.position);
+	}
+	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
+}
+void TabBar::close(TabPane* pane) {
+	if (onClose) {
+		if (!onClose(pane))return;
+	}
+	barRegion->erase(pane->header);
+	contentRegion->erase(pane->region);
+	for (auto iter = panes.begin();iter != panes.end();iter++) {
+		if (iter->get() == pane) {
+			panes.erase(iter);
+			break;
+		}
+	}
+	sortPanes();
 
-	tabPane->header->position = CoordPX((120+5)*panes.size(),0);
-	tabPane->header->dimensions = CoordPX(120, 30);
+}
+void TabBar::add(const std::shared_ptr<TabPane>& tabPane) {
+	if (panes.size() > 0) {
+		TabPanePtr bck = panes.back();
+		tabPane->bounds.position=pixel2(bck->bounds.position.x+bck->bounds.dimensions.x+5.0f,0.0f);
+	}
+	else {
+		tabPane->bounds.position= pixel2(0.0f);
+	}
+	pixel2 dims = tabPane->header->getPreferredDimensions(AlloyApplicationContext().get());
+	tabPane->bounds.dimensions = pixel2(dims.x, TAB_HEIGHT);
+	tabPane->header->dimensions = CoordPerPX(0.0f,1.0f,tabPane->bounds.dimensions.x,0.0f);
 	barRegion->add(tabPane->header);
 	contentRegion->add(tabPane->region);
 	tabPane->parent = this;
@@ -3548,17 +3584,36 @@ bool TabBar::onEventHandler(AlloyContext* context, const InputEvent& e) {
 				}
 			}
 		} else if (e.isUp()) {
-			dragPane = nullptr;
+			if (dragPane != nullptr) {
+				dragPane = nullptr;
+				sortPanes();
+			}
+			else {
+				dragPane = nullptr;
+			}
 		}
 	}
 	
 	if(dragPane!=nullptr&&(e.type==InputType::Cursor||e.type==InputType::MouseButton)){
-		dragPane->header->setDragOffset(e.cursor,cursorDownPosition);
-		
+		box2px bounds = getBounds();
+		dragPane->bounds.position.x = aly::clamp(e.cursor.x- cursorDownPosition.x, bounds.position.x,bounds.position.x+bounds.dimensions.x-dragPane->bounds.dimensions.x)- bounds.position.x;
+		sortPanes();
 		context->requestPack();
 	}
-	
 	return false;
+}
+void TabBar::sortPanes() {
+	std::sort(panes.begin(), panes.end(), [this](const TabPanePtr& a, const TabPanePtr& b) {
+		return (a->bounds.position.x < b->bounds.center().x);
+	});
+	float xOffset =0.0f;
+	for (int index = 0;index <(int)panes.size();index++) {
+		TabPanePtr tabPane = panes[index];
+		if (tabPane.get() != dragPane) {
+			tabPane->bounds.position =pixel2(xOffset,0.0f);
+		}
+		xOffset +=  tabPane->bounds.dimensions.x + 5.0f;
+	}
 }
 TabBar::TabBar(const std::string& name, const AUnit2D& position,
 		const AUnit2D& dimensions) :
@@ -3566,12 +3621,12 @@ TabBar::TabBar(const std::string& name, const AUnit2D& position,
 				nullptr) {
 	barRegion = std::shared_ptr<Composite>(
 			new Composite("Content", CoordPX(0, 0),
-					CoordPerPX(1.0f, 0.0f, 0.0f, 30.0f)));
+					CoordPerPX(1.0f, 0.0f, 0.0f, TAB_HEIGHT)));
 	barRegion->backgroundColor = MakeColor(
 			AlloyApplicationContext()->theme.SHADOW);
 	contentRegion = std::shared_ptr<Composite>(
-			new Composite("Content", CoordPX(0, 30),
-					CoordPerPX(1.0f, 1.0f, 0.0f, -30.0f)));
+			new Composite("Content", CoordPX(0.0f, TAB_HEIGHT),
+					CoordPerPX(1.0f, 1.0f, 0.0f, -TAB_HEIGHT)));
 	Composite::add(barRegion);
 	Composite::add(contentRegion);
 	Application::addListener(this);

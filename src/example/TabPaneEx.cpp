@@ -28,26 +28,12 @@ TabPaneEx::TabPaneEx() :
 bool TabPaneEx::init(Composite& rootNode) {
 	TabBarPtr tabBar=TabBarPtr(new TabBar("Tab Bar",CoordPX(10,10),CoordPerPX(1.0,1.0,-20.0f,-20.0f)));
 	tabBar->backgroundColor=MakeColor(64,64,64);
-	CompositePtr tabPane1=CompositePtr(new Composite("Tab 1",CoordPX(0,0),CoordPercent(1.0f,1.0f)));
-	tabPane1->backgroundColor=MakeColor(HSVAtoColor(HSVA(0.0f,0.7f,1.0f,1.0f)));
-	tabBar->add(MakeShared<TabPane>(tabPane1));
-
-	CompositePtr tabPane2=CompositePtr(new Composite("Tab 2",CoordPX(0,0),CoordPercent(1.0f,1.0f)));
-	tabPane2->backgroundColor=MakeColor(HSVAtoColor(HSVA(0.2f,0.7f,1.0f,1.0f)));
-	tabBar->add(MakeShared<TabPane>(tabPane2));
-
-	CompositePtr tabPane3=CompositePtr(new Composite("Tab 3",CoordPX(0,0),CoordPercent(1.0f,1.0f)));
-	tabPane3->backgroundColor=MakeColor(HSVAtoColor(HSVA(0.4f,0.7f,1.0f,1.0f)));
-	tabBar->add(MakeShared<TabPane>(tabPane3));
-
-	CompositePtr tabPane4=CompositePtr(new Composite("Tab 4",CoordPX(0,0),CoordPercent(1.0f,1.0f)));
-	tabPane4->backgroundColor=MakeColor(HSVAtoColor(HSVA(0.6f,0.7f,1.0f,1.0f)));
-	tabBar->add(MakeShared<TabPane>(tabPane4));
-
-	CompositePtr tabPane5=CompositePtr(new Composite("Tab 5",CoordPX(0,0),CoordPercent(1.0f,1.0f)));
-	tabPane5->backgroundColor=MakeColor(HSVAtoColor(HSVA(0.8f,0.7f,1.0f,1.0f)));
-	tabBar->add(MakeShared<TabPane>(tabPane5));
-
+	const int K = 10;
+	for (int k = 0;k < K;k++) {
+		CompositePtr tabPane = CompositePtr(new Composite(MakeString()<<"Tab "<<k, CoordPX(0, 0), CoordPercent(1.0f, 1.0f)));
+		tabPane->backgroundColor = MakeColor(HSVAtoColor(HSVA(k/(float)K, 0.7f, 1.0f, 1.0f)));
+		tabBar->add(MakeShared<TabPane>(tabPane));
+	}
 	rootNode.backgroundColor=MakeColor(0,0,0);
 	rootNode.add(tabBar);
 	return true;

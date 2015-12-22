@@ -712,11 +712,13 @@ public:
 	TabBar* getBar() const ;
 	void setSelected() const ;
 	bool isSelected() const;
+	pixel2 getPreferredDimensions(AlloyContext* context) const;
 };
 struct TabPane {
 	std::shared_ptr<TabHeader> header;
 	std::shared_ptr<Composite> region;
 	TabBar* parent;
+	box2px bounds;
 	bool isFocused() const {
 		return header->focused;
 	}
@@ -730,7 +732,11 @@ protected:
 	pixel2 cursorDownPosition;
 	TabPane* selectedPane;
 	TabPane* dragPane;
+	void sortPanes();
 public:
+	static const float TAB_HEIGHT;
+	std::function<bool(TabPane*)> onClose;
+	void close(TabPane* pane);
 	void setSelected(TabPane* s);
 	bool isSelected(TabPane* s) const {
 		return (s!=nullptr&&s == selectedPane);
@@ -739,6 +745,7 @@ public:
 	TabBar(const std::string& name, const AUnit2D& position,
 			const AUnit2D& dimensions);
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)override;
+	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,double pixelRatio, bool clamp = false) override;
 };
 typedef std::shared_ptr<TextButton> TextButtonPtr;
 typedef std::shared_ptr<HorizontalSlider> HSliderPtr;

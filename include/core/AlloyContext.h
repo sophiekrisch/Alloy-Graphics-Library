@@ -244,6 +244,7 @@ namespace aly {
 		bool isOnScreenRender() const;
 		bool isOffScreenRender() const;
 		void clearEvents(Region* region);
+		void clearEvents();
 		void setOffScreenVisible(bool vis);
 		void setCursor(const Cursor* cursor) {
 			this->cursor = cursor;

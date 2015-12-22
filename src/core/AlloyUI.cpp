@@ -263,6 +263,16 @@ void Draw::draw(AlloyContext* context) {
 		onDraw(context, getBounds());
 	}
 }
+void Composite::erase(const std::shared_ptr<Region>& node) {
+	for (auto iter = children.begin(); iter != children.end(); iter++) {
+		if (node.get() == iter->get()) {
+			children.erase(iter);
+			node->parent = nullptr;
+			AlloyDefaultContext()->clearEvents();
+			break;
+		}
+	}
+}
 void Composite::putLast(const std::shared_ptr<Region>& region) {
 	size_t idx = 0;
 	size_t pivot = children.size() - 1;
@@ -1319,6 +1329,7 @@ void Composite::add(const std::shared_ptr<Region>& region) {
 						<< region->parent->name << "].");
 	region->parent = this;
 }
+
 pixel2 TextLabel::getTextDimensions(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
