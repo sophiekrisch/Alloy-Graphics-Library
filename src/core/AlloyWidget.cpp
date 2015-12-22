@@ -3659,7 +3659,7 @@ TabBar::TabBar(const std::string& name, const AUnit2D& position,
 	IconButtonPtr tabDropButton = std::shared_ptr<IconButton>(
 		new IconButton(0xf103, CoordPerPX(1.0, 0.0, -TAB_HEIGHT,0.0f),
 			CoordPX(TAB_HEIGHT, TAB_HEIGHT), IconType::SQUARE));
-	tabDropButton->backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
+	tabDropButton->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK.toLighter(0.5f));
 	tabDropButton->setRoundCorners(false);
 	tabDropButton->foregroundColor = MakeColor(0,0,0,0);
 	tabDropButton->borderColor = MakeColor(0, 0, 0, 0);
