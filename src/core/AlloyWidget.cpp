@@ -402,20 +402,21 @@ void TextIconButton::draw(AlloyContext* context) {
 		yoff = 2;
 	}
 	float th = fontSize.toPixels(bounds.dimensions.y, context->dpmm.y,
-			context->pixelRatio);
+		context->pixelRatio);
 	if (hover) {
 
 		nvgBeginPath(nvg);
 		nvgRoundedRect(nvg, bounds.position.x + xoff, bounds.position.y + yoff,
-				bounds.dimensions.x, bounds.dimensions.y,
-				context->theme.CORNER_RADIUS);
+			bounds.dimensions.x, bounds.dimensions.y,
+			context->theme.CORNER_RADIUS);
 		nvgFillColor(nvg, *backgroundColor);
 		nvgFill(nvg);
-	} else {
+	}
+	else {
 		nvgBeginPath(nvg);
 		nvgRoundedRect(nvg, bounds.position.x + 1, bounds.position.y + 1,
-				bounds.dimensions.x - 2, bounds.dimensions.y - 2,
-				context->theme.CORNER_RADIUS);
+			bounds.dimensions.x - 2, bounds.dimensions.y - 2,
+			context->theme.CORNER_RADIUS);
 		nvgFillColor(nvg, *backgroundColor);
 		nvgFill(nvg);
 	}
@@ -497,6 +498,16 @@ void IconButton::draw(AlloyContext* context) {
 		offset = pixel2(0, 0);
 	}
 	float hoverOffset = (hover) ? 1.0f : 0.0f;
+	Color bgColor = *backgroundColor;
+	if (bgColor.a > 0) {
+		nvgBeginPath(nvg);
+		nvgFillColor(nvg,bgColor);
+		nvgRect(nvg, bounds.position.x,
+			bounds.position.y ,
+			bounds.dimensions.x,
+			bounds.dimensions.y);
+		nvgFill(nvg);
+	}
 	if (iconType == IconType::CIRCLE) {
 		nvgBeginPath(nvg);
 		nvgEllipse(nvg, center.x + offset.x, center.y + offset.y,
@@ -505,11 +516,19 @@ void IconButton::draw(AlloyContext* context) {
 		nvgFill(nvg);
 	} else {
 		nvgBeginPath(nvg);
-		nvgRoundedRect(nvg, bounds.position.x + 1 + offset.x - hoverOffset,
+		if (roundCorners) {
+			nvgRoundedRect(nvg, bounds.position.x + 1 + offset.x - hoverOffset,
 				bounds.position.y + 1 + offset.y - hoverOffset,
 				bounds.dimensions.x - 2 + hoverOffset * 2,
 				bounds.dimensions.y - 2 + hoverOffset * 2,
 				context->theme.CORNER_RADIUS);
+		}
+		else {
+			nvgRect(nvg, bounds.position.x + 1 + offset.x - hoverOffset,
+				bounds.position.y + 1 + offset.y - hoverOffset,
+				bounds.dimensions.x - 2 + hoverOffset * 2,
+				bounds.dimensions.y - 2 + hoverOffset * 2);
+		}
 		nvgFillColor(nvg, *foregroundColor);
 		nvgFill(nvg);
 
@@ -524,7 +543,7 @@ void IconButton::draw(AlloyContext* context) {
 	nvgTextAlign(nvg, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
 	drawText(nvg, ibounds.position + HALF_PIX(ibounds.dimensions),
 			iconCodeString, FontStyle::Normal,
-			(hover && borderColor->a > 0) ?
+			(hover ) ?
 					context->theme.HIGHLIGHT : *iconColor, *backgroundColor,
 			nullptr);
 
@@ -541,12 +560,21 @@ void IconButton::draw(AlloyContext* context) {
 			nvgStroke(nvg);
 		} else {
 			nvgBeginPath(nvg);
-			nvgRoundedRect(nvg,
+			if (roundCorners) {
+				nvgRoundedRect(nvg,
 					bounds.position.x + offset.x + lineWidth - hoverOffset,
 					bounds.position.y + offset.y + lineWidth - hoverOffset,
 					bounds.dimensions.x - 2 * lineWidth + hoverOffset * 2.0f,
 					bounds.dimensions.y - 2 * lineWidth + hoverOffset * 2.0f,
 					context->theme.CORNER_RADIUS);
+			}
+			else {
+				nvgRect(nvg,
+					bounds.position.x + offset.x + lineWidth - hoverOffset,
+					bounds.position.y + offset.y + lineWidth - hoverOffset,
+					bounds.dimensions.x - 2 * lineWidth + hoverOffset * 2.0f,
+					bounds.dimensions.y - 2 * lineWidth + hoverOffset * 2.0f);
+			}
 			nvgStrokeColor(nvg,
 					(hover) ? context->theme.HIGHLIGHT : *borderColor);
 			nvgStrokeWidth(nvg, lineWidth);
@@ -3459,7 +3487,7 @@ TabHeader::TabHeader(const std::string& name, TabPane* parent) :
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	textLabel = TextLabelPtr(
 			new TextLabel(name, CoordPX(2, 2),
-					CoordPerPX(1.0f, 1.0f, -30.0f, -4.0f)));
+					CoordPerPX(1.0f, 1.0f, -TabBar::TAB_HEIGHT, -4.0f)));
 	textLabel->fontSize = UnitPX(20.0f);
 	textLabel->fontType = FontType::Bold;
 	textLabel->textColor = MakeColor(
@@ -3476,7 +3504,7 @@ TabHeader::TabHeader(const std::string& name, TabPane* parent) :
 				return false;
 			};
 	IconButtonPtr closeButton = std::shared_ptr<IconButton>(
-			new IconButton(0xf00d, CoordPerPX(1.0, 0.0, -26, 4),
+			new IconButton(0xf00d, CoordPerPX(1.0, 0.0, -TabBar::TAB_HEIGHT+4.0f, 4.0f),
 					CoordPX(22, 22), IconType::CIRCLE));
 	closeButton->borderWidth = UnitPX(0.0f);
 	closeButton->backgroundColor = MakeColor(0, 0, 0, 0);
@@ -3555,8 +3583,12 @@ void TabBar::add(const std::shared_ptr<TabPane>& tabPane) {
 	tabPane->header->dimensions = CoordPerPX(0.0f,1.0f,tabPane->bounds.dimensions.x,0.0f);
 	barRegion->add(tabPane->header);
 	contentRegion->add(tabPane->region);
+
 	tabPane->parent = this;
 	panes.push_back(tabPane);
+	if (panes.size() == 1) {
+		setSelected(tabPane.get());
+	}
 }
 TabPane::TabPane(const std::shared_ptr<Composite>& region) :
 		header(
@@ -3595,7 +3627,7 @@ bool TabBar::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	}
 	
 	if(dragPane!=nullptr&&(e.type==InputType::Cursor||e.type==InputType::MouseButton)){
-		box2px bounds = getBounds();
+		box2px bounds = barRegion->getBounds();
 		dragPane->bounds.position.x = aly::clamp(e.cursor.x- cursorDownPosition.x, bounds.position.x,bounds.position.x+bounds.dimensions.x-dragPane->bounds.dimensions.x)- bounds.position.x;
 		sortPanes();
 		context->requestPack();
@@ -3621,13 +3653,22 @@ TabBar::TabBar(const std::string& name, const AUnit2D& position,
 				nullptr) {
 	barRegion = std::shared_ptr<Composite>(
 			new Composite("Content", CoordPX(0, 0),
-					CoordPerPX(1.0f, 0.0f, 0.0f, TAB_HEIGHT)));
+					CoordPerPX(1.0f, 0.0f, -TAB_HEIGHT, TAB_HEIGHT)));
 	barRegion->backgroundColor = MakeColor(
 			AlloyApplicationContext()->theme.SHADOW);
+	IconButtonPtr tabDropButton = std::shared_ptr<IconButton>(
+		new IconButton(0xf103, CoordPerPX(1.0, 0.0, -TAB_HEIGHT,0.0f),
+			CoordPX(TAB_HEIGHT, TAB_HEIGHT), IconType::SQUARE));
+	tabDropButton->backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
+	tabDropButton->setRoundCorners(false);
+	tabDropButton->foregroundColor = MakeColor(0,0,0,0);
+	tabDropButton->borderColor = MakeColor(0, 0, 0, 0);
+	tabDropButton->iconColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
 	contentRegion = std::shared_ptr<Composite>(
 			new Composite("Content", CoordPX(0.0f, TAB_HEIGHT),
 					CoordPerPX(1.0f, 1.0f, 0.0f, -TAB_HEIGHT)));
 	Composite::add(barRegion);
+	Composite::add(tabDropButton);
 	Composite::add(contentRegion);
 	Application::addListener(this);
 }
