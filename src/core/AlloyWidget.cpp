@@ -3677,12 +3677,15 @@ TabBar::TabBar(const std::string& name, const AUnit2D& position,
 				selectionBox->setVisible(false);
 				context->removeOnTopRegion(selectionBox.get());
 			} else {
-				selectionBox->clearSelections();
-				for (TabPanePtr pane : panes) {
-					selectionBox->addSelection(pane->header->getName());
+				if (panes.size() > 0) {
+					selectionBox->clearSelections();
+					for (TabPanePtr pane : panes) {
+						selectionBox->addSelection(pane->header->getName());
+					}
+					selectionBox->setMaxDisplayEntries(std::min(8, (int)panes.size()));
+					selectionBox->setVisible(true);
+					context->setOnTopRegion(selectionBox.get());
 				}
-				selectionBox->setVisible(true);
-				context->setOnTopRegion(selectionBox.get());
 			}
 			return true;
 		}

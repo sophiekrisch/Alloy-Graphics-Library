@@ -28,7 +28,7 @@ TabPaneEx::TabPaneEx() :
 bool TabPaneEx::init(Composite& rootNode) {
 	TabBarPtr tabBar=TabBarPtr(new TabBar("Tab Bar",CoordPX(10,10),CoordPerPX(1.0,1.0,-20.0f,-20.0f)));
 	tabBar->backgroundColor=MakeColor(64,64,64);
-	const int K = 10;
+	const int K = 15;
 	for (int k = 0;k < K;k++) {
 		CompositePtr tabPane = CompositePtr(new Composite(MakeString()<<"Tab "<<k, CoordPX(0, 0), CoordPercent(1.0f, 1.0f)));
 		tabPane->backgroundColor = MakeColor(HSVAtoColor(HSVA(k/(float)K, 0.7f, 1.0f, 1.0f)));
