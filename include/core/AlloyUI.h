@@ -598,6 +598,12 @@ public:
 	void addSelection(const std::string& selection) {
 		options.push_back(selection);
 	}
+	void clearSelections() {
+		options.clear();
+	}
+	void eraseSelection(int index) {
+		options.erase(options.begin() + index);
+	}
 	SelectionBox(const std::string& name,
 			const std::vector<std::string>& options =
 					std::vector<std::string>());

@@ -3550,8 +3550,15 @@ void TabHeader::draw(AlloyContext* context) {
 	Composite::draw(context);
 }
 void TabBar::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm, double pixelRatio, bool clamp) {
+	float maxExtent = barRegion->getBoundsDimensionsX();
 	for (TabPanePtr tabPane : panes) {
 		tabPane->header->position = CoordPX(tabPane->bounds.position);
+		if (tabPane->bounds.position.x + tabPane->bounds.dimensions.x < maxExtent||tabPane.get()==dragPane) {
+			tabPane->header->setVisible(true);
+		}
+		else {
+			tabPane->header->setVisible(false);
+		}
 	}
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
 }
@@ -3583,7 +3590,6 @@ void TabBar::add(const std::shared_ptr<TabPane>& tabPane) {
 	tabPane->header->dimensions = CoordPerPX(0.0f,1.0f,tabPane->bounds.dimensions.x,0.0f);
 	barRegion->add(tabPane->header);
 	contentRegion->add(tabPane->region);
-	selectionBox->addSelection(tabPane->header->name);
 	tabPane->parent = this;
 	panes.push_back(tabPane);
 	if (panes.size() == 1) {
@@ -3635,9 +3641,15 @@ bool TabBar::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	return false;
 }
 void TabBar::sortPanes() {
-	std::sort(panes.begin(), panes.end(), [this](const TabPanePtr& a, const TabPanePtr& b) {
-		return (a->bounds.position.x < b->bounds.center().x);
-	});
+	if (dragPane != nullptr) {
+		std::sort(panes.begin(), panes.end(), [this](const TabPanePtr& a, const TabPanePtr& b) {
+			if (a->header->isVisible() && !b->header->isVisible()) {
+				return true;
+			} else if (!a->header->isVisible() && b->header->isVisible()) {
+				return false;
+			} else return (a->bounds.position.x < b->bounds.center().x);
+		});
+	}
 	float xOffset =0.0f;
 	for (int index = 0;index <(int)panes.size();index++) {
 		TabPanePtr tabPane = panes[index];
@@ -3665,6 +3677,10 @@ TabBar::TabBar(const std::string& name, const AUnit2D& position,
 				selectionBox->setVisible(false);
 				context->removeOnTopRegion(selectionBox.get());
 			} else {
+				selectionBox->clearSelections();
+				for (TabPanePtr pane : panes) {
+					selectionBox->addSelection(pane->header->getName());
+				}
 				selectionBox->setVisible(true);
 				context->setOnTopRegion(selectionBox.get());
 			}
@@ -3691,13 +3707,15 @@ TabBar::TabBar(const std::string& name, const AUnit2D& position,
 	selectionBox->onSelect = [this](SelectionBox* box) {
 		selectionBox->setVisible(false);
 		AlloyApplicationContext()->removeOnTopRegion(box);
-		setSelected(panes[selectionBox->getSelectedIndex()].get());
-		/*
-		this->setValue(path + box->getSelection(box->getSelectedIndex()));
-		if (onTextEntered) {
-			onTextEntered(this);
-		}
-		*/
+		TabPanePtr current = panes[selectionBox->getSelectedIndex()];
+		TabPanePtr front=panes.front();
+		panes[0] = current;
+		panes[selectionBox->getSelectedIndex()] = front;
+		setSelected(current.get());
+		selectionBox->clearSelections();
+		sortPanes();
+		AlloyApplicationContext()->requestPack();
+
 		return false;
 	};
 	Composite::add(barRegion);
