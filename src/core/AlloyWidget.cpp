@@ -3583,7 +3583,7 @@ void TabBar::add(const std::shared_ptr<TabPane>& tabPane) {
 	tabPane->header->dimensions = CoordPerPX(0.0f,1.0f,tabPane->bounds.dimensions.x,0.0f);
 	barRegion->add(tabPane->header);
 	contentRegion->add(tabPane->region);
-
+	selectionBox->addSelection(tabPane->header->name);
 	tabPane->parent = this;
 	panes.push_back(tabPane);
 	if (panes.size() == 1) {
@@ -3659,6 +3659,19 @@ TabBar::TabBar(const std::string& name, const AUnit2D& position,
 	IconButtonPtr tabDropButton = std::shared_ptr<IconButton>(
 		new IconButton(0xf103, CoordPerPX(1.0, 0.0, -TAB_HEIGHT,0.0f),
 			CoordPX(TAB_HEIGHT, TAB_HEIGHT), IconType::SQUARE));
+	tabDropButton->onMouseDown=[this](AlloyContext* context,const InputEvent& e){
+		if(e.button==GLFW_MOUSE_BUTTON_LEFT){
+			if(selectionBox->isVisible()){
+				selectionBox->setVisible(false);
+				context->removeOnTopRegion(selectionBox.get());
+			} else {
+				selectionBox->setVisible(true);
+				context->setOnTopRegion(selectionBox.get());
+			}
+			return true;
+		}
+		return false;
+	};
 	tabDropButton->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK.toLighter(0.5f));
 	tabDropButton->setRoundCorners(false);
 	tabDropButton->foregroundColor = MakeColor(0,0,0,0);
@@ -3667,8 +3680,29 @@ TabBar::TabBar(const std::string& name, const AUnit2D& position,
 	contentRegion = std::shared_ptr<Composite>(
 			new Composite("Content", CoordPX(0.0f, TAB_HEIGHT),
 					CoordPerPX(1.0f, 1.0f, 0.0f, -TAB_HEIGHT)));
+	selectionBox = SelectionBoxPtr(new SelectionBox(MakeString()<<name<<"_tab", CoordPerPX(1.0f, 0.0f, -120.0f+TAB_HEIGHT,0.0f), CoordPX(120.0f,24.0f)));
+	selectionBox->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	selectionBox->borderColor = MakeColor(AlloyApplicationContext()->theme.HIGHLIGHT);
+	selectionBox->borderWidth = UnitPX(1.0f);
+	selectionBox->setDetached(true);
+	selectionBox->setVisible(false);
+	selectionBox->textColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
+	selectionBox->textAltColor = MakeColor(AlloyApplicationContext()->theme.DARK_TEXT);
+	selectionBox->onSelect = [this](SelectionBox* box) {
+		selectionBox->setVisible(false);
+		AlloyApplicationContext()->removeOnTopRegion(box);
+		setSelected(panes[selectionBox->getSelectedIndex()].get());
+		/*
+		this->setValue(path + box->getSelection(box->getSelectedIndex()));
+		if (onTextEntered) {
+			onTextEntered(this);
+		}
+		*/
+		return false;
+	};
 	Composite::add(barRegion);
 	Composite::add(tabDropButton);
+	barRegion->add(selectionBox);
 	Composite::add(contentRegion);
 	Application::addListener(this);
 }

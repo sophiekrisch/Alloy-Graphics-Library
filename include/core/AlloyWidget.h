@@ -729,6 +729,7 @@ protected:
 	std::vector<std::shared_ptr<TabPane>> panes;
 	std::shared_ptr<Composite> barRegion;
 	std::shared_ptr<Composite> contentRegion;
+	std::shared_ptr<SelectionBox> selectionBox;
 	pixel2 cursorDownPosition;
 	TabPane* selectedPane;
 	TabPane* dragPane;

@@ -601,6 +601,9 @@ public:
 	SelectionBox(const std::string& name,
 			const std::vector<std::string>& options =
 					std::vector<std::string>());
+	SelectionBox(const std::string& name,const AUnit2D& pos,const AUnit2D& dims,
+			const std::vector<std::string>& options =
+					std::vector<std::string>());
 };
 class MenuBar;
 class MenuItem: public Composite {

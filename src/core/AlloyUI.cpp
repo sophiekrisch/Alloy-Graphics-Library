@@ -3204,9 +3204,13 @@ void SelectionBox::setSelectedIndex(int index) {
 
 	}
 }
-SelectionBox::SelectionBox(const std::string& name,
+SelectionBox::SelectionBox(const std::string& name,const std::vector<std::string>& labels) :
+		SelectionBox(name,CoordPX(0.0f,0.0f),CoordPercent(1.0f,1.0f),labels) {
+
+}
+SelectionBox::SelectionBox(const std::string& name,const AUnit2D& pos,const AUnit2D& dims,
 		const std::vector<std::string>& labels) :
-		Region(name), label(name), options(labels) {
+		Region(name,pos,dims), label(name), options(labels) {
 
 	downArrow = AlloyApplicationContext()->createAwesomeGlyph(0xf0ab,
 			FontStyle::Normal, 14);
