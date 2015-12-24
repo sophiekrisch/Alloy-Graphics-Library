@@ -3770,7 +3770,7 @@ TabBar::TabBar(const std::string& name, const AUnit2D& position,
 	selectionBox->textAltColor = MakeColor(AlloyApplicationContext()->theme.DARK_TEXT);
 	selectionBox->onSelect = [this](SelectionBox* box) {
 		int sIndex = selectionBox->getSelectedIndex();
-		if (sIndex >= 0 && sIndex < panes.size()) {
+		if (sIndex >= 0 && sIndex < (int)panes.size()) {
 			selectionBox->setVisible(false);
 			AlloyApplicationContext()->removeOnTopRegion(selectionBox.get());
 			TabPanePtr current = panes[sIndex];
@@ -3793,7 +3793,7 @@ TabBar::TabBar(const std::string& name, const AUnit2D& position,
 		[this](AlloyContext* context, const InputEvent& event) {
 		if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
 			int sIndex = selectionBox->getSelectedIndex();
-			if (sIndex >= 0 && sIndex < panes.size()) {
+			if (sIndex >= 0 && sIndex < (int)panes.size()) {
 				selectionBox->setVisible(false);
 				AlloyApplicationContext()->removeOnTopRegion(selectionBox.get());
 				TabPanePtr current = panes[sIndex];
