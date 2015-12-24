@@ -3199,6 +3199,7 @@ MessageDialog::MessageDialog(const std::string& name, const AUnit2D& pos,
 			new IconButton(0xf00d, CoordPerPX(1.0, 0.0, -30, 30),
 					CoordPX(30, 30), IconType::CIRCLE));
 	cancelButton->setOrigin(Origin::BottomLeft);
+	cancelButton->backgroundColor = MakeColor(COLOR_NONE);
 
 	cancelButton->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& event) {
