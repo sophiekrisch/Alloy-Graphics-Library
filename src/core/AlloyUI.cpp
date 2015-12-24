@@ -2539,12 +2539,12 @@ FileField::FileField(const std::string& name, const AUnit2D& position,
 	selectionBox->backgroundColor = MakeColor(
 			AlloyApplicationContext()->theme.DARK);
 	selectionBox->borderColor = MakeColor(
-			AlloyApplicationContext()->theme.HIGHLIGHT);
+			AlloyApplicationContext()->theme.LIGHT_TEXT);
 	selectionBox->borderWidth = UnitPX(1.0f);
 	selectionBox->textColor = MakeColor(
 			AlloyApplicationContext()->theme.LIGHT_TEXT);
 	selectionBox->textAltColor = MakeColor(
-			AlloyApplicationContext()->theme.DARK_TEXT);
+			AlloyApplicationContext()->theme.LIGHT_TEXT);
 	add(selectionBox);
 	selectionBox->onSelect = [this](SelectionBox* box) {
 		selectionBox->setVisible(false);
