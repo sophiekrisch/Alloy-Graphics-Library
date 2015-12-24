@@ -544,8 +544,8 @@ void IconButton::draw(AlloyContext* context) {
 	nvgTextAlign(nvg, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
 	drawText(nvg, ibounds.position + HALF_PIX(ibounds.dimensions),
 			iconCodeString, FontStyle::Normal,
-			(hover ) ?
-					context->theme.HIGHLIGHT : *iconColor, *backgroundColor,
+			(hover &&borderColor->a>0) ?
+					*borderColor: *iconColor, *backgroundColor,
 			nullptr);
 
 	if (borderColor->a > 0) {
@@ -556,7 +556,7 @@ void IconButton::draw(AlloyContext* context) {
 					radii.x - HALF_PIX(lineWidth) + hoverOffset,
 					radii.y - HALF_PIX(lineWidth) + hoverOffset);
 			nvgStrokeColor(nvg,
-					(hover) ? context->theme.HIGHLIGHT : *borderColor);
+					(hover) ? *borderColor: *iconColor);
 			nvgStrokeWidth(nvg, lineWidth);
 			nvgStroke(nvg);
 		} else {
@@ -960,6 +960,7 @@ void HorizontalSlider::draw(AlloyContext* context) {
 			context->theme.CORNER_RADIUS);
 	nvgFillColor(nvg, bgColor);
 	nvgFill(nvg);
+
 	nvgBeginPath(nvg);
 	NVGpaint hightlightPaint = nvgBoxGradient(nvg, bounds.position.x,
 			bounds.position.y, bounds.dimensions.x, bounds.dimensions.y,
@@ -1313,6 +1314,7 @@ ColorSelector::ColorSelector(const std::string& name, const AUnit2D& pos,
 					CoordPX(30, 30), IconType::CIRCLE));
 	cancelButton->setOrigin(Origin::BottomLeft);
 	cancelButton->backgroundColor = MakeColor(COLOR_NONE);
+	cancelButton->borderColor=MakeColor(AlloyApplicationContext()->theme.HIGHLIGHT);
 	cancelButton->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& event) {
 				colorSelectionPanel->setVisible(false);
@@ -1785,7 +1787,8 @@ FileSelector::FileSelector(const std::string& name, const AUnit2D& pos,
 			new IconButton(0xf115, CoordPerPX(0.0f, 0.0f, 2.0f, 4.0f),
 					CoordPerPX(1.0f, 1.0f, 0.0f, -4.0f)));
 	openIcon->foregroundColor = MakeColor(COLOR_NONE);
-	openIcon->borderColor = MakeColor(COLOR_NONE);
+	openIcon->borderColor=MakeColor(AlloyApplicationContext()->theme.DARK_TEXT);
+	openIcon->borderWidth=UnitPX(0.0f);
 	openIcon->backgroundColor = MakeColor(COLOR_NONE);
 	openIcon->iconColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	setCenter(fileLocation);
@@ -1858,9 +1861,7 @@ FileButton::FileButton(const std::string& name, const AUnit2D& pos,
 
 	foregroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
 	iconColor = MakeColor(AlloyApplicationContext()->theme.DARK_TEXT);
-	//borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
-	borderColor = MakeColor(COLOR_NONE);
-
+	borderColor=MakeColor(0,0,0,0);
 	borderWidth = UnitPX(2.0f);
 	backgroundColor = MakeColor(COLOR_NONE);
 	setRoundCorners(true);
@@ -2418,10 +2419,12 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 					CoordPX(30, 30)));
 	upDirButton->foregroundColor = MakeColor(
 			AlloyApplicationContext()->theme.LIGHT_TEXT);
-	upDirButton->borderColor = MakeColor(COLOR_NONE);
+	upDirButton->borderWidth=UnitPX(0.0f);
 	upDirButton->backgroundColor = MakeColor(0,0,0,0);
 	upDirButton->setRoundCorners(true);
 	upDirButton->iconColor = MakeColor(
+			AlloyApplicationContext()->theme.DARK_TEXT);
+	upDirButton->borderColor = MakeColor(
 			AlloyApplicationContext()->theme.DARK_TEXT);
 	upDirButton->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& event) {
@@ -2437,7 +2440,7 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 			new IconButton(0xf00d, CoordPerPX(1.0, 0.0, -30, 30),
 					CoordPX(30, 30), IconType::CIRCLE));
 	cancelButton->setOrigin(Origin::BottomLeft);
-
+	cancelButton->borderColor=MakeColor(AlloyApplicationContext()->theme.HIGHLIGHT);
 	cancelButton->backgroundColor = MakeColor(COLOR_NONE);
 	cancelButton->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& event) {
@@ -3200,7 +3203,7 @@ MessageDialog::MessageDialog(const std::string& name, const AUnit2D& pos,
 					CoordPX(30, 30), IconType::CIRCLE));
 	cancelButton->setOrigin(Origin::BottomLeft);
 	cancelButton->backgroundColor = MakeColor(COLOR_NONE);
-
+	cancelButton->borderColor=MakeColor(AlloyApplicationContext()->theme.HIGHLIGHT);
 	cancelButton->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& event) {
 				returnValue=false;
