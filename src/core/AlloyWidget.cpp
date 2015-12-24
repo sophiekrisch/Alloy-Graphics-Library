@@ -2419,8 +2419,8 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	upDirButton->foregroundColor = MakeColor(
 			AlloyApplicationContext()->theme.LIGHT_TEXT);
 	upDirButton->borderColor = MakeColor(COLOR_NONE);
-	upDirButton->backgroundColor = MakeColor(
-			AlloyApplicationContext()->theme.SHADOW);
+	upDirButton->backgroundColor = MakeColor(0,0,0,0);
+	upDirButton->setRoundCorners(true);
 	upDirButton->iconColor = MakeColor(
 			AlloyApplicationContext()->theme.DARK_TEXT);
 	upDirButton->onMouseDown =
