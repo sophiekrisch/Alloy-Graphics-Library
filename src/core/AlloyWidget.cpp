@@ -701,8 +701,7 @@ Selection::Selection(const std::string& label, const AUnit2D& position,
 	selectionBox->dimensions = CoordPercent(1.0f, 0.8f);
 	selectionBox->backgroundColor = MakeColor(
 			AlloyApplicationContext()->theme.DARK);
-	selectionBox->borderColor = MakeColor(
-			AlloyApplicationContext()->theme.HIGHLIGHT);
+	selectionBox->borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
 	selectionBox->borderWidth = UnitPX(1.0f);
 	selectionBox->textColor = MakeColor(
 			AlloyApplicationContext()->theme.LIGHT_TEXT);
@@ -3772,7 +3771,7 @@ TabBar::TabBar(const std::string& name, const AUnit2D& position,
 	contentRegion->backgroundColor=MakeColor(AlloyApplicationContext()->theme.DARK.toLighter(0.5f));
 	selectionBox = SelectionBoxPtr(new SelectionBox(MakeString()<<name<<"_tab", CoordPerPX(1.0f, 0.0f, -120.0f,0.0f), CoordPX(120.0f, TAB_HEIGHT-6.0f)));
 	selectionBox->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
-	selectionBox->borderColor = MakeColor(AlloyApplicationContext()->theme.HIGHLIGHT);
+	selectionBox->borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
 	selectionBox->borderWidth = UnitPX(1.0f);
 	selectionBox->setDetached(true);
 	selectionBox->setVisible(false);
