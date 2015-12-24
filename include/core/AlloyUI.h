@@ -600,6 +600,8 @@ public:
 		options.push_back(selection);
 	}
 	void clearSelections() {
+		selectedIndex = -1;
+		selectionOffset = 0;
 		options.clear();
 	}
 	void eraseSelection(int index) {

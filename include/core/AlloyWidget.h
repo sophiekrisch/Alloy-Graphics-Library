@@ -730,6 +730,7 @@ protected:
 	std::shared_ptr<Composite> barRegion;
 	std::shared_ptr<Composite> contentRegion;
 	std::shared_ptr<SelectionBox> selectionBox;
+	std::shared_ptr<IconButton> tabDropButton;
 	pixel2 cursorDownPosition;
 	TabPane* selectedPane;
 	TabPane* dragPane;
@@ -748,6 +749,7 @@ public:
 			const AUnit2D& dimensions);
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)override;
 	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,double pixelRatio, bool clamp = false) override;
+	virtual void draw(AlloyContext* context) override;
 };
 typedef std::shared_ptr<TextButton> TextButtonPtr;
 typedef std::shared_ptr<HorizontalSlider> HSliderPtr;

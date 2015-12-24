@@ -3572,8 +3572,14 @@ void TabHeader::draw(AlloyContext* context) {
 		popScissor(nvg);
 	}
 }
+void TabBar::draw(AlloyContext* context) {
+	pushScissor(context->nvgContext, getCursorBounds());
+	Composite::draw(context);
+	popScissor(context->nvgContext);
+
+}
 void TabBar::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm, double pixelRatio, bool clamp) {
-	float maxExtent = dims.x-TAB_HEIGHT-TAB_SPACING;
+	float maxExtent = dims.x;
 	for (TabPanePtr tabPane : panes) {
 		tabPane->header->position = CoordPX(tabPane->bounds.position);
 		if (tabPane->bounds.position.x + tabPane->bounds.dimensions.x < maxExtent||tabPane.get()==dragPane) {
@@ -3590,6 +3596,12 @@ void TabBar::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm, do
 				break;
 			}
 		}
+	}
+	if (panes.size()>0 && !panes.back()->header->isVisible()) {
+		tabDropButton->setVisible(true);
+	}
+	else {
+		tabDropButton->setVisible(false);
 	}
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
 }
@@ -3626,6 +3638,7 @@ void TabBar::add(const std::shared_ptr<TabPane>& tabPane) {
 	contentRegion->add(tabPane->region);
 	tabPane->parent = this;
 	panes.push_back(tabPane);
+
 }
 TabPane::TabPane(const std::shared_ptr<Composite>& region) :
 		header(
@@ -3699,11 +3712,25 @@ TabBar::TabBar(const std::string& name, const AUnit2D& position,
 				nullptr) {
 	barRegion = std::shared_ptr<Composite>(
 			new Composite("Content", CoordPX(0, 0),
-					CoordPerPX(1.0f, 0.0f, -TAB_HEIGHT, TAB_HEIGHT)));
+					CoordPerPX(1.0f, 0.0f, 0.0f, TAB_HEIGHT)));
 	barRegion->backgroundColor = MakeColor(AlloyApplicationContext()->theme.SHADOW);
-	IconButtonPtr tabDropButton = std::shared_ptr<IconButton>(
+	DrawPtr fadeRegion = DrawPtr(new Draw("Fade Region", CoordPerPX(1.0, 0.0, -2*TAB_HEIGHT, 0.0f),
+		CoordPX(2*TAB_HEIGHT, TAB_HEIGHT)));
+	fadeRegion->onDraw=[this](AlloyContext* context, const box2px& bounds) {
+		NVGcontext* nvg = context->nvgContext;
+		NVGpaint hightlightPaint = nvgLinearGradient(nvg, bounds.position.x, bounds.position.y,
+			bounds.position.x + bounds.dimensions.x, bounds.position.y,
+			context->theme.SHADOW.toSemiTransparent(0.0f), context->theme.SHADOW);
+		nvgBeginPath(nvg);
+		nvgRect(nvg, bounds.position.x, bounds.position.y, bounds.dimensions.x, bounds.dimensions.y);
+		nvgFillPaint(nvg, hightlightPaint);
+		nvgFill(nvg);
+	};
+	fadeRegion->setIgnoreCursorEvents(true);
+	tabDropButton = std::shared_ptr<IconButton>(
 		new IconButton(0xf103, CoordPerPX(1.0, 0.0, -TAB_HEIGHT,0.0f),
 			CoordPX(TAB_HEIGHT, TAB_HEIGHT), IconType::SQUARE));
+	tabDropButton->setVisible(false);
 	tabDropButton->onMouseDown=[this](AlloyContext* context,const InputEvent& e){
 		if(e.button==GLFW_MOUSE_BUTTON_LEFT){
 			if(selectionBox->isVisible()){
@@ -3724,7 +3751,7 @@ TabBar::TabBar(const std::string& name, const AUnit2D& position,
 		}
 		return false;
 	};
-	tabDropButton->backgroundColor = MakeColor(AlloyApplicationContext()->theme.SHADOW);// MakeColor(AlloyApplicationContext()->theme.DARK.toLighter(0.5f));
+	tabDropButton->backgroundColor = MakeColor(0, 0, 0, 0);//AlloyApplicationContext()->theme.SHADOW.toSemiTransparent(0.5f));// MakeColor(AlloyApplicationContext()->theme.DARK.toLighter(0.5f));
 	tabDropButton->setRoundCorners(false);
 	tabDropButton->foregroundColor = MakeColor(0,0,0,0);
 	tabDropButton->borderColor = MakeColor(0, 0, 0, 0);
@@ -3733,7 +3760,7 @@ TabBar::TabBar(const std::string& name, const AUnit2D& position,
 			new Composite("Content", CoordPX(0.0f, TAB_HEIGHT),
 					CoordPerPX(1.0f, 1.0f, 0.0f, -TAB_HEIGHT)));
 	contentRegion->backgroundColor=MakeColor(AlloyApplicationContext()->theme.DARK.toLighter(0.5f));
-	selectionBox = SelectionBoxPtr(new SelectionBox(MakeString()<<name<<"_tab", CoordPerPX(1.0f, 0.0f, -120.0f+TAB_HEIGHT,0.0f), CoordPX(120.0f, TAB_HEIGHT-6.0f)));
+	selectionBox = SelectionBoxPtr(new SelectionBox(MakeString()<<name<<"_tab", CoordPerPX(1.0f, 0.0f, -120.0f,0.0f), CoordPX(120.0f, TAB_HEIGHT-6.0f)));
 	selectionBox->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	selectionBox->borderColor = MakeColor(AlloyApplicationContext()->theme.HIGHLIGHT);
 	selectionBox->borderWidth = UnitPX(1.0f);
@@ -3786,6 +3813,7 @@ TabBar::TabBar(const std::string& name, const AUnit2D& position,
 		return false;
 	};
 	Composite::add(barRegion);
+	Composite::add(fadeRegion);
 	Composite::add(tabDropButton);
 	barRegion->add(selectionBox);
 	Composite::add(contentRegion);
