@@ -38,9 +38,9 @@ Alloy is yet another 2D/3D graphics library written in C++11. As mundane as that
 - Dataflow UI for graphics/imaging pipelines
 - Force directed graph (Prefuse)
 - "One Euro" filter
+- Tab panel
 
 ## Future Work
-- Tab panel
 - Active contour segmentation
 - Iso-surface
 - Image processing for anisotropic image diffusion, Mumford-Shah, Rudin-Osher-Fatemi, Chan-Esedolgu-Nikolova
@@ -193,6 +193,9 @@ Expand Tree Example
 -------------------------
 ![ExpandTreeEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0032.png)
 
+Tab Pane Example
+-------------------------
+![ForceDirectedGraphEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0036.png)
 
 One Euro Filter Example
 -------------------------

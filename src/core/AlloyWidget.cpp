@@ -30,6 +30,7 @@
 using namespace std;
 namespace aly {
 const float TabBar::TAB_HEIGHT = 30.0f;
+const float TabBar::TAB_SPACING = 10.0f;
 bool CheckBox::handleMouseDown(AlloyContext* context, const InputEvent& event) {
 	if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
 		this->checked = !this->checked;
@@ -3484,7 +3485,7 @@ pixel2 TabHeader::getPreferredDimensions(AlloyContext* context) const {
 TabHeader::TabHeader(const std::string& name, TabPane* parent) :
 		Composite(name, CoordPX(0, 0), CoordPX(120, 30)), parentPane(parent), focused(
 		false) {
-	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	backgroundColor = MakeColor(COLOR_NONE);
 	textLabel = TextLabelPtr(
 			new TextLabel(name, CoordPX(2, 2),
 					CoordPerPX(1.0f, 1.0f, -TabBar::TAB_HEIGHT, -4.0f)));
@@ -3531,13 +3532,12 @@ bool TabHeader::isSelected() const {
 }
 void TabHeader::draw(AlloyContext* context) {
 	focused = context->isMouseOver(textLabel.get());
+	Color bgColor;
 	if (isSelected()) {
-		backgroundColor = MakeColor(
-			AlloyApplicationContext()->theme.DARK.toLighter(0.5f));
+		bgColor=AlloyApplicationContext()->theme.DARK.toLighter(0.5f);
 	}
 	else {
-		backgroundColor = MakeColor(
-			AlloyApplicationContext()->theme.DARK);
+		bgColor=AlloyApplicationContext()->theme.DARK;
 
 	}
 	if (focused) {
@@ -3547,10 +3547,33 @@ void TabHeader::draw(AlloyContext* context) {
 		textLabel->textColor = MakeColor(
 				AlloyApplicationContext()->theme.LIGHT_TEXT);
 	}
-	Composite::draw(context);
+	NVGcontext* nvg = context->nvgContext;
+	if (isScrollEnabled()) {
+		pushScissor(nvg, getCursorBounds());
+	}
+	nvgFillColor(nvg, bgColor);
+	nvgStrokeColor(nvg, bgColor.toDarker(0.5f));
+	nvgBeginPath(nvg);
+	box2px bounds = getBounds();
+	nvgStrokeWidth(nvg,2.0f);
+	nvgMoveTo(nvg, bounds.position.x, bounds.position.y);
+	nvgLineTo(nvg, bounds.position.x+bounds.dimensions.x, bounds.position.y);
+	nvgLineTo(nvg, bounds.position.x + bounds.dimensions.x+ TabBar::TAB_SPACING, bounds.position.y+bounds.dimensions.y);
+	nvgLineTo(nvg, bounds.position.x - TabBar::TAB_SPACING, bounds.position.y + bounds.dimensions.y);
+	nvgClosePath(nvg);
+	nvgFill(nvg);
+	nvgStroke(nvg);
+	for (std::shared_ptr<Region>& region : children) {
+		if (region->isVisible()) {
+			region->draw(context);
+		}
+	}
+	if (isScrollEnabled()) {
+		popScissor(nvg);
+	}
 }
 void TabBar::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm, double pixelRatio, bool clamp) {
-	float maxExtent = barRegion->getBoundsDimensionsX();
+	float maxExtent = dims.x-TAB_HEIGHT-TAB_SPACING;
 	for (TabPanePtr tabPane : panes) {
 		tabPane->header->position = CoordPX(tabPane->bounds.position);
 		if (tabPane->bounds.position.x + tabPane->bounds.dimensions.x < maxExtent||tabPane.get()==dragPane) {
@@ -3558,6 +3581,14 @@ void TabBar::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm, do
 		}
 		else {
 			tabPane->header->setVisible(false);
+		}
+	}
+	if (selectedPane == nullptr) {
+		for (int i = (int)panes.size() - 1;i >= 0;i--) {
+			if (panes[i]->header->isVisible()) {
+				setSelected(panes[i].get());
+				break;
+			}
 		}
 	}
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
@@ -3568,6 +3599,9 @@ void TabBar::close(TabPane* pane) {
 	}
 	barRegion->erase(pane->header);
 	contentRegion->erase(pane->region);
+	if (pane == selectedPane) {
+		selectedPane = nullptr;
+	}
 	for (auto iter = panes.begin();iter != panes.end();iter++) {
 		if (iter->get() == pane) {
 			panes.erase(iter);
@@ -3575,26 +3609,23 @@ void TabBar::close(TabPane* pane) {
 		}
 	}
 	sortPanes();
-
 }
 void TabBar::add(const std::shared_ptr<TabPane>& tabPane) {
 	if (panes.size() > 0) {
 		TabPanePtr bck = panes.back();
-		tabPane->bounds.position=pixel2(bck->bounds.position.x+bck->bounds.dimensions.x+5.0f,0.0f);
+		tabPane->bounds.position=pixel2(bck->bounds.position.x+bck->bounds.dimensions.x+ TabBar::TAB_SPACING,0.0f);
 	}
 	else {
-		tabPane->bounds.position= pixel2(0.0f);
+		tabPane->bounds.position= pixel2(TabBar::TAB_SPACING,0.0f);
 	}
 	pixel2 dims = tabPane->header->getPreferredDimensions(AlloyApplicationContext().get());
 	tabPane->bounds.dimensions = pixel2(dims.x, TAB_HEIGHT);
 	tabPane->header->dimensions = CoordPerPX(0.0f,1.0f,tabPane->bounds.dimensions.x,0.0f);
-	barRegion->add(tabPane->header);
+	barRegion->insertAtFront(tabPane->header);
+	tabPane->region->setVisible(false);
 	contentRegion->add(tabPane->region);
 	tabPane->parent = this;
 	panes.push_back(tabPane);
-	if (panes.size() == 1) {
-		setSelected(tabPane.get());
-	}
 }
 TabPane::TabPane(const std::shared_ptr<Composite>& region) :
 		header(
@@ -3607,9 +3638,12 @@ TabBar* TabHeader::getBar() const {
 	return parentPane->parent;
 }
 void TabBar::setSelected(TabPane* s) {
+	if (selectedPane != nullptr) {
+		selectedPane->region->setVisible(false);
+	}
 	selectedPane = s;
 	barRegion->putLast(s->header);
-	contentRegion->putLast(s->region);
+	s->region->setVisible(true);
 }
 bool TabBar::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	if (e.type == InputType::MouseButton) {
@@ -3634,7 +3668,7 @@ bool TabBar::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	
 	if(dragPane!=nullptr&&(e.type==InputType::Cursor||e.type==InputType::MouseButton)){
 		box2px bounds = barRegion->getBounds();
-		dragPane->bounds.position.x = aly::clamp(e.cursor.x- cursorDownPosition.x, bounds.position.x,bounds.position.x+bounds.dimensions.x-dragPane->bounds.dimensions.x)- bounds.position.x;
+		dragPane->bounds.position.x = aly::clamp(e.cursor.x- cursorDownPosition.x, bounds.position.x+TabBar::TAB_SPACING,bounds.position.x+bounds.dimensions.x-dragPane->bounds.dimensions.x-TabBar::TAB_SPACING)- bounds.position.x;
 		sortPanes();
 		context->requestPack();
 	}
@@ -3650,13 +3684,13 @@ void TabBar::sortPanes() {
 			} else return (a->bounds.position.x < b->bounds.center().x);
 		});
 	}
-	float xOffset =0.0f;
+	float xOffset = TabBar::TAB_SPACING;
 	for (int index = 0;index <(int)panes.size();index++) {
 		TabPanePtr tabPane = panes[index];
 		if (tabPane.get() != dragPane) {
 			tabPane->bounds.position =pixel2(xOffset,0.0f);
 		}
-		xOffset +=  tabPane->bounds.dimensions.x + 5.0f;
+		xOffset +=  tabPane->bounds.dimensions.x + TabBar::TAB_SPACING;
 	}
 }
 TabBar::TabBar(const std::string& name, const AUnit2D& position,
@@ -3666,8 +3700,7 @@ TabBar::TabBar(const std::string& name, const AUnit2D& position,
 	barRegion = std::shared_ptr<Composite>(
 			new Composite("Content", CoordPX(0, 0),
 					CoordPerPX(1.0f, 0.0f, -TAB_HEIGHT, TAB_HEIGHT)));
-	barRegion->backgroundColor = MakeColor(
-			AlloyApplicationContext()->theme.SHADOW);
+	barRegion->backgroundColor = MakeColor(AlloyApplicationContext()->theme.SHADOW);
 	IconButtonPtr tabDropButton = std::shared_ptr<IconButton>(
 		new IconButton(0xf103, CoordPerPX(1.0, 0.0, -TAB_HEIGHT,0.0f),
 			CoordPX(TAB_HEIGHT, TAB_HEIGHT), IconType::SQUARE));
@@ -3691,7 +3724,7 @@ TabBar::TabBar(const std::string& name, const AUnit2D& position,
 		}
 		return false;
 	};
-	tabDropButton->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK.toLighter(0.5f));
+	tabDropButton->backgroundColor = MakeColor(AlloyApplicationContext()->theme.SHADOW);// MakeColor(AlloyApplicationContext()->theme.DARK.toLighter(0.5f));
 	tabDropButton->setRoundCorners(false);
 	tabDropButton->foregroundColor = MakeColor(0,0,0,0);
 	tabDropButton->borderColor = MakeColor(0, 0, 0, 0);
@@ -3699,7 +3732,8 @@ TabBar::TabBar(const std::string& name, const AUnit2D& position,
 	contentRegion = std::shared_ptr<Composite>(
 			new Composite("Content", CoordPX(0.0f, TAB_HEIGHT),
 					CoordPerPX(1.0f, 1.0f, 0.0f, -TAB_HEIGHT)));
-	selectionBox = SelectionBoxPtr(new SelectionBox(MakeString()<<name<<"_tab", CoordPerPX(1.0f, 0.0f, -120.0f+TAB_HEIGHT,0.0f), CoordPX(120.0f,24.0f)));
+	contentRegion->backgroundColor=MakeColor(AlloyApplicationContext()->theme.DARK.toLighter(0.5f));
+	selectionBox = SelectionBoxPtr(new SelectionBox(MakeString()<<name<<"_tab", CoordPerPX(1.0f, 0.0f, -120.0f+TAB_HEIGHT,0.0f), CoordPX(120.0f, TAB_HEIGHT-6.0f)));
 	selectionBox->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	selectionBox->borderColor = MakeColor(AlloyApplicationContext()->theme.HIGHLIGHT);
 	selectionBox->borderWidth = UnitPX(1.0f);
@@ -3708,17 +3742,47 @@ TabBar::TabBar(const std::string& name, const AUnit2D& position,
 	selectionBox->textColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
 	selectionBox->textAltColor = MakeColor(AlloyApplicationContext()->theme.DARK_TEXT);
 	selectionBox->onSelect = [this](SelectionBox* box) {
-		selectionBox->setVisible(false);
-		AlloyApplicationContext()->removeOnTopRegion(box);
-		TabPanePtr current = panes[selectionBox->getSelectedIndex()];
-		TabPanePtr front=panes.front();
-		panes[0] = current;
-		panes[selectionBox->getSelectedIndex()] = front;
-		setSelected(current.get());
-		selectionBox->clearSelections();
-		sortPanes();
-		AlloyApplicationContext()->requestPack();
-
+		int sIndex = selectionBox->getSelectedIndex();
+		if (sIndex >= 0 && sIndex < panes.size()) {
+			selectionBox->setVisible(false);
+			AlloyApplicationContext()->removeOnTopRegion(selectionBox.get());
+			TabPanePtr current = panes[sIndex];
+			TabPanePtr front = panes.front();
+			if (current.get() != selectedPane) {
+				if (!current->header->isVisible()) {
+					panes[0] = current;
+					panes[sIndex] = front;
+				}
+				setSelected(current.get());
+				selectionBox->clearSelections();
+				sortPanes();
+				AlloyApplicationContext()->requestPack();
+				return true;
+			}
+		}
+		return false;
+	};
+	selectionBox->onMouseUp =
+		[this](AlloyContext* context, const InputEvent& event) {
+		if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
+			int sIndex = selectionBox->getSelectedIndex();
+			if (sIndex >= 0 && sIndex < panes.size()) {
+				selectionBox->setVisible(false);
+				AlloyApplicationContext()->removeOnTopRegion(selectionBox.get());
+				TabPanePtr current = panes[sIndex];
+				TabPanePtr front = panes.front();
+				if (current.get() != selectedPane) {
+					if (!current->header->isVisible()) {
+						panes[0] = current;
+						panes[sIndex] = front;
+					}
+					setSelected(current.get());
+					selectionBox->clearSelections();
+					sortPanes();
+					AlloyApplicationContext()->requestPack();
+				}
+			}
+		}
 		return false;
 	};
 	Composite::add(barRegion);

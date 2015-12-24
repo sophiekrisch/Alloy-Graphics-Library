@@ -1329,7 +1329,16 @@ void Composite::add(const std::shared_ptr<Region>& region) {
 						<< region->parent->name << "].");
 	region->parent = this;
 }
-
+void Composite::insertAtFront(const std::shared_ptr<Region>& region) {
+	children.insert(children.begin(),region);
+	if (region->parent != nullptr)
+		throw std::runtime_error(
+			MakeString() << "Cannot add child node [" << region->name
+			<< "] to [" << name
+			<< "] because it already has a parent ["
+			<< region->parent->name << "].");
+	region->parent = this;
+}
 pixel2 TextLabel::getTextDimensions(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();

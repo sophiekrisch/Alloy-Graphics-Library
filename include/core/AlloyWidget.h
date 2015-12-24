@@ -735,6 +735,7 @@ protected:
 	TabPane* dragPane;
 	void sortPanes();
 public:
+	static const float TAB_SPACING;
 	static const float TAB_HEIGHT;
 	std::function<bool(TabPane*)> onClose;
 	void close(TabPane* pane);

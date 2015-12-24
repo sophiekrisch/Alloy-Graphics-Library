@@ -317,6 +317,7 @@ public:
 			double pixelRatio, bool clamp = false) override;
 
 	virtual void add(const std::shared_ptr<Region>& region);
+	virtual void insertAtFront(const std::shared_ptr<Region>& region);
 	virtual void pack() override {
 		Region::pack();
 	}
