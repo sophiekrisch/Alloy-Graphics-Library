@@ -3556,8 +3556,8 @@ void TabHeader::draw(AlloyContext* context) {
 	nvgBeginPath(nvg);
 	box2px bounds = getBounds();
 	nvgStrokeWidth(nvg,2.0f);
-	nvgMoveTo(nvg, bounds.position.x, bounds.position.y);
-	nvgLineTo(nvg, bounds.position.x+bounds.dimensions.x, bounds.position.y);
+	nvgMoveTo(nvg, bounds.position.x, bounds.position.y+1);
+	nvgLineTo(nvg, bounds.position.x+bounds.dimensions.x, bounds.position.y + 1);
 	nvgLineTo(nvg, bounds.position.x + bounds.dimensions.x+ TabBar::TAB_SPACING, bounds.position.y+bounds.dimensions.y);
 	nvgLineTo(nvg, bounds.position.x - TabBar::TAB_SPACING, bounds.position.y + bounds.dimensions.y);
 	nvgClosePath(nvg);
