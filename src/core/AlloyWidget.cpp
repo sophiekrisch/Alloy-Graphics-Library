@@ -798,7 +798,7 @@ void Selection::draw(AlloyContext* context) {
 	Composite::draw(context);
 }
 HorizontalSlider::HorizontalSlider(const std::string& label,
-		const AUnit2D& position, const AUnit2D& dimensions, const Number& min,
+		const AUnit2D& position, const AUnit2D& dimensions,bool showLabel, const Number& min,
 		const Number& max, const Number& value) :
 		Slider(label, min, max, value) {
 	this->position = position;
@@ -806,8 +806,10 @@ HorizontalSlider::HorizontalSlider(const std::string& label,
 	float handleSize = 30.0f;
 	float trackPadding = 10.0f;
 	this->aspectRatio = 4.0f;
+		
 	sliderPosition = value.toDouble();
 	textColor = MakeColor(AlloyApplicationContext()->theme.DARK_TEXT);
+	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	borderColor = MakeColor(AlloyApplicationContext()->theme.HIGHLIGHT);
 	sliderHandle = std::shared_ptr<SliderHandle>(
 			new SliderHandle("Scroll Handle"));
@@ -823,8 +825,6 @@ HorizontalSlider::HorizontalSlider(const std::string& label,
 					AlloyApplicationContext()->theme.HIGHLIGHT,
 					AlloyApplicationContext()->theme.HIGHLIGHT));
 
-	sliderTrack->position = CoordPerPX(0.0f, 1.0f, 0.0f, -handleSize);
-	sliderTrack->dimensions = CoordPerPX(1.0f, 0.0f, 0.0f, handleSize);
 
 	sliderTrack->backgroundColor = MakeColor(
 			AlloyApplicationContext()->theme.DARK);
@@ -836,23 +836,31 @@ HorizontalSlider::HorizontalSlider(const std::string& label,
 	sliderHandle->onMouseDrag =
 			[this](AlloyContext* context, const InputEvent& e) {
 				return this->onMouseDrag(context, sliderHandle.get(), e);};
-
-	add(
+	if (showLabel) {
+		sliderTrack->position = CoordPerPX(0.0f, 1.0f, 0.0f, -handleSize);
+		sliderTrack->dimensions = CoordPerPX(1.0f, 0.0f, 0.0f, handleSize);
+		add(
 			sliderLabel = MakeTextLabel(label,
-					CoordPerPX(0.0f, 0.0f, trackPadding, 2.0f),
-					CoordPerPX(0.5f, 1.0f, 0.0f,
-							-(handleSize - trackPadding * 0.75f)),
-					FontType::Bold, UnitPerPX(1.0f, 0.0f),
-					AlloyApplicationContext()->theme.LIGHT_TEXT.toRGBA(),
-					HorizontalAlignment::Left, VerticalAlignment::Bottom));
-	add(
+				CoordPerPX(0.0f, 0.0f, trackPadding, 2.0f),
+				CoordPerPX(0.5f, 1.0f, 0.0f,
+					-(handleSize - trackPadding * 0.75f)),
+				FontType::Bold, UnitPerPX(1.0f, 0.0f),
+				AlloyApplicationContext()->theme.LIGHT_TEXT.toRGBA(),
+				HorizontalAlignment::Left, VerticalAlignment::Bottom));
+		add(
 			valueLabel = MakeTextLabel("Value",
-					CoordPerPX(0.0f, 0.0f, 0.0f, 2.0f),
-					CoordPerPX(1.0f, 1.0f, -trackPadding,
-							-(handleSize - trackPadding * 0.75f)),
-					FontType::Normal, UnitPerPX(1.0f, -2),
-					AlloyApplicationContext()->theme.LIGHT_TEXT.toRGBA(),
-					HorizontalAlignment::Right, VerticalAlignment::Bottom));
+				CoordPerPX(0.0f, 0.0f, 0.0f, 2.0f),
+				CoordPerPX(1.0f, 1.0f, -trackPadding,
+					-(handleSize - trackPadding * 0.75f)),
+				FontType::Normal, UnitPerPX(1.0f, -2),
+				AlloyApplicationContext()->theme.LIGHT_TEXT.toRGBA(),
+				HorizontalAlignment::Right, VerticalAlignment::Bottom));
+	}
+	else {
+		sliderTrack->position = CoordPerPX(0.0f,0.5f,0.0f,-0.5f*handleSize);
+		sliderTrack->dimensions = CoordPerPX(1.0f, 0.0f, 0.0f, handleSize);
+	}
+
 	add(sliderTrack);
 	this->onPack = [this]() {
 		this->setValue(sliderPosition);
@@ -941,23 +949,23 @@ bool HorizontalSlider::onMouseDrag(AlloyContext* context, Region* region,
 	return false;
 }
 void HorizontalSlider::draw(AlloyContext* context) {
-
-	valueLabel->setLabel(labelFormatter(value));
+	if (valueLabel.get() != nullptr) {
+		valueLabel->setLabel(labelFormatter(value));
+	}
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
-
+	Color bgColor = *backgroundColor;
 	nvgBeginPath(nvg);
 	nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
 			bounds.dimensions.x, bounds.dimensions.y,
 			context->theme.CORNER_RADIUS);
-	nvgFillColor(nvg, context->theme.DARK);
+	nvgFillColor(nvg, bgColor);
 	nvgFill(nvg);
-
 	nvgBeginPath(nvg);
 	NVGpaint hightlightPaint = nvgBoxGradient(nvg, bounds.position.x,
 			bounds.position.y, bounds.dimensions.x, bounds.dimensions.y,
 			context->theme.CORNER_RADIUS, 2,
-			context->theme.DARK.toSemiTransparent(0.0f),
+			bgColor.toSemiTransparent(0.0f),
 			context->theme.HIGHLIGHT);
 	nvgFillPaint(nvg, hightlightPaint);
 	nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
@@ -982,6 +990,7 @@ VerticalSlider::VerticalSlider(const std::string& label,
 	sliderPosition = value.toDouble();
 	textColor = MakeColor(AlloyApplicationContext()->theme.DARK_TEXT);
 	borderColor = MakeColor(AlloyApplicationContext()->theme.HIGHLIGHT);
+	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	sliderHandle = std::shared_ptr<SliderHandle>(
 			new SliderHandle("Scroll Handle"));
 
@@ -1107,12 +1116,12 @@ void VerticalSlider::draw(AlloyContext* context) {
 	valueLabel->setLabel(labelFormatter(value));
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
-
+	Color bgColor = *backgroundColor;
 	nvgBeginPath(nvg);
 	nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
 			bounds.dimensions.x, bounds.dimensions.y,
 			context->theme.CORNER_RADIUS);
-	nvgFillColor(nvg, context->theme.DARK);
+	nvgFillColor(nvg, bgColor);
 	nvgFill(nvg);
 
 	nvgBeginPath(nvg);
@@ -1120,7 +1129,7 @@ void VerticalSlider::draw(AlloyContext* context) {
 	NVGpaint hightlightPaint = nvgBoxGradient(nvg, bounds.position.x,
 			bounds.position.y, bounds.dimensions.x, bounds.dimensions.y,
 			context->theme.CORNER_RADIUS, 2,
-			context->theme.DARK.toSemiTransparent(0.0f),
+			bgColor.toSemiTransparent(0.0f),
 			context->theme.HIGHLIGHT);
 	nvgFillPaint(nvg, hightlightPaint);
 	nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,

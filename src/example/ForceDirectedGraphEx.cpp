@@ -185,6 +185,7 @@ bool ForceDirectedGraphEx::init(Composite& rootNode) {
 					new HorizontalSlider(f->getParameterName(n),
 							CoordPX(5.0f, 5.0f),
 							CoordPerPX(1.0f, 0.0f, -10.0f, 40.0f),
+						true,
 							Float(f->getMinValue(n)), Float(f->getMaxValue(n)),
 							Float(f->getParameterValue(n))));
 			paramRegion->add(hslider);

@@ -29,13 +29,13 @@ bool ControlsEx::init(Composite& rootNode) {
 
 	HSliderPtr hslider1 = HSliderPtr(
 			new HorizontalSlider("Integer Slider", CoordPerPX(0.1f, 0.3f, 0, 0),
-					CoordPX(200.0f, 40.0f), Integer(1), Integer(12),
+					CoordPX(200.0f, 40.0f), false,Integer(1), Integer(12),
 					Integer(7)));
 	rootNode.add(hslider1);
 
 	HSliderPtr hslider2 = HSliderPtr(
 			new HorizontalSlider("Double Slider", CoordPercent(0.5f, 0.7f),
-					CoordPX(350.0f, 50.0f), Double(1), Double(12), Double(7)));
+					CoordPX(350.0f, 50.0f),Double(1), Double(12), Double(7)));
 	rootNode.add(hslider2);
 
 	VSliderPtr vslider1 = VSliderPtr(

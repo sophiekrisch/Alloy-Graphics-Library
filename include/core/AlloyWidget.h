@@ -205,9 +205,17 @@ public:
 	bool onMouseDrag(AlloyContext* context, Region* region,
 			const InputEvent& event);
 	HorizontalSlider(const std::string& label, const AUnit2D& position,
-			const AUnit2D& dimensions, const Number& minValue = Float(0.0f),
+			const AUnit2D& dimensions, bool showLabel,
+		const Number& minValue = Float(0.0f),
 			const Number& maxValue = Float(1.0f),
 			const Number& value = Float(0.0f));
+	HorizontalSlider(const std::string& label, const AUnit2D& position,
+		const AUnit2D& dimensions,
+		const Number& minValue = Float(0.0f),
+		const Number& maxValue = Float(1.0f),
+		const Number& value = Float(0.0f)):HorizontalSlider(label,position,dimensions,true,minValue,maxValue,value) {
+
+	}
 	virtual void draw(AlloyContext* context) override;
 	virtual inline ~HorizontalSlider() {
 	}
