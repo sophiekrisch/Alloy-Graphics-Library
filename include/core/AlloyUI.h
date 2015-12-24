@@ -576,7 +576,7 @@ public:
 	FontStyle fontStyle = FontStyle::Normal;
 	FontType fontType = FontType::Normal;
 	AColor textColor = MakeColor(COLOR_WHITE);
-	AColor textAltColor = MakeColor(COLOR_BLACK);
+	AColor textAltColor = MakeColor(COLOR_WHITE);
 	std::function<bool(SelectionBox*)> onSelect;
 	std::vector<std::string> options;
 	void setMaxDisplayEntries(int mx) {

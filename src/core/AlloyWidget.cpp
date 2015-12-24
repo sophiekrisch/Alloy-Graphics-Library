@@ -3493,6 +3493,7 @@ TabHeader::TabHeader(const std::string& name, TabPane* parent) :
 	textLabel->fontType = FontType::Bold;
 	textLabel->textColor = MakeColor(
 			AlloyApplicationContext()->theme.LIGHT_TEXT);
+
 	textLabel->setAlignment(HorizontalAlignment::Left,
 			VerticalAlignment::Middle);
 	add(textLabel);
@@ -3767,7 +3768,7 @@ TabBar::TabBar(const std::string& name, const AUnit2D& position,
 	selectionBox->setDetached(true);
 	selectionBox->setVisible(false);
 	selectionBox->textColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
-	selectionBox->textAltColor = MakeColor(AlloyApplicationContext()->theme.DARK_TEXT);
+	selectionBox->textAltColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
 	selectionBox->onSelect = [this](SelectionBox* box) {
 		int sIndex = selectionBox->getSelectedIndex();
 		if (sIndex >= 0 && sIndex < (int)panes.size()) {
