@@ -34,7 +34,7 @@ bool ControlsEx::init(Composite& rootNode) {
 	rootNode.add(hslider1);
 
 	HSliderPtr hslider2 = HSliderPtr(
-			new HorizontalSlider("Double Slider", CoordPercent(0.5f, 0.7f),
+			new HorizontalSlider("Horizontal Slider", CoordPercent(0.5f, 0.7f),
 					CoordPX(350.0f, 50.0f),Double(1), Double(12), Double(7)));
 	rootNode.add(hslider2);
 
