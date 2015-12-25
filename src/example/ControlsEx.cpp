@@ -85,7 +85,21 @@ bool ControlsEx::init(Composite& rootNode) {
 	modifyLabel->setRoundCorners(false);
 	modifyLabel->horizontalAlignment = HorizontalAlignment::Center;
 	modifyLabel->verticalAlignment = VerticalAlignment::Middle;
+
 	rootNode.add(modifyLabel);
+	ModifiableNumberPtr modifyNumber = ModifiableNumberPtr(
+		new ModifiableNumber("NaN", CoordPerPX(0.5f, 1.0f,100.0f, -100.0f), CoordPX(80, 30),NumberType::Float));
+	modifyNumber->backgroundColor = MakeColor(32, 32, 32);
+	modifyNumber->borderColor = MakeColor(64, 64, 64);
+	modifyNumber->textColor = MakeColor(Color(51, 153, 255));
+	modifyNumber->borderWidth = UnitPX(1.0f);
+	modifyNumber->fontSize = UnitPX(24);
+	modifyNumber->setRoundCorners(false);
+	modifyNumber->setValue("3.14");
+	modifyNumber->horizontalAlignment = HorizontalAlignment::Center;
+	modifyNumber->verticalAlignment = VerticalAlignment::Middle;
+
+	rootNode.add(modifyNumber);
 
 	ColorSelectorPtr colorselect = ColorSelectorPtr(
 			new ColorSelector("Color", CoordPercent(0.5f, 0.4f),
