@@ -46,7 +46,7 @@ bool ControlsEx::init(Composite& rootNode) {
 
 	CheckBoxPtr checkbox = CheckBoxPtr(
 			new CheckBox("Check", CoordPX(10.0f, 100.0f),
-					CoordPercent(0.4f, 0.07f), false));
+					CoordPercent(0.4f, 0.07f), false,true));
 	rootNode.add(checkbox);
 	SelectionPtr selection = SelectionPtr(
 			new Selection("SF District", CoordPX(5, 350), CoordPX(200, 30),
@@ -58,7 +58,7 @@ bool ControlsEx::init(Composite& rootNode) {
 	rootNode.add(selection);
 	ToggleBoxPtr togglebox = ToggleBoxPtr(
 			new ToggleBox("Toggle", CoordPX(200.0f, 40.0f),
-					CoordPercent(0.4f, 0.07f), false));
+					CoordPercent(0.4f, 0.07f), false,true));
 	rootNode.add(togglebox);
 
 	TextButtonPtr textButton = TextButtonPtr(

@@ -56,6 +56,7 @@
 #include "../../include/example/ExpandTreeEx.h"
 #include "../../include/example/OneEuroFilterEx.h"
 #include "../../include/example/TabPaneEx.h"
+#include "../../include/example/ParameterPaneEx.h"
 #include <cstring>
 
 /*
@@ -132,7 +133,7 @@ bool SANITY_CHECK() {
 	return ret;
 }
 int main(int argc, char *argv[]) {
-	const int N = 37;
+	const int N = 38;
 	std::array<ExamplePtr,N> apps = { MAKE_EXAMPLE(UnitsEx), MAKE_EXAMPLE(CompositeEx),
 			MAKE_EXAMPLE(EventsEx), MAKE_EXAMPLE(DragEx), MAKE_EXAMPLE(TweenEx),
 			MAKE_EXAMPLE(ImageEx), MAKE_EXAMPLE(ControlsEx), MAKE_EXAMPLE(
@@ -149,7 +150,9 @@ int main(int argc, char *argv[]) {
 					LocatorEx), MAKE_EXAMPLE(GraphEx), MAKE_EXAMPLE(
 					WindowPaneEx), MAKE_EXAMPLE(SplineEx), MAKE_EXAMPLE(
 					DistanceFieldEx), MAKE_EXAMPLE(ExpandTreeEx),
-					MAKE_EXAMPLE(DataFlowEx),MAKE_EXAMPLE(ForceDirectedGraphEx),MAKE_EXAMPLE(OneEuroFilterEx),MAKE_EXAMPLE(TabPaneEx)};
+					MAKE_EXAMPLE(DataFlowEx),MAKE_EXAMPLE(ForceDirectedGraphEx),
+		MAKE_EXAMPLE(OneEuroFilterEx),MAKE_EXAMPLE(TabPaneEx),
+		MAKE_EXAMPLE(ParameterPaneEx)};
 	std::sort(apps.begin(),apps.end(),[=](const ExamplePtr& a,const ExamplePtr& b){
 		return std::lexicographical_compare(a->name.begin(), a->name.end(), b->name.begin(), b->name.end());
 	});

@@ -45,25 +45,40 @@ bool CheckBox::handleMouseDown(AlloyContext* context, const InputEvent& event) {
 	return false;
 }
 CheckBox::CheckBox(const std::string& label, const AUnit2D& position,
-		const AUnit2D& dimensions, bool checked) :
+		const AUnit2D& dimensions, bool checked,bool showText) :
 		Composite(label, position, dimensions), checked(checked) {
 	this->aspectRatio = 4.0f;
 	CompositePtr valueContainer = MakeComposite("Check Bounds",
 			CoordPerPX(0.0f, 0.0f, 5.0f, 5.0f),
 			CoordPerPX(1.0f, 1.0f, -10.0f, -10.0f));
-	checkLabel = MakeTextLabel(label, CoordPercent(0.0f, 0.0f),
+	if (showText) {
+		checkLabel = MakeTextLabel(label, CoordPercent(0.0f, 0.0f),
 			CoordPercent(1.0f, 1.0f), FontType::Bold, UnitPercent(1.0f),
 			AlloyApplicationContext()->theme.LIGHT_TEXT.toRGBA(),
 			HorizontalAlignment::Left, VerticalAlignment::Middle);
-	valueLabel = MakeTextLabel(CodePointToUTF8(0xf00c),
+		valueLabel = MakeTextLabel(CodePointToUTF8(0xf00c),
 			CoordPercent(1.0f, 0.0f), CoordPercent(0.0f, 1.0f), FontType::Icon,
 			UnitPercent(1.0f),
 			AlloyApplicationContext()->theme.LIGHT_TEXT.toRGBA(),
 			HorizontalAlignment::Center, VerticalAlignment::Middle);
-	valueLabel->setAspectRatio(1.0f);
-	valueLabel->setOrigin(Origin::TopRight);
-	valueLabel->setAspectRule(AspectRule::FixedHeight);
-	valueContainer->add(checkLabel);
+		valueLabel->setAspectRatio(1.0f);
+		valueLabel->setOrigin(Origin::TopRight);
+		valueLabel->setAspectRule(AspectRule::FixedHeight);
+	}
+	else {
+		valueLabel = MakeTextLabel(CodePointToUTF8(0xf00c),
+			CoordPercent(1.0f, 0.0f), CoordPercent(0.0f, 1.0f), FontType::Icon,
+			UnitPercent(1.0f),
+			AlloyApplicationContext()->theme.LIGHT_TEXT.toRGBA(),
+			HorizontalAlignment::Center, VerticalAlignment::Middle);
+		valueLabel->setAspectRatio(1.0f);
+		valueLabel->setOrigin(Origin::TopRight);
+		valueLabel->setAspectRule(AspectRule::FixedHeight);
+	}
+
+	if (showText) {
+		valueContainer->add(checkLabel);
+	}
 	valueContainer->add(valueLabel);
 	add(valueContainer);
 	this->valueLabel->textColor =
@@ -78,10 +93,16 @@ CheckBox::CheckBox(const std::string& label, const AUnit2D& position,
 			[this](AlloyContext* context, const InputEvent& event) {
 				return handleMouseDown(context, event);
 			};
-	checkLabel->onMouseDown =
+	valueContainer->onMouseDown =
+		[this](AlloyContext* context, const InputEvent& event) {
+		return handleMouseDown(context, event);
+	};
+	if (showText) {
+		checkLabel->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& event) {
-				return handleMouseDown(context, event);
-			};
+			return handleMouseDown(context, event);
+		};
+	} 
 }
 void CheckBox::setValue(bool value) {
 	this->checked = value;
@@ -95,9 +116,8 @@ void CheckBox::draw(AlloyContext* context) {
 	box2px bounds = getBounds();
 	bool hover = context->isMouseContainedIn(this);
 	if (hover) {
-
 	} else {
-		checkLabel->textColor = MakeColor(context->theme.LIGHT_TEXT);
+		if(checkLabel.get()!=nullptr)checkLabel->textColor = MakeColor(context->theme.LIGHT_TEXT);
 	}
 	nvgBeginPath(nvg);
 	nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
@@ -150,16 +170,18 @@ bool ToggleBox::handleMouseDown(AlloyContext* context,
 	return false;
 }
 ToggleBox::ToggleBox(const std::string& label, const AUnit2D& position,
-		const AUnit2D& dimensions, bool checked) :
+		const AUnit2D& dimensions, bool checked,bool showText) :
 		Composite(label, position, dimensions), toggledOn(checked) {
 	this->aspectRatio = 4.0f;
-	CompositePtr valueContainer = MakeComposite("Check Bounds",
+	CompositePtr valueContainer=MakeComposite("Check Bounds",
 			CoordPerPX(0.0f, 0.0f, 5.0f, 5.0f),
 			CoordPerPX(1.0f, 1.0f, -10.0f, -10.0f));
-	toggleLabel = MakeTextLabel(label, CoordPercent(0.0f, 0.0f),
+	if (showText) {
+		toggleLabel = MakeTextLabel(label, CoordPercent(0.0f, 0.0f),
 			CoordPercent(1.0f, 1.0f), FontType::Bold, UnitPercent(1.0f),
 			AlloyApplicationContext()->theme.LIGHT_TEXT.toRGBA(),
 			HorizontalAlignment::Left, VerticalAlignment::Middle);
+	}
 	onLabel = MakeTextLabel("ON", CoordPercent(0.2f, 0.0f),
 			CoordPercent(0.3f, 1.0f), FontType::Bold, UnitPerPX(1.0f, -4.0f),
 			AlloyApplicationContext()->theme.LIGHT_TEXT,
@@ -169,14 +191,21 @@ ToggleBox::ToggleBox(const std::string& label, const AUnit2D& position,
 			AlloyApplicationContext()->theme.DARK_TEXT,
 			HorizontalAlignment::Center, VerticalAlignment::Middle);
 
-	clickRegion = MakeComposite("tog select", CoordPercent(1.0f, 0.0f),
+	if (showText) {
+		clickRegion = MakeComposite("tog select", CoordPercent(1.0f, 0.0f),
 			CoordPercent(0.42f, 1.0f));
-	clickRegion->setOrigin(Origin::TopRight);
-	clickRegion->setAspectRatio(2.5f);
-	clickRegion->setAspectRule(AspectRule::FixedHeight);
+		clickRegion->setOrigin(Origin::TopRight);
+		clickRegion->setAspectRatio(2.5f);
+		clickRegion->setAspectRule(AspectRule::FixedHeight);
+	}
+	else {
+		clickRegion = MakeComposite("tog select", CoordPercent(0.0f, 0.0f),CoordPercent(1.0f, 1.0f));
+	}
 	clickRegion->add(onLabel);
 	clickRegion->add(offLabel);
-	valueContainer->add(toggleLabel);
+	if (showText) {
+		valueContainer->add(toggleLabel);
+	}
 	valueContainer->add(clickRegion);
 	add(valueContainer);
 	onLabel->setVisible(this->toggledOn);
@@ -194,10 +223,12 @@ ToggleBox::ToggleBox(const std::string& label, const AUnit2D& position,
 			[this](AlloyContext* context, const InputEvent& event) {
 				return handleMouseDown(context, event);
 			};
-	toggleLabel->onMouseDown =
+	if (showText) {
+		toggleLabel->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& event) {
-				return handleMouseDown(context, event);
-			};
+			return handleMouseDown(context, event);
+		};
+	}
 	Region::onMouseDown =
 			[this](AlloyContext* context, const InputEvent& event) {
 				return handleMouseDown(context, event);
@@ -213,10 +244,13 @@ void ToggleBox::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
 	bool hover = context->isMouseContainedIn(this);
-	if (hover) {
-		toggleLabel->textColor = MakeColor(context->theme.HIGHLIGHT);
-	} else {
-		toggleLabel->textColor = MakeColor(context->theme.LIGHT_TEXT);
+	if (toggleLabel.get()!=nullptr) {
+		if (hover) {
+			toggleLabel->textColor = MakeColor(context->theme.HIGHLIGHT);
+		}
+		else {
+			toggleLabel->textColor = MakeColor(context->theme.LIGHT_TEXT);
+		}
 	}
 	nvgBeginPath(nvg);
 	nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
@@ -1144,35 +1178,53 @@ void VerticalSlider::draw(AlloyContext* context) {
 	}
 }
 ColorSelector::ColorSelector(const std::string& name, const AUnit2D& pos,
-		const AUnit2D& dims) :
+		const AUnit2D& dims,bool showText) :
 		Composite(name, pos, dims) {
 	CompositePtr valueContainer = MakeComposite("Check Bounds",
 			CoordPerPX(0.0f, 0.0f, 5.0f, 5.0f),
 			CoordPerPX(1.0f, 1.0f, -10.0f, -10.0f));
-	textLabel = MakeTextLabel(name, CoordPercent(0.0f, 0.0f),
+	if (showText) {
+		textLabel = MakeTextLabel(name, CoordPercent(0.0f, 0.0f),
 			CoordPercent(1.0f, 1.0f), FontType::Bold, UnitPercent(1.0f),
 			AlloyApplicationContext()->theme.LIGHT_TEXT,
 			HorizontalAlignment::Left, VerticalAlignment::Middle);
+	}
 	static std::shared_ptr<CheckerboardGlyph> checkerboard;
 
 	if (checkerboard.get() == nullptr) {
-		checkerboard = std::shared_ptr<CheckerboardGlyph>(
+		if (showText) {
+			checkerboard = std::shared_ptr<CheckerboardGlyph>(
 				new CheckerboardGlyph(64, 64, 8, 8,
-						AlloyApplicationContext().get()));
+					AlloyApplicationContext().get()));
+		}
+		else {
+			checkerboard = std::shared_ptr<CheckerboardGlyph>(
+				new CheckerboardGlyph(64*4, 64, 8*4, 8,
+					AlloyApplicationContext().get()));
+		}
 	}
 	colorLabel = std::shared_ptr<GlyphRegion>(
 			new GlyphRegion("Color", checkerboard));
 
 	colorLabel->glyph = checkerboard;
-	colorLabel->position = CoordPerPX(1.0f, 0.0f, -4.0f, 4.0f);
-	colorLabel->dimensions = CoordPerPX(0.0f, 1.0f, 0.0f, -8.0f);
 	colorLabel->backgroundColor = MakeColor(COLOR_BLACK);
 	colorLabel->foregroundColor = MakeColor(255, 128, 32, 255);
 	colorLabel->borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
 	colorLabel->borderWidth = UnitPX(1.0f);
-	colorLabel->setAspectRatio(1.0f);
 	colorLabel->setAspectRule(AspectRule::FixedHeight);
-	colorLabel->setOrigin(Origin::TopRight);
+
+	if (showText) {
+		colorLabel->position = CoordPerPX(1.0f, 0.0f, -4.0f, 4.0f);
+		colorLabel->dimensions = CoordPerPX(0.0f, 1.0f, 0.0f, -8.0f);
+		colorLabel->setOrigin(Origin::TopRight);
+		colorLabel->setAspectRatio(1.0f);
+	}
+	else {
+		colorLabel->position = CoordPercent(0.5f,0.5f);
+		colorLabel->dimensions = CoordPercent(1.0f, 1.0f);
+		colorLabel->setAspectRatio(4.0f);
+		colorLabel->setOrigin(Origin::MiddleCenter);
+	}
 	colorWheel = ColorWheelPtr(
 			new ColorWheel("Color Wheel", CoordPX(0.0f, 0.0f),
 					CoordPerPX(1.0f, 0.0f, 0.0f, 300.0f)));
@@ -1190,19 +1242,20 @@ ColorSelector::ColorSelector(const std::string& name, const AUnit2D& pos,
 				}
 				return false;
 			};
-	textLabel->onMouseDown =
+	if (showText) {
+		textLabel->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& e) {
-				if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
-					if (!colorSelectionPanel->isVisible()) {
-						colorWheel->reset();
-					}
-					colorSelectionPanel->setVisible(true);
-					context->getGlassPane()->setVisible(true);
-					return true;
+			if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
+				if (!colorSelectionPanel->isVisible()) {
+					colorWheel->reset();
 				}
-				return false;
-			};
-
+				colorSelectionPanel->setVisible(true);
+				context->getGlassPane()->setVisible(true);
+				return true;
+			}
+			return false;
+		};
+	}
 	colorSelectionPanel = MakeComposite("Color Selection Panel",
 			CoordPerPX(0.5f, 0.5, 0.0f, 0.0f),
 			CoordPX(
@@ -1347,7 +1400,9 @@ ColorSelector::ColorSelector(const std::string& name, const AUnit2D& pos,
 			};
 	colorSelectionPanel->add(cancelButton);
 	Application::addListener(colorSelectionPanel.get());
-	add(textLabel);
+	if (showText) {
+		add(textLabel);
+	}
 	add(colorLabel);
 	AlloyApplicationContext()->getGlassPane()->add(colorSelectionPanel);
 	setColor(*colorLabel->foregroundColor);
@@ -1373,6 +1428,9 @@ void ColorSelector::setColor(const Color& c) {
 	lumSlider->setValue(hsv.z);
 	alphaSlider->setValue(c.a);
 	updateColorSliders(c);
+	if (onSelect) {
+		onSelect(c);
+	}
 }
 Color ColorSelector::getColor() {
 	return colorWheel->getSelectedColor();
@@ -1649,11 +1707,11 @@ void ColorSelector::draw(AlloyContext* context) {
 		*colorLabel->foregroundColor = colorWheel->getSelectedColor();
 	}
 	if (hover) {
-		textLabel->textColor = MakeColor(context->theme.HIGHLIGHT);
+		if(textLabel.get()!=nullptr)textLabel->textColor = MakeColor(context->theme.HIGHLIGHT);
 		colorLabel->borderWidth = UnitPX(2.0f);
 		colorLabel->borderColor = MakeColor(context->theme.HIGHLIGHT);
 	} else {
-		textLabel->textColor = MakeColor(context->theme.LIGHT_TEXT);
+		if (textLabel.get() != nullptr)textLabel->textColor = MakeColor(context->theme.LIGHT_TEXT);
 		colorLabel->borderWidth = UnitPX(1.0f);
 		colorLabel->borderColor = MakeColor(context->theme.NEUTRAL);
 	}

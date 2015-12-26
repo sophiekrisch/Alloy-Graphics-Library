@@ -416,6 +416,7 @@ struct GlyphRegion: public Region {
 struct TextLabel: public Region {
 protected:
 	std::string label;
+	bool truncate=true;
 public:
 	virtual pixel2 getTextDimensions(AlloyContext* context);
 	HorizontalAlignment horizontalAlignment = HorizontalAlignment::Left;
@@ -429,6 +430,9 @@ public:
 			const VerticalAlignment& verticalAlignment) {
 		this->horizontalAlignment = horizontalAlignment;
 		this->verticalAlignment = verticalAlignment;
+	}
+	void setTruncate(bool t) {
+		truncate = t;
 	}
 	void setLabel(const std::string& label) {
 		this->label = label;
@@ -561,6 +565,9 @@ public:
 	Number getValue() const {
 		return numberValue;
 	}
+	Number& getValue() {
+		return numberValue;
+	}
 	std::function<void(NumberField*)> onTextEntered;
 	std::function<void(NumberField*)> onKeyInput;
 };
@@ -584,7 +591,6 @@ public:
 	void setMaxDisplayEntries(int mx) {
 		maxDisplayEntries = mx;
 	}
-
 	virtual box2px getBounds(bool includeBounds = true) const override;
 	std::string getSelection(int index) {
 		return (selectedIndex >= 0) ? options[selectedIndex] : name;

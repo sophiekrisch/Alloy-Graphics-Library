@@ -80,12 +80,12 @@ bool ExpandBarEx::init(Composite& rootNode) {
 
 	motionBlurRegion->setOrientation(Orientation::Vertical,pixel2(2.0f,2.0f),pixel2(2.0f,2.0f));
 	for(int i=0;i<8;i++){
-		motionBlurRegion->add(ToggleBoxPtr(new ToggleBox(MakeString()<<"Option "<<i,CoordPX(2.0f,0.0f),CoordPerPX(1.0f,0.0f,-Composite::scrollBarSize-2.0f,30.0f))));
+		motionBlurRegion->add(ToggleBoxPtr(new ToggleBox(MakeString()<<"Option "<<i,CoordPX(2.0f,0.0f),CoordPerPX(1.0f,0.0f,-Composite::scrollBarSize-2.0f,30.0f),true,true)));
 	}
 
 	lensBlurRegion->setOrientation(Orientation::Vertical,pixel2(2.0f,2.0f),pixel2(2.0f,2.0f));
 	for(int i=0;i<8;i++){
-		lensBlurRegion->add(CheckBoxPtr(new CheckBox(MakeString()<<"Check "<<i,CoordPX(2.0f,0.0f),CoordPerPX(1.0f,0.0f,-Composite::scrollBarSize-2.0f,30.0f))));
+		lensBlurRegion->add(CheckBoxPtr(new CheckBox(MakeString()<<"Check "<<i,CoordPX(2.0f,0.0f),CoordPerPX(1.0f,0.0f,-Composite::scrollBarSize-2.0f,30.0f),false,true)));
 	}
 
 	gaussianBlurRegion->setOrientation(Orientation::Vertical,pixel2(2.0f,2.0f),pixel2(2.0f,2.0f));

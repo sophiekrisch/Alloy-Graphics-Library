@@ -175,7 +175,7 @@ bool ForceDirectedGraphEx::init(Composite& rootNode) {
 				pixel2(5.0f));
 		ToggleBoxPtr enabledToggle = ToggleBoxPtr(
 				new ToggleBox("Force Enabled", CoordPX(5.0f, 5.0f),
-						CoordPerPX(1.0f, 0.0f, -10.0f, 25.0f), true));
+						CoordPerPX(1.0f, 0.0f, -10.0f, 25.0f), true,true));
 		enabledToggle->onChange = [=](bool b) {
 			f->setEnabled(b);
 		};

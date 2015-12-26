@@ -84,7 +84,7 @@ public:
 	}
 	void setValue(bool value);
 	CheckBox(const std::string& label, const AUnit2D& position,
-			const AUnit2D& dimensions, bool checked = false);
+			const AUnit2D& dimensions, bool checked ,bool showText=true);
 	virtual void draw(AlloyContext* context) override;
 };
 class ToggleBox: public Composite {
@@ -103,7 +103,7 @@ public:
 
 	void setValue(bool value);
 	ToggleBox(const std::string& label, const AUnit2D& position,
-			const AUnit2D& dimensions, bool toggledOn = false);
+			const AUnit2D& dimensions, bool toggledOn ,bool showText=true);
 	virtual void draw(AlloyContext* context) override;
 };
 class SliderHandle: public Region {
@@ -348,10 +348,17 @@ private:
 	std::shared_ptr<ColorWheel> colorWheel;
 	void updateColorSliders(const Color& c);
 public:
+	std::function<void(const Color& c)> onSelect;
 	void setColor(const Color& color);
 	Color getColor();
+	inline void setValue(const Color& color) {
+		setColor(color);
+	}
+	inline Color getValue() {
+		return getColor();
+	}
 	ColorSelector(const std::string& name, const AUnit2D& pos,
-			const AUnit2D& dims);
+			const AUnit2D& dims,bool showText=true);
 	virtual void draw(AlloyContext* context) override;
 };
 class ExpandRegion: public Composite {

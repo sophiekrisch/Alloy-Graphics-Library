@@ -1406,8 +1406,14 @@ void TextLabel::draw(AlloyContext* context) {
 		offset.y = bounds.dimensions.y - lineWidth;
 		break;
 	}
+	if (truncate) {
+		pushScissor(nvg, getCursorBounds());
+	}
 	drawText(nvg, bounds.position + offset, label, fontStyle, *textColor,
 			*textAltColor);
+	if (truncate) {
+		popScissor(nvg);
+	}
 	if (borderColor->a > 0) {
 		nvgLineJoin(nvg, NVG_ROUND);
 		nvgBeginPath(nvg);

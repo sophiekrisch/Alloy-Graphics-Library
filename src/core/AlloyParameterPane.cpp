@@ -1,0 +1,117 @@
+/*
+* Copyright(C) 2015, Blake C. Lucas, Ph.D. (img.science@gmail.com)
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+* The above copyright notice and this permission notice shall be included in
+* all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+* THE SOFTWARE.
+*/
+#include "AlloyParameterPane.h"
+namespace aly {
+	ParameterPane::ParameterPane(const std::string& name, const AUnit2D& pos, const AUnit2D& dim, float entryHeight):Composite(name,pos,dim),entryHeight(entryHeight) {
+		setOrientation(Orientation::Vertical);
+	}
+	void ParameterPane::addNumberField(const std::string& label, Number& value,float aspect) {
+		float entryWidth = aspect * entryHeight;
+		CompositePtr comp = CompositePtr(new Composite(label+"_param",CoordPX(0,0),CoordPerPX(1.0f,0.0f,0.0f,entryHeight)));
+		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label,CoordPX(0.0f,0.0f),CoordPerPX(1.0f,0.0f,-entryWidth,entryHeight)));
+		NumberFieldPtr valueRegion = NumberFieldPtr(new NumberField(label, CoordPerPX(1.0f, 0.0f, -entryWidth, 0.0f), CoordPX(entryWidth, entryHeight), value.type()));
+		valueRegion->setNumberValue(value);
+		comp->add(labelRegion);
+		comp->add(valueRegion);
+		std::shared_ptr<AnyInterface> ref = std::shared_ptr<AnyInterface>(new AnyValue<Number*>(&value));
+		values.push_back(ref);
+		valueRegion->onTextEntered = [=](NumberField* field) {
+			*(ref->getValue<Number*>())=field->getValue();
+		};
+		Composite::add(comp);
+	}
+	void ParameterPane::addColorField(const std::string& label, Color& value, float aspect) {
+		float entryWidth = aspect * entryHeight;
+		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, -entryWidth-2.0f, entryHeight)));
+		ColorSelectorPtr valueRegion = ColorSelectorPtr(new ColorSelector(label, CoordPerPX(1.0f, 0.0f, -entryWidth-2.0f, 0.0f), CoordPX(entryWidth, entryHeight),false));
+		valueRegion->setColor(value);
+		comp->add(labelRegion);
+		comp->add(valueRegion);
+		std::shared_ptr<AnyInterface> ref = std::shared_ptr<AnyInterface>(new AnyValue<Color*>(&value));
+		values.push_back(ref);
+		valueRegion->onSelect = [=](const Color& c) {
+			*(ref->getValue<Color*>()) = c;
+		};
+		Composite::add(comp);
+	}
+	void ParameterPane::addSelectionField(const std::string& label,int& selectedIndex, const std::vector<std::string>& options, float aspect) {
+		float entryWidth = aspect * entryHeight;
+		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, -entryWidth - 2.0f, entryHeight)));
+		SelectionPtr valueRegion = SelectionPtr(new Selection(label, CoordPerPX(1.0f, 0.0f, -entryWidth-2.0f, 0.0f), CoordPX(entryWidth, entryHeight), options));
+		valueRegion->setSelectionIndex(selectedIndex);
+		comp->add(labelRegion);
+		comp->add(valueRegion);
+		std::shared_ptr<AnyInterface> ref = std::shared_ptr<AnyInterface>(new AnyValue<int*>(&selectedIndex));
+		values.push_back(ref);
+		valueRegion->onSelect=[=](int selection){
+			*(ref->getValue<int*>()) = selection;
+		};
+		Composite::add(comp);
+	}
+	void ParameterPane::addToggleBox(const std::string& label, bool& value, float aspect) {
+		float entryWidth = aspect * entryHeight;
+		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, -entryWidth, entryHeight)));
+		ToggleBoxPtr valueRegion = ToggleBoxPtr(new ToggleBox(label, CoordPerPX(1.0f, 0.0f, -entryWidth, 0.0f), CoordPX(entryWidth, entryHeight),value,false));
+		comp->add(labelRegion);
+		comp->add(valueRegion);
+		std::shared_ptr<AnyInterface> ref = std::shared_ptr<AnyInterface>(new AnyValue<bool*>(&value));
+		values.push_back(ref);
+		valueRegion->onChange = [=](bool value) {
+			*(ref->getValue<bool*>()) = value;
+		};
+		Composite::add(comp);
+	}
+	void ParameterPane::addCheckBox(const std::string& label, bool& value, float aspect) {
+		float entryWidth = aspect * entryHeight;
+		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, -entryWidth, entryHeight)));
+		CheckBoxPtr valueRegion = CheckBoxPtr(new CheckBox(label, CoordPerPX(1.0f, 0.0f, -entryWidth, 0.0f), CoordPX(entryWidth, entryHeight),value,false));
+		comp->add(labelRegion);
+		comp->add(valueRegion);
+		std::shared_ptr<AnyInterface> ref = std::shared_ptr<AnyInterface>(new AnyValue<bool*>(&value));
+		values.push_back(ref);
+		valueRegion->onChange = [=](bool value) {
+			*(ref->getValue<bool*>()) = value;
+		};
+		Composite::add(comp);
+	}
+	void ParameterPane::addFileField(const std::string& label, std::string& file, float aspect) {
+		float entryWidth = aspect * entryHeight;
+		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, -entryWidth - 2.0f, entryHeight)));
+		FileSelectorPtr valueRegion = FileSelectorPtr(new FileSelector(label, CoordPerPX(1.0f, 0.0f, -entryWidth, 0.0f), CoordPX(entryWidth, entryHeight)));
+		valueRegion->setValue(file);
+		comp->add(labelRegion);
+		comp->add(valueRegion);
+		std::shared_ptr<AnyInterface> ref = std::shared_ptr<AnyInterface>(new AnyValue<std::string*>(&file));
+		values.push_back(ref);
+		valueRegion->onChange = [=](const std::string& value) {
+			*(ref->getValue<std::string*>()) = value;
+		};
+		Composite::add(comp);
+	}
+	void ParameterPane::addMultiFileField(const std::string& label, std::vector<std::string>& files, float aspect) {
+
+	}
+}

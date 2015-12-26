@@ -49,6 +49,7 @@
     <ClCompile Include="..\..\src\example\MeshVertexColorEx.cpp" />
     <ClCompile Include="..\..\src\example\MeshWireframeEx.cpp" />
     <ClCompile Include="..\..\src\example\OneEuroFilterEx.cpp" />
+    <ClCompile Include="..\..\src\example\ParameterPaneEx.cpp" />
     <ClCompile Include="..\..\src\example\PoissonBlendEx.cpp" />
     <ClCompile Include="..\..\src\example\PoissonInpaintEx.cpp" />
     <ClCompile Include="..\..\src\example\SplineEx.cpp" />
@@ -88,6 +89,7 @@
     <ClInclude Include="..\..\include\example\MeshVertexColorEx.h" />
     <ClInclude Include="..\..\include\example\MeshWireframeEx.h" />
     <ClInclude Include="..\..\include\example\OneEuroFilterEx.h" />
+    <ClInclude Include="..\..\include\example\ParameterPaneEx.h" />
     <ClInclude Include="..\..\include\example\PoissonBlendEx.h" />
     <ClInclude Include="..\..\include\example\PoissonInpaintEx.h" />
     <ClInclude Include="..\..\include\example\SplineEx.h" />
@@ -187,7 +189,7 @@
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>glu32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
@@ -204,7 +206,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>glu32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
@@ -224,7 +226,7 @@
       <MinimalRebuild>true</MinimalRebuild>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
@@ -246,7 +248,7 @@
       <MinimalRebuild>true</MinimalRebuild>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>

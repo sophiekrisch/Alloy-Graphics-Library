@@ -39,6 +39,7 @@
     <ClCompile Include="..\..\src\core\AlloyMesh.cpp" />
     <ClCompile Include="..\..\src\core\AlloyMeshPrimitives.cpp" />
     <ClCompile Include="..\..\src\core\AlloyNumber.cpp" />
+    <ClCompile Include="..\..\src\core\AlloyParameterPane.cpp" />
     <ClCompile Include="..\..\src\core\AlloyPLY.cpp" />
     <ClCompile Include="..\..\src\core\AlloySimulation.cpp" />
     <ClCompile Include="..\..\src\core\AlloySparseMatrix.cpp" />
@@ -91,6 +92,7 @@
     <ClInclude Include="..\..\include\core\AlloyMesh.h" />
     <ClInclude Include="..\..\include\core\AlloyMeshPrimitives.h" />
     <ClInclude Include="..\..\include\core\AlloyNumber.h" />
+    <ClInclude Include="..\..\include\core\AlloyParameterPane.h" />
     <ClInclude Include="..\..\include\core\AlloyPLY.h" />
     <ClInclude Include="..\..\include\core\AlloySimulation.h" />
     <ClInclude Include="..\..\include\core\AlloySparseMatrix.h" />

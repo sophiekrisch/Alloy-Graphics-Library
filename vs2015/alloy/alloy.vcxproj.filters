@@ -147,6 +147,9 @@
     <ClCompile Include="..\..\src\core\ForceDirectedGraph.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\core\AlloyParameterPane.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\core\Alloy.h">
@@ -351,6 +354,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\core\OneEuroFilter.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\core\AlloyParameterPane.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
