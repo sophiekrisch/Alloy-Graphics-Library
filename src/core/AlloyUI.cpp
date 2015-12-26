@@ -1583,12 +1583,21 @@ TextField::TextField(const std::string& name) :
 		Composite(name), label(name), value("") {
 	Application::addListener(this);
 	lastTime = std::chrono::high_resolution_clock::now();
+	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
+	borderWidth = UnitPX(1.0f);
+	setRoundCorners(true);
+
 }
 TextField::TextField(const std::string& name, const AUnit2D& position,
 		const AUnit2D& dimensions) :
 		Composite(name, position, dimensions), label(name), value("") {
 	Application::addListener(this);
 	lastTime = std::chrono::high_resolution_clock::now();
+	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
+	borderWidth = UnitPX(1.0f);
+	setRoundCorners(true);
 }
 
 void TextField::handleCharacterInput(AlloyContext* context,
@@ -1738,6 +1747,7 @@ bool TextField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 }
 void TextField::draw(AlloyContext* context) {
 	float ascender, descender, lineh;
+	Region::draw(context);
 	std::vector<NVGglyphPosition> positions(value.size());
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
@@ -1755,26 +1765,8 @@ void TextField::draw(AlloyContext* context) {
 	if (hover) {
 		context->setCursor(&Cursor::TextInsert);
 	}
-	if (backgroundColor->a > 0) {
-		if (hover) {
-
-			nvgBeginPath(nvg);
-			nvgRoundedRect(nvg, x, y, w, h, context->theme.CORNER_RADIUS);
-			nvgFillColor(nvg, *backgroundColor);
-			nvgFill(nvg);
-
-		} else {
-			nvgBeginPath(nvg);
-			nvgRoundedRect(nvg, x + 1, y + 1, w - 2, h - 2,
-					context->theme.CORNER_RADIUS);
-			nvgFillColor(nvg, *backgroundColor);
-			nvgFill(nvg);
-		}
-	}
-
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
-
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	double elapsed =
 			std::chrono::duration<double>(currentTime - lastTime).count();
@@ -1784,7 +1776,6 @@ void TextField::draw(AlloyContext* context) {
 	}
 	textOffsetX = x + 2.0f * lineWidth + PADDING;
 	float textY = y;
-
 	NVGpaint bg = nvgBoxGradient(nvg, x + 1, y + 3, w - 2 * PADDING,
 			h - 2 * PADDING, context->theme.CORNER_RADIUS, 4,
 			context->theme.HIGHLIGHT.toSemiTransparent(0.5f),
@@ -1852,21 +1843,12 @@ void TextField::draw(AlloyContext* context) {
 
 		nvgMoveTo(nvg, cursorOffset, textY + h / 2 - lineh / 2 + PADDING);
 		nvgLineTo(nvg, cursorOffset, textY + h / 2 + lineh / 2 - PADDING);
-		nvgStrokeWidth(nvg, lineWidth);
+		nvgStrokeWidth(nvg, 1.0f);
 		nvgLineCap(nvg, NVG_ROUND);
 		nvgStrokeColor(nvg, context->theme.SHADOW);
 		nvgStroke(nvg);
 	}
 	popScissor(nvg);
-	if (borderColor->a > 0) {
-
-		nvgBeginPath(nvg);
-		nvgStrokeWidth(nvg, lineWidth);
-		nvgRoundedRect(nvg, x + lineWidth, y + lineWidth, w - 2 * lineWidth,
-				h - 2 * lineWidth, context->theme.CORNER_RADIUS);
-		nvgStrokeColor(nvg, *borderColor);
-		nvgStroke(nvg);
-	}
 	if (!isFocused && value.size() == 0) {
 		showDefaultLabel = true;
 	}
@@ -2482,6 +2464,11 @@ NumberField::NumberField(const std::string& name, const NumberType& numberType) 
 	lastTime = std::chrono::high_resolution_clock::now();
 	numberValue = MakeNumber(numberType, 0);
 	invalidNumberColor = MakeColor(255, 0, 0, 128);
+	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
+	borderWidth = UnitPX(1.0f);
+	setRoundCorners(true);
+
 	clear();
 }
 NumberField::NumberField(const std::string& name, const AUnit2D& position,
@@ -2492,6 +2479,11 @@ NumberField::NumberField(const std::string& name, const AUnit2D& position,
 	invalidNumberColor = MakeColor(255, 0, 0, 128);
 	lastTime = std::chrono::high_resolution_clock::now();
 	numberValue = MakeNumber(numberType, 0);
+	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
+	borderWidth = UnitPX(1.0f);
+	setRoundCorners(true);
+
 	clear();
 }
 void NumberField::handleCharacterInput(AlloyContext* context,
@@ -2646,6 +2638,7 @@ bool NumberField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 }
 void NumberField::draw(AlloyContext* context) {
 	float ascender, descender, lineh;
+	Region::draw(context);
 	std::vector<NVGglyphPosition> positions(value.size());
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
@@ -2661,20 +2654,6 @@ void NumberField::draw(AlloyContext* context) {
 	isFocused = f;
 	if (hover) {
 		context->setCursor(&Cursor::TextInsert);
-	}
-	if (backgroundColor->a > 0) {
-		if (hover) {
-			nvgBeginPath(nvg);
-			nvgRoundedRect(nvg, x, y, w, h, context->theme.CORNER_RADIUS);
-			nvgFillColor(nvg, *backgroundColor);
-			nvgFill(nvg);
-		} else {
-			nvgBeginPath(nvg);
-			nvgRoundedRect(nvg, x + 1, y + 1, w - 2, h - 2,
-					context->theme.CORNER_RADIUS);
-			nvgFillColor(nvg, *backgroundColor);
-			nvgFill(nvg);
-		}
 	}
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
@@ -2758,22 +2737,12 @@ void NumberField::draw(AlloyContext* context) {
 		nvgBeginPath(nvg);
 		nvgMoveTo(nvg, cursorOffset, textY + h / 2 - lineh / 2 + PADDING);
 		nvgLineTo(nvg, cursorOffset, textY + h / 2 + lineh / 2 - PADDING);
-		nvgStrokeWidth(nvg, lineWidth);
+		nvgStrokeWidth(nvg, 1.0f);
 		nvgLineCap(nvg, NVG_ROUND);
 		nvgStrokeColor(nvg, context->theme.SHADOW);
 		nvgStroke(nvg);
 	}
 	popScissor(nvg);
-
-	if (borderColor->a > 0) {
-
-		nvgBeginPath(nvg);
-		nvgStrokeWidth(nvg, lineWidth);
-		nvgRoundedRect(nvg, x + lineWidth, y + lineWidth, w - 2 * lineWidth,
-				h - 2 * lineWidth, context->theme.CORNER_RADIUS);
-		nvgStrokeColor(nvg, *borderColor);
-		nvgStroke(nvg);
-	}
 	if (!isFocused && value.size() == 0) {
 		showDefaultLabel = true;
 	}
@@ -2788,10 +2757,8 @@ FileField::FileField(const std::string& name, const AUnit2D& position,
 	selectionBox->setVisible(false);
 	selectionBox->position = CoordPerPX(0.0f, 0.0f, 2.0f, 0.0f);
 	selectionBox->dimensions = CoordPerPX(1.0f, 0.8f, -4.0f, 0.0f);
-	selectionBox->backgroundColor = MakeColor(
-			AlloyApplicationContext()->theme.DARK);
-	selectionBox->borderColor = MakeColor(
-			AlloyApplicationContext()->theme.LIGHT_TEXT);
+	selectionBox->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	selectionBox->borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
 	selectionBox->borderWidth = UnitPX(1.0f);
 	selectionBox->textColor = MakeColor(
 			AlloyApplicationContext()->theme.LIGHT_TEXT);
@@ -2937,7 +2904,7 @@ bool FileField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	return Region::onEventHandler(context, e);
 }
 void FileField::draw(AlloyContext* context) {
-
+	Region::draw(context);
 	float ascender, descender, lineh;
 	std::vector<NVGglyphPosition> positions(value.size());
 	NVGcontext* nvg = context->nvgContext;
@@ -2955,22 +2922,6 @@ void FileField::draw(AlloyContext* context) {
 	if (!isFocused) {
 		showDefaultLabel = true;
 	}
-	if (backgroundColor->a > 0) {
-		if (hover) {
-			nvgBeginPath(nvg);
-			nvgRoundedRect(nvg, x, y, w, h, context->theme.CORNER_RADIUS);
-			nvgFillColor(nvg, *backgroundColor);
-			nvgFill(nvg);
-
-		} else {
-			nvgBeginPath(nvg);
-			nvgRoundedRect(nvg, x + 1, y + 1, w - 2, h - 2,
-					context->theme.CORNER_RADIUS);
-			nvgFillColor(nvg, *backgroundColor);
-			nvgFill(nvg);
-		}
-	}
-
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
 
@@ -3066,20 +3017,12 @@ void FileField::draw(AlloyContext* context) {
 				+ (cursorStart ? positions[cursorStart - 1].maxx - 1 : 0);
 		nvgMoveTo(nvg, xOffset, textY + h / 2 - lineh / 2 + PADDING);
 		nvgLineTo(nvg, xOffset, textY + h / 2 + lineh / 2 - PADDING);
-		nvgStrokeWidth(nvg, lineWidth);
+		nvgStrokeWidth(nvg, 1.0f);
 		nvgLineCap(nvg, NVG_ROUND);
 		nvgStrokeColor(nvg, context->theme.SHADOW);
 		nvgStroke(nvg);
 	}
 	popScissor(nvg);
-	if (borderColor->a > 0) {
-		nvgBeginPath(nvg);
-		nvgStrokeWidth(nvg, lineWidth);
-		nvgRoundedRect(nvg, x + lineWidth, y + lineWidth, w - 2 * lineWidth,
-				h - 2 * lineWidth, context->theme.CORNER_RADIUS);
-		nvgStrokeColor(nvg, *borderColor);
-		nvgStroke(nvg);
-	}
 	if (!isFocused && value.size() == 0) {
 		showDefaultLabel = true;
 	}

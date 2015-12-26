@@ -48,6 +48,10 @@ CheckBox::CheckBox(const std::string& label, const AUnit2D& position,
 		const AUnit2D& dimensions, bool checked,bool showText) :
 		Composite(label, position, dimensions), checked(checked) {
 	this->aspectRatio = 4.0f;
+	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
+	borderWidth = UnitPX(1.0f);
+	setRoundCorners(true);
 	CompositePtr valueContainer = MakeComposite("Check Bounds",
 			CoordPerPX(0.0f, 0.0f, 5.0f, 5.0f),
 			CoordPerPX(1.0f, 1.0f, -10.0f, -10.0f));
@@ -75,11 +79,37 @@ CheckBox::CheckBox(const std::string& label, const AUnit2D& position,
 		valueLabel->setOrigin(Origin::TopRight);
 		valueLabel->setAspectRule(AspectRule::FixedHeight);
 	}
+	DrawPtr checkBoundsDraw = DrawPtr(new Draw("Check Bounds", valueLabel->position, valueLabel->dimensions));
+	checkBoundsDraw->onDraw = [this](AlloyContext* context, const box2px& clickbox) {
+		NVGcontext* nvg = context->nvgContext;
+		nvgBeginPath(nvg);
+		nvgFillColor(nvg, context->theme.NEUTRAL);
+		nvgRoundedRect(nvg, clickbox.position.x, clickbox.position.y,
+			clickbox.dimensions.x, clickbox.dimensions.y,
+			context->theme.CORNER_RADIUS);
+		nvgFill(nvg);
+		bool hover = context->isMouseContainedIn(this);
+		if (hover) {
+			nvgBeginPath(nvg);
+			nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
+			nvgStrokeWidth(nvg, 2.0f);
+			nvgRoundedRect(nvg, clickbox.position.x, clickbox.position.y,
+				clickbox.dimensions.x, clickbox.dimensions.y,
+				context->theme.CORNER_RADIUS);
+			nvgStroke(nvg);
+		}
+	};
+	checkBoundsDraw->setAspectRatio(1.0f);
+	checkBoundsDraw->setOrigin(Origin::TopRight);
+	checkBoundsDraw->setAspectRule(AspectRule::FixedHeight);
 
+	checkBoundsDraw->setIgnoreCursorEvents(true);
 	if (showText) {
 		valueContainer->add(checkLabel);
 	}
+	valueContainer->add(checkBoundsDraw);
 	valueContainer->add(valueLabel);
+	
 	add(valueContainer);
 	this->valueLabel->textColor =
 			(this->checked) ?
@@ -119,42 +149,6 @@ void CheckBox::draw(AlloyContext* context) {
 	} else {
 		if(checkLabel.get()!=nullptr)checkLabel->textColor = MakeColor(context->theme.LIGHT_TEXT);
 	}
-	nvgBeginPath(nvg);
-	nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
-			bounds.dimensions.x, bounds.dimensions.y,
-			context->theme.CORNER_RADIUS);
-	nvgFillColor(nvg, context->theme.DARK);
-	nvgFill(nvg);
-
-	nvgBeginPath(nvg);
-	NVGpaint hightlightPaint = nvgBoxGradient(nvg, bounds.position.x,
-			bounds.position.y, bounds.dimensions.x, bounds.dimensions.y,
-			context->theme.CORNER_RADIUS, 2,
-			context->theme.DARK.toSemiTransparent(0), context->theme.HIGHLIGHT);
-	nvgFillPaint(nvg, hightlightPaint);
-	nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
-			bounds.dimensions.x, bounds.dimensions.y,
-			context->theme.CORNER_RADIUS);
-	nvgFill(nvg);
-
-	nvgBeginPath(nvg);
-	nvgFillColor(nvg, context->theme.NEUTRAL);
-	box2px clickbox = valueLabel->getBounds();
-	nvgRoundedRect(nvg, clickbox.position.x, clickbox.position.y,
-			clickbox.dimensions.x, clickbox.dimensions.y,
-			context->theme.CORNER_RADIUS);
-	nvgFill(nvg);
-
-	if (hover) {
-		nvgBeginPath(nvg);
-		nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
-		nvgStrokeWidth(nvg, 2.0f);
-		nvgRoundedRect(nvg, clickbox.position.x, clickbox.position.y,
-				clickbox.dimensions.x, clickbox.dimensions.y,
-				context->theme.CORNER_RADIUS);
-		nvgStroke(nvg);
-	}
-
 	Composite::draw(context);
 }
 bool ToggleBox::handleMouseDown(AlloyContext* context,
@@ -173,6 +167,11 @@ ToggleBox::ToggleBox(const std::string& label, const AUnit2D& position,
 		const AUnit2D& dimensions, bool checked,bool showText) :
 		Composite(label, position, dimensions), toggledOn(checked) {
 	this->aspectRatio = 4.0f;
+	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
+	borderWidth = UnitPX(1.0f);
+	setRoundCorners(true);
+
 	CompositePtr valueContainer=MakeComposite("Check Bounds",
 			CoordPerPX(0.0f, 0.0f, 5.0f, 5.0f),
 			CoordPerPX(1.0f, 1.0f, -10.0f, -10.0f));
@@ -190,6 +189,41 @@ ToggleBox::ToggleBox(const std::string& label, const AUnit2D& position,
 			CoordPercent(0.3f, 1.0f), FontType::Bold, UnitPerPX(1.0f, -4.0f),
 			AlloyApplicationContext()->theme.DARK_TEXT,
 			HorizontalAlignment::Center, VerticalAlignment::Middle);
+	onLabel->setTruncate(false);
+	offLabel->setTruncate(false);
+
+	DrawPtr toggleRegion = DrawPtr(new Draw("Toggle Region", CoordPX(0.0f,0.0f),CoordPercent(1.0f,1.0f)));
+	toggleRegion->setIgnoreCursorEvents(true);
+	toggleRegion->onDraw = [this](AlloyContext* context, const box2px& clickbounds) {
+		NVGcontext* nvg = context->nvgContext;
+		nvgBeginPath(nvg);
+		nvgFillColor(nvg, context->theme.NEUTRAL);
+		box2px clickbox = clickRegion->getBounds();
+		float radius = clickbox.dimensions.y / 2;
+		nvgRoundedRect(nvg, clickbox.position.x, clickbox.position.y,
+			clickbox.dimensions.x, clickbox.dimensions.y, radius);
+		nvgFill(nvg);
+		bool hover = context->isMouseContainedIn(clickRegion.get());
+		float pos;
+		if (toggledOn) {
+			pos = clickbox.position.x + clickbox.dimensions.x - radius;
+		}
+		else {
+			pos = clickbox.position.x + radius;
+		}
+		if (hover) {
+			nvgBeginPath(nvg);
+			nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
+			nvgStrokeWidth(nvg, 2.0f);
+			nvgRoundedRect(nvg, clickbox.position.x, clickbox.position.y,
+				clickbox.dimensions.x, clickbox.dimensions.y, radius);
+			nvgStroke(nvg);
+		}
+		nvgBeginPath(nvg);
+		nvgFillColor(nvg, context->theme.LIGHT);
+		nvgCircle(nvg, pos, clickbox.position.y + radius, radius - 4);
+		nvgFill(nvg);
+	};
 
 	if (showText) {
 		clickRegion = MakeComposite("tog select", CoordPercent(1.0f, 0.0f),
@@ -197,6 +231,11 @@ ToggleBox::ToggleBox(const std::string& label, const AUnit2D& position,
 		clickRegion->setOrigin(Origin::TopRight);
 		clickRegion->setAspectRatio(2.5f);
 		clickRegion->setAspectRule(AspectRule::FixedHeight);
+
+
+		toggleRegion->setOrigin(Origin::TopRight);
+		toggleRegion->setAspectRatio(2.5f);
+		toggleRegion->setAspectRule(AspectRule::FixedHeight);
 	}
 	else {
 		clickRegion = MakeComposite("tog select", CoordPercent(0.0f, 0.0f),CoordPercent(1.0f, 1.0f));
@@ -206,6 +245,7 @@ ToggleBox::ToggleBox(const std::string& label, const AUnit2D& position,
 	if (showText) {
 		valueContainer->add(toggleLabel);
 	}
+	valueContainer->add(toggleRegion);
 	valueContainer->add(clickRegion);
 	add(valueContainer);
 	onLabel->setVisible(this->toggledOn);
@@ -252,50 +292,6 @@ void ToggleBox::draw(AlloyContext* context) {
 			toggleLabel->textColor = MakeColor(context->theme.LIGHT_TEXT);
 		}
 	}
-	nvgBeginPath(nvg);
-	nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
-			bounds.dimensions.x, bounds.dimensions.y,
-			context->theme.CORNER_RADIUS);
-	nvgFillColor(nvg, context->theme.DARK);
-	nvgFill(nvg);
-
-	nvgBeginPath(nvg);
-	NVGpaint hightlightPaint = nvgBoxGradient(nvg, bounds.position.x,
-			bounds.position.y, bounds.dimensions.x, bounds.dimensions.y,
-			context->theme.CORNER_RADIUS, 2,
-			context->theme.DARK.toSemiTransparent(0), context->theme.HIGHLIGHT);
-	nvgFillPaint(nvg, hightlightPaint);
-	nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
-			bounds.dimensions.x, bounds.dimensions.y,
-			context->theme.CORNER_RADIUS);
-	nvgFill(nvg);
-
-	nvgBeginPath(nvg);
-	nvgFillColor(nvg, context->theme.NEUTRAL);
-	box2px clickbox = clickRegion->getBounds();
-	float radius = clickbox.dimensions.y / 2;
-	nvgRoundedRect(nvg, clickbox.position.x, clickbox.position.y,
-			clickbox.dimensions.x, clickbox.dimensions.y, radius);
-	nvgFill(nvg);
-	float pos;
-	if (toggledOn) {
-		pos = clickbox.position.x + clickbox.dimensions.x - radius;
-	} else {
-		pos = clickbox.position.x + radius;
-	}
-	if (hover) {
-		nvgBeginPath(nvg);
-		nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
-		nvgStrokeWidth(nvg, 2.0f);
-		nvgRoundedRect(nvg, clickbox.position.x, clickbox.position.y,
-				clickbox.dimensions.x, clickbox.dimensions.y, radius);
-		nvgStroke(nvg);
-	}
-	nvgBeginPath(nvg);
-	nvgFillColor(nvg, context->theme.LIGHT);
-	nvgCircle(nvg, pos, clickbox.position.y + radius, radius - 4);
-	nvgFill(nvg);
-
 	Composite::draw(context);
 }
 void ProgressBar::draw(AlloyContext* context) {
@@ -384,7 +380,6 @@ void TextButton::draw(AlloyContext* context) {
 	}
 
 	if (hover) {
-
 		nvgBeginPath(nvg);
 		NVGpaint hightlightPaint = nvgBoxGradient(nvg, bounds.position.x + xoff,
 				bounds.position.y + yoff, bounds.dimensions.x,
@@ -716,6 +711,8 @@ Selection::Selection(const std::string& label, const AUnit2D& position,
 	this->position = position;
 	this->dimensions = dimensions;
 	borderColor = MakeColor(COLOR_NONE);
+	backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
+	setRoundCorners(true);
 	CompositePtr valueContainer = MakeComposite(label,
 			CoordPerPX(0.0f, 0.0f, 5.0f, 5.0f),
 			CoordPerPX(1.0f, 1.0f, -10.0f, -10.0f));
@@ -813,21 +810,6 @@ void Selection::draw(AlloyContext* context) {
 			&& !context->isLeftMouseButtonDown()) {
 		hide(context);
 	}
-	if (hover) {
-		nvgBeginPath(nvg);
-		nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
-				bounds.dimensions.x, bounds.dimensions.y,
-				context->theme.CORNER_RADIUS);
-		nvgFillColor(nvg, context->theme.LIGHT_TEXT);
-		nvgFill(nvg);
-	} else {
-		nvgBeginPath(nvg);
-		nvgRoundedRect(nvg, bounds.position.x + 1, bounds.position.y + 1,
-				bounds.dimensions.x - 2, bounds.dimensions.y - 2,
-				context->theme.CORNER_RADIUS);
-		nvgFillColor(nvg, context->theme.LIGHT_TEXT);
-		nvgFill(nvg);
-	}
 	Composite::draw(context);
 }
 HorizontalSlider::HorizontalSlider(const std::string& label,
@@ -841,9 +823,12 @@ HorizontalSlider::HorizontalSlider(const std::string& label,
 	this->aspectRatio = 4.0f;
 		
 	sliderPosition = value.toDouble();
-	textColor = MakeColor(AlloyApplicationContext()->theme.DARK_TEXT);
+	textColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
-	borderColor = MakeColor(AlloyApplicationContext()->theme.HIGHLIGHT);
+	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
+	borderWidth = UnitPX(1.0f);
+	setRoundCorners(true);
+
 	sliderHandle = std::shared_ptr<SliderHandle>(
 			new SliderHandle("Scroll Handle"));
 
@@ -985,32 +970,7 @@ void HorizontalSlider::draw(AlloyContext* context) {
 	if (valueLabel.get() != nullptr) {
 		valueLabel->setLabel(labelFormatter(value));
 	}
-	NVGcontext* nvg = context->nvgContext;
-	box2px bounds = getBounds();
-	Color bgColor = *backgroundColor;
-	nvgBeginPath(nvg);
-	nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
-			bounds.dimensions.x, bounds.dimensions.y,
-			context->theme.CORNER_RADIUS);
-	nvgFillColor(nvg, bgColor);
-	nvgFill(nvg);
-
-	nvgBeginPath(nvg);
-	NVGpaint hightlightPaint = nvgBoxGradient(nvg, bounds.position.x,
-			bounds.position.y, bounds.dimensions.x, bounds.dimensions.y,
-			context->theme.CORNER_RADIUS, 2,
-			bgColor.toSemiTransparent(0.0f),
-			context->theme.HIGHLIGHT);
-	nvgFillPaint(nvg, hightlightPaint);
-	nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
-			bounds.dimensions.x, bounds.dimensions.y,
-			context->theme.CORNER_RADIUS);
-	nvgFill(nvg);
-	for (std::shared_ptr<Region>& region : children) {
-		if (region->isVisible()) {
-			region->draw(context);
-		}
-	}
+	Composite::draw(context);
 }
 ////
 VerticalSlider::VerticalSlider(const std::string& label,
@@ -1022,9 +982,11 @@ VerticalSlider::VerticalSlider(const std::string& label,
 	float handleSize = 30.0f;
 	this->aspectRatio = 4.0f;
 	sliderPosition = value.toDouble();
-	textColor = MakeColor(AlloyApplicationContext()->theme.DARK_TEXT);
-	borderColor = MakeColor(AlloyApplicationContext()->theme.HIGHLIGHT);
+	textColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
+	borderWidth = UnitPX(1.0f);
+	setRoundCorners(true);
 	sliderHandle = std::shared_ptr<SliderHandle>(
 			new SliderHandle("Scroll Handle"));
 
@@ -1147,35 +1109,10 @@ bool VerticalSlider::onMouseDrag(AlloyContext* context, Region* region,
 	return false;
 }
 void VerticalSlider::draw(AlloyContext* context) {
-	valueLabel->setLabel(labelFormatter(value));
-	NVGcontext* nvg = context->nvgContext;
-	box2px bounds = getBounds();
-	Color bgColor = *backgroundColor;
-	nvgBeginPath(nvg);
-	nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
-			bounds.dimensions.x, bounds.dimensions.y,
-			context->theme.CORNER_RADIUS);
-	nvgFillColor(nvg, bgColor);
-	nvgFill(nvg);
-
-	nvgBeginPath(nvg);
-
-	NVGpaint hightlightPaint = nvgBoxGradient(nvg, bounds.position.x,
-			bounds.position.y, bounds.dimensions.x, bounds.dimensions.y,
-			context->theme.CORNER_RADIUS, 2,
-			bgColor.toSemiTransparent(0.0f),
-			context->theme.HIGHLIGHT);
-	nvgFillPaint(nvg, hightlightPaint);
-	nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
-			bounds.dimensions.x, bounds.dimensions.y,
-			context->theme.CORNER_RADIUS);
-	nvgFill(nvg);
-
-	for (std::shared_ptr<Region>& region : children) {
-		if (region->isVisible()) {
-			region->draw(context);
-		}
+	if (valueLabel.get() != nullptr) {
+		valueLabel->setLabel(labelFormatter(value));
 	}
+	Composite::draw(context);
 }
 ColorSelector::ColorSelector(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims,bool showText) :
@@ -1183,6 +1120,11 @@ ColorSelector::ColorSelector(const std::string& name, const AUnit2D& pos,
 	CompositePtr valueContainer = MakeComposite("Check Bounds",
 			CoordPerPX(0.0f, 0.0f, 5.0f, 5.0f),
 			CoordPerPX(1.0f, 1.0f, -10.0f, -10.0f));
+	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
+	borderWidth = UnitPX(1.0f);
+	setRoundCorners(true);
+
 	if (showText) {
 		textLabel = MakeTextLabel(name, CoordPercent(0.0f, 0.0f),
 			CoordPercent(1.0f, 1.0f), FontType::Bold, UnitPercent(1.0f),
@@ -1220,10 +1162,12 @@ ColorSelector::ColorSelector(const std::string& name, const AUnit2D& pos,
 		colorLabel->setAspectRatio(1.0f);
 	}
 	else {
-		colorLabel->position = CoordPercent(0.5f,0.5f);
+		colorLabel->position = CoordPX(0.0f,0.0f);
 		colorLabel->dimensions = CoordPercent(1.0f, 1.0f);
-		colorLabel->setAspectRatio(4.0f);
-		colorLabel->setOrigin(Origin::MiddleCenter);
+		//colorLabel->position = CoordPercent(0.5f,0.5f);
+		//colorLabel->dimensions = CoordPercent(1.0f, 1.0f);
+		//colorLabel->setAspectRatio(4.0f);
+		//colorLabel->setOrigin(Origin::MiddleCenter);
 	}
 	colorWheel = ColorWheelPtr(
 			new ColorWheel("Color Wheel", CoordPX(0.0f, 0.0f),
@@ -1716,24 +1660,6 @@ void ColorSelector::draw(AlloyContext* context) {
 		colorLabel->borderColor = MakeColor(context->theme.NEUTRAL);
 	}
 	nvgBeginPath(nvg);
-	nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
-			bounds.dimensions.x, bounds.dimensions.y,
-			context->theme.CORNER_RADIUS);
-	nvgFillColor(nvg, context->theme.DARK);
-	nvgFill(nvg);
-
-	nvgBeginPath(nvg);
-	NVGpaint hightlightPaint = nvgBoxGradient(nvg, bounds.position.x,
-			bounds.position.y, bounds.dimensions.x, bounds.dimensions.y,
-			context->theme.CORNER_RADIUS, 2,
-			context->theme.DARK.toSemiTransparent(0), context->theme.HIGHLIGHT);
-	nvgFillPaint(nvg, hightlightPaint);
-	nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
-			bounds.dimensions.x, bounds.dimensions.y,
-			context->theme.CORNER_RADIUS);
-	nvgFill(nvg);
-
-	nvgBeginPath(nvg);
 	nvgFillColor(nvg, context->theme.NEUTRAL);
 	box2px clickbox = colorLabel->getBounds();
 	nvgRoundedRect(nvg, clickbox.position.x, clickbox.position.y,
@@ -1823,11 +1749,11 @@ FileSelector::FileSelector(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims) :
 		BorderComposite(name, pos, dims) {
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
-
+	borderColor= MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
+	borderWidth = UnitPX(0.0f);
 	setRoundCorners(true);
 	std::shared_ptr<Composite> &glassPanel =
 			AlloyApplicationContext()->getGlassPane();
-
 	fileDialog = std::shared_ptr<FileDialog>(
 			new FileDialog("Open File",
 					CoordPerPX(0.5, 0.5, -350 + 7.5f, -250 - 7.5f),
@@ -1836,6 +1762,9 @@ FileSelector::FileSelector(const std::string& name, const AUnit2D& pos,
 	glassPanel->add(fileDialog);
 	fileLocation = std::shared_ptr<FileField>(
 			new FileField("None", CoordPX(0, 0), CoordPercent(1.0f, 1.0f)));
+	fileLocation->backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
+	fileLocation->borderColor = MakeColor(0, 0, 0, 0);
+	fileLocation->borderWidth = UnitPX(0.0f);
 	fileDialog->onSelect = [this](const std::vector<std::string>& file) {
 		fileLocation->setValue(file.front());
 
