@@ -2464,7 +2464,7 @@ NumberField::NumberField(const std::string& name, const NumberType& numberType) 
 	lastTime = std::chrono::high_resolution_clock::now();
 	numberValue = MakeNumber(numberType, 0);
 	invalidNumberColor = MakeColor(255, 0, 0, 128);
-	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
 	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
 	borderWidth = UnitPX(1.0f);
 	setRoundCorners(true);
@@ -2670,7 +2670,6 @@ void NumberField::draw(AlloyContext* context) {
 			h - 2 * PADDING, context->theme.CORNER_RADIUS, 4,
 			context->theme.HIGHLIGHT.toSemiTransparent(0.5f),
 			context->theme.SHADOW.toSemiTransparent(0.5f));
-
 	nvgBeginPath(nvg);
 	nvgRoundedRect(nvg, x + PADDING, y + PADDING, w - 2 * PADDING,
 			h - 2 * PADDING, context->theme.CORNER_RADIUS);

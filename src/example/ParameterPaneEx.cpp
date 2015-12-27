@@ -28,7 +28,7 @@ ParameterPaneEx::ParameterPaneEx() :
 }
 bool ParameterPaneEx::init(Composite& rootNode) {
 	param1 = aly::Float(5.0f);
-	param2 = aly::Float(3);
+	param2 = aly::Integer(3);
 	param3 = 2;
 	param4 = aly::Color(1.0f, 0.0f, 0.0f, 1.0f);
 	param5 = getContext()->getFullPath("images/sfsunset.png");

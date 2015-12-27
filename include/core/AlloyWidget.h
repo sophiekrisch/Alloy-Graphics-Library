@@ -248,6 +248,7 @@ private:
 	void show(AlloyContext* context);
 	bool handleMouseClick(AlloyContext* context, const InputEvent& event);
 public:
+	void setTextColor(const AColor& c);
 	std::function<void(int)> onSelect;
 	//bool onEventHandler(AlloyContext* context, const InputEvent& event)override;
 	inline int getSelectedIndex() const {
@@ -615,7 +616,7 @@ private:
 	std::shared_ptr<IconButton> openIcon;
 	std::shared_ptr<FileDialog> fileDialog;
 public:
-
+	void setIconColor(const AColor& c);
 	std::function<void(const std::string& file)> onChange;
 	void addFileExtensionRule(const std::string& name,
 			const std::string& extension) {

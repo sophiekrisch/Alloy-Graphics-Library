@@ -30,11 +30,16 @@ namespace aly {
 	protected:
 		float entryHeight;
 		std::vector<std::shared_ptr<AnyInterface>> values;
+		void setCommonParameters(const CompositePtr& compRegion,const TextLabelPtr& textLabel,const RegionPtr& regionLabel);
 	public:
+		AColor entryTextColor;
+		AColor entryBackgroundColor;
+		AColor entryBorderColor;
+		AUnit1D entryBorderWidth;
 		ParameterPane(const std::string& name, const AUnit2D& pos, const AUnit2D& dim,float entryHeight=30.0f);
-		void addNumberField(const std::string& label,Number& value,float aspect=4.0f);
+		void addNumberField(const std::string& label,Number& value,float aspect=3.0f);
 		void addSelectionField(const std::string& label,int& selectedIndex,const std::vector<std::string>& options, float aspect = 4.0f);
-		void addToggleBox(const std::string& label, bool& value, float aspect = 2.5f);
+		void addToggleBox(const std::string& label, bool& value, float aspect = 2.1f);
 		void addCheckBox(const std::string& label, bool& value, float aspect = 1.0f);
 		void addColorField(const std::string& label,Color& color, float aspect = 3.0f);
 		void addFileField(const std::string& label, std::string& file, float aspect = 6.0f);

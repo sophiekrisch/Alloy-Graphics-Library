@@ -55,6 +55,8 @@ CheckBox::CheckBox(const std::string& label, const AUnit2D& position,
 	CompositePtr valueContainer = MakeComposite("Check Bounds",
 			CoordPerPX(0.0f, 0.0f, 5.0f, 5.0f),
 			CoordPerPX(1.0f, 1.0f, -10.0f, -10.0f));
+
+	DrawPtr checkBoundsDraw;
 	if (showText) {
 		checkLabel = MakeTextLabel(label, CoordPercent(0.0f, 0.0f),
 			CoordPercent(1.0f, 1.0f), FontType::Bold, UnitPercent(1.0f),
@@ -68,18 +70,22 @@ CheckBox::CheckBox(const std::string& label, const AUnit2D& position,
 		valueLabel->setAspectRatio(1.0f);
 		valueLabel->setOrigin(Origin::TopRight);
 		valueLabel->setAspectRule(AspectRule::FixedHeight);
+		checkBoundsDraw = DrawPtr(new Draw("Check Bounds", CoordPercent(1.0f, 0.0f), CoordPercent(0.0f, 1.0f)));
 	}
 	else {
 		valueLabel = MakeTextLabel(CodePointToUTF8(0xf00c),
-			CoordPercent(1.0f, 0.0f), CoordPercent(0.0f, 1.0f), FontType::Icon,
+			CoordPercent(0.5f, 0.0f), CoordPercent(0.0f, 1.0f), FontType::Icon,
 			UnitPercent(1.0f),
 			AlloyApplicationContext()->theme.LIGHT_TEXT.toRGBA(),
 			HorizontalAlignment::Center, VerticalAlignment::Middle);
 		valueLabel->setAspectRatio(1.0f);
-		valueLabel->setOrigin(Origin::TopRight);
+		valueLabel->setOrigin(Origin::TopCenter);
 		valueLabel->setAspectRule(AspectRule::FixedHeight);
+		checkBoundsDraw = DrawPtr(new Draw("Check Bounds", CoordPercent(0.5f, 0.0f), CoordPercent(0.0f, 1.0f)));
+		checkBoundsDraw->setAspectRatio(1.0f);
+		checkBoundsDraw->setOrigin(Origin::TopCenter);
+		checkBoundsDraw->setAspectRule(AspectRule::FixedHeight);
 	}
-	DrawPtr checkBoundsDraw = DrawPtr(new Draw("Check Bounds", valueLabel->position, valueLabel->dimensions));
 	checkBoundsDraw->onDraw = [this](AlloyContext* context, const box2px& clickbox) {
 		NVGcontext* nvg = context->nvgContext;
 		nvgBeginPath(nvg);
@@ -99,9 +105,6 @@ CheckBox::CheckBox(const std::string& label, const AUnit2D& position,
 			nvgStroke(nvg);
 		}
 	};
-	checkBoundsDraw->setAspectRatio(1.0f);
-	checkBoundsDraw->setOrigin(Origin::TopRight);
-	checkBoundsDraw->setAspectRule(AspectRule::FixedHeight);
 
 	checkBoundsDraw->setIgnoreCursorEvents(true);
 	if (showText) {
@@ -231,14 +234,16 @@ ToggleBox::ToggleBox(const std::string& label, const AUnit2D& position,
 		clickRegion->setOrigin(Origin::TopRight);
 		clickRegion->setAspectRatio(2.5f);
 		clickRegion->setAspectRule(AspectRule::FixedHeight);
-
-
 		toggleRegion->setOrigin(Origin::TopRight);
 		toggleRegion->setAspectRatio(2.5f);
 		toggleRegion->setAspectRule(AspectRule::FixedHeight);
 	}
 	else {
-		clickRegion = MakeComposite("tog select", CoordPercent(0.0f, 0.0f),CoordPercent(1.0f, 1.0f));
+		clickRegion = MakeComposite("tog select", CoordPercent(0.5f, 0.0f),
+			CoordPercent(1.0f, 1.0f));
+		clickRegion->setOrigin(Origin::TopCenter);
+		clickRegion->setAspectRatio(2.5f);
+		clickRegion->setAspectRule(AspectRule::FixedHeight);
 	}
 	clickRegion->add(onLabel);
 	clickRegion->add(offLabel);
@@ -705,6 +710,12 @@ void Selection::show(AlloyContext* context) {
 	context->setOnTopRegion(selectionBox.get());
 	selectionBox->setVisible(true);
 }
+void Selection::setTextColor(const AColor& c) {
+	selectionLabel->textColor = c;
+	selectionLabel->textAltColor = c;
+	arrowLabel->textColor = c;
+	arrowLabel->textAltColor = c;
+}
 Selection::Selection(const std::string& label, const AUnit2D& position,
 		const AUnit2D& dimensions, const std::vector<std::string>& options) :
 		Composite(label), selectedIndex(-1) {
@@ -1141,7 +1152,7 @@ ColorSelector::ColorSelector(const std::string& name, const AUnit2D& pos,
 		}
 		else {
 			checkerboard = std::shared_ptr<CheckerboardGlyph>(
-				new CheckerboardGlyph(64*4, 64, 8*4, 8,
+				new CheckerboardGlyph(64*3, 64, 8*3, 8,
 					AlloyApplicationContext().get()));
 		}
 	}
@@ -1162,12 +1173,8 @@ ColorSelector::ColorSelector(const std::string& name, const AUnit2D& pos,
 		colorLabel->setAspectRatio(1.0f);
 	}
 	else {
-		colorLabel->position = CoordPX(0.0f,0.0f);
-		colorLabel->dimensions = CoordPercent(1.0f, 1.0f);
-		//colorLabel->position = CoordPercent(0.5f,0.5f);
-		//colorLabel->dimensions = CoordPercent(1.0f, 1.0f);
-		//colorLabel->setAspectRatio(4.0f);
-		//colorLabel->setOrigin(Origin::MiddleCenter);
+		colorLabel->position = CoordPX(2.0f, 2.0f);
+		colorLabel->dimensions = CoordPerPX(1.0f, 1.0f, -4.0f, -4.0f);
 	}
 	colorWheel = ColorWheelPtr(
 			new ColorWheel("Color Wheel", CoordPX(0.0f, 0.0f),
@@ -1657,15 +1664,9 @@ void ColorSelector::draw(AlloyContext* context) {
 	} else {
 		if (textLabel.get() != nullptr)textLabel->textColor = MakeColor(context->theme.LIGHT_TEXT);
 		colorLabel->borderWidth = UnitPX(1.0f);
-		colorLabel->borderColor = MakeColor(context->theme.NEUTRAL);
+		colorLabel->borderColor = MakeColor(context->theme.LIGHT_TEXT);
 	}
-	nvgBeginPath(nvg);
-	nvgFillColor(nvg, context->theme.NEUTRAL);
-	box2px clickbox = colorLabel->getBounds();
-	nvgRoundedRect(nvg, clickbox.position.x, clickbox.position.y,
-			clickbox.dimensions.x, clickbox.dimensions.y,
-			context->theme.CORNER_RADIUS);
-	nvgFill(nvg);
+
 	Composite::draw(context);
 }
 
@@ -1745,6 +1746,10 @@ ExpandRegion::ExpandRegion(const std::string& name,
 			-Composite::scrollBarSize, (float) expandHeight);
 	contentRegion->setVisible(expanded);
 }
+void FileSelector::setIconColor(const AColor& c) {
+	openIcon->iconColor = c;
+	openIcon->borderColor=c;
+}
 FileSelector::FileSelector(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims) :
 		BorderComposite(name, pos, dims) {
@@ -1762,8 +1767,8 @@ FileSelector::FileSelector(const std::string& name, const AUnit2D& pos,
 	glassPanel->add(fileDialog);
 	fileLocation = std::shared_ptr<FileField>(
 			new FileField("None", CoordPX(0, 0), CoordPercent(1.0f, 1.0f)));
-	fileLocation->backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
 	fileLocation->borderColor = MakeColor(0, 0, 0, 0);
+	fileLocation->backgroundColor = MakeColor(0, 0, 0, 0);
 	fileLocation->borderWidth = UnitPX(0.0f);
 	fileDialog->onSelect = [this](const std::vector<std::string>& file) {
 		fileLocation->setValue(file.front());
