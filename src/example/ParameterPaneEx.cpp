@@ -34,6 +34,8 @@ bool ParameterPaneEx::init(Composite& rootNode) {
 	param5 = getContext()->getFullPath("images/sfsunset.png");
 	param6 = false;
 	param7 = false;
+	param8.push_back(getContext()->getFullPath("images/sfsunset.png"));
+	param8.push_back(getContext()->getFullPath("images/sfmarket.png"));
 	BorderCompositePtr borderComposite = BorderCompositePtr(new BorderComposite("Layout",CoordPX(0.0f,0.0f),CoordPercent(1.0f,1.0f),true));
 	CompositePtr centerPane = CompositePtr(new Composite("Center", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)));
 	ParameterPanePtr paramPane = ParameterPanePtr(new ParameterPane("Parameter Pane",CoordPX(0.0f,0.0f),CoordPercent(1.0f,1.0f)));
@@ -45,6 +47,7 @@ bool ParameterPaneEx::init(Composite& rootNode) {
 	paramPane->addColorField("Color", param4);
 	paramPane->addToggleBox("Toggle", param6);
 	paramPane->addCheckBox("Check", param7);
+	paramPane->addMultiFileField("Multi-File", param8);
 	centerPane->backgroundColor = MakeColor(getContext()->theme.LIGHT);
 	borderComposite->setCenter(centerPane);
 	borderComposite->setEast(paramPane, UnitPX(300.0f));

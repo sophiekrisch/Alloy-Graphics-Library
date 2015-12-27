@@ -31,6 +31,7 @@ protected:
 	std::string param5;
 	bool param6;
 	bool param7;
+	std::vector<std::string> param8;
 public:
 	ParameterPaneEx();
 	bool init(aly::Composite& rootNode);

@@ -767,6 +767,28 @@ public:
 	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,double pixelRatio, bool clamp = false) override;
 	virtual void draw(AlloyContext* context) override;
 };
+class MultiFileEntry : public ListEntry {
+private:
+	std::string fileName;
+public:
+	MultiFileEntry(ListBox* listBox, const std::string& name, float fontHeight);
+	void setValue(const std::string& file);
+};
+class MultiFileField: public Composite{
+protected:
+	std::shared_ptr<ListBox> valueRegion;
+	std::shared_ptr<FileButton> openFileButton;
+	std::shared_ptr<IconButton> upButton;
+	std::shared_ptr<IconButton> downButton;
+	std::shared_ptr<IconButton> eraseButton;
+	float entryHeight;
+	void update();
+public:
+	std::function<void(const std::vector<std::string>& files)> onChange;
+	void addFiles(const std::vector<std::string>& files);
+	void clearEntries();
+	MultiFileField(const std::string& name, const AUnit2D& pos, const AUnit2D& dims, float entryHeight=30.0f);
+};
 typedef std::shared_ptr<TextButton> TextButtonPtr;
 typedef std::shared_ptr<HorizontalSlider> HSliderPtr;
 typedef std::shared_ptr<VerticalSlider> VSliderPtr;
@@ -796,6 +818,8 @@ typedef std::shared_ptr<ExpandTree> ExpandTreePtr;
 typedef std::shared_ptr<TabHeader> TabHeaderPtr;
 typedef std::shared_ptr<TabPane> TabPanePtr;
 typedef std::shared_ptr<TabBar> TabBarPtr;
+typedef std::shared_ptr<MultiFileEntry> MultiFileEntryPtr;
+typedef std::shared_ptr<MultiFileField>  MultiFileFieldPtr;
 }
 
 #endif /* ALLOYWIDGET_H_ */

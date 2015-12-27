@@ -1895,7 +1895,7 @@ void FileButton::openFileDialog(AlloyContext* context,
 ListEntry::ListEntry(ListBox* listBox, const std::string& name,
 		float entryHeight) :
 		Region(name), dialog(listBox), entryHeight(entryHeight) {
-	this->backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
+	this->backgroundColor = MakeColor(AlloyApplicationContext()->theme.NEUTRAL);
 	this->borderColor = MakeColor(COLOR_NONE);
 	this->selected = false;
 	iconCodeString = "";
@@ -1949,7 +1949,7 @@ bool ListBox::onMouseDown(ListEntry* entry, AlloyContext* context,
 	if (e.isDown()) {
 		if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
 			if (enableMultiSelection) {
-				if (entry->isSelected()) {
+				if (entry->isSelected() && e.clicks == 1) {
 					entry->setSelected(false);
 					for (auto iter = lastSelected.begin();
 							iter != lastSelected.end(); iter++) {
@@ -2027,7 +2027,7 @@ void ListEntry::draw(AlloyContext* context) {
 		if (selected) {
 			nvgFillColor(nvg, context->theme.LINK);
 		} else {
-			nvgFillColor(nvg, context->theme.NEUTRAL);
+			nvgFillColor(nvg, *backgroundColor);
 		}
 		nvgFill(nvg);
 	} else {
@@ -2038,7 +2038,7 @@ void ListEntry::draw(AlloyContext* context) {
 		if (selected) {
 			nvgFillColor(nvg, context->theme.LINK);
 		} else {
-			nvgFillColor(nvg, context->theme.LIGHT);
+			nvgFillColor(nvg, Color(0,0,0,0));
 		}
 		nvgFill(nvg);
 	}
@@ -2308,7 +2308,9 @@ ListBox::ListBox(const std::string& name, const AUnit2D& pos,
 			};
 }
 void ListBox::draw(AlloyContext* context) {
+	pushScissor(context->nvgContext, getCursorBounds());
 	Composite::draw(context);
+	popScissor(context->nvgContext);
 	NVGcontext* nvg = context->nvgContext;
 	if (dragBox.dimensions.x > 0 && dragBox.dimensions.y > 0) {
 		nvgBeginPath(nvg);
@@ -3825,6 +3827,118 @@ TabBar::TabBar(const std::string& name, const AUnit2D& position,
 	Composite::add(contentRegion);
 	Application::addListener(this);
 }
+MultiFileEntry::MultiFileEntry(ListBox* listBox, const std::string& name, float fontHeight) :ListEntry(listBox, name, fontHeight) {
 
+}
+void MultiFileEntry::setValue(const std::string& file) {
+	this->fileName = file;
+}
+void MultiFileField::clearEntries() {
+	valueRegion->clearEntries();
+}
+void MultiFileField::update() {
+	for (ListEntryPtr entry : valueRegion->getEntries()) {
+		entry->parent = nullptr;
+	}
+	valueRegion->update();
+}
+void MultiFileField::addFiles(const std::vector<std::string>& newFiles) {
+	for (std::string file : newFiles) {
+		MultiFileEntryPtr entry = MultiFileEntryPtr(new MultiFileEntry(valueRegion.get(), GetFileName(file), this->entryHeight));
+		entry->setValue(file);
+		valueRegion->addEntry(entry);
+	}
+	update();
+}
+MultiFileField::MultiFileField(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,float entryHeight) : Composite(name, pos, dims) , entryHeight(entryHeight){
+	valueRegion = ListBoxPtr(new ListBox(name, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f,1.0f,-entryHeight,0.0f)));
+	openFileButton = FileButtonPtr(new FileButton("Open Multi-File", CoordPerPX(1.0f, 0.0f, -entryHeight, 0.0f), CoordPX(entryHeight, entryHeight), FileDialogType::OpenMultiFile));
+	upButton = IconButtonPtr(new IconButton(0xf0d8, CoordPerPX(1.0f, 0.0f, -entryHeight + 2, entryHeight + 2), CoordPX(entryHeight - 4, entryHeight - 4)));
+	downButton = IconButtonPtr(new IconButton(0xf0d7, CoordPerPX(1.0f, 0.0f, -entryHeight + 2, 2 * entryHeight + 2), CoordPX(entryHeight - 4, entryHeight - 4)));
+	eraseButton = IconButtonPtr(new IconButton(0xf00d, CoordPerPX(1.0f, 0.0f, -entryHeight + 2, 3 * entryHeight + 2), CoordPX(entryHeight - 4, entryHeight - 4)));
+	valueRegion->setRoundCorners(true);
+	valueRegion->borderWidth = UnitPX(0.0f);
+	valueRegion->backgroundColor = MakeColor(0, 0, 0, 0);
+	openFileButton->backgroundColor = MakeColor(0, 0, 0, 0);
+	openFileButton->foregroundColor = MakeColor(0, 0, 0, 0);
+	openFileButton->borderWidth = UnitPX(0.0f);
+	upButton->backgroundColor = MakeColor(0, 0, 0, 0);
+	upButton->foregroundColor = MakeColor(0, 0, 0, 0);
+	upButton->iconColor = MakeColor(AlloyDefaultContext()->theme.DARK);
+	upButton->borderWidth = UnitPX(0.0f);
+	upButton->borderColor = MakeColor(AlloyDefaultContext()->theme.DARK);
+
+	downButton->backgroundColor = MakeColor(0, 0, 0, 0);
+	downButton->foregroundColor = MakeColor(0, 0, 0, 0);
+	downButton->iconColor = MakeColor(AlloyDefaultContext()->theme.DARK);
+	downButton->borderWidth = UnitPX(0.0f);
+	downButton->borderColor = MakeColor(AlloyDefaultContext()->theme.DARK);
+
+	eraseButton->backgroundColor = MakeColor(0, 0, 0, 0);
+	eraseButton->foregroundColor = MakeColor(0, 0, 0, 0);
+	eraseButton->iconColor = MakeColor(AlloyDefaultContext()->theme.DARK);
+	eraseButton->borderWidth = UnitPX(0.0f);
+	eraseButton->borderColor = MakeColor(AlloyDefaultContext()->theme.DARK);
+
+	backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHT_TEXT);
+	setRoundCorners(true);
+	Composite::add(valueRegion);
+	Composite::add(openFileButton);
+	Composite::add(upButton);
+	Composite::add(downButton);
+	Composite::add(eraseButton);
+	
+	eraseButton->onMouseDown=[this](AlloyContext* context, const InputEvent& e) {
+		if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
+			std::vector<ListEntryPtr>& entries = valueRegion->getEntries();
+			bool removed = false;
+			for (auto iter = entries.begin();iter != entries.end();iter++) {
+				ListEntryPtr entry = *iter;
+				if (entry->isSelected()) {
+					entries.erase(iter);
+					iter--;
+					removed = true;
+				}
+			}
+			if (removed) {
+				update();
+				context->requestPack();
+			}
+		}
+		return false;
+	};
+	upButton->onMouseDown = [this](AlloyContext* context, const InputEvent& e) {
+		if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
+			std::vector<ListEntryPtr>& entries = valueRegion->getEntries();
+			int N =(int) entries.size();
+			for (int i = 1;i < N;i++) {
+				if (entries[i]->isSelected()) {
+					std::swap(entries[std::max(i-1 , 0)], entries[i]);
+					update();
+					context->requestPack();
+					break;
+				}
+			}
+			return true;
+		}
+		return false;
+	};	
+	downButton->onMouseDown = [this](AlloyContext* context, const InputEvent& e) {
+		std::vector<ListEntryPtr>& entries = valueRegion->getEntries();
+		int N = (int)entries.size();
+		for (int i = 0;i < N-1;i++) {
+			if (entries[i]->isSelected()) {
+				std::swap(entries[std::min(i +1 ,N-1)], entries[i]);
+				update();
+				context->requestPack();
+				break;
+			}
+		}
+		return false;
+	};
+	openFileButton->onOpen = [this](const std::vector<std::string>& newFiles) {
+		addFiles(newFiles);
+	};
+}
 }
 
