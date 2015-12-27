@@ -37,11 +37,12 @@ bool ParameterPaneEx::init(Composite& rootNode) {
 	BorderCompositePtr borderComposite = BorderCompositePtr(new BorderComposite("Layout",CoordPX(0.0f,0.0f),CoordPercent(1.0f,1.0f),true));
 	CompositePtr centerPane = CompositePtr(new Composite("Center", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)));
 	ParameterPanePtr paramPane = ParameterPanePtr(new ParameterPane("Parameter Pane",CoordPX(0.0f,0.0f),CoordPercent(1.0f,1.0f)));
+
+	paramPane->addFileField("File", param5);
+	paramPane->addSelectionField("Selection", param3, std::vector<std::string>{"Cool", "Neat", "Awesome", "Boring"});
 	paramPane->addNumberField("Float", param1);
 	paramPane->addNumberField("Integer", param2);
-	paramPane->addSelectionField("Selection", param3, std::vector<std::string>{"Cool","Neat","Awesome","Boring"});
 	paramPane->addColorField("Color", param4);
-	paramPane->addFileField("File", param5);
 	paramPane->addToggleBox("Toggle", param6);
 	paramPane->addCheckBox("Check", param7);
 	centerPane->backgroundColor = MakeColor(getContext()->theme.LIGHT);

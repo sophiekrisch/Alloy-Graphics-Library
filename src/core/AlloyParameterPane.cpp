@@ -21,7 +21,7 @@
 #include "AlloyParameterPane.h"
 namespace aly {
 	ParameterPane::ParameterPane(const std::string& name, const AUnit2D& pos, const AUnit2D& dim, float entryHeight):Composite(name,pos,dim),entryHeight(entryHeight) {
-		setOrientation(Orientation::Vertical,pixel2(0.0f,1.0f),pixel2(0.0f));
+		setOrientation(Orientation::Vertical,pixel2(0.0f,2.0f),pixel2(0.0f));
 		backgroundColor = MakeColor(AlloyDefaultContext()->theme.DARK.toDarker(0.5f));
 		entryBackgroundColor= MakeColor(AlloyDefaultContext()->theme.DARK);
 		entryBorderColor= MakeColor(AlloyDefaultContext()->theme.LIGHT);
