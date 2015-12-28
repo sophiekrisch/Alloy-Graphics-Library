@@ -400,15 +400,14 @@ void TextButton::draw(AlloyContext* context) {
 				context->theme.CORNER_RADIUS);
 		nvgFill(nvg);
 	}
-
 	float th = fontSize.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
 	nvgFontSize(nvg, th);
 	nvgFillColor(nvg, *textColor);
 	nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold));
-	float tw = nvgTextBounds(nvg, 0, 0, name.c_str(), nullptr, nullptr);
-	this->aspectRatio = (tw + 10.0f) / (th + 10.0f);
 	nvgTextAlign(nvg, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
+	float tw = nvgTextBounds(nvg, 0, 0, name.c_str(), nullptr, nullptr);
+
 	pixel2 offset(0, 0);
 	if (truncate) {
 		pushScissor(nvg, getCursorBounds());
