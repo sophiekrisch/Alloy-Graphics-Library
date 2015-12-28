@@ -3864,7 +3864,11 @@ void MultiFileSelector::addFiles(const std::vector<std::string>& newFiles) {
 	update();
 }
 MultiFileSelector::MultiFileSelector(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,float entryHeight) : Composite(name, pos, dims) , entryHeight(entryHeight){
-	valueRegion = ListBoxPtr(new ListBox(name, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f,1.0f,-entryHeight,0.0f)));
+	valueRegion = ListBoxPtr(new ListBox(name, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f,1.0f,-entryHeight-3.0f,0.0f)));
+	RegionPtr bgRegion = RegionPtr(new Region(name, CoordPerPX(1.0f, 0.0f, -entryHeight - 3,0.0f), CoordPerPX(0.0f, 1.0f, 2.0f, 0.0f)));
+	bgRegion->backgroundColor= MakeColor(AlloyDefaultContext()->theme.DARK);
+	bgRegion->setRoundCorners(false);
+	bgRegion->setIgnoreCursorEvents(true);
 	openFileButton = FileButtonPtr(new FileButton("Open Multi-File", CoordPerPX(1.0f, 0.0f, -entryHeight, 0.0f), CoordPX(entryHeight, entryHeight), FileDialogType::OpenMultiFile));
 	upButton = IconButtonPtr(new IconButton(0xf0d8, CoordPerPX(1.0f, 0.0f, -entryHeight + 2, entryHeight + 2), CoordPX(entryHeight - 4, entryHeight - 4)));
 	downButton = IconButtonPtr(new IconButton(0xf0d7, CoordPerPX(1.0f, 0.0f, -entryHeight + 2, 2 * entryHeight + 2), CoordPX(entryHeight - 4, entryHeight - 4)));
@@ -3893,15 +3897,16 @@ MultiFileSelector::MultiFileSelector(const std::string& name, const AUnit2D& pos
 	eraseButton->iconColor = MakeColor(AlloyDefaultContext()->theme.DARK);
 	eraseButton->borderWidth = UnitPX(0.0f);
 	eraseButton->borderColor = MakeColor(AlloyDefaultContext()->theme.DARK);
-
+	borderWidth = UnitPX(0.0f);
 	backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 	setRoundCorners(true);
+
 	Composite::add(valueRegion);
 	Composite::add(openFileButton);
 	Composite::add(upButton);
 	Composite::add(downButton);
 	Composite::add(eraseButton);
-	
+	Composite::add(bgRegion);
 	eraseButton->onMouseDown=[this](AlloyContext* context, const InputEvent& e) {
 		if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
 			std::vector<ListEntryPtr>& entries = valueRegion->getEntries();
