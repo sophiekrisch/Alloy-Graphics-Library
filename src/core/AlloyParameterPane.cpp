@@ -171,6 +171,7 @@ namespace aly {
 		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
 		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
 		FileSelectorPtr valueRegion = FileSelectorPtr(new FileSelector(label, CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, 0.0f), CoordPX(aspect*entryHeight, entryHeight)));
+		valueRegion->setValue(file);
 		if (aspect <= 0) {
 			pixel2 labelBounds = labelRegion->getTextDimensions(AlloyDefaultContext().get());
 			labelBounds.x += 10;
@@ -214,7 +215,9 @@ namespace aly {
 		comp->add(labelRegion);
 		comp->add(valueRegion);
 		Composite::add(comp);
-		
+		valueRegion->onChange = [=](const std::vector<std::string>& value) {
+			*(ref->getValue<std::vector<std::string>*>()) = value;
+		};
 		setCommonParameters(comp, labelRegion, valueRegion);
 		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		valueRegion->setRoundCorners(true);

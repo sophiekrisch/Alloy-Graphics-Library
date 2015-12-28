@@ -30,9 +30,13 @@ class TextButton: public Region {
 private:
 	AColor textColor;
 	AUnit1D fontSize;
+	bool truncate;
 public:
+	void setTruncate(bool t) {
+		truncate = t;
+	}
 	TextButton(const std::string& label, const AUnit2D& position,
-			const AUnit2D& dimensions);
+			const AUnit2D& dimensions,bool truncate=true);
 	virtual void draw(AlloyContext* context) override;
 	virtual inline ~TextButton() {
 	}
@@ -43,13 +47,17 @@ private:
 	std::string iconCodeString;
 	IconAlignment iconAlignment;
 	HorizontalAlignment alignment;
+	bool truncate;
 public:
 	AColor textColor;
 	AUnit1D fontSize;
+	void setTruncate(bool t) {
+		truncate = t;
+	}
 	TextIconButton(const std::string& label, int iconCode,
 			const AUnit2D& position, const AUnit2D& dimensions,
 			const HorizontalAlignment& alignment = HorizontalAlignment::Center,
-			const IconAlignment& iconAlignment = IconAlignment::Left);
+			const IconAlignment& iconAlignment = IconAlignment::Left,bool truncate=true);
 	virtual void draw(AlloyContext* context) override;
 	virtual inline ~TextIconButton() {
 	}
@@ -61,11 +69,15 @@ class IconButton: public Composite {
 private:
 	std::string iconCodeString;
 	IconType iconType;
+	bool truncate;
 public:
 	AColor foregroundColor;
 	AColor iconColor;
+	void setTruncate(bool t) {
+		truncate = t;
+	}
 	IconButton(int iconCode, const AUnit2D& position, const AUnit2D& dimensions,
-			IconType iconType = IconType::SQUARE);
+			IconType iconType = IconType::SQUARE,bool truncate=true);
 	void setIcon(int iconCode);
 	virtual void draw(AlloyContext* context) override;
 	virtual inline ~IconButton() {
@@ -775,6 +787,9 @@ private:
 public:
 	MultiFileEntry(ListBox* listBox, const std::string& name, float fontHeight);
 	void setValue(const std::string& file);
+	std::string getValue() const {
+		return fileName;
+	}
 };
 class MultiFileSelector: public Composite{
 protected:
@@ -785,6 +800,7 @@ protected:
 	std::shared_ptr<IconButton> eraseButton;
 	float entryHeight;
 	void update();
+	void fireEvent();
 public:
 	std::function<void(const std::vector<std::string>& files)> onChange;
 	void addFileExtensionRule(const std::string& name,

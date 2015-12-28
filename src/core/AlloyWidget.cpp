@@ -345,8 +345,8 @@ ProgressBar::ProgressBar(const std::string& name, const AUnit2D& pt,
 
 }
 TextButton::TextButton(const std::string& label, const AUnit2D& position,
-		const AUnit2D& dimensions) :
-		Region(label) {
+		const AUnit2D& dimensions,bool truncate) :
+		Region(label),truncate(truncate) {
 	this->position = position;
 	this->dimensions = dimensions;
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHTEST);
@@ -407,17 +407,23 @@ void TextButton::draw(AlloyContext* context) {
 	this->aspectRatio = (tw + 10.0f) / (th + 10.0f);
 	nvgTextAlign(nvg, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
 	pixel2 offset(0, 0);
+	if (truncate) {
+		pushScissor(nvg, getCursorBounds());
+	}
 	nvgText(nvg, bounds.position.x + bounds.dimensions.x / 2 + xoff,
 			bounds.position.y + bounds.dimensions.y / 2 + yoff, name.c_str(),
 			nullptr);
+	if (truncate) {
+		popScissor(nvg);
+	}
 
 }
 TextIconButton::TextIconButton(const std::string& label, int iconCode,
 		const AUnit2D& position, const AUnit2D& dimensions,
 		const HorizontalAlignment& alignment,
-		const IconAlignment& iconAlignment) :
+		const IconAlignment& iconAlignment,bool truncate) :
 		Composite(label), iconCodeString(CodePointToUTF8(iconCode)), iconAlignment(
-				iconAlignment), alignment(alignment) {
+				iconAlignment), alignment(alignment),truncate(truncate) {
 	this->position = position;
 	this->dimensions = dimensions;
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
@@ -476,6 +482,9 @@ void TextIconButton::draw(AlloyContext* context) {
 		xoffset += AlloyApplicationContext()->theme.SPACING.x;
 	}
 	nvgTextAlign(nvg, NVG_ALIGN_MIDDLE | NVG_ALIGN_LEFT);
+	if (truncate) {
+		pushScissor(nvg, getCursorBounds());
+	}
 	if (iconAlignment == IconAlignment::Right) {
 		nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold));
 		nvgText(nvg, bounds.position.x + xoffset,
@@ -501,11 +510,14 @@ void TextIconButton::draw(AlloyContext* context) {
 				bounds.position.y + bounds.dimensions.y / 2 + yoff,
 				iconCodeString.c_str(), nullptr);
 	}
+	if (truncate) {
+		popScissor(nvg);
+	}
 }
 IconButton::IconButton(int iconCode, const AUnit2D& position,
-		const AUnit2D& dimensions, IconType iconType) :
+		const AUnit2D& dimensions, IconType iconType,bool truncate) :
 		Composite("Icon", position, dimensions), iconCodeString(
-				CodePointToUTF8(iconCode)), iconType(iconType) {
+				CodePointToUTF8(iconCode)), iconType(iconType),truncate(truncate) {
 	this->position = position;
 	this->dimensions = dimensions;
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
@@ -576,12 +588,17 @@ void IconButton::draw(AlloyContext* context) {
 	nvgFontSize(nvg, th);
 	nvgFontFaceId(nvg, context->getFontHandle(FontType::Icon));
 	nvgTextAlign(nvg, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
+	if (truncate) {
+		pushScissor(nvg, getCursorBounds());
+	}
 	drawText(nvg, ibounds.position + HALF_PIX(ibounds.dimensions),
 			iconCodeString, FontStyle::Normal,
 			(hover &&borderColor->a>0) ?
 					*borderColor: *iconColor, *backgroundColor,
 			nullptr);
-
+	if (truncate) {
+		popScissor(nvg);
+	}
 	if (borderColor->a > 0) {
 		if (iconType == IconType::CIRCLE) {
 
@@ -3862,6 +3879,17 @@ void MultiFileSelector::addFiles(const std::vector<std::string>& newFiles) {
 		valueRegion->addEntry(entry);
 	}
 	update();
+	fireEvent();
+}
+void MultiFileSelector::fireEvent() {
+	if (onChange) {
+		std::vector<std::string> files;
+		for (ListEntryPtr entry : valueRegion->getEntries()) {
+			MultiFileEntryPtr newEntry = std::dynamic_pointer_cast<MultiFileEntry>(entry);
+			files.push_back(newEntry->getValue());
+		}
+		onChange(files);
+	}
 }
 MultiFileSelector::MultiFileSelector(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,float entryHeight) : Composite(name, pos, dims) , entryHeight(entryHeight){
 	valueRegion = ListBoxPtr(new ListBox(name, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f,1.0f,-entryHeight-3.0f,0.0f)));
@@ -3929,6 +3957,7 @@ MultiFileSelector::MultiFileSelector(const std::string& name, const AUnit2D& pos
 			if (removed) {
 				update();
 				context->requestPack();
+				fireEvent();
 			}
 		}
 		return false;
@@ -3942,6 +3971,7 @@ MultiFileSelector::MultiFileSelector(const std::string& name, const AUnit2D& pos
 					std::swap(entries[std::max(i-1 , 0)], entries[i]);
 					update();
 					context->requestPack();
+					fireEvent();
 					break;
 				}
 			}
@@ -3957,6 +3987,7 @@ MultiFileSelector::MultiFileSelector(const std::string& name, const AUnit2D& pos
 				std::swap(entries[std::min(i +1 ,N-1)], entries[i]);
 				update();
 				context->requestPack();
+				fireEvent();
 				break;
 			}
 		}

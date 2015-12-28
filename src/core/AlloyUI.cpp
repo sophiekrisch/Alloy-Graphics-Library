@@ -1780,13 +1780,13 @@ void TextField::draw(AlloyContext* context) {
 	}
 	textOffsetX = x + 2.0f * lineWidth + PADDING;
 	float textY = y;
-	NVGpaint bg = nvgBoxGradient(nvg, x + 1, y + 3, w - 2 * PADDING,
-			h - 2 * PADDING, context->theme.CORNER_RADIUS, 4,
+	NVGpaint bg = nvgBoxGradient(nvg, x + 1, y + 3,std::max(0.0f, w - 2 * PADDING),
+			std::max(0.0f,h - 2 * PADDING), context->theme.CORNER_RADIUS, 4,
 			context->theme.LIGHTEST.toSemiTransparent(0.5f),
 			context->theme.DARKEST.toSemiTransparent(0.5f));
 	nvgBeginPath(nvg);
-	nvgRoundedRect(nvg, x + PADDING, y + PADDING, w - 2 * PADDING,
-			h - 2 * PADDING, context->theme.CORNER_RADIUS);
+	nvgRoundedRect(nvg, x + PADDING, y + PADDING, std::max(0.0f, w - 2 * PADDING),
+		std::max(0.0f, h - 2 * PADDING), context->theme.CORNER_RADIUS);
 	nvgFillPaint(nvg, bg);
 	nvgFill(nvg);
 
@@ -1795,7 +1795,7 @@ void TextField::draw(AlloyContext* context) {
 	nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold));
 	nvgTextMetrics(nvg, &ascender, &descender, &lineh);
 
-	pushScissor(nvg, x + PADDING, y, w - 2 * PADDING, h);
+	pushScissor(nvg, x + PADDING, y, std::max(0.0f, w - 2 * PADDING), h);
 
 	nvgTextAlign(nvg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
 	positions.resize(value.size() + 1);
@@ -2670,19 +2670,19 @@ void NumberField::draw(AlloyContext* context) {
 	}
 	textOffsetX = x + 2.0f * lineWidth + PADDING;
 	float textY = y;
-	NVGpaint bg = nvgBoxGradient(nvg, x + 1, y + 3, w - 2 * PADDING,
-			h - 2 * PADDING, context->theme.CORNER_RADIUS, 4,
+	NVGpaint bg = nvgBoxGradient(nvg, x + 1, y + 3,std::max(0.0f, w - 2 * PADDING),
+			std::max(0.0f,h - 2 * PADDING), context->theme.CORNER_RADIUS, 4,
 			context->theme.LIGHTEST.toSemiTransparent(0.5f),
 			context->theme.DARKEST.toSemiTransparent(0.5f));
 	nvgBeginPath(nvg);
-	nvgRoundedRect(nvg, x + PADDING, y + PADDING, w - 2 * PADDING,
-			h - 2 * PADDING, context->theme.CORNER_RADIUS);
+	nvgRoundedRect(nvg, x + PADDING, y + PADDING, std::max(0.0f,w - 2 * PADDING),
+			std::max(0.0f,h - 2 * PADDING), context->theme.CORNER_RADIUS);
 	nvgFillPaint(nvg, bg);
 	nvgFill(nvg);
 	if (!valid && !showDefaultLabel) {
 		nvgBeginPath(nvg);
-		nvgRoundedRect(nvg, x + PADDING, y + PADDING, w - 2 * PADDING,
-				h - 2 * PADDING, context->theme.CORNER_RADIUS);
+		nvgRoundedRect(nvg, x + PADDING, y + PADDING, std::max(0.0f, w - 2 * PADDING),
+			std::max(0.0f, h - 2 * PADDING), context->theme.CORNER_RADIUS);
 		nvgFillColor(nvg, *invalidNumberColor);
 		nvgFill(nvg);
 
@@ -2691,7 +2691,7 @@ void NumberField::draw(AlloyContext* context) {
 	nvgFontSize(nvg, th);
 	nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold));
 	nvgTextMetrics(nvg, &ascender, &descender, &lineh);
-	pushScissor(nvg, x + PADDING, y, w - 2 * PADDING, h);
+	pushScissor(nvg, x + PADDING, y, std::max(0.0f, w - 2 * PADDING), h);
 	nvgTextAlign(nvg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
 	positions.resize(value.size() + 1);
 	nvgTextGlyphPositions(nvg, 0, textY, value.data(),
@@ -2937,22 +2937,20 @@ void FileField::draw(AlloyContext* context) {
 	}
 	textOffsetX = x + 2.0f * lineWidth + PADDING;
 	float textY = y;
-
-	NVGpaint bg = nvgBoxGradient(nvg, x + 1, y + 3, w - 2 * PADDING,
-			h - 2 * PADDING, context->theme.CORNER_RADIUS, 4,
+	NVGpaint bg = nvgBoxGradient(nvg, x + 1, y + 3, std::max(0.0f,w - 2 * PADDING),
+			std::max(0.0f,h - 2 * PADDING), context->theme.CORNER_RADIUS, 4,
 			context->theme.LIGHTEST.toSemiTransparent(0.5f),
 			context->theme.DARKEST.toSemiTransparent(0.5f));
 	nvgBeginPath(nvg);
-	nvgRoundedRect(nvg, x + PADDING, y + PADDING, w - 2 * PADDING,
-			h - 2 * PADDING, context->theme.CORNER_RADIUS);
+	nvgRoundedRect(nvg, x + PADDING, y + PADDING,std::max(0.0f, w - 2 * PADDING),
+			std::max(0.0f,h - 2 * PADDING), context->theme.CORNER_RADIUS);
 	nvgFillPaint(nvg, bg);
 	nvgFill(nvg);
-
 	fontSize = UnitPX(th=std::max(8.0f, h - 4 * PADDING));
 	nvgFontSize(nvg, th);
 	nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold));
 	nvgTextMetrics(nvg, &ascender, &descender, &lineh);
-	pushScissor(nvg, x + PADDING, y, w - 2 * PADDING, h);
+	pushScissor(nvg, x + PADDING, y, std::max(0.0f, w - 2 * PADDING), h);
 	nvgTextAlign(nvg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
 	positions.resize(value.size() + 1);
 	nvgTextGlyphPositions(nvg, 0, textY, value.data(),
