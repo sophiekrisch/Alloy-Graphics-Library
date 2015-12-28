@@ -349,6 +349,9 @@ void View::setup() {
 			VerticalAlignment::Middle);
 	labelRegion->fontSize = UnitPX(fontSize);
 	labelRegion->fontType = FontType::Bold;
+	labelRegion->backgroundColor = MakeColor(0, 0, 0, 0);
+	labelRegion->borderColor = MakeColor(0, 0, 0, 0);
+	labelRegion->borderWidth = UnitPX(0.0f);
 	labelRegion->onTextEntered =
 			[this](TextField* field) {
 				textWidth = labelRegion->getTextDimensions(AlloyApplicationContext().get()).x;
@@ -417,6 +420,9 @@ void Group::setup() {
 			VerticalAlignment::Middle);
 	labelRegion->fontSize = UnitPX(fontSize);
 	labelRegion->fontType = FontType::Bold;
+	labelRegion->backgroundColor = MakeColor(0, 0, 0, 0);
+	labelRegion->borderColor = MakeColor(0, 0, 0, 0);
+	labelRegion->borderWidth = UnitPX(0.0f);
 	labelRegion->onTextEntered =
 			[this](TextField* field) {
 				textWidth = labelRegion->getTextDimensions(AlloyApplicationContext().get()).x;
@@ -496,6 +502,9 @@ void Data::setup() {
 			VerticalAlignment::Middle);
 	labelRegion->fontSize = UnitPX(fontSize);
 	labelRegion->fontType = FontType::Bold;
+	labelRegion->backgroundColor = MakeColor(0, 0, 0, 0);
+	labelRegion->borderColor = MakeColor(0, 0, 0, 0);
+	labelRegion->borderWidth = UnitPX(0.0f);
 	labelRegion->onTextEntered =
 			[this](TextField* field) {
 				textWidth = labelRegion->getTextDimensions(AlloyApplicationContext().get()).x;
@@ -569,6 +578,9 @@ void Compute::setup() {
 			VerticalAlignment::Middle);
 	labelRegion->fontSize = UnitPX(fontSize);
 	labelRegion->fontType = FontType::Bold;
+	labelRegion->backgroundColor = MakeColor(0, 0, 0, 0);
+	labelRegion->borderColor = MakeColor(0, 0, 0, 0);
+	labelRegion->borderWidth = UnitPX(0.0f);
 	labelRegion->onTextEntered =
 			[this](TextField* field) {
 				textWidth = labelRegion->getTextDimensions(AlloyApplicationContext().get()).x;
@@ -644,6 +656,9 @@ void Source::setup() {
 			VerticalAlignment::Middle);
 	labelRegion->fontSize = UnitPX(fontSize);
 	labelRegion->fontType = FontType::Bold;
+	labelRegion->backgroundColor = MakeColor(0, 0, 0, 0);
+	labelRegion->borderColor = MakeColor(0, 0, 0, 0);
+	labelRegion->borderWidth = UnitPX(0.0f);
 	labelRegion->onTextEntered =
 			[this](TextField* field) {
 				textWidth = labelRegion->getTextDimensions(AlloyApplicationContext().get()).x;
@@ -691,6 +706,9 @@ void Destination::setup() {
 			VerticalAlignment::Middle);
 	labelRegion->fontSize = UnitPX(fontSize);
 	labelRegion->fontType = FontType::Bold;
+	labelRegion->backgroundColor = MakeColor(0, 0, 0, 0);
+	labelRegion->borderColor = MakeColor(0, 0, 0, 0);
+	labelRegion->borderWidth = UnitPX(0.0f);
 	labelRegion->onTextEntered =
 			[this](TextField* field) {
 				textWidth = labelRegion->getTextDimensions(AlloyApplicationContext().get()).x;
@@ -863,6 +881,8 @@ void DataFlow::groupSelected() {
 	for (ConnectionPtr connection : group->connections) {
 		connection->setSelected(false);
 	}
+
+	group->setSelected(true);
 	//std::cout<<"------- Group Selected -------"<<std::endl;
 	//std::cout<<*group<<std::endl;
 }
