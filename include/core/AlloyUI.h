@@ -397,7 +397,7 @@ public:
 };
 
 struct GlyphRegion: public Region {
-	AColor foregroundColor = MakeColor(Theme::Default.LIGHT_TEXT);
+	AColor foregroundColor = MakeColor(Theme::Default.LIGHTER);
 	std::shared_ptr<Glyph> glyph;
 	GlyphRegion(const std::string& name, const std::shared_ptr<Glyph>& glyph) :
 			Region(name), glyph(glyph) {
@@ -424,8 +424,8 @@ public:
 	FontStyle fontStyle = FontStyle::Normal;
 	FontType fontType = FontType::Normal;
 	AUnit1D fontSize = UnitPX(24);
-	AColor textColor = MakeColor(Theme::Default.LIGHT_TEXT);
-	AColor textAltColor = MakeColor(Theme::Default.DARK_TEXT);
+	AColor textColor = MakeColor(Theme::Default.LIGHTER);
+	AColor textAltColor = MakeColor(Theme::Default.DARKER);
 	void setAlignment(const HorizontalAlignment& horizontalAlignment,
 			const VerticalAlignment& verticalAlignment) {
 		this->horizontalAlignment = horizontalAlignment;
@@ -488,7 +488,7 @@ protected:
 public:
 	static const float PADDING;
 	AUnit1D fontSize;
-	AColor textColor = MakeColor(Theme::Default.LIGHT_TEXT);
+	AColor textColor = MakeColor(Theme::Default.LIGHTER);
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
 			override;
 	virtual inline ~TextField() {
@@ -544,7 +544,7 @@ public:
 		return valid;
 	}
 	static const float PADDING;
-	AColor textColor = MakeColor(Theme::Default.LIGHT_TEXT);
+	AColor textColor = MakeColor(Theme::Default.LIGHTER);
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
 			override;
 	virtual inline ~NumberField() {
@@ -732,7 +732,7 @@ public:
 	void setEnableAutoSugest(bool b) {
 		autoSuggest = b;
 	}
-	AColor textColor = MakeColor(Theme::Default.LIGHT_TEXT);
+	AColor textColor = MakeColor(Theme::Default.LIGHTER);
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
 			override;
 	virtual inline ~FileField() {
@@ -818,11 +818,11 @@ std::shared_ptr<TextLabel> MakeTextLabel(const std::string& name,
 std::shared_ptr<TextField> MakeTextField(const std::string& name,
 		const AUnit2D& position, const AUnit2D& dimensions,
 		const Color& bgColor = Theme::Default.DARK, const Color& textColor =
-				Theme::Default.LIGHT_TEXT, const std::string& value = "");
+				Theme::Default.LIGHTER, const std::string& value = "");
 std::shared_ptr<NumberField> MakeNumberField(const std::string& name,
 		const AUnit2D& position, const AUnit2D& dimensions,
 		const NumberType& type, const Color& bgColor = Theme::Default.DARK,
-		const Color& textColor = Theme::Default.LIGHT_TEXT,
+		const Color& textColor = Theme::Default.LIGHTER,
 		const Color& invalidColor = Color(220, 64, 64));
 std::shared_ptr<Region> MakeRegion(const std::string& name,
 		const AUnit2D& position, const AUnit2D& dimensions,

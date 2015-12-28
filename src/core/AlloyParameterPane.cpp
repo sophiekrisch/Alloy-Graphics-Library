@@ -26,7 +26,7 @@ namespace aly {
 		backgroundColor = MakeColor(AlloyDefaultContext()->theme.DARK.toDarker(0.5f));
 		entryBackgroundColor= MakeColor(AlloyDefaultContext()->theme.DARK);
 		entryBorderColor= MakeColor(AlloyDefaultContext()->theme.LIGHT);
-		entryTextColor = MakeColor(AlloyDefaultContext()->theme.LIGHT_TEXT);
+		entryTextColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		entryBorderWidth = UnitPX(0.0f);
 	}
 	void ParameterPane::setCommonParameters(const CompositePtr& compRegion,const TextLabelPtr& textLabel, const RegionPtr& valueRegion) {
@@ -44,7 +44,7 @@ namespace aly {
 		CompositePtr comp = CompositePtr(new Composite(label+"_param",CoordPX(0,0),CoordPerPX(1.0f,0.0f,0.0f,entryHeight)));
 		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label,CoordPX(0.0f,0.0f),CoordPerPX(1.0f,0.0f,-entryWidth,entryHeight)));
 		NumberFieldPtr valueRegion = NumberFieldPtr(new NumberField(label, CoordPerPX(1.0f, 0.0f, -entryWidth, 0.0f), CoordPX(entryWidth, entryHeight), value.type()));
-		valueRegion->textColor = MakeColor(AlloyDefaultContext()->theme.DARK_TEXT);
+		valueRegion->textColor = MakeColor(AlloyDefaultContext()->theme.DARKER);
 		valueRegion->setNumberValue(value);
 		comp->add(labelRegion);
 		comp->add(valueRegion);
@@ -55,7 +55,7 @@ namespace aly {
 		};
 		Composite::add(comp);
 		setCommonParameters(comp,labelRegion, valueRegion);
-		valueRegion->backgroundColor= MakeColor(AlloyDefaultContext()->theme.LIGHT_TEXT);
+		valueRegion->backgroundColor= MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		valueRegion->setRoundCorners(true);
 	}
 	void ParameterPane::addColorField(const std::string& label, Color& value, float aspect) {
@@ -91,7 +91,7 @@ namespace aly {
 		};
 		Composite::add(comp);
 		setCommonParameters(comp, labelRegion, valueRegion);
-		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHT_TEXT);
+		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		valueRegion->setRoundCorners(true);
 	}
 	void ParameterPane::addToggleBox(const std::string& label, bool& value, float aspect) {
@@ -140,7 +140,7 @@ namespace aly {
 		};
 		Composite::add(comp);
 		setCommonParameters(comp, labelRegion, valueRegion);
-		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHT_TEXT);
+		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		valueRegion->setRoundCorners(true);
 	}
 
@@ -159,7 +159,7 @@ namespace aly {
 		Composite::add(comp);
 		
 		setCommonParameters(comp, labelRegion, valueRegion);
-		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHT_TEXT);
+		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		valueRegion->setRoundCorners(true);
 
 	}

@@ -39,16 +39,16 @@ void ExpandTreeEx::addLeaf(TreeItem* item, const FileDescription& fd) {
 									nvgFontFaceId(nvg,context->getFontHandle(FontType::Normal));
 									std::string label;
 									label=MakeString()<<"File Size: "<<FormatSize(fd.fileSize);
-									drawText(nvg,bounds.position.x,yoff,label.c_str(),FontStyle::Normal,context->theme.LIGHT_TEXT);
+									drawText(nvg,bounds.position.x,yoff,label.c_str(),FontStyle::Normal,context->theme.LIGHTER);
 									yoff+=fontSize+2;
 									label=MakeString()<<"Created: "<<FormatDateAndTime(fd.creationTime);
-									drawText(nvg,bounds.position.x,yoff,label.c_str(),FontStyle::Normal,context->theme.LIGHT_TEXT);
+									drawText(nvg,bounds.position.x,yoff,label.c_str(),FontStyle::Normal,context->theme.LIGHTER);
 									yoff+=fontSize+2;
 									label=MakeString()<<"Modified: "<<FormatDateAndTime(fd.lastModifiedTime);
-									drawText(nvg,bounds.position.x,yoff,label.c_str(),FontStyle::Normal,context->theme.LIGHT_TEXT);
+									drawText(nvg,bounds.position.x,yoff,label.c_str(),FontStyle::Normal,context->theme.LIGHTER);
 									yoff+=fontSize+2;
 									label=MakeString()<<"Accessed: "<<FormatDateAndTime(fd.lastAccessTime);
-									drawText(nvg,bounds.position.x,yoff,label.c_str(),FontStyle::Normal,context->theme.LIGHT_TEXT);
+									drawText(nvg,bounds.position.x,yoff,label.c_str(),FontStyle::Normal,context->theme.LIGHTER);
 								}, pixel2(180, 4 * (fontSize + 2) + 2))));
 	}
 }

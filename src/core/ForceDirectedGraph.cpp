@@ -95,14 +95,14 @@ namespace aly {
 			float lineWidth = scale*4.0f;
 			nvgStrokeWidth(nvg, lineWidth);
 			if (selected) {
-				nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+				nvgStrokeColor(nvg, Color(context->theme.LIGHTEST));
 
 				nvgFillColor(nvg, Color(color).toLighter(0.25f));
 			}
 			else {
 
 				nvgFillColor(nvg, Color(color));
-				nvgStrokeColor(nvg, Color(context->theme.LIGHT_TEXT));
+				nvgStrokeColor(nvg, Color(context->theme.LIGHTER));
 			}
 			nvgStrokeWidth(nvg, lineWidth);
 			nvgBeginPath(nvg);

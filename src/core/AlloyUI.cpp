@@ -1120,7 +1120,7 @@ void ScrollHandle::draw(AlloyContext* context) {
 	if (orientation == Orientation::Vertical) {
 		NVGpaint shadowPaint = nvgBoxGradient(nvg, x + lineWidth - 1,
 				y + lineWidth - 1, w - 2 * lineWidth, h - 2 * lineWidth,
-				(w - 2 - 2 * lineWidth) / 2, 4, context->theme.HIGHLIGHT,
+				(w - 2 - 2 * lineWidth) / 2, 4, context->theme.LIGHTEST,
 				context->theme.NEUTRAL);
 		nvgBeginPath(nvg);
 		nvgRoundedRect(nvg, x + 1 + lineWidth, y + 1 + lineWidth,
@@ -1131,7 +1131,7 @@ void ScrollHandle::draw(AlloyContext* context) {
 	} else if (orientation == Orientation::Horizontal) {
 		NVGpaint shadowPaint = nvgBoxGradient(nvg, x + lineWidth - 1,
 				y + lineWidth - 1, w - 2 * lineWidth, h - 2 * lineWidth,
-				(h - 2 - 2 * lineWidth) / 2, 4, context->theme.HIGHLIGHT,
+				(h - 2 - 2 * lineWidth) / 2, 4, context->theme.LIGHTEST,
 				context->theme.NEUTRAL);
 		nvgBeginPath(nvg);
 		nvgRoundedRect(nvg, x + 1 + lineWidth, y + 1 + lineWidth,
@@ -1158,8 +1158,8 @@ void ScrollTrack::draw(AlloyContext* context) {
 		NVGpaint shadowPaint = nvgBoxGradient(nvg, x + lineWidth + 1, //-1
 		y + lineWidth + 1, //+1
 		w - 2 * lineWidth, h - 2 * lineWidth, (w - 2 * lineWidth) / 2, 4,
-				context->theme.SHADOW.toSemiTransparent(32),
-				context->theme.SHADOW.toSemiTransparent(92));
+				context->theme.DARKEST.toSemiTransparent(32),
+				context->theme.DARKEST.toSemiTransparent(92));
 		nvgBeginPath(nvg);
 		nvgRoundedRect(nvg, x + lineWidth, y + lineWidth, w - 2 * lineWidth,
 				h - 2 * lineWidth, (w - 2 * lineWidth) / 2);
@@ -1169,8 +1169,8 @@ void ScrollTrack::draw(AlloyContext* context) {
 		NVGpaint shadowPaint = nvgBoxGradient(nvg, x + lineWidth + 1, //-1
 		y + lineWidth + 1, //+1
 		w - 2 * lineWidth, h - 2 * lineWidth, (h - 2 * lineWidth) / 2, 4,
-				context->theme.SHADOW.toSemiTransparent(32),
-				context->theme.SHADOW.toSemiTransparent(92));
+				context->theme.DARKEST.toSemiTransparent(32),
+				context->theme.DARKEST.toSemiTransparent(92));
 		nvgBeginPath(nvg);
 		nvgRoundedRect(nvg, x + lineWidth, y + lineWidth, w - 2 * lineWidth,
 				h - 2 * lineWidth, (h - 2 * lineWidth) / 2);
@@ -1782,8 +1782,8 @@ void TextField::draw(AlloyContext* context) {
 	float textY = y;
 	NVGpaint bg = nvgBoxGradient(nvg, x + 1, y + 3, w - 2 * PADDING,
 			h - 2 * PADDING, context->theme.CORNER_RADIUS, 4,
-			context->theme.HIGHLIGHT.toSemiTransparent(0.5f),
-			context->theme.SHADOW.toSemiTransparent(0.5f));
+			context->theme.LIGHTEST.toSemiTransparent(0.5f),
+			context->theme.DARKEST.toSemiTransparent(0.5f));
 	nvgBeginPath(nvg);
 	nvgRoundedRect(nvg, x + PADDING, y + PADDING, w - 2 * PADDING,
 			h - 2 * PADDING, context->theme.CORNER_RADIUS);
@@ -1849,7 +1849,7 @@ void TextField::draw(AlloyContext* context) {
 		nvgLineTo(nvg, cursorOffset, textY + h / 2 + lineh / 2 - PADDING);
 		nvgStrokeWidth(nvg, 1.0f);
 		nvgLineCap(nvg, NVG_ROUND);
-		nvgStrokeColor(nvg, context->theme.SHADOW);
+		nvgStrokeColor(nvg, context->theme.DARKEST);
 		nvgStroke(nvg);
 	}
 	popScissor(nvg);
@@ -1874,8 +1874,8 @@ pixel2 ModifiableLabel::getTextDimensions(AlloyContext* context) {
 }
 ModifiableLabel::ModifiableLabel(const std::string& name, const AUnit2D& position,
 	const AUnit2D& dimensions) :TextField(name, position, dimensions), fontType(FontType::Normal),fontStyle(FontStyle::Normal) {
-	textAltColor = MakeColor(AlloyApplicationContext()->theme.DARK_TEXT);
-	textColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
+	textAltColor = MakeColor(AlloyApplicationContext()->theme.DARKER);
+	textColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
 	fontSize = UnitPX(24);
 	setValue(name);
 }
@@ -1921,7 +1921,7 @@ void ModifiableLabel::draw(AlloyContext* context) {
 	} 
 
 	if (isFocused) {
-		nvgFillColor(nvg, context->theme.LIGHT_TEXT);
+		nvgFillColor(nvg, context->theme.LIGHTER);
 		nvgBeginPath(nvg);
 		nvgRect(nvg, bounds.position.x + lineWidth * 0.5f+PADDING,
 			bounds.position.y + lineWidth * 0.5f+PADDING,
@@ -1987,7 +1987,7 @@ void ModifiableLabel::draw(AlloyContext* context) {
 				context->theme.DARK.toSemiTransparent(0.25f));
 			nvgFill(nvg);
 		}
-		nvgFillColor(nvg,context->theme.DARK_TEXT.toDarker(0.5f));
+		nvgFillColor(nvg,context->theme.DARKER.toDarker(0.5f));
 		if (showDefaultLabel) {
 			nvgText(nvg, textOffsetX, textY + h / 2, label.c_str(), NULL);
 		}
@@ -2000,7 +2000,7 @@ void ModifiableLabel::draw(AlloyContext* context) {
 			nvgLineTo(nvg, cursorOffset, textY + h / 2 + lineh / 2 - PADDING);
 			nvgStrokeWidth(nvg, lineWidth);
 			nvgLineCap(nvg, NVG_ROUND);
-			nvgStrokeColor(nvg, context->theme.SHADOW);
+			nvgStrokeColor(nvg, context->theme.DARKEST);
 			nvgStroke(nvg);
 		}
 		popScissor(nvg);
@@ -2110,8 +2110,8 @@ pixel2 ModifiableNumber::getTextDimensions(AlloyContext* context) {
 }
 ModifiableNumber::ModifiableNumber(const std::string& name, const AUnit2D& position,
 	const AUnit2D& dimensions, const NumberType& type) :NumberField(name, position, dimensions,type), fontType(FontType::Normal), fontStyle(FontStyle::Normal) {
-	textAltColor = MakeColor(AlloyApplicationContext()->theme.DARK_TEXT);
-	textColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
+	textAltColor = MakeColor(AlloyApplicationContext()->theme.DARKER);
+	textColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
 	fontSize = UnitPX(24);
 	setValue(name);
 }
@@ -2156,7 +2156,7 @@ void ModifiableNumber::draw(AlloyContext* context) {
 	}
 
 	if (isFocused) {
-		nvgFillColor(nvg, context->theme.LIGHT_TEXT);
+		nvgFillColor(nvg, context->theme.LIGHTER);
 		nvgBeginPath(nvg);
 		nvgRect(nvg, bounds.position.x + lineWidth * 0.5f + PADDING,
 			bounds.position.y + lineWidth * 0.5f + PADDING,
@@ -2229,7 +2229,7 @@ void ModifiableNumber::draw(AlloyContext* context) {
 				context->theme.DARK.toSemiTransparent(0.25f));
 			nvgFill(nvg);
 		}
-		nvgFillColor(nvg, context->theme.DARK_TEXT.toDarker(0.5f));
+		nvgFillColor(nvg, context->theme.DARKER.toDarker(0.5f));
 		if (showDefaultLabel) {
 			nvgText(nvg, textOffsetX, textY + h / 2, label.c_str(), NULL);
 		}
@@ -2242,7 +2242,7 @@ void ModifiableNumber::draw(AlloyContext* context) {
 			nvgLineTo(nvg, cursorOffset, textY + h / 2 + lineh / 2 - PADDING);
 			nvgStrokeWidth(nvg, lineWidth);
 			nvgLineCap(nvg, NVG_ROUND);
-			nvgStrokeColor(nvg, context->theme.SHADOW);
+			nvgStrokeColor(nvg, context->theme.DARKEST);
 			nvgStroke(nvg);
 		}
 		popScissor(nvg);
@@ -2468,7 +2468,7 @@ NumberField::NumberField(const std::string& name, const NumberType& numberType) 
 	lastTime = std::chrono::high_resolution_clock::now();
 	numberValue = MakeNumber(numberType, 0);
 	invalidNumberColor = MakeColor(255, 0, 0, 128);
-	backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
+	backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
 	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
 	borderWidth = UnitPX(1.0f);
 	setRoundCorners(true);
@@ -2672,8 +2672,8 @@ void NumberField::draw(AlloyContext* context) {
 	float textY = y;
 	NVGpaint bg = nvgBoxGradient(nvg, x + 1, y + 3, w - 2 * PADDING,
 			h - 2 * PADDING, context->theme.CORNER_RADIUS, 4,
-			context->theme.HIGHLIGHT.toSemiTransparent(0.5f),
-			context->theme.SHADOW.toSemiTransparent(0.5f));
+			context->theme.LIGHTEST.toSemiTransparent(0.5f),
+			context->theme.DARKEST.toSemiTransparent(0.5f));
 	nvgBeginPath(nvg);
 	nvgRoundedRect(nvg, x + PADDING, y + PADDING, w - 2 * PADDING,
 			h - 2 * PADDING, context->theme.CORNER_RADIUS);
@@ -2742,7 +2742,7 @@ void NumberField::draw(AlloyContext* context) {
 		nvgLineTo(nvg, cursorOffset, textY + h / 2 + lineh / 2 - PADDING);
 		nvgStrokeWidth(nvg, 1.0f);
 		nvgLineCap(nvg, NVG_ROUND);
-		nvgStrokeColor(nvg, context->theme.SHADOW);
+		nvgStrokeColor(nvg, context->theme.DARKEST);
 		nvgStroke(nvg);
 	}
 	popScissor(nvg);
@@ -2761,12 +2761,12 @@ FileField::FileField(const std::string& name, const AUnit2D& position,
 	selectionBox->position = CoordPerPX(0.0f, 0.0f, 2.0f, 0.0f);
 	selectionBox->dimensions = CoordPerPX(1.0f, 0.8f, -4.0f, 0.0f);
 	selectionBox->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
-	selectionBox->borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
+	selectionBox->borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
 	selectionBox->borderWidth = UnitPX(1.0f);
 	selectionBox->textColor = MakeColor(
-			AlloyApplicationContext()->theme.LIGHT_TEXT);
+			AlloyApplicationContext()->theme.LIGHTER);
 	selectionBox->textAltColor = MakeColor(
-			AlloyApplicationContext()->theme.LIGHT_TEXT);
+			AlloyApplicationContext()->theme.LIGHTER);
 	add(selectionBox);
 	selectionBox->onSelect = [this](SelectionBox* box) {
 		selectionBox->setVisible(false);
@@ -2940,8 +2940,8 @@ void FileField::draw(AlloyContext* context) {
 
 	NVGpaint bg = nvgBoxGradient(nvg, x + 1, y + 3, w - 2 * PADDING,
 			h - 2 * PADDING, context->theme.CORNER_RADIUS, 4,
-			context->theme.HIGHLIGHT.toSemiTransparent(0.5f),
-			context->theme.SHADOW.toSemiTransparent(0.5f));
+			context->theme.LIGHTEST.toSemiTransparent(0.5f),
+			context->theme.DARKEST.toSemiTransparent(0.5f));
 	nvgBeginPath(nvg);
 	nvgRoundedRect(nvg, x + PADDING, y + PADDING, w - 2 * PADDING,
 			h - 2 * PADDING, context->theme.CORNER_RADIUS);
@@ -3022,7 +3022,7 @@ void FileField::draw(AlloyContext* context) {
 		nvgLineTo(nvg, xOffset, textY + h / 2 + lineh / 2 - PADDING);
 		nvgStrokeWidth(nvg, 1.0f);
 		nvgLineCap(nvg, NVG_ROUND);
-		nvgStrokeColor(nvg, context->theme.SHADOW);
+		nvgStrokeColor(nvg, context->theme.DARKEST);
 		nvgStroke(nvg);
 	}
 	popScissor(nvg);
@@ -3371,7 +3371,7 @@ void SelectionBox::draw(AlloyContext* context) {
 			nvgCircle(nvg, bounds.position.x + bounds.dimensions.x,
 					bounds.position.y, upArrow->height / 2);
 			nvgFill(nvg);
-			upArrow->draw(upArrowBox, context->theme.HIGHLIGHT, COLOR_NONE,
+			upArrow->draw(upArrowBox, context->theme.LIGHTEST, COLOR_NONE,
 					context);
 			if (upArrowBox.contains(
 					AlloyApplicationContext()->cursorPosition)) {
@@ -3388,7 +3388,7 @@ void SelectionBox::draw(AlloyContext* context) {
 					bounds.position.y + bounds.dimensions.y,
 					downArrow->height / 2);
 			nvgFill(nvg);
-			downArrow->draw(downArrowBox, context->theme.HIGHLIGHT, COLOR_NONE,
+			downArrow->draw(downArrowBox, context->theme.LIGHTEST, COLOR_NONE,
 					context);
 			if (downArrowBox.contains(
 					AlloyApplicationContext()->cursorPosition)) {
@@ -3722,7 +3722,7 @@ void Menu::draw(AlloyContext* context) {
 			nvgCircle(nvg, bounds.position.x + bounds.dimensions.x,
 					bounds.position.y, upArrow->height / 2);
 			nvgFill(nvg);
-			upArrow->draw(upArrowBox, context->theme.HIGHLIGHT, COLOR_NONE,
+			upArrow->draw(upArrowBox, context->theme.LIGHTEST, COLOR_NONE,
 					context);
 			if (upArrowBox.contains(
 					AlloyApplicationContext()->cursorPosition)) {
@@ -3739,7 +3739,7 @@ void Menu::draw(AlloyContext* context) {
 					bounds.position.y + bounds.dimensions.y,
 					downArrow->height / 2);
 			nvgFill(nvg);
-			downArrow->draw(downArrowBox, context->theme.HIGHLIGHT, COLOR_NONE,
+			downArrow->draw(downArrowBox, context->theme.LIGHTEST, COLOR_NONE,
 					context);
 			if (downArrowBox.contains(
 					AlloyApplicationContext()->cursorPosition)) {
@@ -3914,11 +3914,11 @@ Menu::Menu(const std::string& name, float menuWidth,
 				CoordPerPX(0.0f, 0.0f, menuWidth, 0.0f)), options(labels) {
 	setDetached(true);
 	setVisible(false);
-	backgroundColor = MakeColor(AlloyApplicationContext()->theme.HIGHLIGHT);
-	borderColor = MakeColor(AlloyApplicationContext()->theme.HIGHLIGHT);
+	backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHTEST);
+	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHTEST);
 	borderWidth = UnitPX(1.0f);
-	textColor = MakeColor(AlloyApplicationContext()->theme.DARK_TEXT);
-	textAltColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
+	textColor = MakeColor(AlloyApplicationContext()->theme.DARKER);
+	textAltColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
 	downArrow = AlloyApplicationContext()->createAwesomeGlyph(0xf0ab,
 			FontStyle::Normal, 14);
 	upArrow = AlloyApplicationContext()->createAwesomeGlyph(0xf0aa,
@@ -4074,10 +4074,10 @@ MenuItem::MenuItem(const std::string& name, const AUnit2D& position,
 MenuHeader::MenuHeader(const std::shared_ptr<Menu>& menu,
 		const AUnit2D& position, const AUnit2D& dimensions) :
 		MenuItem(menu->name, position, dimensions), menu(menu) {
-	backgroundAltColor = MakeColor(AlloyApplicationContext()->theme.HIGHLIGHT);
+	backgroundAltColor = MakeColor(AlloyApplicationContext()->theme.LIGHTEST);
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
-	textAltColor = MakeColor(AlloyApplicationContext()->theme.DARK_TEXT);
-	textColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
+	textAltColor = MakeColor(AlloyApplicationContext()->theme.DARKER);
+	textColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
 	borderColor = MakeColor(COLOR_NONE);
 	borderWidth = UnitPX(0.0f);
 	fontSize = UnitPerPX(1.0f, -10);

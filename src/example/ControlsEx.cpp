@@ -124,18 +124,18 @@ bool ControlsEx::init(Composite& rootNode) {
 	rootNode.add(iconButton);
 	TextFieldPtr tfield = MakeTextField("Text Field", CoordPercent(0.1f, 0.8f),
 			CoordPX(200.0f, 50.0f), Theme::Default.LIGHT,
-			Theme::Default.DARK_TEXT);
+			Theme::Default.DARKER);
 	NumberFieldPtr ifield = MakeNumberField("Integer Field",
 			CoordPerPX(0.5f, 0.5f, 0.0f, 0.0f), CoordPX(200.0f, 30.0f),
 			NumberType::Integer, Theme::Default.LIGHT,
-			Theme::Default.DARK_TEXT);
+			Theme::Default.DARKER);
 	NumberFieldPtr bfield = MakeNumberField("Binary Field",
 			CoordPerPX(0.5f, 0.5f, 0.0f, 35.0f), CoordPX(200.0f, 30.0f),
 			NumberType::Boolean, Theme::Default.LIGHT,
-			Theme::Default.DARK_TEXT);
+			Theme::Default.DARKER);
 	NumberFieldPtr ffield = MakeNumberField("Float Field",
 			CoordPercent(0.1f, 0.4f), CoordPX(200.0f, 30.0f), NumberType::Float,
-			Theme::Default.LIGHT, Theme::Default.DARK_TEXT);
+			Theme::Default.LIGHT, Theme::Default.DARKER);
 	rootNode.add(tfield);
 	rootNode.add(bfield);
 	rootNode.add(ifield);

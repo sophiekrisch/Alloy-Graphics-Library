@@ -205,12 +205,12 @@ void NodeIcon::draw(AlloyContext* context) {
 	if (selected) {
 		nvgStrokeWidth(nvg, 6.0f);
 		lineWidth = 6;
-		nvgStrokeColor(nvg, strokeColor = context->theme.HIGHLIGHT);
+		nvgStrokeColor(nvg, strokeColor = context->theme.LIGHTEST);
 	} else {
 		nvgStrokeWidth(nvg, 4.0f);
 		lineWidth = 4;
 		nvgStrokeColor(nvg,
-				strokeColor = context->theme.HIGHLIGHT.toDarker(0.8f));
+				strokeColor = context->theme.LIGHTEST.toDarker(0.8f));
 	}
 	if (shape == NodeShape::Circle) {
 		nvgBeginPath(nvg);
@@ -1235,11 +1235,11 @@ void Connection::draw(AlloyContext* context, DataFlow* flow) {
 	if (selected) {
 		nvgStrokeWidth(nvg, 6.0f);
 
-		nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
+		nvgStrokeColor(nvg, context->theme.LIGHTEST);
 	} else {
 		nvgStrokeWidth(nvg, 4.0f);
 
-		nvgStrokeColor(nvg, context->theme.HIGHLIGHT.toDarker(0.8f));
+		nvgStrokeColor(nvg, context->theme.LIGHTEST.toDarker(0.8f));
 	}
 	pixel2 start;
 	pixel2 end;
@@ -1636,18 +1636,18 @@ void InputPort::draw(AlloyContext* context) {
 			over = true;
 		}
 		nvgFillColor(nvg, Color(context->theme.LIGHT));
-		nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+		nvgStrokeColor(nvg, Color(context->theme.LIGHTEST));
 	} else {
 		if (context->isMouseOver(this)) {
-			nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
-			nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+			nvgFillColor(nvg, Color(context->theme.LIGHTEST));
+			nvgStrokeColor(nvg, Color(context->theme.LIGHTEST));
 			context->setCursor(&Cursor::CrossHairs);
 			getGraph()->setCurrentPort(this);
 			over = true;
 		} else {
 			if (isConnected()) {
-				nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
-				nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+				nvgFillColor(nvg, Color(context->theme.LIGHTEST));
+				nvgStrokeColor(nvg, Color(context->theme.LIGHTEST));
 			} else {
 				nvgFillColor(nvg, Color(context->theme.LIGHT));
 				nvgStrokeColor(nvg, Color(context->theme.LIGHT));
@@ -1671,7 +1671,7 @@ void InputPort::draw(AlloyContext* context) {
 				bounds.position.y);
 		nvgRotate(nvg, -ALY_PI * 0.25f);
 		aly::drawText(nvg, 0.0f, 0.0f, name.c_str(), FontStyle::Outline,
-				context->theme.HIGHLIGHT, context->theme.DARK, nullptr);
+				context->theme.LIGHTEST, context->theme.DARK, nullptr);
 		nvgRestore(nvg);
 	}
 }
@@ -1682,15 +1682,15 @@ void ParentPort::draw(AlloyContext* context) {
 			context->pixelRatio);
 	bool over = false;
 	if (context->isMouseOver(this)) {
-		nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
-		nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+		nvgFillColor(nvg, Color(context->theme.LIGHTEST));
+		nvgStrokeColor(nvg, Color(context->theme.LIGHTEST));
 		context->setCursor(&Cursor::CrossHairs);
 		getGraph()->setCurrentPort(this);
 		over = true;
 	} else {
 		if (isConnected()) {
-			nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
-			nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+			nvgFillColor(nvg, Color(context->theme.LIGHTEST));
+			nvgStrokeColor(nvg, Color(context->theme.LIGHTEST));
 		} else {
 			nvgFillColor(nvg, Color(context->theme.LIGHT));
 			nvgStrokeColor(nvg, Color(context->theme.LIGHT));
@@ -1711,7 +1711,7 @@ void ParentPort::draw(AlloyContext* context) {
 		nvgTranslate(nvg, bounds.position.x + bounds.dimensions.x,
 				bounds.position.y);
 		aly::drawText(nvg, 0.0f, 0.0f, name.c_str(), FontStyle::Outline,
-				context->theme.HIGHLIGHT, context->theme.DARK, nullptr);
+				context->theme.LIGHTEST, context->theme.DARK, nullptr);
 		nvgRestore(nvg);
 	}
 }
@@ -1728,23 +1728,23 @@ void OutputPort::draw(AlloyContext* context) {
 			getGraph()->setCurrentPort(this);
 			over = true;
 			nvgFillColor(nvg, Color(context->theme.DARK));
-			nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+			nvgStrokeColor(nvg, Color(context->theme.LIGHTEST));
 		}
 		else {
 			nvgFillColor(nvg, Color(context->theme.DARK));
-			nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+			nvgStrokeColor(nvg, Color(context->theme.LIGHTEST));
 		}
 	} else {
 		if (context->isMouseOver(this)) {
-			nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
-			nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+			nvgFillColor(nvg, Color(context->theme.LIGHTEST));
+			nvgStrokeColor(nvg, Color(context->theme.LIGHTEST));
 			context->setCursor(&Cursor::CrossHairs);
 			getGraph()->setCurrentPort(this);
 			over = true;
 		} else {
 			if (isConnected()) {
-				nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
-				nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+				nvgFillColor(nvg, Color(context->theme.LIGHTEST));
+				nvgStrokeColor(nvg, Color(context->theme.LIGHTEST));
 			} else {
 				nvgFillColor(nvg, Color(context->theme.LIGHT));
 				nvgStrokeColor(nvg, Color(context->theme.LIGHT));
@@ -1774,7 +1774,7 @@ void OutputPort::draw(AlloyContext* context) {
 				bounds.position.y + bounds.dimensions.y);
 		nvgRotate(nvg, ALY_PI * 0.25f);
 		aly::drawText(nvg, 0.0f, 0.0f, name.c_str(), FontStyle::Outline,
-				context->theme.HIGHLIGHT, context->theme.DARK, nullptr);
+				context->theme.LIGHTEST, context->theme.DARK, nullptr);
 		nvgRestore(nvg);
 	}
 }
@@ -1786,15 +1786,15 @@ void ChildPort::draw(AlloyContext* context) {
 			context->pixelRatio);
 	bool over = false;
 	if (context->isMouseOver(this)) {
-		nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
-		nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+		nvgFillColor(nvg, Color(context->theme.LIGHTEST));
+		nvgStrokeColor(nvg, Color(context->theme.LIGHTEST));
 		context->setCursor(&Cursor::CrossHairs);
 		getGraph()->setCurrentPort(this);
 		over = true;
 	} else {
 		if (isConnected()) {
-			nvgFillColor(nvg, Color(context->theme.HIGHLIGHT));
-			nvgStrokeColor(nvg, Color(context->theme.HIGHLIGHT));
+			nvgFillColor(nvg, Color(context->theme.LIGHTEST));
+			nvgStrokeColor(nvg, Color(context->theme.LIGHTEST));
 		} else {
 			nvgFillColor(nvg, Color(context->theme.LIGHT));
 			nvgStrokeColor(nvg, Color(context->theme.LIGHT));
@@ -1821,7 +1821,7 @@ void ChildPort::draw(AlloyContext* context) {
 		nvgSave(nvg);
 		nvgTranslate(nvg, bounds.position.x, bounds.position.y);
 		aly::drawText(nvg, 0.0f, 0.0f, name.c_str(), FontStyle::Outline,
-				context->theme.HIGHLIGHT, context->theme.DARK, nullptr);
+				context->theme.LIGHTEST, context->theme.DARK, nullptr);
 		nvgRestore(nvg);
 	}
 }
@@ -2029,7 +2029,7 @@ void Node::draw(AlloyContext* context) {
 	box2px bounds = getBounds();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
-	nvgStrokeColor(nvg, context->theme.LIGHT_TEXT);
+	nvgStrokeColor(nvg, context->theme.LIGHTER);
 	nvgStrokeWidth(nvg, lineWidth);
 	nvgLineCap(nvg, NVG_ROUND);
 	box2px lbounds = labelRegion->getBounds();
@@ -2131,18 +2131,18 @@ void Source::draw(AlloyContext* context) {
 	box2px bounds = getBounds();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
-	nvgStrokeColor(nvg, context->theme.LIGHT_TEXT);
+	nvgStrokeColor(nvg, context->theme.LIGHTER);
 	nvgStrokeWidth(nvg, lineWidth);
 	nvgLineCap(nvg, NVG_ROUND);
 	box2px lbounds = labelRegion->getBounds();
 	nvgStrokeWidth(nvg, 2.0f);
 	if (inputPorts.size() > 0 || outputPorts.size() > 0) {
 		nvgStrokeColor(nvg,
-				Color(context->theme.LIGHT_TEXT.toSemiTransparent(NODE_ALPHA)));
+				Color(context->theme.LIGHTER.toSemiTransparent(NODE_ALPHA)));
 		nvgFillColor(nvg,
 				nodeIcon->backgroundColor->toSemiTransparent(NODE_ALPHA));
 	} else {
-		nvgStrokeColor(nvg, Color(COLOR_NONE)); //Color(context->theme.LIGHT_TEXT.toSemiTransparent(NODE_ALPHA))
+		nvgStrokeColor(nvg, Color(COLOR_NONE)); //Color(context->theme.LIGHTER.toSemiTransparent(NODE_ALPHA))
 		nvgFillColor(nvg,
 				Color(context->theme.DARK.toSemiTransparent(NODE_ALPHA)));
 	}
@@ -2164,18 +2164,18 @@ void Destination::draw(AlloyContext* context) {
 	box2px bounds = getBounds();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
-	nvgStrokeColor(nvg, context->theme.LIGHT_TEXT);
+	nvgStrokeColor(nvg, context->theme.LIGHTER);
 	nvgStrokeWidth(nvg, lineWidth);
 	nvgLineCap(nvg, NVG_ROUND);
 	box2px lbounds = labelRegion->getBounds();
 	nvgStrokeWidth(nvg, 2.0f);
 	if (inputPorts.size() > 0 || outputPorts.size() > 0) {
 		nvgStrokeColor(nvg,
-				Color(context->theme.LIGHT_TEXT.toSemiTransparent(NODE_ALPHA)));
+				Color(context->theme.LIGHTER.toSemiTransparent(NODE_ALPHA)));
 		nvgFillColor(nvg,
 				nodeIcon->backgroundColor->toSemiTransparent(NODE_ALPHA));
 	} else {
-		nvgStrokeColor(nvg, Color(COLOR_NONE)); //Color(context->theme.LIGHT_TEXT.toSemiTransparent(NODE_ALPHA))
+		nvgStrokeColor(nvg, Color(COLOR_NONE)); //Color(context->theme.LIGHTER.toSemiTransparent(NODE_ALPHA))
 		nvgFillColor(nvg,
 				Color(context->theme.DARK.toSemiTransparent(NODE_ALPHA)));
 	}
@@ -2255,7 +2255,7 @@ void Relationship::draw(AlloyContext* context) {
 					context->theme.CORNER_RADIUS);
 			nvgFill(nvg);
 			aly::drawText(nvg, mid, predicate->getName(), FontStyle::Normal,
-					context->theme.HIGHLIGHT, context->theme.DARK);
+					context->theme.LIGHTEST, context->theme.DARK);
 		}
 	}
 }
@@ -2281,7 +2281,7 @@ void Relationship::drawText(AlloyContext* context) {
 					context->theme.CORNER_RADIUS);
 			nvgFill(nvg);
 			aly::drawText(nvg, mid, predicate->getName(), FontStyle::Normal,
-					context->theme.HIGHLIGHT, context->theme.DARK);
+					context->theme.LIGHTEST, context->theme.DARK);
 		}
 	}
 }
@@ -2392,7 +2392,7 @@ void DataFlow::draw(AlloyContext* context) {
 			float2 offset = getDrawOffset();
 			NVGcontext* nvg = context->nvgContext;
 			nvgStrokeWidth(nvg, 2.0f);
-			nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
+			nvgStrokeColor(nvg, context->theme.LIGHTEST);
 
 			box2px bounds = connectingPort->getBounds();
 			pixel2 start;
@@ -2435,7 +2435,7 @@ void DataFlow::draw(AlloyContext* context) {
 			}
 			nvgLineCap(nvg, NVG_ROUND);
 			nvgLineJoin(nvg, NVG_BEVEL);
-			nvgStrokeColor(nvg, context->theme.HIGHLIGHT);
+			nvgStrokeColor(nvg, context->theme.LIGHTEST);
 			nvgBeginPath(nvg);
 			float2 pt0 = offset + path.front();
 			nvgMoveTo(nvg, pt0.x, pt0.y);
