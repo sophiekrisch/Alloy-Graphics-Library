@@ -483,6 +483,7 @@ protected:
 	float entryHeight;
 	AUnit1D fontSize;
 public:
+	friend class ListBox;
 	void setSelected(bool selected);
 	bool isSelected();
 	void setLabel(const std::string& label);
@@ -541,6 +542,7 @@ protected:
 		lastSelected.clear();
 	}
 public:
+	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,double pixelRatio, bool clamp) override;
 	box2px getDragBox() const {
 		return dragBox;
 	}
@@ -774,7 +776,7 @@ public:
 	MultiFileEntry(ListBox* listBox, const std::string& name, float fontHeight);
 	void setValue(const std::string& file);
 };
-class MultiFileField: public Composite{
+class MultiFileSelector: public Composite{
 protected:
 	std::shared_ptr<ListBox> valueRegion;
 	std::shared_ptr<FileButton> openFileButton;
@@ -785,9 +787,20 @@ protected:
 	void update();
 public:
 	std::function<void(const std::vector<std::string>& files)> onChange;
+	void addFileExtensionRule(const std::string& name,
+		const std::string& extension) {
+		openFileButton->addFileExtensionRule(name, extension);
+	}
+	void addFileExtensionRule(const std::string& name,
+		const std::initializer_list<std::string>& extension) {
+		openFileButton->addFileExtensionRule(name, extension);
+	}
+	void setFileExtensionRule(int index) {
+		openFileButton->setFileExtensionRule(index);
+	}
 	void addFiles(const std::vector<std::string>& files);
 	void clearEntries();
-	MultiFileField(const std::string& name, const AUnit2D& pos, const AUnit2D& dims, float entryHeight=30.0f);
+	MultiFileSelector(const std::string& name, const AUnit2D& pos, const AUnit2D& dims, float entryHeight=30.0f);
 };
 typedef std::shared_ptr<TextButton> TextButtonPtr;
 typedef std::shared_ptr<HorizontalSlider> HSliderPtr;
@@ -819,7 +832,7 @@ typedef std::shared_ptr<TabHeader> TabHeaderPtr;
 typedef std::shared_ptr<TabPane> TabPanePtr;
 typedef std::shared_ptr<TabBar> TabBarPtr;
 typedef std::shared_ptr<MultiFileEntry> MultiFileEntryPtr;
-typedef std::shared_ptr<MultiFileField>  MultiFileFieldPtr;
+typedef std::shared_ptr<MultiFileSelector>  MultiFileSelectorPtr;
 }
 
 #endif /* ALLOYWIDGET_H_ */

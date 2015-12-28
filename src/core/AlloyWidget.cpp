@@ -2188,29 +2188,39 @@ void FileDialog::setSelectedFile(const std::string& file) {
 		directoryList->update();
 	}
 }
+
+void ListBox::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,double pixelRatio, bool clamp){
+	AlloyContext* context = AlloyApplicationContext().get();
+	Region::pack(pos,dims, dpmm, pixelRatio, clamp);
+	pixel2 maxDim = pixel2(this->getBoundsDimensionsX(), 0.0f);
+	NVGcontext* nvg = context->nvgContext;
+	box2px bounds = getBounds();
+
+	for (std::shared_ptr<ListEntry> entry : listEntries) {
+		float th = entry->fontSize.toPixels(bounds.dimensions.y, context->dpmm.y, context->pixelRatio);
+		nvgFontSize(nvg, th);
+		nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold));
+		float tw = nvgTextBounds(nvg, 0, 0, entry->getName().c_str(), nullptr, nullptr)+10;
+		maxDim = aly::max(pixel2(tw,entry->entryHeight), maxDim);
+	}
+	for (std::shared_ptr<ListEntry> entry : listEntries) {
+		entry->dimensions = CoordPX(maxDim);
+	}
+	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
+}
 void ListBox::update() {
 	clear();
 	lastSelected.clear();
-	AlloyApplicationContext()->addDeferredTask(
-			[this]() {
-				lastSelected.clear();
-				AlloyContext* context = AlloyApplicationContext().get();
-				pixel2 maxDim = pixel2(this->getBoundsDimensionsX(), 0.0f);
-				for (std::shared_ptr<ListEntry> entry : listEntries) {
-					maxDim = aly::max(entry->dimensions.toPixels(context->getScreenSize(), context->dpmm, context->pixelRatio), maxDim);
-				}
-				for (std::shared_ptr<ListEntry> entry : listEntries) {
-					if (entry->parent == nullptr) {
-						entry->dimensions = CoordPX(maxDim);
-						add(entry);
-					}
-					if (entry->isSelected()) {
-						lastSelected.push_back(entry.get());
-					}
-				}
-				AlloyApplicationContext()->requestPack();
-			});
-
+	AlloyContext* context = AlloyApplicationContext().get();
+	for (std::shared_ptr<ListEntry> entry : listEntries) {
+		if (entry->parent == nullptr) {
+			add(entry);
+		}
+		if (entry->isSelected()) {
+			lastSelected.push_back(entry.get());
+		}
+	}
+	context->requestPack();
 }
 ListBox::ListBox(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims) :
@@ -2218,7 +2228,7 @@ ListBox::ListBox(const std::string& name, const AUnit2D& pos,
 	enableMultiSelection = false;
 	scrollingDown = false;
 	scrollingUp = false;
-	backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
+	backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHT_TEXT);
 	borderColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	borderWidth = UnitPX(1.0f);
 	setOrientation(Orientation::Vertical, pixel2(0, 2), pixel2(0, 2));
@@ -2541,21 +2551,24 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 						FileEntry* entry = dynamic_cast<FileEntry*>(lentry);
 						if (this->type == FileDialogType::OpenMultiFile) {
 							if (entry->fileDescription.fileType == FileType::Directory) {
-								setSelectedFile(entry->fileDescription.fileLocation);
-								fileLocation->setValue(entry->fileDescription.fileLocation);
+								std::string fileName = entry->fileDescription.fileLocation;
+								setSelectedFile(fileName);
+								fileLocation->setValue(fileName);
 							}
 							updateValidity();
 
 						}
 						else if (this->type == FileDialogType::OpenFile) {
-							setSelectedFile(entry->fileDescription.fileLocation);
-							fileLocation->setValue(entry->fileDescription.fileLocation);
+							std::string fileName = entry->fileDescription.fileLocation;
+							setSelectedFile(fileName);
+							fileLocation->setValue(fileName);
 							updateValidity();
 						}
 						else if (this->type == FileDialogType::SaveFile) {
 							if (entry->fileDescription.fileType == FileType::Directory) {
-								setSelectedFile(entry->fileDescription.fileLocation);
-								fileLocation->setValue(entry->fileDescription.fileLocation);
+								std::string fileName = entry->fileDescription.fileLocation;
+								setSelectedFile(fileName);
+								fileLocation->setValue(fileName);
 							}
 							else {
 								fileLocation->setValue(entry->fileDescription.fileLocation);
@@ -3833,16 +3846,16 @@ MultiFileEntry::MultiFileEntry(ListBox* listBox, const std::string& name, float 
 void MultiFileEntry::setValue(const std::string& file) {
 	this->fileName = file;
 }
-void MultiFileField::clearEntries() {
+void MultiFileSelector::clearEntries() {
 	valueRegion->clearEntries();
 }
-void MultiFileField::update() {
+void MultiFileSelector::update() {
 	for (ListEntryPtr entry : valueRegion->getEntries()) {
 		entry->parent = nullptr;
 	}
 	valueRegion->update();
 }
-void MultiFileField::addFiles(const std::vector<std::string>& newFiles) {
+void MultiFileSelector::addFiles(const std::vector<std::string>& newFiles) {
 	for (std::string file : newFiles) {
 		MultiFileEntryPtr entry = MultiFileEntryPtr(new MultiFileEntry(valueRegion.get(), GetFileName(file), this->entryHeight));
 		entry->setValue(file);
@@ -3850,7 +3863,7 @@ void MultiFileField::addFiles(const std::vector<std::string>& newFiles) {
 	}
 	update();
 }
-MultiFileField::MultiFileField(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,float entryHeight) : Composite(name, pos, dims) , entryHeight(entryHeight){
+MultiFileSelector::MultiFileSelector(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,float entryHeight) : Composite(name, pos, dims) , entryHeight(entryHeight){
 	valueRegion = ListBoxPtr(new ListBox(name, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f,1.0f,-entryHeight,0.0f)));
 	openFileButton = FileButtonPtr(new FileButton("Open Multi-File", CoordPerPX(1.0f, 0.0f, -entryHeight, 0.0f), CoordPX(entryHeight, entryHeight), FileDialogType::OpenMultiFile));
 	upButton = IconButtonPtr(new IconButton(0xf0d8, CoordPerPX(1.0f, 0.0f, -entryHeight + 2, entryHeight + 2), CoordPX(entryHeight - 4, entryHeight - 4)));
@@ -3892,13 +3905,20 @@ MultiFileField::MultiFileField(const std::string& name, const AUnit2D& pos, cons
 		if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
 			std::vector<ListEntryPtr>& entries = valueRegion->getEntries();
 			bool removed = false;
+			ListEntryPtr next;
 			for (auto iter = entries.begin();iter != entries.end();iter++) {
 				ListEntryPtr entry = *iter;
 				if (entry->isSelected()) {
+					if((iter + 1) != entries.end()) {
+						next=(*(iter + 1));
+					}
 					entries.erase(iter);
 					iter--;
 					removed = true;
 				}
+			}
+			if (next.get() != nullptr) {
+				next->setSelected(true);
 			}
 			if (removed) {
 				update();

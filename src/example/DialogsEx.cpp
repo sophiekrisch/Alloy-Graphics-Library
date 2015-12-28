@@ -30,6 +30,7 @@ bool DialogsEx::init(Composite& rootNode) {
 	FileButtonPtr openMultiButton = FileButtonPtr(new FileButton("Open Multi-File", CoordPerPX(0.2f, 0.0f, 45.0f, 5.0f), CoordPX(40, 40), FileDialogType::OpenMultiFile));
 	FileSelectorPtr fileSelector=FileSelectorPtr(new FileSelector("Selector", CoordPerPX(0.5f, 0.0f,0.0f,90.0f),CoordPX(300.0f, 30.0f)));
 	ColorSelectorPtr colorselect = ColorSelectorPtr(new ColorSelector("Color", CoordPerPX(0.2f, 0.0f, 90.0f, 5.0f), CoordPX(150, 40)));
+	MultiFileSelectorPtr mfileField = MultiFileSelectorPtr(new MultiFileSelector("Multi-File",CoordPercent(0.5f,0.5f),CoordPX(300,200)));
 	ListBoxPtr listBox = ListBoxPtr(new ListBox("List Box", CoordPX( 5.0f, 90.0f),CoordPX(300,300)));
 	for (int i = 0;i < 30;i++) {
 		listBox->addEntry(ListEntryPtr(new ListEntry(listBox.get(),MakeString()<<"Multi-Selection Entry ("<<i<<")",30.0f)));
@@ -42,7 +43,9 @@ bool DialogsEx::init(Composite& rootNode) {
 	rootNode.add(fileSelector);
 	rootNode.add(colorselect);
 	rootNode.add(listBox);
+	rootNode.add(mfileField);
 
+	mfileField->addFiles(std::vector<std::string> { getContext()->getFullPath("images" + ALY_PATH_SEPARATOR + "sfsunset.png"), getContext()->getFullPath("images" + ALY_PATH_SEPARATOR + "sfmarket.png")});
 	using extensions = std::initializer_list<std::string>;
 	std::string exampleFile = getContext()->getFullPath("images" + ALY_PATH_SEPARATOR + "sfsunset.png");
 	fileSelector->addFileExtensionRule("Portable Network Graphics", "png");

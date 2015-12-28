@@ -47,7 +47,7 @@ bool ParameterPaneEx::init(Composite& rootNode) {
 	paramPane->addColorField("Color", param4);
 	paramPane->addToggleBox("Toggle", param6);
 	paramPane->addCheckBox("Check", param7);
-	paramPane->addMultiFileField("Multi-File", param8);
+	paramPane->addMultiFileSelector("Multi-File", param8);
 	centerPane->backgroundColor = MakeColor(getContext()->theme.LIGHT);
 	borderComposite->setCenter(centerPane);
 	borderComposite->setEast(paramPane, UnitPX(300.0f));

@@ -339,8 +339,12 @@ void Composite::putFirst(Region* region) {
 }
 void Composite::clear() {
 	setDragOffset(pixel2(0, 0));
-	AlloyApplicationContext()->addDeferredTask(
-			[this] {this->children.clear();});
+	for (RegionPtr node:children) {
+		node->parent = nullptr;
+	}
+	children.clear();
+	AlloyDefaultContext()->clearEvents();
+	
 }
 Region* Composite::locate(const pixel2& cursor) {
 	if (isVisible()) {
