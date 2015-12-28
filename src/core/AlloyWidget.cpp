@@ -71,6 +71,9 @@ CheckBox::CheckBox(const std::string& label, const AUnit2D& position,
 		valueLabel->setOrigin(Origin::TopRight);
 		valueLabel->setAspectRule(AspectRule::FixedHeight);
 		checkBoundsDraw = DrawPtr(new Draw("Check Bounds", CoordPercent(1.0f, 0.0f), CoordPercent(0.0f, 1.0f)));
+		checkBoundsDraw->setAspectRatio(1.0f);
+		checkBoundsDraw->setOrigin(Origin::TopRight);
+		checkBoundsDraw->setAspectRule(AspectRule::FixedHeight);
 	}
 	else {
 		valueLabel = MakeTextLabel(CodePointToUTF8(0xf00c),
