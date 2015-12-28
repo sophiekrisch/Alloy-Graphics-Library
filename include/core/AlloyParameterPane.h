@@ -42,8 +42,8 @@ namespace aly {
 		void addToggleBox(const std::string& label, bool& value, float aspect = 2.1f);
 		void addCheckBox(const std::string& label, bool& value, float aspect = 1.0f);
 		void addColorField(const std::string& label,Color& color, float aspect = 3.0f);
-		void addFileField(const std::string& label, std::string& file, float aspect = 6.0f);
-		void addMultiFileSelector(const std::string& label, std::vector<std::string>& files, float aspect = 6.0f);
+		void addFileField(const std::string& label, std::string& file, float aspect = -1.0f);
+		void addMultiFileSelector(const std::string& label, std::vector<std::string>& files, float aspect = -1.0f);
 	};
 
 	typedef std::shared_ptr<ParameterPane> ParameterPanePtr;

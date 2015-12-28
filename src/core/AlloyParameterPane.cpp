@@ -34,16 +34,24 @@ namespace aly {
 		compRegion->backgroundColor = entryBackgroundColor;
 		compRegion->borderColor = entryBorderColor;
 		compRegion->borderWidth = entryBorderWidth;
-
 		valueRegion->backgroundColor = entryBackgroundColor;
 		valueRegion->borderWidth = UnitPX(0.0f);
 		textLabel->textColor = entryTextColor;
 	}
 	void ParameterPane::addNumberField(const std::string& label, Number& value,float aspect) {
-		float entryWidth = aspect * entryHeight;
 		CompositePtr comp = CompositePtr(new Composite(label+"_param",CoordPX(0,0),CoordPerPX(1.0f,0.0f,0.0f,entryHeight)));
-		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label,CoordPX(0.0f,0.0f),CoordPerPX(1.0f,0.0f,-entryWidth,entryHeight)));
-		NumberFieldPtr valueRegion = NumberFieldPtr(new NumberField(label, CoordPerPX(1.0f, 0.0f, -entryWidth, 0.0f), CoordPX(entryWidth, entryHeight), value.type()));
+		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+		NumberFieldPtr valueRegion = NumberFieldPtr(new NumberField(label, CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, 0.0f), CoordPX(aspect*entryHeight, entryHeight), value.type()));
+		if (aspect <= 0) {
+			pixel2 labelBounds = labelRegion->getTextDimensions(AlloyDefaultContext().get());
+			labelBounds.x += 10;
+			valueRegion->position = CoordPX(labelBounds.x, 0.0f);
+			valueRegion->dimensions = CoordPerPX(1.0f, 0.0f, -labelBounds.x, entryHeight);
+		}
+		else {
+			labelRegion->position = CoordPX(0.0f, 0.0f);
+			labelRegion->dimensions = CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, entryHeight);
+		}
 		valueRegion->textColor = MakeColor(AlloyDefaultContext()->theme.DARKER);
 		valueRegion->setNumberValue(value);
 		comp->add(labelRegion);
@@ -59,10 +67,19 @@ namespace aly {
 		valueRegion->setRoundCorners(true);
 	}
 	void ParameterPane::addColorField(const std::string& label, Color& value, float aspect) {
-		float entryWidth = aspect * entryHeight;
 		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
-		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, -entryWidth, entryHeight)));
-		ColorSelectorPtr valueRegion = ColorSelectorPtr(new ColorSelector(label, CoordPerPX(1.0f, 0.0f, -entryWidth, 0.0f), CoordPX(entryWidth, entryHeight),false));
+		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+		ColorSelectorPtr valueRegion = ColorSelectorPtr(new ColorSelector(label, CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, 0.0f), CoordPX(aspect*entryHeight, entryHeight),false));
+		if (aspect <= 0) {
+			pixel2 labelBounds = labelRegion->getTextDimensions(AlloyDefaultContext().get());
+			labelBounds.x += 10;
+			valueRegion->position = CoordPX(labelBounds.x, 0.0f);
+			valueRegion->dimensions = CoordPerPX(1.0f, 0.0f, -labelBounds.x, entryHeight);
+		}
+		else {
+			labelRegion->position = CoordPX(0.0f, 0.0f);
+			labelRegion->dimensions = CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, entryHeight);
+		}
 		valueRegion->setColor(value);
 		comp->add(labelRegion);
 		comp->add(valueRegion);
@@ -76,12 +93,20 @@ namespace aly {
 
 	}
 	void ParameterPane::addSelectionField(const std::string& label,int& selectedIndex, const std::vector<std::string>& options, float aspect) {
-		float entryWidth = aspect * entryHeight;
 		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
-		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, -entryWidth, entryHeight)));
-		SelectionPtr valueRegion = SelectionPtr(new Selection(label, CoordPerPX(1.0f, 0.0f, -entryWidth, 0.0f), CoordPX(entryWidth, entryHeight), options));
+		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+		SelectionPtr valueRegion = SelectionPtr(new Selection(label, CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, 0.0f), CoordPX(aspect*entryHeight, entryHeight), options));
+		if (aspect <= 0) {
+			pixel2 labelBounds = labelRegion->getTextDimensions(AlloyDefaultContext().get());
+			labelBounds.x += 10;
+			valueRegion->position = CoordPX(labelBounds.x, 0.0f);
+			valueRegion->dimensions = CoordPerPX(1.0f, 0.0f, -labelBounds.x, entryHeight);
+		}
+		else {
+			labelRegion->position = CoordPX(0.0f, 0.0f);
+			labelRegion->dimensions = CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, entryHeight);
+		}
 		valueRegion->setSelectionIndex(selectedIndex);
-
 		comp->add(labelRegion);
 		comp->add(valueRegion);
 		std::shared_ptr<AnyInterface> ref = std::shared_ptr<AnyInterface>(new AnyValue<int*>(&selectedIndex));
@@ -95,10 +120,19 @@ namespace aly {
 		valueRegion->setRoundCorners(true);
 	}
 	void ParameterPane::addToggleBox(const std::string& label, bool& value, float aspect) {
-		float entryWidth = aspect * entryHeight;
 		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
-		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, -entryWidth, entryHeight)));
-		ToggleBoxPtr valueRegion = ToggleBoxPtr(new ToggleBox(label, CoordPerPX(1.0f, 0.0f, -entryWidth, 0.0f), CoordPX(entryWidth, entryHeight),value,false));
+		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+		ToggleBoxPtr valueRegion = ToggleBoxPtr(new ToggleBox(label, CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, 0.0f), CoordPX(aspect*entryHeight, entryHeight),value,false));
+		if (aspect <= 0) {
+			pixel2 labelBounds = labelRegion->getTextDimensions(AlloyDefaultContext().get());
+			labelBounds.x += 10;
+			valueRegion->position = CoordPX(labelBounds.x, 0.0f);
+			valueRegion->dimensions = CoordPerPX(1.0f, 0.0f, -labelBounds.x, entryHeight);
+		}
+		else {
+			labelRegion->position = CoordPX(0.0f, 0.0f);
+			labelRegion->dimensions = CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, entryHeight);
+		}
 		comp->add(labelRegion);
 		comp->add(valueRegion);
 		std::shared_ptr<AnyInterface> ref = std::shared_ptr<AnyInterface>(new AnyValue<bool*>(&value));
@@ -110,10 +144,19 @@ namespace aly {
 		setCommonParameters(comp, labelRegion, valueRegion);
 	}
 	void ParameterPane::addCheckBox(const std::string& label, bool& value, float aspect) {
-		float entryWidth = aspect * entryHeight;
 		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
-		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, -entryWidth, entryHeight)));
-		CheckBoxPtr valueRegion = CheckBoxPtr(new CheckBox(label, CoordPerPX(1.0f, 0.0f, -entryWidth, 0.0f), CoordPX(entryWidth, entryHeight),value,false));
+		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+		CheckBoxPtr valueRegion = CheckBoxPtr(new CheckBox(label, CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, 0.0f), CoordPX(aspect*entryHeight, entryHeight),value,false));
+		if (aspect <= 0) {
+			pixel2 labelBounds = labelRegion->getTextDimensions(AlloyDefaultContext().get());
+			labelBounds.x += 10;
+			valueRegion->position = CoordPX(labelBounds.x, 0.0f);
+			valueRegion->dimensions = CoordPerPX(1.0f, 0.0f, -labelBounds.x, entryHeight);
+		}
+		else {
+			labelRegion->position = CoordPX(0.0f, 0.0f);
+			labelRegion->dimensions = CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, entryHeight);
+		}
 		comp->add(labelRegion);
 		comp->add(valueRegion);
 		std::shared_ptr<AnyInterface> ref = std::shared_ptr<AnyInterface>(new AnyValue<bool*>(&value));
@@ -125,12 +168,19 @@ namespace aly {
 		setCommonParameters(comp, labelRegion, valueRegion);
 	}
 	void ParameterPane::addFileField(const std::string& label, std::string& file, float aspect) {
-		float entryWidth = aspect * entryHeight;
 		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
-		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, -entryWidth, entryHeight)));
-		pixel2 labelBounds = labelRegion->getTextDimensions(AlloyDefaultContext().get());
-		labelBounds.x += 4;
-		FileSelectorPtr valueRegion = FileSelectorPtr(new FileSelector(label, CoordPerPX(1.0f, 0.0f, -entryWidth, 0.0f), CoordPX(entryWidth, entryHeight)));
+		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+		FileSelectorPtr valueRegion = FileSelectorPtr(new FileSelector(label, CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, 0.0f), CoordPX(aspect*entryHeight, entryHeight)));
+		if (aspect <= 0) {
+			pixel2 labelBounds = labelRegion->getTextDimensions(AlloyDefaultContext().get());
+			labelBounds.x += 10;
+			valueRegion->position = CoordPX(labelBounds.x, 0.0f);
+			valueRegion->dimensions = CoordPerPX(1.0f, 0.0f, -labelBounds.x, entryHeight);
+		}
+		else {
+			labelRegion->position = CoordPX(0.0f, 0.0f);
+			labelRegion->dimensions = CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, entryHeight);
+		}
 		comp->add(labelRegion);
 		comp->add(valueRegion);
 		std::shared_ptr<AnyInterface> ref = std::shared_ptr<AnyInterface>(new AnyValue<std::string*>(&file));
@@ -145,12 +195,19 @@ namespace aly {
 	}
 
 	void ParameterPane::addMultiFileSelector(const std::string& label, std::vector<std::string>& files, float aspect) {
-		float entryWidth = aspect * entryHeight;
 		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, 4*entryHeight)));
 		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f,0.0f, entryHeight)));
-		pixel2 labelBounds=labelRegion->getTextDimensions(AlloyDefaultContext().get());
-		labelBounds.x += 4;
-		MultiFileSelectorPtr valueRegion = MultiFileSelectorPtr(new MultiFileSelector("Multi-File Field", CoordPX(labelBounds.x,0.0f), CoordPerPX(1.0f,0.0f,-labelBounds.x, 4*entryHeight),entryHeight));
+		MultiFileSelectorPtr valueRegion = MultiFileSelectorPtr(new MultiFileSelector("Multi-File Field", CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, 0.0f), CoordPX(aspect*entryHeight, 4*entryHeight),entryHeight));
+		if (aspect <=0) {
+			pixel2 labelBounds = labelRegion->getTextDimensions(AlloyDefaultContext().get());
+			labelBounds.x += 10;
+			valueRegion->position = CoordPX(labelBounds.x, 0.0f);
+			valueRegion->dimensions = CoordPerPX(1.0f, 0.0f, -labelBounds.x, 4 * entryHeight);
+		}
+		else {
+			labelRegion->position=CoordPX(0.0f, 0.0f);
+			labelRegion->dimensions=CoordPerPX(1.0f, 0.0f, -aspect*entryHeight,4* entryHeight);
+		}
 		std::shared_ptr<AnyInterface> ref = std::shared_ptr<AnyInterface>(new AnyValue<std::vector<std::string>*>(&files));
 		valueRegion->addFiles(files);
 		values.push_back(ref);
