@@ -190,7 +190,7 @@ ToggleBox::ToggleBox(const std::string& label, const AUnit2D& position,
 			HorizontalAlignment::Center, VerticalAlignment::Middle);
 	offLabel = MakeTextLabel("OFF", CoordPercent(0.5f, 0.0f),
 			CoordPercent(0.3f, 1.0f), FontType::Bold, UnitPerPX(1.0f, -4.0f),
-			AlloyApplicationContext()->theme.DARKER,
+			AlloyApplicationContext()->theme.DARK,
 			HorizontalAlignment::Center, VerticalAlignment::Middle);
 	onLabel->setTruncate(false);
 	offLabel->setTruncate(false);
@@ -331,12 +331,12 @@ void ProgressBar::draw(AlloyContext* context) {
 	nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold));
 	nvgFontSize(nvg, std::max(8.0f, h - FADE));
 	drawText(nvg, pixel2(x + 0.5f * w, y + 0.5f * h), label, FontStyle::Normal,
-			context->theme.LIGHTER, context->theme.DARKER);
+			context->theme.LIGHTER, context->theme.DARK);
 	popScissor(nvg);
 
 	pushScissor(nvg, x + w * value, y, w * (1.0f - value), h);
 	drawText(nvg, pixel2(x + 0.5f * w, y + 0.5f * h), label, FontStyle::Normal,
-			context->theme.DARKER, context->theme.LIGHTER);
+			context->theme.DARK, context->theme.LIGHTER);
 	popScissor(nvg);
 }
 ProgressBar::ProgressBar(const std::string& name, const AUnit2D& pt,
@@ -350,7 +350,7 @@ TextButton::TextButton(const std::string& label, const AUnit2D& position,
 	this->position = position;
 	this->dimensions = dimensions;
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHTEST);
-	textColor = MakeColor(AlloyApplicationContext()->theme.DARKER);
+	textColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
 	fontSize = UnitPerPX(1.0f, -10);
 	this->aspectRule = AspectRule::FixedHeight;
@@ -421,7 +421,7 @@ TextIconButton::TextIconButton(const std::string& label, int iconCode,
 	this->position = position;
 	this->dimensions = dimensions;
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
-	textColor = MakeColor(AlloyApplicationContext()->theme.DARKER);
+	textColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
 	fontSize = UnitPerPX(1.0f, -10);
 }
@@ -729,12 +729,12 @@ Selection::Selection(const std::string& label, const AUnit2D& position,
 			CoordPerPX(1.0f, 1.0f, -10.0f, -10.0f));
 	selectionLabel = MakeTextLabel(label, CoordPercent(0.0f, 0.0f),
 			CoordPercent(1.0f, 1.0f), FontType::Bold, UnitPercent(1.0f),
-			AlloyApplicationContext()->theme.DARKER.toRGBA(),
+			AlloyApplicationContext()->theme.DARK.toRGBA(),
 			HorizontalAlignment::Left, VerticalAlignment::Middle);
 	arrowLabel = MakeTextLabel(CodePointToUTF8(0xf13a),
 			CoordPercent(1.0f, 0.0f), CoordPercent(0.0f, 1.0f), FontType::Icon,
 			UnitPercent(1.0f),
-			AlloyApplicationContext()->theme.DARKER.toRGBA(),
+			AlloyApplicationContext()->theme.DARK.toRGBA(),
 			HorizontalAlignment::Center, VerticalAlignment::Middle);
 	selectionBox = SelectionBoxPtr(new SelectionBox(label + "_box", options));
 	selectionBox->setDetached(true);
@@ -1779,7 +1779,7 @@ FileSelector::FileSelector(const std::string& name, const AUnit2D& pos,
 			new IconButton(0xf115, CoordPerPX(0.0f, 0.0f, 2.0f, 4.0f),
 					CoordPerPX(1.0f, 1.0f, 0.0f, -4.0f)));
 	openIcon->foregroundColor = MakeColor(COLOR_NONE);
-	openIcon->borderColor=MakeColor(AlloyApplicationContext()->theme.DARKER);
+	openIcon->borderColor=MakeColor(AlloyApplicationContext()->theme.DARK);
 	openIcon->borderWidth=UnitPX(0.0f);
 	openIcon->backgroundColor = MakeColor(COLOR_NONE);
 	openIcon->iconColor = MakeColor(AlloyApplicationContext()->theme.DARK);
@@ -1852,7 +1852,7 @@ FileButton::FileButton(const std::string& name, const AUnit2D& pos,
 	}
 
 	foregroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
-	iconColor = MakeColor(AlloyApplicationContext()->theme.DARKER);
+	iconColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	borderColor=MakeColor(0,0,0,0);
 	borderWidth = UnitPX(2.0f);
 	backgroundColor = MakeColor(COLOR_NONE);
@@ -2067,7 +2067,7 @@ void ListEntry::draw(AlloyContext* context) {
 
 			nvgFillColor(nvg, context->theme.LIGHTEST);
 		} else {
-			nvgFillColor(nvg, context->theme.DARKER);
+			nvgFillColor(nvg, context->theme.DARK);
 		}
 	}
 
@@ -2427,9 +2427,9 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	upDirButton->backgroundColor = MakeColor(0,0,0,0);
 	upDirButton->setRoundCorners(true);
 	upDirButton->iconColor = MakeColor(
-			AlloyApplicationContext()->theme.DARKER);
+			AlloyApplicationContext()->theme.DARK);
 	upDirButton->borderColor = MakeColor(
-			AlloyApplicationContext()->theme.DARKER);
+			AlloyApplicationContext()->theme.DARK);
 	upDirButton->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& event) {
 				std::string file=RemoveTrailingSlash(this->getValue());
@@ -3875,6 +3875,7 @@ MultiFileSelector::MultiFileSelector(const std::string& name, const AUnit2D& pos
 	openFileButton->backgroundColor = MakeColor(0, 0, 0, 0);
 	openFileButton->foregroundColor = MakeColor(0, 0, 0, 0);
 	openFileButton->borderWidth = UnitPX(0.0f);
+	openFileButton->iconColor = MakeColor(AlloyDefaultContext()->theme.DARK);
 	upButton->backgroundColor = MakeColor(0, 0, 0, 0);
 	upButton->foregroundColor = MakeColor(0, 0, 0, 0);
 	upButton->iconColor = MakeColor(AlloyDefaultContext()->theme.DARK);

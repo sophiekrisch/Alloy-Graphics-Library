@@ -1874,7 +1874,7 @@ pixel2 ModifiableLabel::getTextDimensions(AlloyContext* context) {
 }
 ModifiableLabel::ModifiableLabel(const std::string& name, const AUnit2D& position,
 	const AUnit2D& dimensions) :TextField(name, position, dimensions), fontType(FontType::Normal),fontStyle(FontStyle::Normal) {
-	textAltColor = MakeColor(AlloyApplicationContext()->theme.DARKER);
+	textAltColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	textColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
 	fontSize = UnitPX(24);
 	setValue(name);
@@ -1987,7 +1987,7 @@ void ModifiableLabel::draw(AlloyContext* context) {
 				context->theme.DARK.toSemiTransparent(0.25f));
 			nvgFill(nvg);
 		}
-		nvgFillColor(nvg,context->theme.DARKER.toDarker(0.5f));
+		nvgFillColor(nvg,context->theme.DARK.toDarker(0.5f));
 		if (showDefaultLabel) {
 			nvgText(nvg, textOffsetX, textY + h / 2, label.c_str(), NULL);
 		}
@@ -2110,7 +2110,7 @@ pixel2 ModifiableNumber::getTextDimensions(AlloyContext* context) {
 }
 ModifiableNumber::ModifiableNumber(const std::string& name, const AUnit2D& position,
 	const AUnit2D& dimensions, const NumberType& type) :NumberField(name, position, dimensions,type), fontType(FontType::Normal), fontStyle(FontStyle::Normal) {
-	textAltColor = MakeColor(AlloyApplicationContext()->theme.DARKER);
+	textAltColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	textColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
 	fontSize = UnitPX(24);
 	setValue(name);
@@ -2229,7 +2229,7 @@ void ModifiableNumber::draw(AlloyContext* context) {
 				context->theme.DARK.toSemiTransparent(0.25f));
 			nvgFill(nvg);
 		}
-		nvgFillColor(nvg, context->theme.DARKER.toDarker(0.5f));
+		nvgFillColor(nvg, context->theme.DARK.toDarker(0.5f));
 		if (showDefaultLabel) {
 			nvgText(nvg, textOffsetX, textY + h / 2, label.c_str(), NULL);
 		}
@@ -3917,7 +3917,7 @@ Menu::Menu(const std::string& name, float menuWidth,
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHTEST);
 	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHTEST);
 	borderWidth = UnitPX(1.0f);
-	textColor = MakeColor(AlloyApplicationContext()->theme.DARKER);
+	textColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	textAltColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
 	downArrow = AlloyApplicationContext()->createAwesomeGlyph(0xf0ab,
 			FontStyle::Normal, 14);
@@ -4076,7 +4076,7 @@ MenuHeader::MenuHeader(const std::shared_ptr<Menu>& menu,
 		MenuItem(menu->name, position, dimensions), menu(menu) {
 	backgroundAltColor = MakeColor(AlloyApplicationContext()->theme.LIGHTEST);
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
-	textAltColor = MakeColor(AlloyApplicationContext()->theme.DARKER);
+	textAltColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	textColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
 	borderColor = MakeColor(COLOR_NONE);
 	borderWidth = UnitPX(0.0f);
