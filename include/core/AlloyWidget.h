@@ -791,6 +791,7 @@ public:
 		return fileName;
 	}
 };
+
 class MultiFileSelector: public Composite{
 protected:
 	std::shared_ptr<ListBox> valueRegion;
