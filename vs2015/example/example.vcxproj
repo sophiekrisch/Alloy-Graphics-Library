@@ -19,9 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\core\process_unix.cpp" />
-    <ClCompile Include="..\..\src\core\process_win.cpp" />
-    <ClCompile Include="..\..\src\core\tinyprocess.cpp" />
     <ClCompile Include="..\..\src\example\ColorSpaceEx.cpp" />
     <ClCompile Include="..\..\src\example\CompositeEx.cpp" />
     <ClCompile Include="..\..\src\example\ControlsEx.cpp" />
@@ -63,7 +60,6 @@
     <ClCompile Include="..\..\src\example\WindowPaneEx.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\core\tinyprocess.h" />
     <ClInclude Include="..\..\include\example\ColorSpaceEx.h" />
     <ClInclude Include="..\..\include\example\CompositeEx.h" />
     <ClInclude Include="..\..\include\example\ControlsEx.h" />
