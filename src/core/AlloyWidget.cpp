@@ -3894,7 +3894,7 @@ void MultiFileSelector::fireEvent() {
 	}
 }
 MultiFileSelector::MultiFileSelector(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,float entryHeight) : Composite(name, pos, dims) , entryHeight(entryHeight){
-	valueRegion = ListBoxPtr(new ListBox(name, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f,1.0f,-entryHeight-2.0f,0.0f)));
+	valueRegion = ListBoxPtr(new ListBox(name, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f,1.0f,-entryHeight-3.0f,0.0f)));
 	RegionPtr bgRegion = RegionPtr(new Region(name, CoordPerPX(1.0f, 0.0f, -entryHeight - 3,0.0f), CoordPerPX(0.0f, 1.0f, 2.0f, 0.0f)));
 	bgRegion->backgroundColor= MakeColor(AlloyDefaultContext()->theme.DARK);
 	bgRegion->setRoundCorners(false);
