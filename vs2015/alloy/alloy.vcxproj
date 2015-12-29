@@ -43,6 +43,7 @@
     <ClCompile Include="..\..\src\core\AlloyPLY.cpp" />
     <ClCompile Include="..\..\src\core\AlloySimulation.cpp" />
     <ClCompile Include="..\..\src\core\AlloySparseMatrix.cpp" />
+    <ClCompile Include="..\..\src\core\AlloyTablePane.cpp" />
     <ClCompile Include="..\..\src\core\AlloyUI.cpp" />
     <ClCompile Include="..\..\src\core\AlloyUnits.cpp" />
     <ClCompile Include="..\..\src\core\AlloyVolume.cpp" />
@@ -101,6 +102,7 @@
     <ClInclude Include="..\..\include\core\AlloySparseMatrix.h" />
     <ClInclude Include="..\..\include\core\AlloySparseSolve.h" />
     <ClInclude Include="..\..\include\core\AlloySpline.h" />
+    <ClInclude Include="..\..\include\core\AlloyTablePane.h" />
     <ClInclude Include="..\..\include\core\AlloyUI.h" />
     <ClInclude Include="..\..\include\core\AlloyUnits.h" />
     <ClInclude Include="..\..\include\core\AlloyVector.h" />

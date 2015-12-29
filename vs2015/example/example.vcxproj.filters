@@ -118,6 +118,9 @@
     <ClCompile Include="..\..\src\example\ParameterPaneEx.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\example\TablePaneEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\example\UnitsEx.h">
@@ -235,6 +238,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\example\ParameterPaneEx.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\example\TablePaneEx.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

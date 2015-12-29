@@ -1,0 +1,363 @@
+/*
+* Copyright(C) 2015, Blake C. Lucas, Ph.D. (img.science@gmail.com)
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+* The above copyright notice and this permission notice shall be included in
+* all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+* THE SOFTWARE.
+*/
+#include "AlloyTablePane.h"
+#include "AlloyApplication.h"
+#include "AlloyDrawUtil.h"
+namespace aly {
+	TableRow::TableRow(TablePane* tablePane, const std::string& name,float entryHeight) :
+		Composite(name), tablePane(tablePane), entryHeight(entryHeight) {
+		this->backgroundColor = MakeColor(AlloyApplicationContext()->theme.NEUTRAL);
+		this->borderColor = MakeColor(COLOR_NONE);
+		this->selected = false;
+		this->onMouseDown = [this](AlloyContext* context, const InputEvent& e) {
+			return this->tablePane->onMouseDown(this, context, e);
+		};
+	}
+	TableEntry::TableEntry(const std::string& name, const AUnit2D& pos, const AUnit2D& dims): Composite(name,pos,dims) {
+
+	}
+
+	void TableRow::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,double pixelRatio, bool clamp) {
+		const int cols = tablePane->getColumns();
+		pixel offset = 0.0f;
+		for (std::pair<int, TableEntryPtr> pr : columns) {
+			TableEntryPtr entry = pr.second;
+			int col = pr.first;
+			entry->position = CoordPX(offset, 0.0f);
+			pixel w = tablePane->getColumnWidthPixels(col);
+			entry->dimensions = CoordPerPX(0.0f,1.0f,w, 0.0f);
+			offset += w;
+		}
+		Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
+	}
+	std::shared_ptr<TableEntry> TableRow::getColumn(int i) const {
+		if (columns.find(i) == columns.end()){
+			return std::shared_ptr<TableEntry>();
+		}
+		else {
+			return columns.at(i);
+		}
+	}
+	int TableRow::compare(const std::shared_ptr<TableRow>& row, int column) {
+		return getColumn(column)->compare(row->getColumn(column));
+	}
+
+	void TableRow::setColumn(int c, const std::shared_ptr<TableEntry>& region) {
+		columns[c] = region;
+	}
+	void TablePane::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
+		double pixelRatio, bool clamp) {
+		for (int c = 0;c < columns;c++) {
+			columnWidthPixels[c] = columnWidths[c].toPixels(dims.x, dpmm.x, pixelRatio);
+		}
+		Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
+	}
+	void TablePane::setColumnWidth(int c, const AUnit1D& unit) {
+		columnWidths[c] = unit;
+	}
+	AUnit1D TablePane::getColumnWidth(int c) const {
+		return columnWidths[c];
+	}
+	pixel TablePane::getColumnWidthPixels(int c) const {
+		return columnWidthPixels[c];
+	}
+	bool TablePane::onMouseDown(TableRow* entry, AlloyContext* context,
+		const InputEvent& e) {
+		if (e.isDown()) {
+			if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
+				if (enableMultiSelection) {
+					if (entry->isSelected() && e.clicks == 1) {
+						entry->setSelected(false);
+						for (auto iter = lastSelected.begin();
+						iter != lastSelected.end(); iter++) {
+							if (*iter == entry) {
+								lastSelected.erase(iter);
+								break;
+							}
+						}
+					}
+					else {
+						entry->setSelected(true);
+						lastSelected.push_back(entry);
+					}
+				}
+				else {
+					if (!entry->isSelected()) {
+						for (TableRow* child : lastSelected) {
+							child->setSelected(false);
+						}
+						entry->setSelected(true);
+						lastSelected.clear();
+						lastSelected.push_back(entry);
+					}
+				}
+				if (onSelect)
+					onSelect(entry, e);
+				return true;
+			}
+			else if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {
+				for (TableRow* child : lastSelected) {
+					child->setSelected(false);
+				}
+				if (onSelect)
+					onSelect(nullptr, e);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void TablePane::update() {
+		clear();
+		lastSelected.clear();
+		AlloyContext* context = AlloyApplicationContext().get();
+		for (std::shared_ptr<TableRow> entry : rows) {
+			if (entry->parent == nullptr) {
+				add(entry);
+			}
+			if (entry->isSelected()) {
+				lastSelected.push_back(entry.get());
+			}
+		}
+		context->requestPack();
+	}
+	TablePane::TablePane(const std::string& name, const AUnit2D& pos,
+		const AUnit2D& dims,int columns) :
+		Composite(name, pos, dims),columns(columns), columnWidths(columns,UnitPercent(1.0f/columns)),columnWidthPixels(columns,0.0f){
+		enableMultiSelection = false;
+		scrollingDown = false;
+		scrollingUp = false;
+		backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
+		borderColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+		borderWidth = UnitPX(1.0f);
+		setOrientation(Orientation::Vertical, pixel2(0, 2), pixel2(0, 2));
+		setScrollEnabled(true);
+		dragBox = box2px(float2(0, 0), float2(0, 0));
+		onEvent =
+			[this](AlloyContext* context, const InputEvent& e) {
+			if (!context->isMouseOver(this, true))return false;
+			if (e.type == InputType::Cursor || e.type == InputType::MouseButton) {
+				if (context->isMouseDrag()) {
+					if (enableMultiSelection) {
+						float2 cursorDown = context->getCursorDownPosition();
+						float2 stPt = aly::min(cursorDown, e.cursor);
+						float2 endPt = aly::max(cursorDown, e.cursor);
+						dragBox.position = stPt;
+						dragBox.dimensions = endPt - stPt;
+						dragBox.intersect(getBounds());
+					}
+				}
+				else if (!context->isMouseDown() && e.type == InputType::MouseButton) {
+					if (enableMultiSelection) {
+						for (std::shared_ptr<TableRow> entry : rows) {
+							if (!entry->isSelected()) {
+								if (dragBox.intersects(entry->getBounds())) {
+									lastSelected.push_back(entry.get());
+									entry->setSelected(true);
+								}
+							}
+						}
+					}
+					dragBox = box2px(float2(0, 0), float2(0, 0));
+				}
+				else {
+					dragBox = box2px(float2(0, 0), float2(0, 0));
+				}
+			}
+			if (e.type == InputType::Cursor) {
+				box2px bounds = this->getBounds();
+				box2px lastBounds = bounds, firstBounds = bounds;
+				float entryHeight = 30;
+				lastBounds.position.y = bounds.position.y + bounds.dimensions.y - entryHeight;
+				lastBounds.dimensions.y = entryHeight;
+				firstBounds.dimensions.y = entryHeight;
+				if ((!isHorizontalScrollVisible() && lastBounds.contains(e.cursor)) || (dragBox.dimensions.x*dragBox.dimensions.y > 0 && e.cursor.y > bounds.dimensions.y + bounds.position.y)) {
+					if (downTimer.get() == nullptr) {
+						downTimer = std::shared_ptr<TimerTask>(new TimerTask([this] {
+							double deltaT = 200;
+							scrollingDown = true;
+							while (scrollingDown) {
+								if (!addVerticalScrollPosition(10.0f))break;
+								std::this_thread::sleep_for(std::chrono::milliseconds((long)deltaT));
+								deltaT = std::max(30.0, 0.75*deltaT);
+							}
+						}, nullptr, 500, 30));
+						downTimer->execute();
+					}
+				}
+				else {
+					if (downTimer.get() != nullptr) {
+						scrollingDown = false;
+						downTimer.reset();
+					}
+				}
+				if (firstBounds.contains(e.cursor) || (dragBox.dimensions.x*dragBox.dimensions.y > 0 && e.cursor.y < bounds.position.y)) {
+					if (upTimer.get() == nullptr) {
+						upTimer = std::shared_ptr<TimerTask>(new TimerTask([this] {
+							double deltaT = 200;
+							scrollingUp = true;
+							while (scrollingUp) {
+								if (!addVerticalScrollPosition(-10.0f))break;
+								std::this_thread::sleep_for(std::chrono::milliseconds((long)deltaT));
+								deltaT = std::max(30.0, 0.75*deltaT);
+							}
+						}, nullptr, 500, 30));
+						upTimer->execute();
+					}
+				}
+				else {
+					if (upTimer.get() != nullptr) {
+						scrollingUp = false;
+						upTimer.reset();
+					}
+				}
+			}
+
+			return false;
+		};
+	}
+	void TablePane::draw(AlloyContext* context) {
+		pushScissor(context->nvgContext, getCursorBounds());
+		Composite::draw(context);
+		popScissor(context->nvgContext);
+		NVGcontext* nvg = context->nvgContext;
+		if (dragBox.dimensions.x > 0 && dragBox.dimensions.y > 0) {
+			nvgBeginPath(nvg);
+			nvgRect(nvg, dragBox.position.x, dragBox.position.y,
+				dragBox.dimensions.x, dragBox.dimensions.y);
+			nvgFillColor(nvg, context->theme.DARK.toSemiTransparent(0.5f));
+			nvgFill(nvg);
+
+			nvgBeginPath(nvg);
+			nvgRect(nvg, dragBox.position.x, dragBox.position.y,
+				dragBox.dimensions.x, dragBox.dimensions.y);
+			nvgStrokeWidth(nvg, 2.0f);
+			nvgStrokeColor(nvg, context->theme.DARK);
+			nvgStroke(nvg);
+		}
+	}
+	bool TablePane::isDraggingOver(TableRow* entry) {
+		if (entry->isSelected() || dragBox.intersects(entry->getBounds())) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	TableStringEntry::TableStringEntry(const std::string& name, const std::string& label) :TableEntry(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)) {
+		value = ModifiableLabelPtr(new ModifiableLabel(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)));
+		value->backgroundColor = MakeColor(0, 0, 0, 0);
+		value->borderColor = MakeColor(0, 0, 0, 0);
+		value->borderWidth = UnitPX(0.0f);
+		value->setValue(label);
+		Composite::add(value);
+	}
+	int TableStringEntry::compare(const std::shared_ptr<TableEntry>& entry) const {
+		TableStringEntryPtr other = std::dynamic_pointer_cast<TableStringEntry>(entry);
+		std::string a = getValue();
+		std::string b = other->getValue();
+		if (a == b)return 0;
+		return (std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end()))?-1:1;
+	}
+
+	TableNumberEntry::TableNumberEntry(const std::string& name, const Number& init) :TableEntry(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)) {
+		value = ModifiableNumberPtr(new ModifiableNumber(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f),init.type()));
+		value->backgroundColor = MakeColor(0, 0, 0, 0);
+		value->borderColor = MakeColor(0, 0, 0, 0);
+		value->borderWidth = UnitPX(0.0f);
+		value->setNumberValue(init);
+		Composite::add(value);
+	}
+	int TableNumberEntry::compare(const std::shared_ptr<TableEntry>& entry) const {
+		TableNumberEntryPtr other = std::dynamic_pointer_cast<TableNumberEntry>(entry);
+		return (int)aly::sign(getValue().toDouble()-other->getValue().toDouble());
+	}
+
+	TableCheckBoxEntry::TableCheckBoxEntry(const std::string& name, bool init) :TableEntry(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)) {
+		value = CheckBoxPtr(new CheckBox(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f),init,false));
+		value->backgroundColor = MakeColor(0, 0, 0, 0);
+		value->borderColor = MakeColor(0, 0, 0, 0);
+		value->borderWidth = UnitPX(0.0f);
+		Composite::add(value);
+	}
+	int TableCheckBoxEntry::compare(const std::shared_ptr<TableEntry>& entry) const {
+		TableCheckBoxEntryPtr other = std::dynamic_pointer_cast<TableCheckBoxEntry>(entry);
+		bool a = getValue();
+		bool b = other->getValue();
+		return (((a)?1:0)-((b)?1:0));
+	}
+	TableToggleBoxEntry::TableToggleBoxEntry(const std::string& name, bool init) :TableEntry(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)) {
+		value = ToggleBoxPtr(new ToggleBox(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f), init, false));
+		value->backgroundColor = MakeColor(0, 0, 0, 0);
+		value->borderColor = MakeColor(0, 0, 0, 0);
+		value->borderWidth = UnitPX(0.0f);
+		Composite::add(value);
+	}
+	int TableToggleBoxEntry::compare(const std::shared_ptr<TableEntry>& entry) const {
+		TableToggleBoxEntryPtr other = std::dynamic_pointer_cast<TableToggleBoxEntry>(entry);
+		bool a = getValue();
+		bool b = other->getValue();
+		return (((a) ? 1 : 0) - ((b) ? 1 : 0));
+	}
+	TableSelectionEntry::TableSelectionEntry(const std::string& name, const std::vector<std::string>& options, int init) :TableEntry(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)) {
+		value = SelectionPtr(new Selection(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f), options));
+		value->backgroundColor = MakeColor(0, 0, 0, 0);
+		value->borderColor = MakeColor(0, 0, 0, 0);
+		value->borderWidth = UnitPX(0.0f);
+		value->setValue(init);
+		Composite::add(value);
+	}
+	int TableSelectionEntry::compare(const std::shared_ptr<TableEntry>& entry) const {
+		TableSelectionEntryPtr other = std::dynamic_pointer_cast<TableSelectionEntry>(entry);
+		int a = getValue();
+		int b = other->getValue();
+		return (a-b);
+	}
+
+	TableColorEntry::TableColorEntry(const std::string& name,const Color& init) :TableEntry(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)) {
+		value = ColorSelectorPtr(new ColorSelector(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)));
+		value->backgroundColor = MakeColor(0, 0, 0, 0);
+		value->borderColor = MakeColor(0, 0, 0, 0);
+		value->borderWidth = UnitPX(0.0f);
+		value->setValue(init);
+		Composite::add(value);
+	}
+	int TableColorEntry::compare(const std::shared_ptr<TableEntry>& entry) const {
+		TableColorEntryPtr other = std::dynamic_pointer_cast<TableColorEntry>(entry);
+		Color a = getValue();
+		Color b = other->getValue();
+		return (int)aly::sign((a.r+a.g+a.b)-(b.r+b.g+b.b));
+	}
+	TableProgressBarEntry::TableProgressBarEntry(const std::string& name, float progress) :TableEntry(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)) {
+		value = ProgressBarPtr(new ProgressBar(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)));
+		value->backgroundColor = MakeColor(0, 0, 0, 0);
+		value->borderColor = MakeColor(0, 0, 0, 0);
+		value->borderWidth = UnitPX(0.0f);
+		value->setValue(progress);
+		Composite::add(value);
+	}
+	int TableProgressBarEntry::compare(const std::shared_ptr<TableEntry>& entry) const {
+		TableProgressBarEntryPtr other = std::dynamic_pointer_cast<TableProgressBarEntry>(entry);
+		float a = getValue();
+		float b = other->getValue();
+		return (int)aly::sign(a-b);
+	}
+}

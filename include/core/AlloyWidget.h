@@ -144,6 +144,12 @@ public:
 	inline void setValue(float p) {
 		value = clamp(p, 0.0f, 1.0f);
 	}
+	inline float getValue() const {
+		return value;
+	}
+	inline std::string getLabel() const {
+		return label;
+	}
 	inline void setValue(const std::string& l) {
 		label = l;
 	}

@@ -63,6 +63,7 @@ public:
 		virtual std::string toString() const = 0;
 		NumberType virtual type() const = 0;
 	};
+
 private:
 	template<class T> struct Impl: public Interface {
 		T value;
@@ -186,6 +187,7 @@ public:
 
 	}
 };
+
 struct Integer {
 private:
 	int value = 0;
@@ -394,6 +396,12 @@ template<class T> Number MakeNumber(const NumberType& numberType,T value) {
 		throw std::runtime_error("Number type not defined.");
 	}
 	return Integer(0);
+}
+inline bool operator < (const Number& a, const Number& b) {
+	return (a.toDouble() < b.toDouble());
+}
+inline bool operator == (const Number& a, const Number& b) {
+	return (a.toDouble() == b.toDouble());
 }
 template<class C, class R> std::basic_ostream<C, R> & operator <<(
 	std::basic_ostream<C, R> & ss, const Number& v) {
