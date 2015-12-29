@@ -311,7 +311,7 @@ void ProgressBar::draw(AlloyContext* context) {
 	float h = bounds.dimensions.y;
 	const float FADE = 8;
 	NVGpaint shadowPaint = nvgBoxGradient(nvg, x, y, //+1
-			w, h, (h) / 2, FADE, context->theme.LIGHT, context->theme.DARKEST);
+			w , h, (h) / 2, FADE, context->theme.LIGHT, context->theme.DARKEST);
 	nvgBeginPath(nvg);
 	nvgRoundedRect(nvg, x, y, w, h, h / 2);
 	nvgFillPaint(nvg, shadowPaint);
@@ -755,7 +755,7 @@ Selection::Selection(const std::string& label, const AUnit2D& position,
 			UnitPercent(1.0f),
 			AlloyApplicationContext()->theme.DARK.toRGBA(),
 			HorizontalAlignment::Center, VerticalAlignment::Middle);
-	selectionBox = SelectionBoxPtr(new SelectionBox(label + "_box", options));
+	selectionBox = SelectionBoxPtr(new SelectionBox(label, options));
 	selectionBox->setDetached(true);
 	selectionBox->setVisible(false);
 	selectionBox->position = CoordPercent(0.0f, 0.0f);

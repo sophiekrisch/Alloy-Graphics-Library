@@ -140,8 +140,8 @@ namespace aly {
 		void setColumn(int c,const std::shared_ptr<TableEntry>& region);
 		std::shared_ptr<TableEntry> getColumn(int i) const;
 		TableRow(TablePane* tablePane, const std::string& name, float entryHeight=30.0f);
-		void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
-			double pixelRatio, bool clamp);
+		virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
+			double pixelRatio, bool clamp) override;
 	};
 
 	class TablePane : public Composite {
@@ -177,8 +177,8 @@ namespace aly {
 		void addRow(const std::shared_ptr<TableRow>& entry) {
 			rows.push_back(entry);
 		}
-		void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
-			double pixelRatio, bool clamp);
+		virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
+			double pixelRatio, bool clamp) override;
 		void clearRows() {
 			rows.clear();
 			lastSelected.clear();
@@ -192,6 +192,7 @@ namespace aly {
 		}
 		bool isDraggingOver(TableRow* entry);
 		TablePane(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,int columns);
+		std::shared_ptr<TableRow> addRow(const std::string& name="",float entryHeight=30.0f);
 		int getColumns() const {
 			return columns;
 		}

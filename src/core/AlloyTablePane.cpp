@@ -23,8 +23,8 @@
 #include "AlloyDrawUtil.h"
 namespace aly {
 	TableRow::TableRow(TablePane* tablePane, const std::string& name,float entryHeight) :
-		Composite(name), tablePane(tablePane), entryHeight(entryHeight) {
-		this->backgroundColor = MakeColor(AlloyApplicationContext()->theme.NEUTRAL);
+		Composite(name,CoordPX(0.0f,0.0f),CoordPerPX(1.0f,0.0f,0.0f,entryHeight)), tablePane(tablePane), entryHeight(entryHeight) {
+		this->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 		this->borderColor = MakeColor(COLOR_NONE);
 		this->selected = false;
 		this->onMouseDown = [this](AlloyContext* context, const InputEvent& e) {
@@ -38,6 +38,7 @@ namespace aly {
 	void TableRow::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,double pixelRatio, bool clamp) {
 		const int cols = tablePane->getColumns();
 		pixel offset = 0.0f;
+
 		for (std::pair<int, TableEntryPtr> pr : columns) {
 			TableEntryPtr entry = pr.second;
 			int col = pr.first;
@@ -61,12 +62,18 @@ namespace aly {
 	}
 
 	void TableRow::setColumn(int c, const std::shared_ptr<TableEntry>& region) {
+		if (columns.find(c) != columns.end()) {
+			Composite::erase(columns[c]);
+		}
+		Composite::add(region);
 		columns[c] = region;
 	}
 	void TablePane::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp) {
+		Region::pack(pos, dims, dpmm, pixelRatio, clamp);
+		box2px bounds = getBounds();
 		for (int c = 0;c < columns;c++) {
-			columnWidthPixels[c] = columnWidths[c].toPixels(dims.x, dpmm.x, pixelRatio);
+			columnWidthPixels[c] = columnWidths[c].toPixels(bounds.dimensions.x, dpmm.x, pixelRatio);
 		}
 		Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
 	}
@@ -78,6 +85,11 @@ namespace aly {
 	}
 	pixel TablePane::getColumnWidthPixels(int c) const {
 		return columnWidthPixels[c];
+	}
+	std::shared_ptr<TableRow> TablePane::addRow(const std::string& name, float entryHeight) {
+		TableRowPtr row=TableRowPtr(new TableRow(this, name, entryHeight));
+		addRow(row);
+		return row;
 	}
 	bool TablePane::onMouseDown(TableRow* entry, AlloyContext* context,
 		const InputEvent& e) {
@@ -145,10 +157,11 @@ namespace aly {
 		enableMultiSelection = false;
 		scrollingDown = false;
 		scrollingUp = false;
-		backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
+		backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARKER);
 		borderColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 		borderWidth = UnitPX(1.0f);
-		setOrientation(Orientation::Vertical, pixel2(0, 2), pixel2(0, 2));
+		setRoundCorners(false);
+		setOrientation(Orientation::Vertical, pixel2(0, 2), pixel2(0, 0));
 		setScrollEnabled(true);
 		dragBox = box2px(float2(0, 0), float2(0, 0));
 		onEvent =
@@ -293,7 +306,9 @@ namespace aly {
 
 	TableCheckBoxEntry::TableCheckBoxEntry(const std::string& name, bool init) :TableEntry(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)) {
 		value = CheckBoxPtr(new CheckBox(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f),init,false));
-		value->backgroundColor = MakeColor(0, 0, 0, 0);
+		value->setAspectRule(AspectRule::FixedHeight);
+		value->setAspectRatio(1.0f);
+		value->backgroundColor = MakeColor(0,0,0,0);
 		value->borderColor = MakeColor(0, 0, 0, 0);
 		value->borderWidth = UnitPX(0.0f);
 		Composite::add(value);
@@ -306,6 +321,8 @@ namespace aly {
 	}
 	TableToggleBoxEntry::TableToggleBoxEntry(const std::string& name, bool init) :TableEntry(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)) {
 		value = ToggleBoxPtr(new ToggleBox(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f), init, false));
+		value->setAspectRule(AspectRule::FixedHeight);
+		value->setAspectRatio(2.0f);
 		value->backgroundColor = MakeColor(0, 0, 0, 0);
 		value->borderColor = MakeColor(0, 0, 0, 0);
 		value->borderWidth = UnitPX(0.0f);
@@ -319,7 +336,6 @@ namespace aly {
 	}
 	TableSelectionEntry::TableSelectionEntry(const std::string& name, const std::vector<std::string>& options, int init) :TableEntry(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)) {
 		value = SelectionPtr(new Selection(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f), options));
-		value->backgroundColor = MakeColor(0, 0, 0, 0);
 		value->borderColor = MakeColor(0, 0, 0, 0);
 		value->borderWidth = UnitPX(0.0f);
 		value->setValue(init);
@@ -333,7 +349,7 @@ namespace aly {
 	}
 
 	TableColorEntry::TableColorEntry(const std::string& name,const Color& init) :TableEntry(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)) {
-		value = ColorSelectorPtr(new ColorSelector(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)));
+		value = ColorSelectorPtr(new ColorSelector(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f),false));
 		value->backgroundColor = MakeColor(0, 0, 0, 0);
 		value->borderColor = MakeColor(0, 0, 0, 0);
 		value->borderWidth = UnitPX(0.0f);
@@ -351,6 +367,8 @@ namespace aly {
 		value->backgroundColor = MakeColor(0, 0, 0, 0);
 		value->borderColor = MakeColor(0, 0, 0, 0);
 		value->borderWidth = UnitPX(0.0f);
+
+		value->setAspectRule(AspectRule::Unspecified);
 		value->setValue(progress);
 		Composite::add(value);
 	}
@@ -359,5 +377,11 @@ namespace aly {
 		float a = getValue();
 		float b = other->getValue();
 		return (int)aly::sign(a-b);
+	}
+	void TableRow::setSelected(bool selected) {
+		this->selected = selected;
+	}
+	bool TableRow::isSelected() {
+		return selected;
 	}
 }
