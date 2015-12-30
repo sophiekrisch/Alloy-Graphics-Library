@@ -30,7 +30,7 @@
 #include "AlloyUI.h"
 #include "AlloyMesh.h"
 #include "AlloyDenseSolve.h"
-#include "ImageProcessing.h"
+#include "AlloyImageProcessing.h"
 #include "AlloySparseMatrix.h"
 #include "AlloyDenseMatrix.h"
 #include "AlloyArray.h"

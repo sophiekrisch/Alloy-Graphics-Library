@@ -20,6 +20,7 @@
  */
 
 #include "Alloy.h"
+#include "AlloyImageProcessing.h"
 #include "../../include/example/ImageProcessingEx.h"
 using namespace aly;
 ImageProcessingEx::ImageProcessingEx() :

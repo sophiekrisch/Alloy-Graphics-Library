@@ -310,33 +310,6 @@ public:
 					std::vector<std::string>());
 };
 
-struct ColorWheel: public Composite {
-protected:
-	Color selectedColor;
-	float2 tBounds[3];
-	float2 tPoints[3];
-	float rInner, rOuter;
-	float2 center;
-	HSVA hsvColor;
-	bool triangleSelected = false;
-	bool circleSelected = false;
-	std::function<void(const Color& value)> onChangeEvent;
-	void updateWheel();
-public:
-	inline void setOnChangeEvent(
-			const std::function<void(const Color& value)>& func) {
-		onChangeEvent = func;
-	}
-	void reset();
-	Color getSelectedColor() const {
-		return selectedColor;
-	}
-	void setColor(const Color& c);
-	void setColor(const pixel2& cursor);
-	ColorWheel(const std::string& name, const AUnit2D& pos,
-			const AUnit2D& dims);
-	void draw(AlloyContext* context) override;
-};
 
 class MessageDialog: public Composite {
 protected:
@@ -357,32 +330,7 @@ public:
 	virtual void draw(AlloyContext* context) override;
 	std::function<void(MessageDialog* dialog)> onSelect;
 };
-class ColorSelector: public Composite {
-private:
-	TextLabelPtr textLabel;
-	GlyphRegionPtr colorLabel;
-	CompositePtr colorSelectionPanel;
-	std::shared_ptr<VerticalSlider> redSlider;
-	std::shared_ptr<VerticalSlider> greenSlider;
-	std::shared_ptr<VerticalSlider> blueSlider;
-	std::shared_ptr<VerticalSlider> lumSlider;
-	std::shared_ptr<VerticalSlider> alphaSlider;
-	std::shared_ptr<ColorWheel> colorWheel;
-	void updateColorSliders(const Color& c);
-public:
-	std::function<void(const Color& c)> onSelect;
-	void setColor(const Color& color);
-	Color getColor();
-	inline void setValue(const Color& color) {
-		setColor(color);
-	}
-	inline Color getValue() {
-		return getColor();
-	}
-	ColorSelector(const std::string& name, const AUnit2D& pos,
-			const AUnit2D& dims,bool showText=true);
-	virtual void draw(AlloyContext* context) override;
-};
+
 
 
 class FileDialog;
@@ -638,12 +586,12 @@ typedef std::shared_ptr<HorizontalSlider> HSliderPtr;
 typedef std::shared_ptr<VerticalSlider> VSliderPtr;
 typedef std::shared_ptr<HorizontalSlider> HorizontalSliderPtr;
 typedef std::shared_ptr<VerticalSlider> VerticalSliderPtr;
-typedef std::shared_ptr<ColorSelector> ColorSelectorPtr;
+
+
 typedef std::shared_ptr<CheckBox> CheckBoxPtr;
 typedef std::shared_ptr<ToggleBox> ToggleBoxPtr;
 typedef std::shared_ptr<Selection> SelectionPtr;
 typedef std::shared_ptr<ProgressBar> ProgressBarPtr;
-typedef std::shared_ptr<ColorWheel> ColorWheelPtr;
 
 typedef std::shared_ptr<FileSelector> FileSelectorPtr;
 typedef std::shared_ptr<FileDialog> FileDialogPtr;

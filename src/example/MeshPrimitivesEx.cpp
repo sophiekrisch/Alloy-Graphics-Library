@@ -20,6 +20,7 @@
  */
 
 #include "Alloy.h"
+#include "AlloyMeshPrimitives.h"
 #include "../../include/example/MeshPrimitivesEx.h"
 using namespace aly;
 MeshPrimitivesEx::MeshPrimitivesEx() :

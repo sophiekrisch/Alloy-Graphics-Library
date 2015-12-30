@@ -105,9 +105,6 @@
     <ClCompile Include="..\..\src\core\AlloyCamera.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\core\ImageProcessing.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\core\AlloyDenseMatrix.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -172,6 +169,12 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\core\AlloyGraphPane.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\AlloyImageProcessing.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\AlloyColorSelector.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -299,9 +302,6 @@
     <ClInclude Include="..\..\include\core\AlloyCamera.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\ImageProcessing.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\core\AlloyDenseMatrix.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -399,6 +399,12 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\core\AlloyGraphPane.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\core\AlloyImageProcessing.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\core\AlloyColorSelector.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

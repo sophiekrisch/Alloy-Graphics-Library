@@ -20,6 +20,7 @@
 */
 #include "AlloyParameterPane.h"
 #include "AlloyFileUtil.h"
+#include "AlloyColorSelector.h"
 namespace aly {
 	ParameterPane::ParameterPane(const std::string& name, const AUnit2D& pos, const AUnit2D& dim, float entryHeight):Composite(name,pos,dim),entryHeight(entryHeight) {
 		setOrientation(Orientation::Vertical,pixel2(0.0f,2.0f),pixel2(0.0f));

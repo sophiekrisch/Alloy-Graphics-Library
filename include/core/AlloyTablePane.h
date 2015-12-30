@@ -23,6 +23,7 @@
 #include "AlloyUI.h"
 #include "AlloyWidget.h"
 #include "AlloyAny.h"
+#include "AlloyColorSelector.h"
 #include <string>
 #include <vector>
 namespace aly {

@@ -20,6 +20,7 @@
  */
 
 #include "Alloy.h"
+#include "AlloyDenseSolve.h"
 #include "../../include/example/PoissonBlendEx.h"
 using namespace aly;
 PoissonBlendEx::PoissonBlendEx() :

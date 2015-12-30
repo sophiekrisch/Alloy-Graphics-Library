@@ -20,6 +20,7 @@
  */
 
 #include "Alloy.h"
+#include "AlloySparseSolve.h"
 #include "../../include/example/MeshSmoothEx.h"
 using namespace aly;
 MeshSmoothEx::MeshSmoothEx() :

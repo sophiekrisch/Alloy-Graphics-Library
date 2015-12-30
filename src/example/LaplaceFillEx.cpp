@@ -20,6 +20,7 @@
  */
 
 #include "Alloy.h"
+#include "AlloyDenseSolve.h"
 #include "../../include/example/LaplaceFillEx.h"
 using namespace aly;
 LaplaceFillEx::LaplaceFillEx() :
