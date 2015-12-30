@@ -86,11 +86,12 @@ namespace aly {
 	void TablePane::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp) {
 		Region::pack(pos, dims, dpmm, pixelRatio, clamp);
-		box2px bounds = getBounds();
+		box2px bounds = contentRegion->getBounds();
 		pixel offset = 0;
 		pixel w;
+		pixel sw = (contentRegion->isVerticalScrollVisible())?std::max(0.0f,bounds.dimensions.x - Composite::scrollBarSize):bounds.dimensions.x;
 		for (int c = 0;c < columns;c++) {
-			columnWidthPixels[c] =w= columnWidths[c].toPixels(bounds.dimensions.x, dpmm.x, pixelRatio);
+			columnWidthPixels[c] =w= columnWidths[c].toPixels(sw, dpmm.x, pixelRatio);
 			columnHeaders[c]->position = CoordPX(offset, 0.0f);
 			columnHeaders[c]->dimensions = CoordPX(w, entryHeight);
 			offset += w;
