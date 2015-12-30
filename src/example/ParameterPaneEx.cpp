@@ -46,7 +46,7 @@ bool ParameterPaneEx::init(Composite& rootNode) {
 	paramPane->addNumberField("Float", param1);
 	paramPane->addNumberField("Integer", param2);
 
-	paramPane->addGroup("Group 2",true);
+	paramPane->addGroup("Group 2",false);
 	paramPane->addMultiFileSelector("Multi-File", param8);
 	paramPane->addColorField("Color", param4);
 	paramPane->addToggleBox("Toggle", param6);

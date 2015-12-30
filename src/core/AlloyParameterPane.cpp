@@ -35,7 +35,7 @@ namespace aly {
 					region->backgroundColor = MakeColor(AlloyDefaultContext()->theme.DARKER);
 				}
 				groupQueue.clear();
-				CompositePtr eregion=expandBar->add(lastRegion, estimatedHeight-SPACING, true);
+				CompositePtr eregion=expandBar->add(lastRegion, estimatedHeight-SPACING, lastExpanded);
 				eregion->setRoundCorners(false);
 				lastRegion->setOrientation(Orientation::Vertical, pixel2(0.0f, SPACING), pixel2(0.0f));
 				lastRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.DARKEST);
