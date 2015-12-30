@@ -171,8 +171,6 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(
 		return ss << "Middle Right";
 	case Origin::MiddleCenter:
 		return ss << "Middle Center";
-	case Origin::MiddleCenter:
-		return ss << "Middle Center";
 	}
 	return ss;
 }

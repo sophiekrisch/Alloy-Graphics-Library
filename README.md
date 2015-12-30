@@ -196,6 +196,10 @@ Tab Pane Example
 -------------------------
 ![ForceDirectedGraphEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0036.png)
 
+Table Pane Example
+-------------------------
+![TablePaneEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0038.png)
+
 Parameter Pane Example
 -------------------------
 ![ParameterPaneEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0037.png)

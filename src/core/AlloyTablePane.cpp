@@ -22,8 +22,8 @@
 #include "AlloyApplication.h"
 #include "AlloyDrawUtil.h"
 namespace aly {
-	TableRow::TableRow(TablePane* tablePane, const std::string& name,float entryHeight) :
-		Composite(name,CoordPX(0.0f,0.0f),CoordPerPX(1.0f,0.0f,0.0f,entryHeight)), tablePane(tablePane), entryHeight(entryHeight) {
+	TableRow::TableRow(TablePane* tablePane, const std::string& name) :
+		Composite(name,CoordPX(0.0f,0.0f),CoordPerPX(1.0f,0.0f,0.0f,tablePane->entryHeight)), tablePane(tablePane) {
 		this->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 		this->borderColor = MakeColor(COLOR_NONE);
 		this->selected = false;
@@ -59,7 +59,26 @@ namespace aly {
 	int TableRow::compare(const std::shared_ptr<TableRow>& row, int column) {
 		return getColumn(column)->compare(row->getColumn(column));
 	}
-
+	void TablePane::sort(int c) {
+		int dir = sortDirections[c];
+		if (dir == 0)dir = -1; else dir = -dir;
+		for (int i = 0;i < columns;i++) {
+			sortDirections[i] = 0;
+			columnHeaders[i]->setIcon(0);
+		}
+		sortDirections[c] = dir;
+		if (dir < 0) {
+			columnHeaders[c]->setIcon(0xf0d7);
+		}
+		else if (dir>0) {
+			columnHeaders[c]->setIcon(0xf0d8);
+		}
+		std::sort(rows.begin(), rows.end(), [this,c,dir](const TableRowPtr& a, const TableRowPtr& b) {
+			return (a->compare(b, c)*dir>0);
+		});
+		update();
+		AlloyApplicationContext()->requestPack();
+	}
 	void TableRow::setColumn(int c, const std::shared_ptr<TableEntry>& region) {
 		if (columns.find(c) != columns.end()) {
 			Composite::erase(columns[c]);
@@ -71,13 +90,22 @@ namespace aly {
 		double pixelRatio, bool clamp) {
 		Region::pack(pos, dims, dpmm, pixelRatio, clamp);
 		box2px bounds = getBounds();
+		pixel offset = 0;
+		pixel w;
 		for (int c = 0;c < columns;c++) {
-			columnWidthPixels[c] = columnWidths[c].toPixels(bounds.dimensions.x, dpmm.x, pixelRatio);
+			columnWidthPixels[c] =w= columnWidths[c].toPixels(bounds.dimensions.x, dpmm.x, pixelRatio);
+			columnHeaders[c]->position = CoordPX(offset, 0.0f);
+			columnHeaders[c]->dimensions = CoordPX(w, entryHeight);
+			offset += w;
 		}
 		Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
 	}
 	void TablePane::setColumnWidth(int c, const AUnit1D& unit) {
 		columnWidths[c] = unit;
+	}
+
+	void TablePane::setColumnLabel(int c, const std::string& label) {
+		columnHeaders[c]->setLabel(label);
 	}
 	AUnit1D TablePane::getColumnWidth(int c) const {
 		return columnWidths[c];
@@ -85,8 +113,8 @@ namespace aly {
 	pixel TablePane::getColumnWidthPixels(int c) const {
 		return columnWidthPixels[c];
 	}
-	std::shared_ptr<TableRow> TablePane::addRow(const std::string& name, float entryHeight) {
-		TableRowPtr row=TableRowPtr(new TableRow(this, name, entryHeight));
+	std::shared_ptr<TableRow> TablePane::addRow(const std::string& name) {
+		TableRowPtr row=TableRowPtr(new TableRow(this, name));
 		addRow(row);
 		return row;
 	}
@@ -137,12 +165,12 @@ namespace aly {
 	}
 
 	void TablePane::update() {
-		clear();
+		contentRegion->clear();
 		lastSelected.clear();
 		AlloyContext* context = AlloyApplicationContext().get();
 		for (std::shared_ptr<TableRow> entry : rows) {
 			if (entry->parent == nullptr) {
-				add(entry);
+				contentRegion->add(entry);
 			}
 			if (entry->isSelected()) {
 				lastSelected.push_back(entry.get());
@@ -150,101 +178,125 @@ namespace aly {
 		}
 		context->requestPack();
 	}
-	TablePane::TablePane(const std::string& name, const AUnit2D& pos,
-		const AUnit2D& dims,int columns) :
-		Composite(name, pos, dims),columns(columns), columnWidths(columns,UnitPercent(1.0f/columns)),columnWidthPixels(columns,0.0f){
-		enableMultiSelection = false;
-		scrollingDown = false;
-		scrollingUp = false;
-		backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARKER);
-		borderColor = MakeColor(AlloyApplicationContext()->theme.DARK);
-		borderWidth = UnitPX(1.0f);
-		setRoundCorners(false);
-		setOrientation(Orientation::Vertical, pixel2(0, 2), pixel2(0, 0));
-		setScrollEnabled(true);
-		dragBox = box2px(float2(0, 0), float2(0, 0));
-		onEvent =
-			[this](AlloyContext* context, const InputEvent& e) {
-			if (!context->isMouseOver(this, true))return false;
-			if (e.type == InputType::Cursor || e.type == InputType::MouseButton) {
-				if (context->isMouseDrag()) {
-					if (enableMultiSelection) {
-						float2 cursorDown = context->getCursorDownPosition();
-						float2 stPt = aly::min(cursorDown, e.cursor);
-						float2 endPt = aly::max(cursorDown, e.cursor);
-						dragBox.position = stPt;
-						dragBox.dimensions = endPt - stPt;
-						dragBox.intersect(getBounds());
-					}
+	bool TablePane::onEventHandler(AlloyContext* context, const InputEvent& e) {
+		/*
+		if (!context->isMouseOver(this, true))return false;
+		if (e.type == InputType::Cursor || e.type == InputType::MouseButton) {
+			if (context->isMouseDrag()) {
+				if (enableMultiSelection) {
+					float2 cursorDown = context->getCursorDownPosition();
+					float2 stPt = aly::min(cursorDown, e.cursor);
+					float2 endPt = aly::max(cursorDown, e.cursor);
+					dragBox.position = stPt;
+					dragBox.dimensions = endPt - stPt;
+					dragBox.intersect(getBounds());
 				}
-				else if (!context->isMouseDown() && e.type == InputType::MouseButton) {
-					if (enableMultiSelection) {
-						for (std::shared_ptr<TableRow> entry : rows) {
-							if (!entry->isSelected()) {
-								if (dragBox.intersects(entry->getBounds())) {
-									lastSelected.push_back(entry.get());
-									entry->setSelected(true);
-								}
+			}
+			else if (!context->isMouseDown() && e.type == InputType::MouseButton) {
+				if (enableMultiSelection) {
+					for (std::shared_ptr<TableRow> entry : rows) {
+						if (!entry->isSelected()) {
+							if (dragBox.intersects(entry->getBounds())) {
+								lastSelected.push_back(entry.get());
+								entry->setSelected(true);
 							}
 						}
 					}
-					dragBox = box2px(float2(0, 0), float2(0, 0));
 				}
-				else {
-					dragBox = box2px(float2(0, 0), float2(0, 0));
+				dragBox = box2px(float2(0, 0), float2(0, 0));
+			}
+			else {
+				dragBox = box2px(float2(0, 0), float2(0, 0));
+			}
+		}
+		if (e.type == InputType::Cursor) {
+			box2px bounds = this->getBounds();
+			box2px lastBounds = bounds, firstBounds = bounds;
+			float entryHeight = 30;
+			lastBounds.position.y = bounds.position.y + bounds.dimensions.y - entryHeight;
+			lastBounds.dimensions.y = entryHeight;
+			firstBounds.dimensions.y = entryHeight;
+			if ((!contentRegion->isHorizontalScrollVisible() && lastBounds.contains(e.cursor)) || (dragBox.dimensions.x*dragBox.dimensions.y > 0 && e.cursor.y > bounds.dimensions.y + bounds.position.y)) {
+				if (downTimer.get() == nullptr) {
+					downTimer = std::shared_ptr<TimerTask>(new TimerTask([this] {
+						double deltaT = 200;
+						scrollingDown = true;
+						while (scrollingDown) {
+							if (!contentRegion->addVerticalScrollPosition(10.0f))break;
+							std::this_thread::sleep_for(std::chrono::milliseconds((long)deltaT));
+							deltaT = std::max(30.0, 0.75*deltaT);
+						}
+					}, nullptr, 500, 30));
+					downTimer->execute();
 				}
 			}
-			if (e.type == InputType::Cursor) {
-				box2px bounds = this->getBounds();
-				box2px lastBounds = bounds, firstBounds = bounds;
-				float entryHeight = 30;
-				lastBounds.position.y = bounds.position.y + bounds.dimensions.y - entryHeight;
-				lastBounds.dimensions.y = entryHeight;
-				firstBounds.dimensions.y = entryHeight;
-				if ((!isHorizontalScrollVisible() && lastBounds.contains(e.cursor)) || (dragBox.dimensions.x*dragBox.dimensions.y > 0 && e.cursor.y > bounds.dimensions.y + bounds.position.y)) {
-					if (downTimer.get() == nullptr) {
-						downTimer = std::shared_ptr<TimerTask>(new TimerTask([this] {
-							double deltaT = 200;
-							scrollingDown = true;
-							while (scrollingDown) {
-								if (!addVerticalScrollPosition(10.0f))break;
-								std::this_thread::sleep_for(std::chrono::milliseconds((long)deltaT));
-								deltaT = std::max(30.0, 0.75*deltaT);
-							}
-						}, nullptr, 500, 30));
-						downTimer->execute();
-					}
-				}
-				else {
-					if (downTimer.get() != nullptr) {
-						scrollingDown = false;
-						downTimer.reset();
-					}
-				}
-				if (firstBounds.contains(e.cursor) || (dragBox.dimensions.x*dragBox.dimensions.y > 0 && e.cursor.y < bounds.position.y)) {
-					if (upTimer.get() == nullptr) {
-						upTimer = std::shared_ptr<TimerTask>(new TimerTask([this] {
-							double deltaT = 200;
-							scrollingUp = true;
-							while (scrollingUp) {
-								if (!addVerticalScrollPosition(-10.0f))break;
-								std::this_thread::sleep_for(std::chrono::milliseconds((long)deltaT));
-								deltaT = std::max(30.0, 0.75*deltaT);
-							}
-						}, nullptr, 500, 30));
-						upTimer->execute();
-					}
-				}
-				else {
-					if (upTimer.get() != nullptr) {
-						scrollingUp = false;
-						upTimer.reset();
-					}
+			else {
+				if (downTimer.get() != nullptr) {
+					scrollingDown = false;
+					downTimer.reset();
 				}
 			}
-
-			return false;
-		};
+			if (firstBounds.contains(e.cursor) || (dragBox.dimensions.x*dragBox.dimensions.y > 0 && e.cursor.y < bounds.position.y)) {
+				if (upTimer.get() == nullptr) {
+					upTimer = std::shared_ptr<TimerTask>(new TimerTask([this] {
+						double deltaT = 200;
+						scrollingUp = true;
+						while (scrollingUp) {
+							if (!contentRegion->addVerticalScrollPosition(-10.0f))break;
+							std::this_thread::sleep_for(std::chrono::milliseconds((long)deltaT));
+							deltaT = std::max(30.0, 0.75*deltaT);
+						}
+					}, nullptr, 500, 30));
+					upTimer->execute();
+				}
+			}
+			else {
+				if (upTimer.get() != nullptr) {
+					scrollingUp = false;
+					upTimer.reset();
+				}
+			}
+		}
+		*/
+		return false;
+	}
+	TablePane::TablePane(const std::string& name, const AUnit2D& pos,
+		const AUnit2D& dims,int columns,float entryHeight) :
+		Composite(name, pos, dims),columns(columns),columnHeaders(columns), sortDirections(columns), columnWidths(columns,UnitPercent(1.0f/columns)),columnWidthPixels(columns,0.0f), entryHeight(entryHeight){
+		
+		enableMultiSelection = false;
+		scrollingDown = false;
+		scrollingUp = false;
+		setRoundCorners(false);
+		backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
+		borderColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+		borderWidth = UnitPX(1.0f);
+		contentRegion = CompositePtr(new Composite(name,CoordPX(0.0f,entryHeight),CoordPerPX(1.0f,1.0f,0.0f,-entryHeight)));
+		contentRegion->setRoundCorners(false);
+		contentRegion->setOrientation(Orientation::Vertical, pixel2(0, 2), pixel2(0, 0));
+		contentRegion->setScrollEnabled(true);
+		contentRegion->borderWidth = UnitPX(1.0f);
+		contentRegion->borderColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+		contentRegion->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARKER);
+		dragBox = box2px(float2(0, 0), float2(0, 0));
+		for (int c = 0;c < columns;c++) {
+			TextIconButtonPtr textIcon = TextIconButtonPtr(new TextIconButton(MakeString()<<"Column "<<c, 0,CoordPX(2.0f,2.0f),CoordPerPX(1.0f,1.0f,-4.0f,entryHeight-4.0f),HorizontalAlignment::Center,IconAlignment::Right));
+			textIcon->setRoundCorners(false);
+			textIcon->borderWidth = UnitPX(0.0f);
+			textIcon->backgroundColor = MakeColor(0, 0, 0, 0);
+			textIcon->onMouseDown = [this,c](AlloyContext* context, const InputEvent& e) {
+				if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
+					sort(c);
+					return true;
+				}
+				return false;
+			};
+			columnHeaders[c] = textIcon;
+			sortDirections[c] = 0;
+			Composite::add(textIcon);
+		}
+		Composite::add(contentRegion);
+		//Application::addListener(this);
 	}
 	void TablePane::draw(AlloyContext* context) {
 		pushScissor(context->nvgContext, getCursorBounds());
@@ -274,11 +326,12 @@ namespace aly {
 			return false;
 		}
 	}
-	TableStringEntry::TableStringEntry(const std::string& name, const std::string& label) :TableEntry(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)) {
-		value = ModifiableLabelPtr(new ModifiableLabel(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)));
+	TableStringEntry::TableStringEntry(const std::string& name, const std::string& label,const HorizontalAlignment& alignment) :TableEntry(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)) {
+		value = ModifiableLabelPtr(new ModifiableLabel(name, CoordPX(2.0f, 0.0f), CoordPerPX(1.0f, 1.0f, -4.0f, 0.0f)));
 		value->backgroundColor = MakeColor(0, 0, 0, 0);
 		value->borderColor = MakeColor(0, 0, 0, 0);
 		value->borderWidth = UnitPX(0.0f);
+		value->setAlignment(alignment, VerticalAlignment::Middle);
 		value->setValue(label);
 		Composite::add(value);
 	}
@@ -291,10 +344,11 @@ namespace aly {
 	}
 
 	TableNumberEntry::TableNumberEntry(const std::string& name, const Number& init) :TableEntry(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)) {
-		value = ModifiableNumberPtr(new ModifiableNumber(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f),init.type()));
+		value = ModifiableNumberPtr(new ModifiableNumber(name, CoordPX(2.0f, 0.0f), CoordPerPX(1.0f, 1.0f,-4.0f,0.0f),init.type()));
 		value->backgroundColor = MakeColor(0, 0, 0, 0);
 		value->borderColor = MakeColor(0, 0, 0, 0);
 		value->borderWidth = UnitPX(0.0f);
+		value->setAlignment(HorizontalAlignment::Center, VerticalAlignment::Middle);
 		value->setNumberValue(init);
 		Composite::add(value);
 	}

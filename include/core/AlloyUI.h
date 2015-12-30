@@ -239,6 +239,18 @@ public:
 		}
 		return verticalScrollTrack->isVisible();
 	}
+	Orientation getOrientation() const {
+		return orientation;
+	}
+	Origin getOrigin() const {
+		return origin;
+	}
+	AspectRule getAspectRule() const {
+		return aspectRule;
+	}
+	double getAspectRatio() const {
+		return aspectRatio;
+	}
 	bool isHorizontalScrollVisible() const {
 		if (horizontalScrollTrack.get() == nullptr) {
 			return false;
@@ -831,7 +843,7 @@ std::shared_ptr<Region> MakeRegion(const std::string& name,
 template<class C, class R> std::basic_ostream<C, R> & operator <<(
 		std::basic_ostream<C, R> & ss, const Region & region) {
 	ss << "Region: " << region.name << std::endl;
-	ss << "\tOrigin: " << region.origin << std::endl;
+	ss << "\tOrigin: " << region.getOrigin() << std::endl;
 	ss << "\tRelative Position: " << region.position << std::endl;
 	ss << "\tRelative Dimensions: " << region.dimensions << std::endl;
 	ss << "\tBounds: " << region.bounds << std::endl;
@@ -846,7 +858,7 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(
 	ss << "Glyph Region: " << region.name << std::endl;
 	if (region.glyph.get() != nullptr)
 		ss << "\t" << *region.glyph << std::endl;
-	ss << "\tOrigin: " << region.origin << std::endl;
+	ss << "\tOrigin: " << region.getOrigin() << std::endl;
 	ss << "\tRelative Position: " << region.position << std::endl;
 	ss << "\tRelative Dimensions: " << region.dimensions << std::endl;
 	ss << "\tBounds: " << region.getBounds() << std::endl;
@@ -859,7 +871,7 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(
 template<class C, class R> std::basic_ostream<C, R> & operator <<(
 		std::basic_ostream<C, R> & ss, const TextLabel & region) {
 	ss << "Text Label: " << region.name << std::endl;
-	ss << "\tOrigin: " << region.origin << std::endl;
+	ss << "\tOrigin: " << region.getOrigin() << std::endl;
 	ss << "\tHorizontal Alignment: " << region.horizontalAlignment << std::endl;
 	ss << "\tVertical Alignment: " << region.verticalAlignment << std::endl;
 	ss << "\tRelative Position: " << region.position << std::endl;
@@ -876,17 +888,12 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(
 template<class C, class R> std::basic_ostream<C, R> & operator <<(
 		std::basic_ostream<C, R> & ss, const Composite& region) {
 	ss << "Composite: " << region.name << std::endl;
-	ss << "\tOrigin: " << region.origin << std::endl;
-	ss << "\tOrientation: " << region.orientation << std::endl;
+	ss << "\tOrigin: " << region.getOrigin() << std::endl;
+	ss << "\tOrientation: " << region.getOrientation() << std::endl;
 	ss << "\tRelative Position: " << region.position << std::endl;
 	ss << "\tRelative Dimensions: " << region.dimensions << std::endl;
 	ss << "\tBackground Color: " << region.backgroundColor << std::endl;
 	ss << "\tBounds: " << region.getBounds() << std::endl;
-	int counter = 0;
-	for (const std::shared_ptr<Region>& child : region.children) {
-		ss << "\tChild[" << counter << "]: " << child->name << " "
-				<< child->getBounds() << std::endl;
-	}
 	return ss;
 }
 class AdjustableComposite: public Composite {

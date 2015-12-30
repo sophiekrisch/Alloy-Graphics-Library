@@ -306,10 +306,12 @@ void ProgressBar::draw(AlloyContext* context) {
 	box2px bounds = getBounds();
 	NVGcontext* nvg = context->nvgContext;
 	float x = bounds.position.x;
+
 	float y = bounds.position.y;
 	float w = bounds.dimensions.x;
 	float h = bounds.dimensions.y;
 	const float FADE = 8;
+	box2px cbounds = getCursorBounds();
 	NVGpaint shadowPaint = nvgBoxGradient(nvg, x, y, //+1
 			w , h, (h) / 2, FADE, context->theme.LIGHT, context->theme.DARKEST);
 	nvgBeginPath(nvg);
@@ -319,7 +321,7 @@ void ProgressBar::draw(AlloyContext* context) {
 
 	NVGpaint gradPaint = nvgLinearGradient(nvg, x, y, x, y + h,
 			context->theme.NEUTRAL, context->theme.DARK);
-	pushScissor(nvg, x, y, w * value, h);
+	pushScissor(nvg, cbounds.position.x, cbounds.position.y, std::min(cbounds.dimensions.x,w * value), cbounds.dimensions.y);
 	nvgBeginPath(nvg);
 	nvgRoundedRect(nvg, x, y, w, h, h / 2);
 	nvgFillPaint(nvg, gradPaint);
@@ -336,8 +338,8 @@ void ProgressBar::draw(AlloyContext* context) {
 	drawText(nvg, pixel2(x + 0.5f * w, y + 0.5f * h), label, FontStyle::Normal,
 			context->theme.LIGHTER, context->theme.DARK);
 	popScissor(nvg);
-
-	pushScissor(nvg, x + w * value, y, w * (1.0f - value), h);
+	float xx= std::max(cbounds.position.x, x + w * value);
+	pushScissor(nvg, xx, cbounds.position.y, std::min(cbounds.dimensions.x + x - xx,w * (1.0f - value)+x-xx), cbounds.dimensions.y);
 	drawText(nvg, pixel2(x + 0.5f * w, y + 0.5f * h), label, FontStyle::Normal,
 			context->theme.DARK, context->theme.LIGHTER);
 	popScissor(nvg);
@@ -425,13 +427,20 @@ TextIconButton::TextIconButton(const std::string& label, int iconCode,
 		const HorizontalAlignment& alignment,
 		const IconAlignment& iconAlignment,bool truncate) :
 		Composite(label), iconCodeString(CodePointToUTF8(iconCode)), iconAlignment(
-				iconAlignment), alignment(alignment),truncate(truncate) {
+				iconAlignment), alignment(alignment),truncate(truncate),label(label) {
 	this->position = position;
 	this->dimensions = dimensions;
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
 	textColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
 	fontSize = UnitPerPX(1.0f, -10);
+}
+
+void TextIconButton::setLabel(const std::string& label) {
+	this->label = label;
+}
+void TextIconButton::setIcon(int code) {
+	iconCodeString = CodePointToUTF8(code);
 }
 void TextIconButton::draw(AlloyContext* context) {
 	bool hover = context->isMouseOver(this);
@@ -449,24 +458,36 @@ void TextIconButton::draw(AlloyContext* context) {
 	if (hover) {
 
 		nvgBeginPath(nvg);
-		nvgRoundedRect(nvg, bounds.position.x + xoff, bounds.position.y + yoff,
-			bounds.dimensions.x, bounds.dimensions.y,
-			context->theme.CORNER_RADIUS);
+		if (roundCorners) {
+			nvgRoundedRect(nvg, bounds.position.x + xoff, bounds.position.y + yoff,
+				bounds.dimensions.x, bounds.dimensions.y,
+				context->theme.CORNER_RADIUS);
+		}
+		else {
+			nvgRect(nvg, bounds.position.x + xoff, bounds.position.y + yoff,
+				bounds.dimensions.x, bounds.dimensions.y);
+		}
 		nvgFillColor(nvg, *backgroundColor);
 		nvgFill(nvg);
 	}
 	else {
 		nvgBeginPath(nvg);
-		nvgRoundedRect(nvg, bounds.position.x + 1, bounds.position.y + 1,
-			bounds.dimensions.x - 2, bounds.dimensions.y - 2,
-			context->theme.CORNER_RADIUS);
+		if (roundCorners) {
+			nvgRoundedRect(nvg, bounds.position.x + 1, bounds.position.y + 1,
+				bounds.dimensions.x - 2, bounds.dimensions.y - 2,
+				context->theme.CORNER_RADIUS);
+		}
+		else {
+			nvgRect(nvg, bounds.position.x + 1, bounds.position.y + 1,
+				bounds.dimensions.x - 2, bounds.dimensions.y - 2);
+		}
 		nvgFillColor(nvg, *backgroundColor);
 		nvgFill(nvg);
 	}
 	nvgFillColor(nvg, *textColor);
 	nvgFontSize(nvg, th);
 	nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold));
-	float tw = nvgTextBounds(nvg, 0, 0, name.c_str(), nullptr, nullptr);
+	float tw = nvgTextBounds(nvg, 0, 0,label.c_str(), nullptr, nullptr);
 
 	nvgFontFaceId(nvg, context->getFontHandle(FontType::Icon));
 	float iw = nvgTextBounds(nvg, 0, 0, iconCodeString.c_str(), nullptr,
@@ -491,7 +512,7 @@ void TextIconButton::draw(AlloyContext* context) {
 		nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold));
 		nvgText(nvg, bounds.position.x + xoffset,
 				bounds.position.y + bounds.dimensions.y / 2 + yoff,
-				name.c_str(), nullptr);
+			label.c_str(), nullptr);
 
 		nvgFontFaceId(nvg, context->getFontHandle(FontType::Icon));
 		nvgText(nvg,
@@ -505,7 +526,7 @@ void TextIconButton::draw(AlloyContext* context) {
 				bounds.position.x + xoffset
 						+ AlloyApplicationContext()->theme.SPACING.x + iw,
 				bounds.position.y + bounds.dimensions.y / 2 + yoff,
-				name.c_str(), nullptr);
+			label.c_str(), nullptr);
 
 		nvgFontFaceId(nvg, context->getFontHandle(FontType::Icon));
 		nvgText(nvg, bounds.position.x + xoffset,

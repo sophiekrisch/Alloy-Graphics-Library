@@ -48,12 +48,15 @@ private:
 	IconAlignment iconAlignment;
 	HorizontalAlignment alignment;
 	bool truncate;
+	std::string label;
 public:
 	AColor textColor;
 	AUnit1D fontSize;
 	void setTruncate(bool t) {
 		truncate = t;
 	}
+	void setLabel(const std::string& label);
+	void setIcon(int code);
 	TextIconButton(const std::string& label, int iconCode,
 			const AUnit2D& position, const AUnit2D& dimensions,
 			const HorizontalAlignment& alignment = HorizontalAlignment::Center,

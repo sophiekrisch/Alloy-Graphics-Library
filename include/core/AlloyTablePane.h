@@ -36,7 +36,7 @@ namespace aly {
 		protected:
 			ModifiableLabelPtr value;
 		public:
-			TableStringEntry(const std::string& name, const std::string& value);
+			TableStringEntry(const std::string& name, const std::string& value,const HorizontalAlignment& alignment= HorizontalAlignment::Left);
 			std::string getValue() const{
 				return value->getValue();
 			}
@@ -130,7 +130,6 @@ namespace aly {
 	protected:
 		bool selected;
 		TablePane* tablePane;
-		float entryHeight;
 		std::map<int, std::shared_ptr<TableEntry>> columns;
 	public:
 		int compare(const std::shared_ptr<TableRow>& row,int column);
@@ -139,7 +138,7 @@ namespace aly {
 		bool isSelected();
 		void setColumn(int c,const std::shared_ptr<TableEntry>& region);
 		std::shared_ptr<TableEntry> getColumn(int i) const;
-		TableRow(TablePane* tablePane, const std::string& name, float entryHeight=30.0f);
+		TableRow(TablePane* tablePane, const std::string& name);
 		virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 			double pixelRatio, bool clamp) override;
 	};
@@ -151,6 +150,7 @@ namespace aly {
 		std::shared_ptr<TimerTask> downTimer, upTimer;
 		bool scrollingDown;
 		bool scrollingUp;
+		float entryHeight;
 		const int columns;
 		std::vector<std::shared_ptr<TableRow>> rows;
 		std::list<TableRow*> lastSelected;
@@ -160,13 +160,18 @@ namespace aly {
 		void clearActiveList() {
 			lastSelected.clear();
 		}
+		CompositePtr contentRegion;
 		std::vector<AUnit1D> columnWidths;
 		std::vector<pixel> columnWidthPixels;
+		std::vector<TextIconButtonPtr> columnHeaders;
+		std::vector<int> sortDirections;
+		void sort(int c);
 	public:
+		friend class TableRow;
 		box2px getDragBox() const {
 			return dragBox;
 		}
-		
+		void setColumnLabel(int c, const std::string& label);
 		void setColumnWidth(int c, const AUnit1D& unit);
 		pixel getColumnWidthPixels(int c) const;
 		AUnit1D getColumnWidth(int c) const;
@@ -191,11 +196,13 @@ namespace aly {
 				return nullptr;
 		}
 		bool isDraggingOver(TableRow* entry);
-		TablePane(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,int columns);
-		std::shared_ptr<TableRow> addRow(const std::string& name="",float entryHeight=30.0f);
+		TablePane(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,int columns, float entryHeight = 30.0f);
+		std::shared_ptr<TableRow> addRow(const std::string& name="");
 		int getColumns() const {
 			return columns;
 		}
+		virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
+			override;
 		virtual void draw(AlloyContext* context) override;
 		void setEnableMultiSelection(bool enable) {
 			enableMultiSelection = enable;
