@@ -24,7 +24,7 @@
 using namespace aly;
 using namespace aly::dataflow;
 DataFlowEx::DataFlowEx() :
-	Application(1080, 1080, "Data Flow Graph Example") {
+	Application(1080, 1080, "Data Flow GraphPane Example") {
 }
 bool DataFlowEx::init(Composite& rootNode) {
 	graph = MakeDataFlow("Data Flow", CoordPX(10, 10),

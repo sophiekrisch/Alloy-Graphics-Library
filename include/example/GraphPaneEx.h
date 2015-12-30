@@ -19,13 +19,13 @@
  * THE SOFTWARE.
  */
 
-#ifndef GRAPH_EX_H_
-#define GRAPH_EX_H_
+#ifndef GRAPHPANE_EX_H_
+#define GRAPHPANE_EX_H_
 
 #include "AlloyApplication.h"
-class GraphEx: public aly::Application {
+class GraphPaneEx: public aly::Application {
 public:
-	GraphEx();
+	GraphPaneEx();
 	bool init(aly::Composite& rootNode);
 };
 

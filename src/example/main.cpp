@@ -45,7 +45,7 @@
 #include "../../include/example/MeshPrimitivesEx.h"
 #include "../../include/example/MenuEx.h"
 #include "../../include/example/LocatorEx.h"
-#include "../../include/example/GraphEx.h"
+#include "../../include/example/GraphPaneEx.h"
 #include "../../include/example/SplineEx.h"
 #include "../../include/example/IntersectorEx.h"
 #include "../../include/example/WindowPaneEx.h"
@@ -148,7 +148,7 @@ int main(int argc, char *argv[]) {
 			MAKE_EXAMPLE(MeshPickerEx), MAKE_EXAMPLE(IntersectorEx),
 			MAKE_EXAMPLE(MeshSmoothEx), MAKE_EXAMPLE(ColorSpaceEx),
 			MAKE_EXAMPLE(MeshPrimitivesEx), MAKE_EXAMPLE(MenuEx), MAKE_EXAMPLE(
-					LocatorEx), MAKE_EXAMPLE(GraphEx), MAKE_EXAMPLE(
+					LocatorEx), MAKE_EXAMPLE(GraphPaneEx), MAKE_EXAMPLE(
 					WindowPaneEx), MAKE_EXAMPLE(SplineEx), MAKE_EXAMPLE(
 					DistanceFieldEx), MAKE_EXAMPLE(ExpandTreeEx),
 					MAKE_EXAMPLE(DataFlowEx),MAKE_EXAMPLE(ForceDirectedGraphEx),

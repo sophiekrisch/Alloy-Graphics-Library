@@ -85,9 +85,6 @@
     <ClCompile Include="..\..\src\example\LocatorEx.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\example\GraphEx.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\example\WindowPaneEx.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -119,6 +116,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\example\TablePaneEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\GraphPaneEx.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -207,9 +207,6 @@
     <ClInclude Include="..\..\include\example\LocatorEx.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\GraphEx.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\example\WindowPaneEx.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -241,6 +238,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\example\TablePaneEx.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\example\GraphPaneEx.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

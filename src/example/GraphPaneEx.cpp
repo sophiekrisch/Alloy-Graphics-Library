@@ -20,18 +20,19 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/GraphEx.h"
+#include "AlloyGraphPane.h"
+#include "../../include/example/GraphPaneEx.h"
 using namespace aly;
-GraphEx::GraphEx() :
-		Application(800, 600, "Graph Example") {
+GraphPaneEx::GraphPaneEx() :
+		Application(800, 600, "GraphPane Example") {
 
 
 }
-bool GraphEx::init(Composite& rootNode) {
+bool GraphPaneEx::init(Composite& rootNode) {
 	int N = 5;
 	float delta = 0.001f;
 
-	GraphPtr graphRegion = GraphPtr(new Graph("Graph Example", CoordPerPX(0.5f, 0.0f, -300.0f, 10.0f), CoordPX(600, 400)));
+	GraphPanePtr graphRegion = GraphPanePtr(new GraphPane("GraphPane Example", CoordPerPX(0.5f, 0.0f, -300.0f, 10.0f), CoordPX(600, 400)));
 	for (int n = 0;n < N;n++) {
 		float startX = RandomUniform(-1.0f, 1.0f);
 		float endX = RandomUniform(3.0f, 4.0f);

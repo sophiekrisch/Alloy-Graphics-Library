@@ -25,7 +25,7 @@
 using namespace aly;
 using namespace aly::dataflow;
 ForceDirectedGraphEx::ForceDirectedGraphEx() :
-		Application(1920,1080, "Force Directed Graph Example") {
+		Application(1920,1080, "Force Directed GraphPane Example") {
 
 }
 void ForceDirectedGraphEx::createDescendantGraph(

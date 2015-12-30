@@ -29,7 +29,7 @@
     <ClCompile Include="..\..\src\example\EventsEx.cpp" />
     <ClCompile Include="..\..\src\example\ExpandBarEx.cpp" />
     <ClCompile Include="..\..\src\example\ForceDirectedGraphEx.cpp" />
-    <ClCompile Include="..\..\src\example\GraphEx.cpp" />
+    <ClCompile Include="..\..\src\example\GraphPaneEx.cpp" />
     <ClCompile Include="..\..\src\example\ImageEx.cpp" />
     <ClCompile Include="..\..\src\example\ImageProcessingEx.cpp" />
     <ClCompile Include="..\..\src\example\IntersectorEx.cpp" />
@@ -71,7 +71,7 @@
     <ClInclude Include="..\..\include\example\EventsEx.h" />
     <ClInclude Include="..\..\include\example\ExpandBarEx.h" />
     <ClInclude Include="..\..\include\example\ForceDirectedGraphEx.h" />
-    <ClInclude Include="..\..\include\example\GraphEx.h" />
+    <ClInclude Include="..\..\include\example\GraphPaneEx.h" />
     <ClInclude Include="..\..\include\example\ImageEx.h" />
     <ClInclude Include="..\..\include\example\ImageProcessingEx.h" />
     <ClInclude Include="..\..\include\example\IntersectorEx.h" />

@@ -34,6 +34,7 @@
     <ClCompile Include="..\..\src\core\AlloyExpandBar.cpp" />
     <ClCompile Include="..\..\src\core\AlloyExpandTree.cpp" />
     <ClCompile Include="..\..\src\core\AlloyFileUtil.cpp" />
+    <ClCompile Include="..\..\src\core\AlloyGraphPane.cpp" />
     <ClCompile Include="..\..\src\core\AlloyImage.cpp" />
     <ClCompile Include="..\..\src\core\AlloyIntersector.cpp" />
     <ClCompile Include="..\..\src\core\AlloyIsoContour.cpp" />
@@ -93,6 +94,7 @@
     <ClInclude Include="..\..\include\core\AlloyExpandTree.h" />
     <ClInclude Include="..\..\include\core\AlloyFilesystem.h" />
     <ClInclude Include="..\..\include\core\AlloyFileUtil.h" />
+    <ClInclude Include="..\..\include\core\AlloyGraphPane.h" />
     <ClInclude Include="..\..\include\core\AlloyImage.h" />
     <ClInclude Include="..\..\include\core\AlloyIntersector.h" />
     <ClInclude Include="..\..\include\core\AlloyIsoContour.h" />

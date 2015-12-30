@@ -580,40 +580,6 @@ public:
 	void openFileDialog(AlloyContext* context,
 			const std::string& workingDirectory = GetCurrentWorkingDirectory());
 };
-struct GraphData {
-	std::string name;
-	Color color;
-	std::vector<float2> points;
-	static const float NO_INTERSECT;
-	GraphData(const std::string& name = "", Color color = Color(200, 64, 64)) :
-			name(name), color(color) {
-
-	}
-	float interpolate(float x) const;
-};
-typedef std::shared_ptr<GraphData> GraphDataPtr;
-class Graph: public Region {
-protected:
-	std::vector<GraphDataPtr> curves;
-	box2f graphBounds;
-	float2 cursorPosition;
-	const float GRAPH_PADDING = 24.0f;
-public:
-	std::string xAxisLabel;
-	std::string yAxisLabel;
-	void add(const GraphDataPtr& curve);
-	std::shared_ptr<GraphData> add(const GraphData& curve);
-	void clear() {
-		curves.clear();
-	}
-	box2f updateGraphBounds();
-	void setGraphBounds(const box2f& r) {
-		graphBounds = r;
-	}
-	Graph(const std::string& name, const AUnit2D& pos, const AUnit2D& dims);
-	virtual void draw(AlloyContext* context) override;
-};
-
 class WindowPane: public AdjustableComposite {
 protected:
 	CompositePtr titleRegion;
@@ -686,10 +652,8 @@ typedef std::shared_ptr<TextIconButton> TextIconButtonPtr;
 typedef std::shared_ptr<IconButton> IconButtonPtr;
 typedef std::shared_ptr<ListBox> ListBoxPtr;
 typedef std::shared_ptr<ListEntry> ListEntryPtr;
-typedef std::shared_ptr<Graph> GraphPtr;
 typedef std::shared_ptr<WindowPane> WindowPanePtr;
 typedef std::shared_ptr<MessageDialog> MessageDialogPtr;
-
 typedef std::shared_ptr<MultiFileEntry> MultiFileEntryPtr;
 typedef std::shared_ptr<MultiFileSelector>  MultiFileSelectorPtr;
 }
