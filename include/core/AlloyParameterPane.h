@@ -22,21 +22,32 @@
 #define ALLOYPARAMETERPANE_H_
 #include "AlloyUI.h"
 #include "AlloyWidget.h"
+#include "AlloyExpandBar.h"
 #include "AlloyAny.h"
 #include <string>
 #include <vector>
 namespace aly {
 	class ParameterPane : public Composite {
 	protected:
+		static const float SPACING;
 		float entryHeight;
 		std::vector<std::shared_ptr<AnyInterface>> values;
 		void setCommonParameters(const CompositePtr& compRegion,const TextLabelPtr& textLabel,const RegionPtr& regionLabel);
+		std::list<RegionPtr> groupQueue;
+		CompositePtr lastRegion;
+		ExpandBarPtr expandBar;
+		float estimatedHeight=0;
+		bool lastExpanded = false;
+		void updateGroups();
 	public:
 		AColor entryTextColor;
 		AColor entryBackgroundColor;
 		AColor entryBorderColor;
 		AUnit1D entryBorderWidth;
+		virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm, double pixelRatio, bool clamp) override;
+
 		ParameterPane(const std::string& name, const AUnit2D& pos, const AUnit2D& dim,float entryHeight=30.0f);
+		void addGroup(const std::string& name,bool expanded);
 		void addNumberField(const std::string& label,Number& value,float aspect=3.0f);
 		void addSelectionField(const std::string& label,int& selectedIndex,const std::vector<std::string>& options, float aspect = 4.0f);
 		void addToggleBox(const std::string& label, bool& value, float aspect = 2.1f);

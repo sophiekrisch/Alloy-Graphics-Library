@@ -586,13 +586,10 @@ typedef std::shared_ptr<HorizontalSlider> HSliderPtr;
 typedef std::shared_ptr<VerticalSlider> VSliderPtr;
 typedef std::shared_ptr<HorizontalSlider> HorizontalSliderPtr;
 typedef std::shared_ptr<VerticalSlider> VerticalSliderPtr;
-
-
 typedef std::shared_ptr<CheckBox> CheckBoxPtr;
 typedef std::shared_ptr<ToggleBox> ToggleBoxPtr;
 typedef std::shared_ptr<Selection> SelectionPtr;
 typedef std::shared_ptr<ProgressBar> ProgressBarPtr;
-
 typedef std::shared_ptr<FileSelector> FileSelectorPtr;
 typedef std::shared_ptr<FileDialog> FileDialogPtr;
 typedef std::shared_ptr<FileButton> FileButtonPtr;
