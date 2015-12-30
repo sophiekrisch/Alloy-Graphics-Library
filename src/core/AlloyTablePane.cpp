@@ -27,9 +27,6 @@ namespace aly {
 		this->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 		this->borderColor = MakeColor(COLOR_NONE);
 		this->selected = false;
-		this->onMouseDown = [this](AlloyContext* context, const InputEvent& e) {
-			return this->tablePane->onMouseDown(this, context, e);
-		};
 	}
 	TableEntry::TableEntry(const std::string& name, const AUnit2D& pos, const AUnit2D& dims): Composite(name,pos,dims) {
 
