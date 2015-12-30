@@ -20,6 +20,7 @@
  */
 
 #include "Alloy.h"
+#include "AlloyTabPane.h"
 #include "../../include/example/TabPaneEx.h"
 using namespace aly;
 TabPaneEx::TabPaneEx() :

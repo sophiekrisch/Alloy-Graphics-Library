@@ -737,59 +737,6 @@ public:
 	WindowPane(const RegionPtr& content);
 	virtual void draw(AlloyContext* context) override;
 };
-class TabBar;
-struct TabPane;
-class TabHeader: public Composite{
-protected:
-	TextLabelPtr textLabel;
-	TabPane* parentPane;
-	bool focused;
-public:
-	friend struct TabPane;
-	TabHeader(const std::string& name,TabPane* parent=nullptr);
-	virtual void draw(AlloyContext* context) override;
-	TabBar* getBar() const ;
-	void setSelected() const ;
-	bool isSelected() const;
-	pixel2 getPreferredDimensions(AlloyContext* context) const;
-};
-struct TabPane {
-	std::shared_ptr<TabHeader> header;
-	std::shared_ptr<Composite> region;
-	TabBar* parent;
-	box2px bounds;
-	bool isFocused() const {
-		return header->focused;
-	}
-	TabPane(const std::shared_ptr<Composite>& region);
-};
-class TabBar: public Composite {
-protected:
-	std::vector<std::shared_ptr<TabPane>> panes;
-	std::shared_ptr<Composite> barRegion;
-	std::shared_ptr<Composite> contentRegion;
-	std::shared_ptr<SelectionBox> selectionBox;
-	std::shared_ptr<IconButton> tabDropButton;
-	pixel2 cursorDownPosition;
-	TabPane* selectedPane;
-	TabPane* dragPane;
-	void sortPanes();
-public:
-	static const float TAB_SPACING;
-	static const float TAB_HEIGHT;
-	std::function<bool(TabPane*)> onClose;
-	void close(TabPane* pane);
-	void setSelected(TabPane* s);
-	bool isSelected(TabPane* s) const {
-		return (s!=nullptr&&s == selectedPane);
-	}
-	void add(const std::shared_ptr<TabPane>& tabPane);
-	TabBar(const std::string& name, const AUnit2D& position,
-			const AUnit2D& dimensions);
-	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)override;
-	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,double pixelRatio, bool clamp = false) override;
-	virtual void draw(AlloyContext* context) override;
-};
 class MultiFileEntry : public ListEntry {
 private:
 	std::string fileName;
@@ -854,9 +801,6 @@ typedef std::shared_ptr<MessageDialog> MessageDialogPtr;
 typedef std::shared_ptr<TreeItem> TreeItemPtr;
 typedef std::shared_ptr<LeafItem> LeafItemPtr;
 typedef std::shared_ptr<ExpandTree> ExpandTreePtr;
-typedef std::shared_ptr<TabHeader> TabHeaderPtr;
-typedef std::shared_ptr<TabPane> TabPanePtr;
-typedef std::shared_ptr<TabBar> TabBarPtr;
 typedef std::shared_ptr<MultiFileEntry> MultiFileEntryPtr;
 typedef std::shared_ptr<MultiFileSelector>  MultiFileSelectorPtr;
 }
