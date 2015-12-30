@@ -37,10 +37,10 @@ bool TablePaneEx::init(Composite& rootNode) {
 	for (int r = 0;r < R;r++) {
 		TableRowPtr row = tablePane->addRow();
 		row->setColumn(0,TableStringEntryPtr(new TableStringEntry("String", MakeString()<<"Row "<<(r+1))));
-		row->setColumn(1, TableNumberEntryPtr(new TableNumberEntry("Float", Float(RandomGaussian(0.0f,1.0f)))));
+		row->setColumn(1, TableNumberEntryPtr(new TableNumberEntry("Float", Float(RandomUniform(0.0f,10.0f)))));
 		row->setColumn(2, TableNumberEntryPtr(new TableNumberEntry("Integer", Integer(RandomUniform(0,100)))));
-		row->setColumn(3, TableCheckBoxEntryPtr(new TableCheckBoxEntry("Check",true)));
-		row->setColumn(4, TableToggleBoxEntryPtr(new TableToggleBoxEntry("Check", true)));
+		row->setColumn(3, TableCheckBoxEntryPtr(new TableCheckBoxEntry("Check",(RandomUniform(0,1)!=0))));
+		row->setColumn(4, TableToggleBoxEntryPtr(new TableToggleBoxEntry("Check", (RandomUniform(0, 1) != 0))));
 		row->setColumn(5, TableSelectionEntryPtr(new TableSelectionEntry("Selection", std::vector<std::string>{"car","plane","boat"},RandomUniform(0,2))));
 		row->setColumn(6, TableColorEntryPtr(new TableColorEntry("Color",HSVtoColor(HSV(RandomUniform(0.0f,1.0f),1.0f,RandomUniform(0.5f,1.0f))))));
 		row->setColumn(7, TableProgressBarEntryPtr(new TableProgressBarEntry("Progress",r/(float)(R-1))));

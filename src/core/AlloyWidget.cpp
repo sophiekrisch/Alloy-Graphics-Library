@@ -1147,7 +1147,7 @@ void VerticalSlider::draw(AlloyContext* context) {
 ColorSelector::ColorSelector(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims,bool showText) :
 		Composite(name, pos, dims) {
-	CompositePtr valueContainer = MakeComposite("Check Bounds",
+	CompositePtr valueContainer = MakeComposite("Color Bounds",
 			CoordPerPX(0.0f, 0.0f, 5.0f, 5.0f),
 			CoordPerPX(1.0f, 1.0f, -10.0f, -10.0f));
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
@@ -1183,13 +1183,13 @@ ColorSelector::ColorSelector(const std::string& name, const AUnit2D& pos,
 	colorLabel->foregroundColor = MakeColor(255, 128, 32, 255);
 	colorLabel->borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
 	colorLabel->borderWidth = UnitPX(1.0f);
-	colorLabel->setAspectRule(AspectRule::FixedHeight);
 
 	if (showText) {
 		colorLabel->position = CoordPerPX(1.0f, 0.0f, -4.0f, 4.0f);
 		colorLabel->dimensions = CoordPerPX(0.0f, 1.0f, 0.0f, -8.0f);
 		colorLabel->setOrigin(Origin::TopRight);
 		colorLabel->setAspectRatio(1.0f);
+		colorLabel->setAspectRule(AspectRule::FixedHeight);
 	}
 	else {
 		colorLabel->position = CoordPX(2.0f, 2.0f);

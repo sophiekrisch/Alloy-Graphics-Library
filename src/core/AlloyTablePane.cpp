@@ -38,7 +38,6 @@ namespace aly {
 	void TableRow::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,double pixelRatio, bool clamp) {
 		const int cols = tablePane->getColumns();
 		pixel offset = 0.0f;
-
 		for (std::pair<int, TableEntryPtr> pr : columns) {
 			TableEntryPtr entry = pr.second;
 			int col = pr.first;
@@ -305,9 +304,10 @@ namespace aly {
 	}
 
 	TableCheckBoxEntry::TableCheckBoxEntry(const std::string& name, bool init) :TableEntry(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)) {
-		value = CheckBoxPtr(new CheckBox(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f),init,false));
+		value = CheckBoxPtr(new CheckBox(name, CoordPercent(0.5f, 0.0f), CoordPercent(1.0f, 1.0f),init,false));
 		value->setAspectRule(AspectRule::FixedHeight);
 		value->setAspectRatio(1.0f);
+		value->setOrigin(Origin::TopCenter);
 		value->backgroundColor = MakeColor(0,0,0,0);
 		value->borderColor = MakeColor(0, 0, 0, 0);
 		value->borderWidth = UnitPX(0.0f);
@@ -320,9 +320,10 @@ namespace aly {
 		return (((a)?1:0)-((b)?1:0));
 	}
 	TableToggleBoxEntry::TableToggleBoxEntry(const std::string& name, bool init) :TableEntry(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)) {
-		value = ToggleBoxPtr(new ToggleBox(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f), init, false));
+		value = ToggleBoxPtr(new ToggleBox(name, CoordPercent(0.5f, 0.0f), CoordPercent(1.0f, 1.0f), init, false));
 		value->setAspectRule(AspectRule::FixedHeight);
 		value->setAspectRatio(2.0f);
+		value->setOrigin(Origin::TopCenter);
 		value->backgroundColor = MakeColor(0, 0, 0, 0);
 		value->borderColor = MakeColor(0, 0, 0, 0);
 		value->borderWidth = UnitPX(0.0f);
@@ -349,9 +350,10 @@ namespace aly {
 	}
 
 	TableColorEntry::TableColorEntry(const std::string& name,const Color& init) :TableEntry(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)) {
-		value = ColorSelectorPtr(new ColorSelector(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f),false));
-		value->backgroundColor = MakeColor(0, 0, 0, 0);
-		value->borderColor = MakeColor(0, 0, 0, 0);
+		value = ColorSelectorPtr(new ColorSelector(name, CoordPercent(0.5f, 0.0f), CoordPercent(1.0f, 1.0f),false));
+		value->setAspectRatio(1.0f);
+		value->setAspectRule(AspectRule::FixedHeight);
+		value->setOrigin(Origin::TopCenter);
 		value->borderWidth = UnitPX(0.0f);
 		value->setValue(init);
 		Composite::add(value);
