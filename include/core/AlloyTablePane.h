@@ -36,7 +36,7 @@ namespace aly {
 		protected:
 			ModifiableLabelPtr value;
 		public:
-			TableStringEntry(const std::string& name, const std::string& value,const HorizontalAlignment& alignment= HorizontalAlignment::Left);
+			TableStringEntry(const std::string& name, const std::string& value, bool modifiable=false, const HorizontalAlignment& alignment= HorizontalAlignment::Left);
 			std::string getValue() const{
 				return value->getValue();
 			}
@@ -49,7 +49,7 @@ namespace aly {
 	protected:
 		ModifiableNumberPtr value;
 	public:
-		TableNumberEntry(const std::string& name, const Number& value);
+		TableNumberEntry(const std::string& name, const Number& value, bool modifiable=false);
 		Number getValue() const {
 			return value->getValue();
 		}

@@ -1584,7 +1584,7 @@ void TextField::clear() {
 }
 
 TextField::TextField(const std::string& name) :
-		Composite(name), label(name), value("") {
+		Composite(name), label(name), value(""), modifiable(true) {
 	Application::addListener(this);
 	lastTime = std::chrono::high_resolution_clock::now();
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
@@ -1725,7 +1725,7 @@ void TextField::handleCursorInput(AlloyContext* context, const InputEvent& e) {
 	}
 }
 bool TextField::onEventHandler(AlloyContext* context, const InputEvent& e) {
-	if (isVisible()) {
+	if (isVisible() && modifiable) {
 		if (!context->isFocused(this) || th <= 0)
 			return false;
 		switch (e.type) {
@@ -1761,7 +1761,7 @@ void TextField::draw(AlloyContext* context) {
 		onTextEntered(this);
 	}
 	isFocused = f;
-	bool hover = context->isMouseOver(this);
+	bool hover = context->isMouseOver(this)&&modifiable;
 	float x = bounds.position.x;
 	float y = bounds.position.y;
 	float w = bounds.dimensions.x;
@@ -1873,7 +1873,8 @@ pixel2 ModifiableLabel::getTextDimensions(AlloyContext* context) {
 	return pixel2(tw, th);
 }
 ModifiableLabel::ModifiableLabel(const std::string& name, const AUnit2D& position,
-	const AUnit2D& dimensions) :TextField(name, position, dimensions), fontType(FontType::Normal),fontStyle(FontStyle::Normal) {
+	const AUnit2D& dimensions,bool modifiable) :TextField(name, position, dimensions), fontType(FontType::Normal),fontStyle(FontStyle::Normal) {
+	this->modifiable = modifiable;
 	textAltColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	textColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
 	fontSize = UnitPX(24);
@@ -1886,12 +1887,12 @@ void ModifiableLabel::draw(AlloyContext* context) {
 	std::vector<NVGglyphPosition> positions(value.size());
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
-	bool hover = context->isMouseOver(this);
+	bool hover = context->isMouseOver(this)&&modifiable;
 	float x = bounds.position.x;
 	float y = bounds.position.y;
 	float w = bounds.dimensions.x;
 	float h = bounds.dimensions.y;	
-	bool f = context->isFocused(this);
+	bool f = context->isFocused(this) && modifiable;
 	if (!f&&isFocused&&onTextEntered) {
 		onTextEntered(this);
 	}
@@ -2109,7 +2110,8 @@ pixel2 ModifiableNumber::getTextDimensions(AlloyContext* context) {
 	return pixel2(tw, th);
 }
 ModifiableNumber::ModifiableNumber(const std::string& name, const AUnit2D& position,
-	const AUnit2D& dimensions, const NumberType& type) :NumberField(name, position, dimensions,type), fontType(FontType::Normal), fontStyle(FontStyle::Normal) {
+	const AUnit2D& dimensions, const NumberType& type,bool modifiable) :NumberField(name, position, dimensions,type), fontType(FontType::Normal), fontStyle(FontStyle::Normal) {
+	this->modifiable = modifiable;
 	textAltColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	textColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
 	fontSize = UnitPX(24);
@@ -2121,12 +2123,12 @@ void ModifiableNumber::draw(AlloyContext* context) {
 	std::vector<NVGglyphPosition> positions(value.size());
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
-	bool hover = context->isMouseOver(this);
+	bool hover = context->isMouseOver(this) && modifiable;
 	float x = bounds.position.x;
 	float y = bounds.position.y;
 	float w = bounds.dimensions.x;
 	float h = bounds.dimensions.y;
-	bool f = context->isFocused(this);
+	bool f = context->isFocused(this) && modifiable;
 	if (!f&&isFocused&&onTextEntered) {
 		onTextEntered(this);
 	}
@@ -2463,7 +2465,7 @@ void NumberField::clear() {
 	}
 }
 NumberField::NumberField(const std::string& name, const NumberType& numberType) :
-		Composite(name), label(name), value(""), numberType(numberType) {
+		Composite(name), label(name), value(""), numberType(numberType),modifiable(true) {
 	Application::addListener(this);
 	lastTime = std::chrono::high_resolution_clock::now();
 	numberValue = MakeNumber(numberType, 0);
@@ -2616,7 +2618,7 @@ void NumberField::handleCursorInput(AlloyContext* context,
 	}
 }
 bool NumberField::onEventHandler(AlloyContext* context, const InputEvent& e) {
-	if (isVisible()) {
+	if (isVisible()&&modifiable) {
 		if (!context->isFocused(this) || th <= 0)
 			return false;
 		switch (e.type) {
@@ -2646,7 +2648,7 @@ void NumberField::draw(AlloyContext* context) {
 	std::vector<NVGglyphPosition> positions(value.size());
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
-	bool hover = context->isMouseOver(this);
+	bool hover = context->isMouseOver(this) && modifiable;
 	float x = bounds.position.x;
 	float y = bounds.position.y;
 	float w = bounds.dimensions.x;

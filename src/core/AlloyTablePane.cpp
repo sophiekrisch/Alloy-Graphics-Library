@@ -323,8 +323,8 @@ namespace aly {
 			return false;
 		}
 	}
-	TableStringEntry::TableStringEntry(const std::string& name, const std::string& label,const HorizontalAlignment& alignment) :TableEntry(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)) {
-		value = ModifiableLabelPtr(new ModifiableLabel(name, CoordPX(2.0f, 0.0f), CoordPerPX(1.0f, 1.0f, -4.0f, 0.0f)));
+	TableStringEntry::TableStringEntry(const std::string& name, const std::string& label,bool modifiable,const HorizontalAlignment& alignment) :TableEntry(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)) {
+		value = ModifiableLabelPtr(new ModifiableLabel(name, CoordPX(2.0f, 0.0f), CoordPerPX(1.0f, 1.0f, -4.0f, 0.0f), modifiable));
 		value->backgroundColor = MakeColor(0, 0, 0, 0);
 		value->borderColor = MakeColor(0, 0, 0, 0);
 		value->borderWidth = UnitPX(0.0f);
@@ -340,8 +340,8 @@ namespace aly {
 		return (std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end()))?-1:1;
 	}
 
-	TableNumberEntry::TableNumberEntry(const std::string& name, const Number& init) :TableEntry(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)) {
-		value = ModifiableNumberPtr(new ModifiableNumber(name, CoordPX(2.0f, 0.0f), CoordPerPX(1.0f, 1.0f,-4.0f,0.0f),init.type()));
+	TableNumberEntry::TableNumberEntry(const std::string& name, const Number& init,bool modifiable) :TableEntry(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)) {
+		value = ModifiableNumberPtr(new ModifiableNumber(name, CoordPX(2.0f, 0.0f), CoordPerPX(1.0f, 1.0f, -4.0f, 0.0f), init.type(),modifiable));
 		value->backgroundColor = MakeColor(0, 0, 0, 0);
 		value->borderColor = MakeColor(0, 0, 0, 0);
 		value->borderWidth = UnitPX(0.0f);

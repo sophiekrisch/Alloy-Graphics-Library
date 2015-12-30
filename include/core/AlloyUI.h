@@ -497,10 +497,14 @@ protected:
 	int cursorStart = 0, cursorEnd = 0, textStart = 0;
 	bool dragging = false;
 	std::string lastValue;
+	bool modifiable;
 public:
 	static const float PADDING;
 	AUnit1D fontSize;
 	AColor textColor = MakeColor(Theme::Default.LIGHTER);
+	void setModifiable(bool m) {
+		modifiable = m;
+	}
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
 			override;
 	virtual inline ~TextField() {
@@ -549,11 +553,15 @@ protected:
 	std::string lastValue;
 	Number numberValue;
 	NumberType numberType;
+	bool modifiable;
 public:
 	AUnit1D fontSize;
 	AColor invalidNumberColor;
 	bool isValid() const {
 		return valid;
+	}
+	void setModifiable(bool m) {
+		modifiable = m;
 	}
 	static const float PADDING;
 	AColor textColor = MakeColor(Theme::Default.LIGHTER);
@@ -771,7 +779,7 @@ public:
 		this->verticalAlignment = verticalAlignment;
 	}
 	virtual pixel2 getTextDimensions(AlloyContext* context);
-	ModifiableLabel(const std::string& name, const AUnit2D& position,const AUnit2D& dimensions);
+	ModifiableLabel(const std::string& name, const AUnit2D& position,const AUnit2D& dimensions,bool modifiable=true);
 	virtual void draw(AlloyContext* context) override;
 };
 struct ModifiableNumber : public NumberField {
@@ -779,6 +787,7 @@ public:
 	FontType fontType;
 	FontStyle fontStyle;
 	AColor textAltColor;
+
 	HorizontalAlignment horizontalAlignment = HorizontalAlignment::Left;
 	VerticalAlignment verticalAlignment = VerticalAlignment::Top;
 	void setAlignment(const HorizontalAlignment& horizontalAlignment,
@@ -787,7 +796,7 @@ public:
 		this->verticalAlignment = verticalAlignment;
 	}
 	virtual pixel2 getTextDimensions(AlloyContext* context);
-	ModifiableNumber(const std::string& name, const AUnit2D& position, const AUnit2D& dimensions, const NumberType& type);
+	ModifiableNumber(const std::string& name, const AUnit2D& position, const AUnit2D& dimensions, const NumberType& type,bool modifiable=true);
 	virtual void draw(AlloyContext* context) override;
 };
 std::shared_ptr<Composite> MakeComposite(const std::string& name,
