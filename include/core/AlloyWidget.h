@@ -383,116 +383,8 @@ public:
 			const AUnit2D& dims,bool showText=true);
 	virtual void draw(AlloyContext* context) override;
 };
-class ExpandRegion: public Composite {
-private:
-	std::shared_ptr<TextLabel> selectionLabel;
-	std::shared_ptr<TextLabel> arrowIcon;
-	std::shared_ptr<Composite> contentRegion;
-	std::shared_ptr<Composite> titleContainer;
-	bool expanded;
-public:
-	pixel expandHeight;
-	void setExpanded(bool expanded);
-	ExpandRegion(const std::string& name,
-			const std::shared_ptr<Composite>& region, const AUnit2D& pos,
-			const AUnit2D& dims, pixel expandHeight, bool expanded);
-	virtual void draw(AlloyContext* context) override;
-};
-class ExpandTree;
-class TreeItem {
-protected:
-	static const int PADDING;
-	std::string name;
-	std::string iconCodeString;
-	float fontSize = 24;
 
-	box2px bounds;
-	box2px selectionBounds;
-	bool expanded;
-	std::vector<std::shared_ptr<TreeItem>> children;
-public:
-	std::function<void(TreeItem* item)> onExpand;
-	std::function<void(TreeItem* item)> onCollapse;
-	std::function<void(TreeItem* item, const InputEvent& e)> onSelect;
-	bool isExpanded() const {
-		return expanded;
-	}
-	std::string getName() const {
-		return name;
-	}
-	void clear() {
-		children.clear();
-	}
-	bool hasChildren() const {
-		return (children.size() != 0);
-	}
 
-	void setExpanded(bool expand);
-	virtual void add(const std::shared_ptr<TreeItem>& item);
-	virtual TreeItem* locate(AlloyContext* context, const pixel2& pt);
-	TreeItem(const std::string& name = "", int iconCode = 0,
-			float fontSize = 24);
-	virtual box2px getBounds() const;
-	virtual box2px update(AlloyContext* context,
-			const pixel2& offset = pixel2(0.0f));
-	virtual void draw(ExpandTree* tree, AlloyContext* context,
-			const pixel2& offset);
-	virtual ~TreeItem() {
-
-	}
-};
-class LeafItem: public TreeItem {
-protected:
-	std::function<void(AlloyContext* context, const box2px& bounds)> onDraw;
-public:
-	LeafItem(
-			const std::function<
-					void(AlloyContext* context, const box2px& bounds)>& onDraw,
-			const pixel2& dimensions);
-	virtual box2px getBounds() const;
-	virtual void add(const std::shared_ptr<TreeItem>& item) override {
-		throw std::runtime_error("Cannot add child to leaf node.");
-	}
-	virtual box2px update(AlloyContext* context,
-			const pixel2& offset = pixel2(0.0f)) override;
-	virtual void draw(ExpandTree* tree, AlloyContext* context,
-			const pixel2& offset) override;
-	virtual TreeItem* locate(AlloyContext* context, const pixel2& pt) override;
-	virtual ~LeafItem() {
-	}
-};
-class ExpandTree: public Composite {
-protected:
-	TreeItem root;
-	DrawPtr drawRegion;
-	TreeItem* selectedItem;
-	bool dirty;
-public:
-	TreeItem* getSelectedItem() const {
-		return selectedItem;
-	}
-	void setDirty(bool d) {
-		dirty = d;
-	}
-	void update(AlloyContext* context);
-	ExpandTree(const std::string& name, const AUnit2D& pos,
-			const AUnit2D& dims);
-	void add(const std::shared_ptr<TreeItem>& item);
-	void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
-			double pixelRatio, bool clamp);
-	virtual void draw(AlloyContext* context) override;
-	virtual void drawDebug(AlloyContext* context) override;
-};
-class ExpandBar: public Composite {
-private:
-	std::list<std::shared_ptr<ExpandRegion>> expandRegions;
-	std::list<std::shared_ptr<Region>> contentRegions;
-public:
-	CompositePtr add(const std::shared_ptr<Region>&, pixel expandHeight,
-			bool expanded);
-
-	ExpandBar(const std::string& name, const AUnit2D& pos, const AUnit2D& dims);
-};
 class FileDialog;
 class ListBox;
 class ListEntry: public Region {
@@ -786,8 +678,7 @@ typedef std::shared_ptr<ToggleBox> ToggleBoxPtr;
 typedef std::shared_ptr<Selection> SelectionPtr;
 typedef std::shared_ptr<ProgressBar> ProgressBarPtr;
 typedef std::shared_ptr<ColorWheel> ColorWheelPtr;
-typedef std::shared_ptr<ExpandBar> ExpandBarPtr;
-typedef std::shared_ptr<ExpandRegion> ExpandRegionPtr;
+
 typedef std::shared_ptr<FileSelector> FileSelectorPtr;
 typedef std::shared_ptr<FileDialog> FileDialogPtr;
 typedef std::shared_ptr<FileButton> FileButtonPtr;
@@ -798,9 +689,7 @@ typedef std::shared_ptr<ListEntry> ListEntryPtr;
 typedef std::shared_ptr<Graph> GraphPtr;
 typedef std::shared_ptr<WindowPane> WindowPanePtr;
 typedef std::shared_ptr<MessageDialog> MessageDialogPtr;
-typedef std::shared_ptr<TreeItem> TreeItemPtr;
-typedef std::shared_ptr<LeafItem> LeafItemPtr;
-typedef std::shared_ptr<ExpandTree> ExpandTreePtr;
+
 typedef std::shared_ptr<MultiFileEntry> MultiFileEntryPtr;
 typedef std::shared_ptr<MultiFileSelector>  MultiFileSelectorPtr;
 }

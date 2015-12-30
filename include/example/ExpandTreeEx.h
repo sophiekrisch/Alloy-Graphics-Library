@@ -24,6 +24,7 @@
 
 #include "AlloyApplication.h"
 #include "AlloyWidget.h"
+#include "AlloyExpandTree.h"
 class ExpandTreeEx: public aly::Application {
 protected:
 	void addDirectory(const std::string& dir, aly::TreeItem* item);

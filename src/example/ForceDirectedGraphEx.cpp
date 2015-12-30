@@ -20,6 +20,7 @@
  */
 
 #include "Alloy.h"
+#include "AlloyExpandBar.h"
 #include "../../include/example/ForceDirectedGraphEx.h"
 using namespace aly;
 using namespace aly::dataflow;

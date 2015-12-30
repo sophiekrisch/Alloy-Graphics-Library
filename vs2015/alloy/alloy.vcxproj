@@ -31,6 +31,8 @@
     <ClCompile Include="..\..\src\core\AlloyDenseSolve.cpp" />
     <ClCompile Include="..\..\src\core\AlloyDistanceField.cpp" />
     <ClCompile Include="..\..\src\core\AlloyDrawUtil.cpp" />
+    <ClCompile Include="..\..\src\core\AlloyExpandBar.cpp" />
+    <ClCompile Include="..\..\src\core\AlloyExpandTree.cpp" />
     <ClCompile Include="..\..\src\core\AlloyFileUtil.cpp" />
     <ClCompile Include="..\..\src\core\AlloyImage.cpp" />
     <ClCompile Include="..\..\src\core\AlloyIntersector.cpp" />
@@ -87,6 +89,8 @@
     <ClInclude Include="..\..\include\core\AlloyDistanceField.h" />
     <ClInclude Include="..\..\include\core\AlloyDrawUtil.h" />
     <ClInclude Include="..\..\include\core\AlloyEnum.h" />
+    <ClInclude Include="..\..\include\core\AlloyExpandBar.h" />
+    <ClInclude Include="..\..\include\core\AlloyExpandTree.h" />
     <ClInclude Include="..\..\include\core\AlloyFilesystem.h" />
     <ClInclude Include="..\..\include\core\AlloyFileUtil.h" />
     <ClInclude Include="..\..\include\core\AlloyImage.h" />

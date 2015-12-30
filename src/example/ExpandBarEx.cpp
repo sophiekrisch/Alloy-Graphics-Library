@@ -22,6 +22,7 @@
 #include "../../include/example/ExpandBarEx.h"
 
 #include "Alloy.h"
+#include "AlloyExpandBar.h"
 using namespace aly;
 ExpandBarEx::ExpandBarEx() :
 		Application(800, 600, "Expand Bar Example") {
