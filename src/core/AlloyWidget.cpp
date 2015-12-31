@@ -1605,11 +1605,13 @@ void FileDialog::setSelectedFile(const std::string& file) {
 			i++;
 		}
 		updateValidity();
-		directoryList->update();
 	}
 }
 
 void ListBox::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,double pixelRatio, bool clamp){
+	if (dirty) {
+		update();
+	}
 	AlloyContext* context = AlloyApplicationContext().get();
 	Region::pack(pos,dims, dpmm, pixelRatio, clamp);
 	pixel2 maxDim = pixel2(this->getBoundsDimensionsX(), 0.0f);
@@ -1640,11 +1642,13 @@ void ListBox::update() {
 			lastSelected.push_back(entry.get());
 		}
 	}
+	dirty = false;
 	context->requestPack();
 }
 ListBox::ListBox(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims) :
 		Composite(name, pos, dims) {
+	dirty = false;
 	enableMultiSelection = false;
 	scrollingDown = false;
 	scrollingUp = false;

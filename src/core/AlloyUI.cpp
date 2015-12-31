@@ -1586,6 +1586,7 @@ void TextField::clear() {
 TextField::TextField(const std::string& name) :
 		Composite(name), label(name), value(""), modifiable(true) {
 	Application::addListener(this);
+	modifiable = true;
 	lastTime = std::chrono::high_resolution_clock::now();
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
@@ -1597,6 +1598,7 @@ TextField::TextField(const std::string& name, const AUnit2D& position,
 		const AUnit2D& dimensions) :
 		Composite(name, position, dimensions), label(name), value("") {
 	Application::addListener(this);
+	modifiable = true;
 	lastTime = std::chrono::high_resolution_clock::now();
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
@@ -1756,11 +1758,11 @@ void TextField::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
 
-	bool f = context->isFocused(this);
+	bool f = context->isFocused(this) && modifiable;
 	if (!f&&isFocused&&onTextEntered) {
 		onTextEntered(this);
 	}
-	isFocused = f;
+	isFocused = f&&modifiable;
 	bool hover = context->isMouseOver(this)&&modifiable;
 	float x = bounds.position.x;
 	float y = bounds.position.y;
@@ -2467,9 +2469,10 @@ void NumberField::clear() {
 NumberField::NumberField(const std::string& name, const NumberType& numberType) :
 		Composite(name), label(name), value(""), numberType(numberType),modifiable(true) {
 	Application::addListener(this);
+	modifiable = true;
 	lastTime = std::chrono::high_resolution_clock::now();
 	numberValue = MakeNumber(numberType, 0);
-	invalidNumberColor = MakeColor(255, 0, 0, 128);
+	invalidNumberColor = MakeColor(255, 128,128,255);
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
 	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
 	borderWidth = UnitPX(1.0f);
@@ -2481,8 +2484,9 @@ NumberField::NumberField(const std::string& name, const AUnit2D& position,
 		const AUnit2D& dimensions, const NumberType& numberType) :
 		Composite(name, position, dimensions), label(name), value(""), numberType(
 				numberType) {
+	modifiable = true;
 	Application::addListener(this);
-	invalidNumberColor = MakeColor(255, 0, 0, 128);
+	invalidNumberColor = MakeColor(255, 128,128, 255);
 	lastTime = std::chrono::high_resolution_clock::now();
 	numberValue = MakeNumber(numberType, 0);
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
@@ -2653,7 +2657,7 @@ void NumberField::draw(AlloyContext* context) {
 	float y = bounds.position.y;
 	float w = bounds.dimensions.x;
 	float h = bounds.dimensions.y;
-	bool f = context->isFocused(this);
+	bool f = context->isFocused(this) && modifiable;
 	if (!f&&isFocused&&onTextEntered) {
 		onTextEntered(this);
 	}

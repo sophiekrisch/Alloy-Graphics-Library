@@ -53,7 +53,7 @@ bool TablePaneEx::init(Composite& rootNode) {
 		row->setColumn(6, TableColorEntryPtr(new TableColorEntry("Color",HSVtoColor(HSV(RandomUniform(0.0f,1.0f),1.0f,RandomUniform(0.5f,1.0f))))));
 		row->setColumn(7, TableProgressBarEntryPtr(new TableProgressBarEntry("Progress", RandomUniform(0.0f, 1.0f))));
 	}
-	tablePane->update();
+	tablePane->setEnableMultiSelection(true);
 	rootNode.add(tablePane);
 	return true;
 }

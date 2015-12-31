@@ -394,6 +394,7 @@ protected:
 	std::shared_ptr<TimerTask> downTimer, upTimer;
 	bool scrollingDown;
 	bool scrollingUp;
+	bool dirty;
 	std::vector<std::shared_ptr<ListEntry>> listEntries;
 	std::list<ListEntry*> lastSelected;
 	void addToActiveList(ListEntry* entry) {
@@ -403,6 +404,8 @@ protected:
 		lastSelected.clear();
 	}
 public:
+	void update();
+
 	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,double pixelRatio, bool clamp) override;
 	box2px getDragBox() const {
 		return dragBox;
@@ -412,12 +415,13 @@ public:
 	}
 	void addEntry(const std::shared_ptr<ListEntry>& entry) {
 		listEntries.push_back(entry);
+		dirty = true;
 	}
 	void clearEntries() {
 		listEntries.clear();
 		lastSelected.clear();
+		dirty = true;
 	}
-	void update();
 
 	ListEntry* getLastSelected() {
 		if (lastSelected.size() > 0)

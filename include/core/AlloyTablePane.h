@@ -44,6 +44,9 @@ namespace aly {
 			void setValue(const std::string& val) {
 				value->setValue(val);
 			}
+			ModifiableLabelPtr getRegion() const {
+				return value;
+			}
 			virtual int compare(const std::shared_ptr<TableEntry>& entry) const override;
 	};
 	class TableNumberEntry : public TableEntry {
@@ -56,6 +59,9 @@ namespace aly {
 		}
 		void setValue(const Number& num) {
 			value->setNumberValue(num);
+		}
+		ModifiableNumberPtr getRegion() const {
+			return value;
 		}
 		virtual int compare(const std::shared_ptr<TableEntry>& entry) const override;
 	};
@@ -70,6 +76,10 @@ namespace aly {
 		void setValue(const int& num) {
 			value->setValue(num);
 		}
+		SelectionPtr getRegion() const {
+			return value;
+		}
+
 		virtual int compare(const std::shared_ptr<TableEntry>& entry) const override;
 	};
 	class TableCheckBoxEntry : public TableEntry {
@@ -83,6 +93,10 @@ namespace aly {
 		void setValue(const bool& val) {
 			value->setValue(val);
 		}
+		CheckBoxPtr getRegion() const {
+			return value;
+		}
+
 		virtual int compare(const std::shared_ptr<TableEntry>& entry) const override;
 	};
 	class TableToggleBoxEntry : public TableEntry {
@@ -96,6 +110,10 @@ namespace aly {
 		void setValue(const bool& val) {
 			value->setValue(val);
 		}
+		ToggleBoxPtr getRegion() const {
+			return value;
+		}
+
 		virtual int compare(const std::shared_ptr<TableEntry>& entry) const override;
 	};
 	class TableColorEntry : public TableEntry {
@@ -109,6 +127,10 @@ namespace aly {
 		void setValue(const Color& num) {
 			value->setValue(num);
 		}
+		ColorSelectorPtr getRegion() const {
+			return value;
+		}
+
 		virtual int compare(const std::shared_ptr<TableEntry>& entry) const override;
 	};
 	class TableProgressBarEntry : public TableEntry {
@@ -125,6 +147,10 @@ namespace aly {
 		void setValue(const std::string& label, float& num) {
 			value->setValue(label,num);
 		}
+		ProgressBarPtr getRegion() const {
+			return value;
+		}
+
 		virtual int compare(const std::shared_ptr<TableEntry>& entry) const override;
 	};
 	class TableRow: public Composite{
@@ -152,12 +178,15 @@ namespace aly {
 		bool scrollingDown;
 		bool scrollingUp;
 		float entryHeight;
+		bool dirty;
 		const int columns;
 		std::vector<std::shared_ptr<TableRow>> rows;
 		std::list<TableRow*> lastSelected;
 		void addToActiveList(TableRow* entry) {
 			lastSelected.push_back(entry);
 		}
+		void update();
+
 		void clearActiveList() {
 			lastSelected.clear();
 		}
@@ -182,14 +211,15 @@ namespace aly {
 		}
 		void addRow(const std::shared_ptr<TableRow>& entry) {
 			rows.push_back(entry);
+			dirty = true;
 		}
 		virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 			double pixelRatio, bool clamp) override;
 		void clearRows() {
 			rows.clear();
 			lastSelected.clear();
+			dirty = true;
 		}
-		void update();
 		TableRow* getLastSelected() {
 			if (lastSelected.size() > 0)
 				return lastSelected.back();

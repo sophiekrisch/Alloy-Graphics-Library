@@ -35,7 +35,6 @@ bool DialogsEx::init(Composite& rootNode) {
 	for (int i = 0;i < 30;i++) {
 		listBox->addEntry(ListEntryPtr(new ListEntry(listBox.get(),MakeString()<<"Multi-Selection Entry ("<<i<<")",30.0f)));
 	}
-	listBox->update();
 	listBox->setEnableMultiSelection(true);
 
 	rootNode.add(saveButton);

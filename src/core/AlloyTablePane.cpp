@@ -35,6 +35,12 @@ namespace aly {
 	void TableRow::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,double pixelRatio, bool clamp) {
 		const int cols = tablePane->getColumns();
 		pixel offset = 0.0f;
+		if (selected) {
+			backgroundColor=MakeColor(AlloyApplicationContext()->theme.LINK);
+		}
+		else {
+			backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+		}
 		for (std::pair<int, TableEntryPtr> pr : columns) {
 			TableEntryPtr entry = pr.second;
 			int col = pr.first;
@@ -85,6 +91,9 @@ namespace aly {
 	}
 	void TablePane::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp) {
+		if (dirty) {
+			update();
+		}
 		Region::pack(pos, dims, dpmm, pixelRatio, clamp);
 		box2px bounds = contentRegion->getBounds();
 		pixel offset = 0;
@@ -174,11 +183,21 @@ namespace aly {
 				lastSelected.push_back(entry.get());
 			}
 		}
+
+		dirty = false;
 		context->requestPack();
 	}
 	bool TablePane::onEventHandler(AlloyContext* context, const InputEvent& e) {
-		/*
+		
 		if (!context->isMouseOver(this, true))return false;
+		if (e.type == InputType::MouseButton) {
+			for (TableRowPtr row : rows) {
+				if (context->isMouseDown(row.get(), true)) {
+					onMouseDown(row.get(), context, e);
+					break;
+				}
+			}
+		}
 		if (e.type == InputType::Cursor || e.type == InputType::MouseButton) {
 			if (context->isMouseDrag()) {
 				if (enableMultiSelection) {
@@ -255,13 +274,13 @@ namespace aly {
 				}
 			}
 		}
-		*/
+		
 		return false;
 	}
 	TablePane::TablePane(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims,int columns,float entryHeight) :
 		Composite(name, pos, dims),columns(columns),columnHeaders(columns), sortDirections(columns), columnWidths(columns,UnitPercent(1.0f/columns)),columnWidthPixels(columns,0.0f), entryHeight(entryHeight){
-		
+		dirty = false;
 		enableMultiSelection = false;
 		scrollingDown = false;
 		scrollingUp = false;
@@ -273,6 +292,7 @@ namespace aly {
 		contentRegion->setRoundCorners(false);
 		contentRegion->setOrientation(Orientation::Vertical, pixel2(0, 2), pixel2(0, 0));
 		contentRegion->setScrollEnabled(true);
+		contentRegion->setAlwaysShowVerticalScrollBar(true);
 		contentRegion->borderWidth = UnitPX(1.0f);
 		contentRegion->borderColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 		contentRegion->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARKER);
@@ -294,7 +314,7 @@ namespace aly {
 			Composite::add(textIcon);
 		}
 		Composite::add(contentRegion);
-		//Application::addListener(this);
+		Application::addListener(this);
 	}
 	void TablePane::draw(AlloyContext* context) {
 		pushScissor(context->nvgContext, getCursorBounds());

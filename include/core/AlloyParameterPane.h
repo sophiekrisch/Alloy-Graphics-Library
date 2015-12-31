@@ -23,6 +23,7 @@
 #include "AlloyUI.h"
 #include "AlloyWidget.h"
 #include "AlloyExpandBar.h"
+#include "AlloyColorSelector.h"
 #include "AlloyAny.h"
 #include <string>
 #include <vector>
@@ -47,14 +48,14 @@ namespace aly {
 		virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm, double pixelRatio, bool clamp) override;
 
 		ParameterPane(const std::string& name, const AUnit2D& pos, const AUnit2D& dim,float entryHeight=30.0f);
-		void addGroup(const std::string& name,bool expanded);
-		void addNumberField(const std::string& label,Number& value,float aspect=3.0f);
-		void addSelectionField(const std::string& label,int& selectedIndex,const std::vector<std::string>& options, float aspect = 4.0f);
-		void addToggleBox(const std::string& label, bool& value, float aspect = 2.1f);
-		void addCheckBox(const std::string& label, bool& value, float aspect = 1.0f);
-		void addColorField(const std::string& label,Color& color, float aspect = 3.0f);
-		void addFileField(const std::string& label, std::string& file, float aspect = -1.0f);
-		void addMultiFileSelector(const std::string& label, std::vector<std::string>& files, float aspect = -1.0f);
+		CompositePtr addGroup(const std::string& name,bool expanded);
+		NumberFieldPtr addNumberField(const std::string& label,Number& value,float aspect=3.0f);
+		SelectionPtr addSelectionField(const std::string& label,int& selectedIndex,const std::vector<std::string>& options, float aspect = 4.0f);
+		ToggleBoxPtr addToggleBox(const std::string& label, bool& value, float aspect = 2.1f);
+		CheckBoxPtr addCheckBox(const std::string& label, bool& value, float aspect = 1.0f);
+		ColorSelectorPtr addColorField(const std::string& label,Color& color, float aspect = 3.0f);
+		FileSelectorPtr addFileField(const std::string& label, std::string& file, float aspect = -1.0f);
+		MultiFileSelectorPtr addMultiFileSelector(const std::string& label, std::vector<std::string>& files, float aspect = -1.0f);
 	};
 
 	typedef std::shared_ptr<ParameterPane> ParameterPanePtr;

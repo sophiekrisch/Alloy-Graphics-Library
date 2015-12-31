@@ -56,7 +56,7 @@ namespace aly {
 			}
 		}
 	}
-	void ParameterPane::addGroup(const std::string& name,bool expanded) {
+	CompositePtr ParameterPane::addGroup(const std::string& name,bool expanded) {
 		if (lastRegion.get() != nullptr&&groupQueue.size() > 0) {
 			for (RegionPtr region : groupQueue) {
 				lastRegion->add(region);
@@ -77,6 +77,7 @@ namespace aly {
 			expandBar = ExpandBarPtr(new ExpandBar("Parameters", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)));
 			Composite::add(expandBar);
 		}
+		return lastRegion;
 	}
 	ParameterPane::ParameterPane(const std::string& name, const AUnit2D& pos, const AUnit2D& dim, float entryHeight):Composite(name,pos,dim),entryHeight(entryHeight) {
 		backgroundColor = MakeColor(AlloyDefaultContext()->theme.DARKER);
@@ -98,7 +99,7 @@ namespace aly {
 		compRegion->add(valueRegion);
 		groupQueue.push_back(compRegion);
 	}
-	void ParameterPane::addNumberField(const std::string& label, Number& value,float aspect) {
+	NumberFieldPtr ParameterPane::addNumberField(const std::string& label, Number& value,float aspect) {
 		CompositePtr comp = CompositePtr(new Composite(label+"_param",CoordPX(0,0),CoordPerPX(1.0f,0.0f,0.0f,entryHeight)));
 		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
 		NumberFieldPtr valueRegion = NumberFieldPtr(new NumberField(label, CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, 0.0f), CoordPX(aspect*entryHeight, entryHeight), value.type()));
@@ -124,8 +125,9 @@ namespace aly {
 		valueRegion->backgroundColor= MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		valueRegion->setRoundCorners(true);
 		estimatedHeight += entryHeight + SPACING;
+		return valueRegion;
 	}
-	void ParameterPane::addColorField(const std::string& label, Color& value, float aspect) {
+	ColorSelectorPtr ParameterPane::addColorField(const std::string& label, Color& value, float aspect) {
 		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
 		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
 		ColorSelectorPtr valueRegion = ColorSelectorPtr(new ColorSelector(label, CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, 0.0f), CoordPX(aspect*entryHeight, entryHeight),false));
@@ -147,9 +149,9 @@ namespace aly {
 		};
 		setCommonParameters(comp, labelRegion, valueRegion);
 		estimatedHeight += entryHeight + SPACING;
-
+		return valueRegion;
 	}
-	void ParameterPane::addSelectionField(const std::string& label,int& selectedIndex, const std::vector<std::string>& options, float aspect) {
+	SelectionPtr ParameterPane::addSelectionField(const std::string& label,int& selectedIndex, const std::vector<std::string>& options, float aspect) {
 		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
 		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
 		SelectionPtr valueRegion = SelectionPtr(new Selection(label, CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, 0.0f), CoordPX(aspect*entryHeight, entryHeight), options));
@@ -173,8 +175,9 @@ namespace aly {
 		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		valueRegion->setRoundCorners(true);
 		estimatedHeight += entryHeight + SPACING;
+		return valueRegion;
 	}
-	void ParameterPane::addToggleBox(const std::string& label, bool& value, float aspect) {
+	ToggleBoxPtr ParameterPane::addToggleBox(const std::string& label, bool& value, float aspect) {
 		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
 		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
 		ToggleBoxPtr valueRegion = ToggleBoxPtr(new ToggleBox(label, CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, 0.0f), CoordPX(aspect*entryHeight, entryHeight),value,false));
@@ -195,8 +198,9 @@ namespace aly {
 		};
 		setCommonParameters(comp, labelRegion, valueRegion);
 		estimatedHeight += entryHeight + SPACING;
+		return valueRegion;
 	}
-	void ParameterPane::addCheckBox(const std::string& label, bool& value, float aspect) {
+	CheckBoxPtr ParameterPane::addCheckBox(const std::string& label, bool& value, float aspect) {
 		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
 		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
 		CheckBoxPtr valueRegion = CheckBoxPtr(new CheckBox(label, CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, 0.0f), CoordPX(aspect*entryHeight, entryHeight),value,false));
@@ -217,8 +221,9 @@ namespace aly {
 		};
 		setCommonParameters(comp, labelRegion, valueRegion);
 		estimatedHeight += entryHeight + SPACING;
+		return valueRegion;
 	}
-	void ParameterPane::addFileField(const std::string& label, std::string& file, float aspect) {
+	FileSelectorPtr ParameterPane::addFileField(const std::string& label, std::string& file, float aspect) {
 		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
 		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
 		FileSelectorPtr valueRegion = FileSelectorPtr(new FileSelector(label, CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, 0.0f), CoordPX(aspect*entryHeight, entryHeight)));
@@ -242,9 +247,10 @@ namespace aly {
 		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		valueRegion->setRoundCorners(true);
 		estimatedHeight += entryHeight + SPACING;
+		return valueRegion;
 	}
 
-	void ParameterPane::addMultiFileSelector(const std::string& label, std::vector<std::string>& files, float aspect) {
+	MultiFileSelectorPtr ParameterPane::addMultiFileSelector(const std::string& label, std::vector<std::string>& files, float aspect) {
 		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, 4*entryHeight)));
 		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f,0.0f, entryHeight)));
 		MultiFileSelectorPtr valueRegion = MultiFileSelectorPtr(new MultiFileSelector("Multi-File Field", CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, 0.0f), CoordPX(aspect*entryHeight, 4*entryHeight),entryHeight));
@@ -268,5 +274,6 @@ namespace aly {
 		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		valueRegion->setRoundCorners(true);
 		estimatedHeight += 4*entryHeight + SPACING;
+		return valueRegion;
 	}
 }
