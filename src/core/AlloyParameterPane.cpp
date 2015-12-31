@@ -39,7 +39,7 @@ namespace aly {
 				lastRegion->setOrientation(Orientation::Vertical, pixel2(0.0f, SPACING), pixel2(0.0f));
 				lastRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.DARKEST);
 				lastRegion->borderColor= MakeColor(0,0,0,0);
-				lastRegion->setRoundCorners(true);
+				lastRegion->setRoundCorners(false);
 				estimatedHeight = 0;
 			}
 			else {
@@ -67,7 +67,7 @@ namespace aly {
 			lastRegion->setOrientation(Orientation::Vertical, pixel2(0.0f, SPACING), pixel2(0.0f));
 			lastRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.DARKEST);
 			lastRegion->borderColor = MakeColor(0, 0, 0, 0);
-			lastRegion->setRoundCorners(true);
+			lastRegion->setRoundCorners(false);
 			estimatedHeight = 0;
 		}
 		lastRegion = CompositePtr(new Composite(name, CoordPX(0.0f,0.0f),CoordPercent(1.0f,1.0f)));
