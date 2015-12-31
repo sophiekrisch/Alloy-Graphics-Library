@@ -24,7 +24,7 @@ alloy : $(OBJS)
 	ranlib liballoy.a
 
 examples : $(EXOBJS)
-	$(CXX) $(LDLIBS) -o AlloyExamples $(EXOBJS) $(LIBS)
+	$(CXX) $(LDLIBS) -o examples $(EXOBJS) $(LIBS)
 		
 clean :
 	clear
