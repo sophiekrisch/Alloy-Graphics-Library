@@ -1,7 +1,7 @@
 Alloy Graphics Library
 ========
 Alloy is yet another 2D/3D graphics library written in C++11. As mundane as that sounds, this API provides an extensive collection of GUI components and engineering reference implementations of common 2D/3D graphics algorithms for fast prototyping on windows and linux platforms.
-
+[![Build Status]https://travis-ci.org/bclucas/Alloy-Graphics-Library.svg?branch=master)](https://travis-ci.org/bclucas/Alloy-Graphics-Library)
 ## Contents
 - Anti-aliased vector graphics drawing (NanoVG).
 - Truetype fonts (stb_truetype).
