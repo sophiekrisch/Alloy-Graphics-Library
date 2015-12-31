@@ -21,13 +21,7 @@ endif()
 string(TOUPPER "${CMAKE_BUILD_TYPE}" U_CMAKE_BUILD_TYPE)
 
 set(MULTITHREADED_BUILD 8 CACHE STRING "How many threads are used to build the project")
-if(MULTITHREADED_BUILD)
-    if(${CMAKE_GENERATOR} MATCHES "Unix Makefiles")
-      set(CMAKE_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM} -j${MULTITHREADED_BUILD}")
-    elseif(MSVC)
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-    endif()
-endif()
+
 
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL " " FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL " " FORCE)
@@ -35,6 +29,7 @@ set(GLFW_BUILD_DOCS OFF CACHE BOOL " " FORCE)
 set(GLFW_BUILD_INSTALL OFF CACHE BOOL " " FORCE)
 set(GLFW_INSTALL OFF CACHE BOOL " " FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL " " FORCE)
+
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw" "ext_build/glfw")
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   # Quench annoying deprecation warnings when compiling GLFW on OSX
@@ -52,7 +47,7 @@ if (MSVC)
   add_definitions(/D "_UNICODE")
 
   # Parallel build on MSVC (all targets)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Oi /Gy /Ob2 /W3 /openmp")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /Oi /Gy /Ob2 /W3 /openmp")
 endif()
 
 # Compile with compiler warnings turned on
@@ -97,7 +92,6 @@ file(GLOB lib_includes include/core/*.h include/core/cereal/*.h include/core/lib
 file(GLOB lib_files src/core/*.cpp src/core/*.c)
 file(GLOB ex_files src/example/*.cpp)
 file(GLOB ex_includes include/example/*.h)
-
 add_library(alloy STATIC ${lib_includes} ${lib_files} ${LIBALLOY_EXTRA_SOURCE})
 target_link_libraries(glfw)
 
