@@ -2005,7 +2005,7 @@ void ModifiableLabel::draw(AlloyContext* context) {
 			nvgBeginPath(nvg);
 			nvgMoveTo(nvg, cursorOffset, textY + h / 2 - lineh / 2 + PADDING);
 			nvgLineTo(nvg, cursorOffset, textY + h / 2 + lineh / 2 - PADDING);
-			nvgStrokeWidth(nvg, lineWidth);
+			nvgStrokeWidth(nvg,1.0f);
 			nvgLineCap(nvg, NVG_ROUND);
 			nvgStrokeColor(nvg, context->theme.DARKEST);
 			nvgStroke(nvg);
@@ -2248,7 +2248,7 @@ void ModifiableNumber::draw(AlloyContext* context) {
 			nvgBeginPath(nvg);
 			nvgMoveTo(nvg, cursorOffset, textY + h / 2 - lineh / 2 + PADDING);
 			nvgLineTo(nvg, cursorOffset, textY + h / 2 + lineh / 2 - PADDING);
-			nvgStrokeWidth(nvg, lineWidth);
+			nvgStrokeWidth(nvg, 1.0f);
 			nvgLineCap(nvg, NVG_ROUND);
 			nvgStrokeColor(nvg, context->theme.DARKEST);
 			nvgStroke(nvg);
