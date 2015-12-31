@@ -1,0 +1,25 @@
+language: cpp
+sudo: false
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - deadsnakes
+      - kalakris-cmake
+    packages:
+      - g++-4.8
+      - gcc-4.8
+      - libglu1-mesa-dev
+      - libxxf86vm-dev 
+      - cmake
+matrix:
+  include:
+    - os: linux
+      compiler: gcc-4.8
+      script:
+        -DCMAKE_CXX_COMPILER=g++-4.8 -DCMAKE_C_COMPILER=gcc-4.8
+        - make -j 2
+    - os: osx
+      compiler: clang
+      script:
+        - make -j 2
