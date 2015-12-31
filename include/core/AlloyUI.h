@@ -488,8 +488,8 @@ protected:
 	std::chrono::high_resolution_clock::time_point lastTime;
 	void clear();
 	void erase();
-	void handleCursorInput(AlloyContext* context, const InputEvent& e);
-	void handleMouseInput(AlloyContext* context, const InputEvent& e);
+	bool handleCursorInput(AlloyContext* context, const InputEvent& e);
+	bool handleMouseInput(AlloyContext* context, const InputEvent& e);
 	void handleKeyInput(AlloyContext* context, const InputEvent& e);
 	void handleCharacterInput(AlloyContext* context, const InputEvent& e);
 	void moveCursorTo(int index, bool isShiftHeld = false);
@@ -540,8 +540,8 @@ protected:
 	std::chrono::high_resolution_clock::time_point lastTime;
 	void clear();
 	void erase();
-	void handleCursorInput(AlloyContext* context, const InputEvent& e);
-	void handleMouseInput(AlloyContext* context, const InputEvent& e);
+	bool handleCursorInput(AlloyContext* context, const InputEvent& e);
+	bool handleMouseInput(AlloyContext* context, const InputEvent& e);
 	void handleKeyInput(AlloyContext* context, const InputEvent& e);
 	void handleCharacterInput(AlloyContext* context, const InputEvent& e);
 	void moveCursorTo(int index, bool isShiftHeld = false);

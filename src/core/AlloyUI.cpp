@@ -1703,7 +1703,7 @@ void TextField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 	}
 }
 
-void TextField::handleMouseInput(AlloyContext* context, const InputEvent& e) {
+bool TextField::handleMouseInput(AlloyContext* context, const InputEvent& e) {
 	FontPtr fontFace = context->getFont(FontType::Bold);
 	if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
 		if (e.isDown()) {
@@ -1717,14 +1717,18 @@ void TextField::handleMouseInput(AlloyContext* context, const InputEvent& e) {
 		} else {
 			dragging = false;
 		}
+		return true;
 	}
+	return false;
 }
-void TextField::handleCursorInput(AlloyContext* context, const InputEvent& e) {
+bool TextField::handleCursorInput(AlloyContext* context, const InputEvent& e) {
 	FontPtr fontFace = context->getFont(FontType::Bold);
 	if (dragging) {
 		int shift = (int) (e.cursor.x - textOffsetX);
 		dragCursorTo(fontFace->getCursorPosition(value, th, shift));
+		return true;
 	}
+	return false;
 }
 bool TextField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	if (isVisible() && modifiable) {
@@ -1732,7 +1736,7 @@ bool TextField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			return false;
 		switch (e.type) {
 		case InputType::MouseButton:
-			handleMouseInput(context, e);
+			if (handleMouseInput(context, e))return true;
 			break;
 		case InputType::Character:
 			handleCharacterInput(context, e);
@@ -1741,7 +1745,7 @@ bool TextField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			handleKeyInput(context, e);
 			break;
 		case InputType::Cursor:
-			handleCursorInput(context, e);
+			if (handleCursorInput(context, e))return true;
 			break;
 		case InputType::Unspecified:
 			break;
@@ -2597,7 +2601,7 @@ void NumberField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 	}
 }
 
-void NumberField::handleMouseInput(AlloyContext* context, const InputEvent& e) {
+bool NumberField::handleMouseInput(AlloyContext* context, const InputEvent& e) {
 	FontPtr fontFace = context->getFont(FontType::Bold);
 	if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
 		if (e.isDown()) {
@@ -2611,15 +2615,19 @@ void NumberField::handleMouseInput(AlloyContext* context, const InputEvent& e) {
 		} else {
 			dragging = false;
 		}
+		return true;
 	}
+	return false;
 }
-void NumberField::handleCursorInput(AlloyContext* context,
+bool NumberField::handleCursorInput(AlloyContext* context,
 		const InputEvent& e) {
 	FontPtr fontFace = context->getFont(FontType::Bold);
 	if (dragging) {
 		int shift = (int) (e.cursor.x - textOffsetX);
 		dragCursorTo(fontFace->getCursorPosition(value, th, shift));
+		return true;
 	}
+	return false;
 }
 bool NumberField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	if (isVisible()&&modifiable) {
@@ -2627,7 +2635,7 @@ bool NumberField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			return false;
 		switch (e.type) {
 		case InputType::MouseButton:
-			handleMouseInput(context, e);
+			if (handleMouseInput(context, e))return true;
 			break;
 		case InputType::Character:
 			handleCharacterInput(context, e);
@@ -2636,7 +2644,7 @@ bool NumberField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			handleKeyInput(context, e);
 			break;
 		case InputType::Cursor:
-			handleCursorInput(context, e);
+			if (handleCursorInput(context, e))return true;
 			break;
 		case InputType::Unspecified:
 			break;
@@ -2862,7 +2870,7 @@ bool FileField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			return false;
 		switch (e.type) {
 		case InputType::MouseButton:
-			handleMouseInput(context, e);
+			if (handleMouseInput(context, e))return true;
 			break;
 		case InputType::Character:
 			handleCharacterInput(context, e);
@@ -2901,7 +2909,7 @@ bool FileField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			}
 			break;
 		case InputType::Cursor:
-			handleCursorInput(context, e);
+			if (handleCursorInput(context, e))return true;
 			break;
 		case InputType::Unspecified:
 			break;
