@@ -20,6 +20,15 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 string(TOUPPER "${CMAKE_BUILD_TYPE}" U_CMAKE_BUILD_TYPE)
 
+set(MULTITHREADED_BUILD 8 CACHE STRING "How many threads are used to build the project")
+if(MULTITHREADED_BUILD)
+    if(${CMAKE_GENERATOR} MATCHES "Unix Makefiles")
+      set(CMAKE_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM} -j${MULTITHREADED_BUILD}")
+    elseif(MSVC)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+    endif()
+endif()
+
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL " " FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL " " FORCE)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL " " FORCE)
@@ -43,17 +52,20 @@ if (MSVC)
   add_definitions(/D "_UNICODE")
 
   # Parallel build on MSVC (all targets)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /Oi /Gy /Ob2 /W3 /openmp")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Oi /Gy /Ob2 /W3 /openmp")
 endif()
 
 # Compile with compiler warnings turned on
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -DGL_GLEXT_PROTOTYPES=1 -O3 -Wall -c -fmessage-length=0")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -DGL_GLEXT_PROTOTYPES=1 -O3 -Wall -fmessage-length=0 -MMD -MP -fopenmp")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DGL_GLEXT_PROTOTYPES=1 -O3 -Wall -fmessage-length=0 -MMD -MP -fopenmp")
+
 endif()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 endif()
+
 
 if(WIN32)
   # Build and include GLEW on Windows
@@ -74,7 +86,7 @@ elseif (APPLE)
   list(APPEND ALLOY_EXTRA_LIBS ${cocoa_library} ${opengl_library} ${corevideo_library} ${iokit_library})
   list(APPEND LIBALLOY_EXTRA_SOURCE src/darwin.mm)
 elseif(CMAKE_SYSTEM MATCHES "Linux")
-  list(APPEND ALLOY_EXTRA_LIBS  gomp GL Xext GLU GLEW Xi Xrandr X11 Xxf86vm Xinerama Xcursor Xdamage pthread m dl)
+  list(APPEND ALLOY_EXTRA_LIBS gomp GL Xext GLU GLEW Xi Xrandr X11 Xxf86vm Xinerama Xcursor Xdamage pthread m dl stdc++)
 endif()
 
 include_directories(include/core include/examples ext/glfw/include ext/glew/include ${CMAKE_CURRENT_BINARY_DIR})
@@ -87,7 +99,6 @@ file(GLOB ex_files src/example/*.cpp)
 file(GLOB ex_includes include/example/*.h)
 
 add_library(alloy STATIC ${lib_includes} ${lib_files} ${LIBALLOY_EXTRA_SOURCE})
-include_directories()
 target_link_libraries(glfw)
 
 if(ALLOY_BUILD_EXAMPLE)
