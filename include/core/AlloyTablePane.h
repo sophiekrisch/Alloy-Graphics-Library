@@ -177,7 +177,6 @@ namespace aly {
 		std::shared_ptr<TimerTask> downTimer, upTimer;
 		bool scrollingDown;
 		bool scrollingUp;
-		float entryHeight;
 		bool dirty;
 		const int columns;
 		std::vector<std::shared_ptr<TableRow>> rows;
@@ -191,9 +190,11 @@ namespace aly {
 			lastSelected.clear();
 		}
 		CompositePtr contentRegion;
+
+		float entryHeight;
+		std::vector<TextIconButtonPtr> columnHeaders;
 		std::vector<AUnit1D> columnWidths;
 		std::vector<pixel> columnWidthPixels;
-		std::vector<TextIconButtonPtr> columnHeaders;
 		std::vector<int> sortDirections;
 		void sort(int c);
 	public:

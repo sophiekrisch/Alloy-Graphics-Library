@@ -2926,7 +2926,6 @@ void FileField::draw(AlloyContext* context) {
 	std::vector<NVGglyphPosition> positions(value.size());
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
-	bool hover = context->isMouseOver(this);
 	float x = bounds.position.x;
 	float y = bounds.position.y;
 	float w = bounds.dimensions.x;

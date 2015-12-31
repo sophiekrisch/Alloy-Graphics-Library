@@ -33,7 +33,6 @@ namespace aly {
 	}
 
 	void TableRow::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,double pixelRatio, bool clamp) {
-		const int cols = tablePane->getColumns();
 		pixel offset = 0.0f;
 		if (selected) {
 			backgroundColor=MakeColor(AlloyApplicationContext()->theme.LINK);
@@ -279,7 +278,7 @@ namespace aly {
 	}
 	TablePane::TablePane(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims,int columns,float entryHeight) :
-		Composite(name, pos, dims),columns(columns),columnHeaders(columns), sortDirections(columns), columnWidths(columns,UnitPercent(1.0f/columns)),columnWidthPixels(columns,0.0f), entryHeight(entryHeight){
+		Composite(name, pos, dims),columns(columns), entryHeight(entryHeight),columnHeaders(columns), columnWidths(columns,UnitPercent(1.0f/columns)),columnWidthPixels(columns,0.0f), sortDirections(columns){
 		dirty = false;
 		enableMultiSelection = false;
 		scrollingDown = false;

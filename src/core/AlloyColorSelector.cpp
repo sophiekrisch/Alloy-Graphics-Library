@@ -552,8 +552,6 @@ namespace aly {
 		nvgRestore(nvg);
 	}
 	void ColorSelector::draw(AlloyContext* context) {
-		NVGcontext* nvg = context->nvgContext;
-		box2px bounds = getBounds();
 		bool hover = context->isMouseContainedIn(this);
 		if (colorWheel->isVisible()) {
 			*colorLabel->foregroundColor = colorWheel->getSelectedColor();

@@ -147,8 +147,6 @@ void CheckBox::setValue(bool value) {
 					MakeColor(AlloyApplicationContext()->theme.DARK);
 }
 void CheckBox::draw(AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
-	box2px bounds = getBounds();
 	bool hover = context->isMouseContainedIn(this);
 	if (hover) {
 	} else {
@@ -288,8 +286,6 @@ void ToggleBox::setValue(bool value) {
 	offLabel->setVisible(!this->toggledOn);
 }
 void ToggleBox::draw(AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
-	box2px bounds = getBounds();
 	bool hover = context->isMouseContainedIn(this);
 	if (toggleLabel.get()!=nullptr) {
 		if (hover) {
@@ -407,8 +403,6 @@ void TextButton::draw(AlloyContext* context) {
 	nvgFillColor(nvg, *textColor);
 	nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold));
 	nvgTextAlign(nvg, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
-	float tw = nvgTextBounds(nvg, 0, 0, name.c_str(), nullptr, nullptr);
-
 	pixel2 offset(0, 0);
 	if (truncate) {
 		pushScissor(nvg, getCursorBounds());
@@ -853,9 +847,7 @@ Selection::Selection(const std::string& label, const AUnit2D& position,
 }
 
 void Selection::draw(AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
 	bool hover = context->isMouseContainedIn(this);
-	box2px bounds = getBounds();
 	if (!hover && selectionBox->isVisible()
 			&& !context->isLeftMouseButtonDown()) {
 		hide(context);

@@ -172,6 +172,15 @@ public:
 	pixel getBoundsDimensionsY(bool includeOffset = true) const {
 		return getBounds(includeOffset).dimensions.y;
 	}
+	Origin getOrigin() const {
+		return origin;
+	}
+	AspectRule getAspectRule() const {
+		return aspectRule;
+	}
+	double getAspectRatio() const {
+		return aspectRatio;
+	}
 	virtual void setVisible(bool vis);
 	Region* parent = nullptr;
 	Region(
@@ -242,15 +251,7 @@ public:
 	Orientation getOrientation() const {
 		return orientation;
 	}
-	Origin getOrigin() const {
-		return origin;
-	}
-	AspectRule getAspectRule() const {
-		return aspectRule;
-	}
-	double getAspectRatio() const {
-		return aspectRatio;
-	}
+
 	bool isHorizontalScrollVisible() const {
 		if (horizontalScrollTrack.get() == nullptr) {
 			return false;
