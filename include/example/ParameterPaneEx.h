@@ -24,16 +24,16 @@
 #include "AlloyApplication.h"
 class ParameterPaneEx: public aly::Application {
 protected:
-	aly::Number param1;
-	aly::Number param2;
-	aly::Number param9;
-	int param3;
-	std::string param10;
-	aly::Color param4;
-	std::string param5;
-	bool param6;
-	bool param7;
-	std::vector<std::string> param8;
+	aly::Number paramFloat1;
+	aly::Number paramInt1;
+	aly::Number paramFloat2;
+	int paramSelect;
+	std::string paramString;
+	aly::Color paramColor;
+	std::string paramFile;
+	bool paramBool1;
+	bool paramBool2;
+	std::vector<std::string> paramMultiFile;
 public:
 	ParameterPaneEx();
 	bool init(aly::Composite& rootNode);

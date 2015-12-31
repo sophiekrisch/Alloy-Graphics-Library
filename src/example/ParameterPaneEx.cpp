@@ -25,35 +25,37 @@
 using namespace aly;
 ParameterPaneEx::ParameterPaneEx() :
 		Application(800, 600, "Parameter Pane Example") {
+	paramFloat1 = aly::Float(5.0f);
+	paramInt1 = aly::Integer(3);
+	paramFloat2 = aly::Float(0.5f);
+	paramSelect = 2;
+	paramColor = aly::Color(1.0f, 0.0f, 0.0f, 1.0f);
+	paramBool1 = false;
+	paramBool2 = false;
+	paramString = "Hello";
 }
 bool ParameterPaneEx::init(Composite& rootNode) {
-	param1 = aly::Float(5.0f);
-	param2 = aly::Integer(3);
-	param9 = aly::Float(0.5f);
-	param3 = 2;
-	param4 = aly::Color(1.0f, 0.0f, 0.0f, 1.0f);
-	param5 = getContext()->getFullPath("images/sfsunset.png");
-	param6 = false;
-	param7 = false;
-	param10 = "Hello";
-	param8.push_back(getContext()->getFullPath("images/sfsunset.png"));
-	param8.push_back(getContext()->getFullPath("images/sfmarket.png"));
+	paramFile = getContext()->getFullPath("images/sfsunset.png");
+	paramMultiFile.push_back(getContext()->getFullPath("images/sfsunset.png"));
+	paramMultiFile.push_back(getContext()->getFullPath("images/sfmarket.png"));
 	BorderCompositePtr borderComposite = BorderCompositePtr(new BorderComposite("Layout",CoordPX(0.0f,0.0f),CoordPercent(1.0f,1.0f),true));
 	CompositePtr centerPane = CompositePtr(new Composite("Center", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)));
 	ParameterPanePtr paramPane = ParameterPanePtr(new ParameterPane("Parameter Pane",CoordPX(0.0f,0.0f),CoordPercent(1.0f,1.0f),26.0f));
+
 	paramPane->addGroup("Group 1",true);
-	paramPane->addFileField("File", param5);
-	paramPane->addSelectionField("Selection", param3, std::vector<std::string>{"Cool", "Neat", "Awesome", "Boring"});
-	paramPane->addNumberField("Float", param1);
-	paramPane->addNumberField("Integer", param2);
-	paramPane->addTextField("String", param10);
+		paramPane->addFileField("File", paramFile);
+		paramPane->addSelectionField("Selection", paramSelect, std::vector<std::string>{"Cool", "Neat", "Awesome", "Boring"});
+		paramPane->addNumberField("Float", paramFloat1);
+		paramPane->addNumberField("Integer", paramInt1);
+		paramPane->addTextField("String", paramString);
 
 	paramPane->addGroup("Group 2",true);
-	paramPane->addMultiFileSelector("Multi-File", param8);
-	paramPane->addColorField("Color", param4);
-	paramPane->addNumberField("Tween", param9, Float(0.0f),Float(1.0f),7);
-	paramPane->addToggleBox("Toggle", param6);
-	paramPane->addCheckBox("Check", param7);
+		paramPane->addMultiFileSelector("Multi-File", paramMultiFile);
+		paramPane->addColorField("Color", paramColor);
+		paramPane->addNumberField("Tween", paramFloat2, Float(0.0f),Float(1.0f),7);
+		paramPane->addToggleBox("Toggle", paramBool1);
+		paramPane->addCheckBox("Check", paramBool2);
+
 	centerPane->backgroundColor = MakeColor(getContext()->theme.LIGHT);
 	borderComposite->setCenter(centerPane);
 	borderComposite->setEast(paramPane, UnitPX(300.0f));
