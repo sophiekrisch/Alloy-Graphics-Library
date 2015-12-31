@@ -2414,10 +2414,10 @@ MultiFileSelector::MultiFileSelector(const std::string& name, const AUnit2D& pos
 	bgRegion->backgroundColor= MakeColor(AlloyDefaultContext()->theme.DARK);
 	bgRegion->setRoundCorners(false);
 	bgRegion->setIgnoreCursorEvents(true);
-	openFileButton = FileButtonPtr(new FileButton("Open Multi-File", CoordPerPX(1.0f, 0.0f, -entryHeight+2.0f, 2.0f), CoordPX(entryHeight-4, entryHeight-4), FileDialogType::OpenMultiFile));
-	upButton = IconButtonPtr(new IconButton(0xf0d8, CoordPerPX(1.0f, 0.0f, -entryHeight + 2.0f, entryHeight + 2.0f), CoordPX(entryHeight - 4, entryHeight - 4)));
-	downButton = IconButtonPtr(new IconButton(0xf0d7, CoordPerPX(1.0f, 0.0f, -entryHeight + 2.0f, 2 * entryHeight + 2.0f), CoordPX(entryHeight - 4, entryHeight - 4)));
-	eraseButton = IconButtonPtr(new IconButton(0xf00d, CoordPerPX(1.0f, 0.0f, -entryHeight + 2.0f, 3 * entryHeight + 2.0f), CoordPX(entryHeight - 4, entryHeight - 4)));
+	openFileButton = FileButtonPtr(new FileButton("Open Multi-File", CoordPerPX(1.0f, 0.0f, -entryHeight, 1.0f), CoordPX(entryHeight-2, entryHeight-2), FileDialogType::OpenMultiFile));
+	upButton = IconButtonPtr(new IconButton(0xf0d8, CoordPerPX(1.0f, 0.0f, -entryHeight , entryHeight + 1.0f), CoordPX(entryHeight - 2, entryHeight - 2)));
+	downButton = IconButtonPtr(new IconButton(0xf0d7, CoordPerPX(1.0f, 0.0f, -entryHeight , 2 * entryHeight + 1.0f), CoordPX(entryHeight - 2, entryHeight - 2)));
+	eraseButton = IconButtonPtr(new IconButton(0xf00d, CoordPerPX(1.0f, 0.0f, -entryHeight , 3 * entryHeight + 1.0f), CoordPX(entryHeight - 2, entryHeight - 2)));
 	valueRegion->setRoundCorners(true);
 	valueRegion->borderWidth = UnitPX(0.0f);
 	valueRegion->backgroundColor = MakeColor(0, 0, 0, 0);
