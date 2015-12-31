@@ -36,11 +36,10 @@ namespace aly {
 				}
 				groupQueue.clear();
 				CompositePtr eregion=expandBar->add(lastRegion, estimatedHeight-SPACING, lastExpanded);
-				eregion->setRoundCorners(false);
 				lastRegion->setOrientation(Orientation::Vertical, pixel2(0.0f, SPACING), pixel2(0.0f));
 				lastRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.DARKEST);
-				lastRegion->borderColor= MakeColor(AlloyDefaultContext()->theme.DARK);
-				lastRegion->setRoundCorners(false);
+				lastRegion->borderColor= MakeColor(0,0,0,0);
+				lastRegion->setRoundCorners(true);
 				estimatedHeight = 0;
 			}
 			else {
@@ -64,23 +63,24 @@ namespace aly {
 			}
 			groupQueue.clear();
 			CompositePtr eregion = expandBar->add(lastRegion, estimatedHeight - SPACING,lastExpanded);
-			eregion->setRoundCorners(false);
+			
 			lastRegion->setOrientation(Orientation::Vertical, pixel2(0.0f, SPACING), pixel2(0.0f));
 			lastRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.DARKEST);
-			lastRegion->borderColor = MakeColor(AlloyDefaultContext()->theme.DARK);
-			lastRegion->setRoundCorners(false);
+			lastRegion->borderColor = MakeColor(0, 0, 0, 0);
+			lastRegion->setRoundCorners(true);
 			estimatedHeight = 0;
 		}
 		lastRegion = CompositePtr(new Composite(name, CoordPX(0.0f,0.0f),CoordPercent(1.0f,1.0f)));
 		lastExpanded = expanded;
 		if (expandBar.get() == nullptr) {
 			expandBar = ExpandBarPtr(new ExpandBar("Parameters", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)));
+			expandBar->backgroundColor = MakeColor(0, 0, 0, 0);
 			Composite::add(expandBar);
 		}
 		return lastRegion;
 	}
 	ParameterPane::ParameterPane(const std::string& name, const AUnit2D& pos, const AUnit2D& dim, float entryHeight):Composite(name,pos,dim),entryHeight(entryHeight) {
-		backgroundColor = MakeColor(AlloyDefaultContext()->theme.DARKER);
+		backgroundColor = MakeColor(AlloyDefaultContext()->theme.DARKEST);
 		entryBackgroundColor= MakeColor(AlloyDefaultContext()->theme.DARK);
 		entryBorderColor= MakeColor(AlloyDefaultContext()->theme.LIGHT);
 		entryTextColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);

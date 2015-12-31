@@ -39,7 +39,6 @@ bool ParameterPaneEx::init(Composite& rootNode) {
 	BorderCompositePtr borderComposite = BorderCompositePtr(new BorderComposite("Layout",CoordPX(0.0f,0.0f),CoordPercent(1.0f,1.0f),true));
 	CompositePtr centerPane = CompositePtr(new Composite("Center", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)));
 	ParameterPanePtr paramPane = ParameterPanePtr(new ParameterPane("Parameter Pane",CoordPX(0.0f,0.0f),CoordPercent(1.0f,1.0f),26.0f));
-
 	paramPane->addGroup("Group 1",true);
 	paramPane->addFileField("File", param5);
 	paramPane->addSelectionField("Selection", param3, std::vector<std::string>{"Cool", "Neat", "Awesome", "Boring"});
