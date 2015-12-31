@@ -325,14 +325,14 @@ namespace aly {
 			nvgBeginPath(nvg);
 			nvgRect(nvg, dragBox.position.x, dragBox.position.y,
 				dragBox.dimensions.x, dragBox.dimensions.y);
-			nvgFillColor(nvg, context->theme.DARK.toSemiTransparent(0.5f));
+			nvgFillColor(nvg, context->theme.LIGHT.toSemiTransparent(0.5f));
 			nvgFill(nvg);
 
 			nvgBeginPath(nvg);
 			nvgRect(nvg, dragBox.position.x, dragBox.position.y,
 				dragBox.dimensions.x, dragBox.dimensions.y);
 			nvgStrokeWidth(nvg, 2.0f);
-			nvgStrokeColor(nvg, context->theme.DARK);
+			nvgStrokeColor(nvg, context->theme.LIGHT);
 			nvgStroke(nvg);
 		}
 	}
