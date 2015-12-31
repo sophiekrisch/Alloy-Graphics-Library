@@ -99,6 +99,61 @@ namespace aly {
 		compRegion->add(valueRegion);
 		groupQueue.push_back(compRegion);
 	}
+	ModifiableNumberPtr ParameterPane::addNumberField(const std::string& label, Number& value, const Number& minValue, const Number& maxValue, float aspect){
+		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+		const float numAspect = 3.0f;
+		if (aspect > 0) {
+			aspect = std::max(numAspect, aspect);
+		}
+		ModifiableNumberPtr valueRegion = ModifiableNumberPtr(new ModifiableNumber(label, CoordPerPX(1.0f, 0.0f, -numAspect*entryHeight, 0.0f), CoordPX(numAspect*entryHeight, entryHeight), value.type()));
+		HorizontalSliderPtr tweenRegion = HorizontalSliderPtr(new HorizontalSlider("Tween", CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, 0.0f), CoordPX((aspect-numAspect)*entryHeight, entryHeight), false, minValue, maxValue, value));
+		valueRegion->setAlignment(HorizontalAlignment::Center, VerticalAlignment::Middle);
+		valueRegion->fontSize = UnitPX(entryHeight-6.0f);
+		tweenRegion->backgroundColor = MakeColor(0, 0, 0, 0);
+		if (aspect <= 0) {
+			pixel2 labelBounds = labelRegion->getTextDimensions(AlloyDefaultContext().get());
+			labelBounds.x += 10;
+			tweenRegion->position = CoordPX(labelBounds.x, 0.0f);
+			tweenRegion->dimensions = CoordPerPX(1.0f, 0.0f, -labelBounds.x-numAspect*entryHeight, entryHeight);
+		}
+		else {
+			labelRegion->position = CoordPX(0.0f, 0.0f);
+			labelRegion->dimensions = CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, entryHeight);
+		}
+		valueRegion->textColor = MakeColor(AlloyDefaultContext()->theme.DARKER);
+		valueRegion->setNumberValue(value);
+		std::shared_ptr<AnyInterface> ref = std::shared_ptr<AnyInterface>(new AnyValue<Number*>(&value));
+		values.push_back(ref);
+		valueRegion->onTextEntered = [=](NumberField* field) {
+			Number val = field->getValue();
+			if (val < minValue) {
+				val = minValue;
+				field->setNumberValue(val);
+			}
+			if (val > maxValue) {
+				val = maxValue;
+				field->setNumberValue(val);
+			}
+			tweenRegion->setValue(val.toDouble());
+			*(ref->getValue<Number*>()) = val;
+		};
+		tweenRegion->setOnChangeEvent([=](const aly::Number& value) {
+			valueRegion->setNumberValue(value);
+			*(ref->getValue<Number*>()) =value;
+		});
+		setCommonParameters(comp, labelRegion, valueRegion);
+
+		valueRegion->textColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
+		valueRegion->backgroundColor = MakeColor(0, 0, 0, 0);
+		tweenRegion->backgroundColor = MakeColor(0, 0, 0, 0);
+		tweenRegion->borderWidth = UnitPX(0.0f);
+		comp->add(tweenRegion);
+		estimatedHeight += entryHeight + SPACING;
+		return valueRegion;
+
+	}
+
 	NumberFieldPtr ParameterPane::addNumberField(const std::string& label, Number& value,float aspect) {
 		CompositePtr comp = CompositePtr(new Composite(label+"_param",CoordPX(0,0),CoordPerPX(1.0f,0.0f,0.0f,entryHeight)));
 		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
@@ -127,6 +182,34 @@ namespace aly {
 		estimatedHeight += entryHeight + SPACING;
 		return valueRegion;
 	}
+	TextFieldPtr ParameterPane::addTextField(const std::string& label,std::string& value, float aspect) {
+		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+		TextFieldPtr valueRegion = TextFieldPtr(new TextField(label, CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, 0.0f), CoordPX(aspect*entryHeight, entryHeight)));
+		if (aspect <= 0) {
+			pixel2 labelBounds = labelRegion->getTextDimensions(AlloyDefaultContext().get());
+			labelBounds.x += 10;
+			valueRegion->position = CoordPX(labelBounds.x, 0.0f);
+			valueRegion->dimensions = CoordPerPX(1.0f, 0.0f, -labelBounds.x, entryHeight);
+		}
+		else {
+			labelRegion->position = CoordPX(0.0f, 0.0f);
+			labelRegion->dimensions = CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, entryHeight);
+		}
+		valueRegion->textColor = MakeColor(AlloyDefaultContext()->theme.DARKER);
+		valueRegion->setValue(value);
+		std::shared_ptr<AnyInterface> ref = std::shared_ptr<AnyInterface>(new AnyValue<std::string*>(&value));
+		values.push_back(ref);
+		valueRegion->onTextEntered = [=](TextField* field) {
+			*(ref->getValue<std::string*>()) = field->getValue();
+		};
+		setCommonParameters(comp, labelRegion, valueRegion);
+		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
+		valueRegion->setRoundCorners(true);
+		estimatedHeight += entryHeight + SPACING;
+		return valueRegion;
+	}
+
 	ColorSelectorPtr ParameterPane::addColorField(const std::string& label, Color& value, float aspect) {
 		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
 		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));

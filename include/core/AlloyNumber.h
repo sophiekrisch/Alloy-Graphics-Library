@@ -400,6 +400,9 @@ template<class T> Number MakeNumber(const NumberType& numberType,T value) {
 inline bool operator < (const Number& a, const Number& b) {
 	return (a.toDouble() < b.toDouble());
 }
+inline bool operator > (const Number& a, const Number& b) {
+	return (a.toDouble() > b.toDouble());
+}
 inline bool operator == (const Number& a, const Number& b) {
 	return (a.toDouble() == b.toDouble());
 }

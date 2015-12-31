@@ -26,7 +26,9 @@ class ParameterPaneEx: public aly::Application {
 protected:
 	aly::Number param1;
 	aly::Number param2;
+	aly::Number param9;
 	int param3;
+	std::string param10;
 	aly::Color param4;
 	std::string param5;
 	bool param6;
