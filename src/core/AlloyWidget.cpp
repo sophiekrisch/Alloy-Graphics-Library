@@ -1188,15 +1188,15 @@ FileSelector::FileSelector(const std::string& name, const AUnit2D& pos,
 		if (onChange)onChange(file.front());
 	};
 	openIcon = std::shared_ptr<IconButton>(
-			new IconButton(0xf115, CoordPerPX(0.0f, 0.0f, 2.0f, 4.0f),
-					CoordPerPX(1.0f, 1.0f, 0.0f, -4.0f)));
+			new IconButton(0xf115, CoordPX(2.0f, 2.0f),
+					CoordPerPX(1.0f, 1.0f, -2.0f, -2.0f)));
 	openIcon->foregroundColor = MakeColor(COLOR_NONE);
 	openIcon->borderColor=MakeColor(AlloyApplicationContext()->theme.DARK);
 	openIcon->borderWidth=UnitPX(0.0f);
 	openIcon->backgroundColor = MakeColor(COLOR_NONE);
 	openIcon->iconColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	setCenter(fileLocation);
-	setEast(openIcon, UnitPX(32.0f));
+	setEast(openIcon, UnitPX(30.0f));
 	openIcon->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& event) {
 				if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
@@ -1771,6 +1771,7 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 					(type == FileDialogType::SaveFile) ? "Save" : "Open",
 					0xf115, CoordPerPX(1.0f, 0.0f, -10.0f, 5.0f),
 					CoordPX(100, 30)));
+	actionButton->setRoundCorners(true);
 	actionButton->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& event) {
 				if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
