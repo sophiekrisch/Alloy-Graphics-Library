@@ -30,7 +30,7 @@ clean :
 	clear
 	$(RM) $(OBJS) $(EXOBJS) $(DS)
 	$(RM) liballoy.a
-	$(RM) $(EXAMPLES) AlloyExamples
+	$(RM) $(EXAMPLES) examples
 	
 all : 
 	clear
