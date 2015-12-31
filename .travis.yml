@@ -16,7 +16,7 @@ matrix:
     - os: linux
       compiler: gcc-4.8
       script:
-        -DCMAKE_CXX_COMPILER=g++-4.8 -DCMAKE_C_COMPILER=gcc-4.8
+        -DCMAKE_CXX_COMPILER=g++-4.8 -DCMAKE_CC_COMPILER=gcc-4.8
         - make -j 2
     - os: osx
       compiler: clang
