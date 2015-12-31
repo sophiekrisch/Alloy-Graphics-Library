@@ -28,6 +28,7 @@ TweenEx::TweenEx() :
 bool TweenEx::init(Composite& rootNode) {
 	TextLabelPtr label = MakeTextLabel("Hello There!", CoordPercent(0.5f, 0.9f), CoordPX(100, 30), FontType::Normal, UnitPT(16.0f),RGBA(255, 255, 255, 255), HorizontalAlignment::Center,VerticalAlignment::Bottom);
 	label->setOrigin(Origin::MiddleCenter);
+	label->setTruncate(false);
 	std::shared_ptr<ImageGlyph> img = createImageGlyph(getFullPath("images/sfmarket.png"));
 	GlyphRegionPtr imgr = MakeGlyphRegion(img, CoordPercent(0.5f, 0.45f),CoordPX(100,300), AspectRule::FixedHeight, Color(32, 64, 128, 255),Color(128, 128, 128, 128), Color(200, 200, 200, 255), UnitPX(1.0f));
 	GlyphRegionPtr iconr = MakeGlyphRegion(createAwesomeGlyph(0xf1b3),CoordPX(20, 20), CoordPX(50, 50), Color(32, 64, 128, 255),Color(255, 255, 255, 255));
