@@ -700,7 +700,7 @@ void SliderHandle::draw(AlloyContext* context) {
 		nvgBeginPath(nvg);
 		nvgCircle(nvg, bounds.position.x + bounds.dimensions.x * 0.5f,
 				bounds.position.y + bounds.dimensions.y * 0.5f,
-				bounds.dimensions.y * 0.5f);
+				bounds.dimensions.y * 0.42f);
 		nvgFillColor(nvg, context->theme.LIGHT.toSemiTransparent(0.5f));
 		nvgFill(nvg);
 	}
