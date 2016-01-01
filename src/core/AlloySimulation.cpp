@@ -99,8 +99,6 @@ bool Simulation::start() {
 	}
 	return true;
 }
-Simulation::~Simulation() {
-	stop();
-}
+
 }
 

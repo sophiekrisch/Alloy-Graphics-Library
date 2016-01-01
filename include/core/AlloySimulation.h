@@ -99,7 +99,9 @@ public:
 	void reset();
 	bool start();
 	bool stop();
-	virtual ~Simulation();
+	inline virtual ~Simulation() {
+		stop();
+	}
 };
 }
 
