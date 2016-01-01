@@ -15,6 +15,10 @@ addons:
       - gcc-4.8
       - libglu1-mesa-dev
       - libxxf86vm-dev 
+      - libxrandr-dev
+      - libxcursor-dev
+      - libxinerama-dev
+      - libxdamage-dev
 matrix:
   include:
     - os: linux
