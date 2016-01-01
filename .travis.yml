@@ -7,6 +7,7 @@ addons:
     - add-apt-repository ppa:george-edison55/cmake-3.x
     - apt-get update
     - apt-get install cmake
+    - apt-get upgrade
   apt:
     sources:
       - ubuntu-toolchain-r-test
@@ -16,7 +17,6 @@ addons:
       - gcc-4.8
       - libglu1-mesa-dev
       - libxxf86vm-dev 
-      - cmake
 matrix:
   include:
     - os: linux
