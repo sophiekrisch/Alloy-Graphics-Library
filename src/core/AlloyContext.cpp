@@ -657,7 +657,7 @@ void AlloyContext::update(Composite& rootNode) {
 	if (deferredTasks.size() > 0) {
 		executeDeferredTasks();
 		cursorLocator.reset(viewSize);
-		rootNode.update(&cursorLocator);
+		rootNode.updateCursor(&cursorLocator);
 		dirtyCursorLocator = false;
 		mouseOverRegion = locate(cursorPosition);
 		dirtyCursor = false;
@@ -666,7 +666,7 @@ void AlloyContext::update(Composite& rootNode) {
 	if (updateElapsed > UPDATE_LOCATOR_INTERVAL_SEC) {
 		if (dirtyCursorLocator) {
 			cursorLocator.reset(viewSize);
-			rootNode.update(&cursorLocator);
+			rootNode.updateCursor(&cursorLocator);
 			dirtyCursorLocator = false;
 			mouseOverRegion = locate(cursorPosition);
 			dirtyCursor = false;

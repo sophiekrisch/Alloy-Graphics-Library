@@ -192,7 +192,7 @@ public:
 	virtual void pack(AlloyContext* context);
 	virtual void pack();
 	virtual void draw(AlloyContext* context);
-	virtual void update(CursorLocator* cursorLocator);
+	virtual void updateCursor(CursorLocator* cursorLocator);
 	virtual void drawDebug(AlloyContext* context);
 	bool isVisible() const;
 	virtual ~Region();
@@ -325,7 +325,7 @@ public:
 
 	virtual void draw(AlloyContext* context) override;
 	virtual void drawDebug(AlloyContext* context) override;
-	virtual void update(CursorLocator* cursorLocator) override;
+	virtual void updateCursor(CursorLocator* cursorLocator) override;
 	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 			double pixelRatio, bool clamp = false) override;
 
@@ -373,7 +373,7 @@ public:
 	virtual Region* locate(const pixel2& cursor) override;
 	virtual void draw(AlloyContext* context) override;
 	virtual void drawDebug(AlloyContext* context) override;
-	virtual void update(CursorLocator* cursorLocator) override;
+	virtual void updateCursor(CursorLocator* cursorLocator) override;
 	void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 			double pixelRatio, bool clamp = false) override;
 	void setNorth(const std::shared_ptr<Region>& region,
@@ -856,8 +856,8 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(
 	ss << "\tOrigin: " << region.getOrigin() << std::endl;
 	ss << "\tRelative Position: " << region.position << std::endl;
 	ss << "\tRelative Dimensions: " << region.dimensions << std::endl;
-	ss << "\tBounds: " << region.bounds << std::endl;
-	ss << "\tAspect Ratio: " << region.aspectRule << std::endl;
+	ss << "\tBounds: " << region.getBounds() << std::endl;
+	ss << "\tAspect Ratio: " << region.getAspectRule() << std::endl;
 	ss << "\tBackground Color: " << region.backgroundColor << std::endl;
 	if (region.parent != nullptr)
 		ss << "\tParent: " << region.parent->name << std::endl;
@@ -872,7 +872,7 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(
 	ss << "\tRelative Position: " << region.position << std::endl;
 	ss << "\tRelative Dimensions: " << region.dimensions << std::endl;
 	ss << "\tBounds: " << region.getBounds() << std::endl;
-	ss << "\tAspect Ratio: " << region.aspectRule << " (" << region.aspectRatio
+	ss << "\tAspect Ratio: " << region.getAspectRule() << " (" << region.getAspectRatio()
 			<< ")" << std::endl;
 	if (region.parent != nullptr)
 		ss << "\tParent: " << region.parent->name << std::endl;

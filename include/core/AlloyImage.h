@@ -198,9 +198,9 @@ public:
 		if (this == &rhs)
 			return *this;
 		this->resize(rhs.width, rhs.height);
-		this->x = x;
-		this->y = y;
-		this->id = id;
+		this->x = rhs.x;
+		this->y = rhs.y;
+		this->id = rhs.id;
 		this->set(rhs.data);
 		return *this;
 	}
