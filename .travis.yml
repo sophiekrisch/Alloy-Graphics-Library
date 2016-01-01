@@ -1,13 +1,12 @@
 language: cpp
 sudo: false
-env:
-  - DISTRO=ubuntu-precise
 addons:
+  before_install:
+    - sudo add-apt-repository ppa:smspillaz/cmake-2.8.12 -y
   apt:
     sources:
       - ubuntu-toolchain-r-test
       - deadsnakes
-      - ppa:smspillaz/cmake-2.8.12
     packages:
       - g++-4.8
       - gcc-4.8
