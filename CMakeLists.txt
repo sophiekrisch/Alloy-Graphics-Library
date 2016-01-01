@@ -95,7 +95,7 @@ file(GLOB lib_files src/core/*.cpp src/core/*.c)
 file(GLOB ex_files src/example/*.cpp)
 file(GLOB ex_includes include/example/*.h)
 add_library(alloy STATIC ${lib_includes} ${lib_files} ${LIBALLOY_EXTRA_SOURCE})
-target_link_libraries(glfw)
+target_link_libraries(glfw ${ALLOY_EXTRA_LIBS})
 
 if(ALLOY_BUILD_EXAMPLE)
   add_executable(examples ${ex_includes} ${ex_files})
