@@ -35,7 +35,6 @@ matrix:
         - brew update
         - brew install glew
         - brew tap homebrew/versions
-        - brew install glfw3
       compiler: clang
       script:
         - cmake -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
