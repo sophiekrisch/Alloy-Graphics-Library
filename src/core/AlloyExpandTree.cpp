@@ -98,7 +98,7 @@ namespace aly {
 		}
 	}
 	void ExpandTree::add(const std::shared_ptr<TreeItem>& item) {
-		root.add(item);
+		root.addItem(item);
 	}
 	const int TreeItem::PADDING = 2;
 
@@ -115,7 +115,7 @@ namespace aly {
 			}
 		}
 	}
-	void TreeItem::add(const std::shared_ptr<TreeItem>& item) {
+	void TreeItem::addItem(const std::shared_ptr<TreeItem>& item) {
 		children.push_back(item);
 
 	}

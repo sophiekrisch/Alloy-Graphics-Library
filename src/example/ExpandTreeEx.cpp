@@ -29,7 +29,7 @@ ExpandTreeEx::ExpandTreeEx() :
 void ExpandTreeEx::addLeaf(TreeItem* item, const FileDescription& fd) {
 	const float fontSize = 14;
 	if (!item->hasChildren()) {
-		item->add(
+		item->addItem(
 				LeafItemPtr(
 						new LeafItem(
 								[this,fontSize,fd](AlloyContext* context,const box2px& bounds) {
@@ -75,7 +75,7 @@ void ExpandTreeEx::addDirectory(const std::string& dir, aly::TreeItem* parent) {
 					addLeaf(current,fd);
 				};
 		}
-		parent->add(child);
+		parent->addItem(child);
 	}
 }
 bool ExpandTreeEx::init(Composite& rootNode) {

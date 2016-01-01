@@ -54,7 +54,7 @@ namespace aly {
 		}
 
 		void setExpanded(bool expand);
-		virtual void add(const std::shared_ptr<TreeItem>& item);
+		virtual void addItem(const std::shared_ptr<TreeItem>& item);
 		virtual TreeItem* locate(AlloyContext* context, const pixel2& pt);
 		TreeItem(const std::string& name = "", int iconCode = 0,
 			float fontSize = 24);
@@ -76,7 +76,7 @@ namespace aly {
 			void(AlloyContext* context, const box2px& bounds)>& onDraw,
 			const pixel2& dimensions);
 		virtual box2px getBounds() const;
-		virtual void add(const std::shared_ptr<TreeItem>& item) override {
+		virtual void addItem(const std::shared_ptr<TreeItem>& item) override {
 			throw std::runtime_error("Cannot add child to leaf node.");
 		}
 		virtual box2px update(AlloyContext* context,

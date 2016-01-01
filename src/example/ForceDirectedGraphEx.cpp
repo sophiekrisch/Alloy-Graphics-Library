@@ -194,7 +194,7 @@ bool ForceDirectedGraphEx::init(Composite& rootNode) {
 				f->setParameter(n,val.toFloat());
 			});
 		}
-		controlRegion->add(paramRegion, 30.0f + N * (40.0f + 5.0f) + 5.0f,
+		controlRegion->addRegion(paramRegion, 30.0f + N * (40.0f + 5.0f) + 5.0f,
 				firstTime);
 		firstTime = false;
 	}
