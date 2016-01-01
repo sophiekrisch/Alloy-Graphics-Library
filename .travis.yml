@@ -7,7 +7,7 @@ addons:
     sources:
       - ubuntu-toolchain-r-test
       - deadsnakes
-      - kalakris-cmake
+      - ppa:smspillaz/cmake-2.8.12
     packages:
       - g++-4.8
       - gcc-4.8
