@@ -170,7 +170,7 @@ namespace aly {
 		}
 		sortPanes();
 	}
-	void TabBar::add(const std::shared_ptr<TabPane>& tabPane) {
+	void TabBar::addPane(const std::shared_ptr<TabPane>& tabPane) {
 		if (panes.size() > 0) {
 			TabPanePtr bck = panes.back();
 			tabPane->bounds.position = pixel2(bck->bounds.position.x + bck->bounds.dimensions.x + TabBar::TAB_SPACING, 0.0f);

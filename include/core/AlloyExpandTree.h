@@ -103,7 +103,7 @@ namespace aly {
 		void update(AlloyContext* context);
 		ExpandTree(const std::string& name, const AUnit2D& pos,
 			const AUnit2D& dims);
-		void add(const std::shared_ptr<TreeItem>& item);
+		void addItem(const std::shared_ptr<TreeItem>& item);
 		void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 			double pixelRatio, bool clamp);
 		virtual void draw(AlloyContext* context) override;

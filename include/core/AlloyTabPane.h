@@ -70,7 +70,7 @@ namespace aly {
 		bool isSelected(TabPane* s) const {
 			return (s != nullptr&&s == selectedPane);
 		}
-		void add(const std::shared_ptr<TabPane>& tabPane);
+		void addPane(const std::shared_ptr<TabPane>& tabPane);
 		TabBar(const std::string& name, const AUnit2D& position,
 			const AUnit2D& dimensions);
 		virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)override;

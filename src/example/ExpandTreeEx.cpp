@@ -97,7 +97,7 @@ bool ExpandTreeEx::init(Composite& rootNode) {
 				addLeaf(current,fd);
 			};
 		}
-		tree->add(child);
+		tree->addItem(child);
 	}
 	rootNode.add(tree);
 	return true;

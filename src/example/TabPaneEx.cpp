@@ -33,7 +33,7 @@ bool TabPaneEx::init(Composite& rootNode) {
 	for (int k = 0;k < K;k++) {
 		CompositePtr tabPane = CompositePtr(new Composite(MakeString()<<"Tab "<<k, CoordPX(0, 0), CoordPercent(1.0f, 1.0f)));
 		tabPane->backgroundColor = MakeColor(HSVAtoColor(HSVA(k/(float)K, 0.7f, 1.0f, 1.0f)));
-		tabBar->add(MakeShared<TabPane>(tabPane));
+		tabBar->addPane(MakeShared<TabPane>(tabPane));
 	}
 	rootNode.backgroundColor=MakeColor(0,0,0);
 	rootNode.add(tabBar);
