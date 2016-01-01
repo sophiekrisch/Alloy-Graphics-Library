@@ -42,22 +42,9 @@ Alloy is yet another 2D/3D graphics library written in C++11. As mundane as that
 - Force directed graph
 - "One Euro" filter
 
-## Future Work
-- Active contour segmentation
-- Iso-surface
-- Image processing for anisotropic image diffusion, Mumford-Shah, Rudin-Osher-Fatemi, Chan-Esedolgu-Nikolova
-- Automatic UV generation (OpenNL)
-- 2D fluids (Stam's stable fluid simulator)
-- Progressive Meshes
-- Gradient Vector Flow
-- KAZE features
-- DAISY features
-- SLIC super pixels 
-- Spring Level Sets
-- 2D physics (box2D)
-
 ## Dependencies
 GLFW 3.1+ and GLEW. Source code for all other libraries is included in the repository and compiles on windows, linux, and mac.
+
 ## Building
 #### Ubuntu Linux:
  
@@ -98,6 +85,20 @@ make -j4
 
 ## License
 Alloy is <B>BSD licensed</B> and only uses libraries that also have a permissive license for commercial and academic use.
+
+## Future Work
+- Active contour segmentation
+- Iso-surface
+- Image processing for anisotropic image diffusion, Mumford-Shah, Rudin-Osher-Fatemi, Chan-Esedolgu-Nikolova
+- Automatic UV generation (OpenNL)
+- 2D fluids (Stam's stable fluid simulator)
+- Progressive Meshes
+- Gradient Vector Flow
+- KAZE features
+- DAISY features
+- SLIC super pixels 
+- Spring Level Sets
+- 2D physics (box2D)
 
 
 Absolute/Relative Positioning Example
