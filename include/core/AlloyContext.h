@@ -30,8 +30,10 @@
 #include <GL/glew.h>
 #else
 #include <GL/glew.h>
-#include <GL/glx.h>
-#include <GL/glxext.h>
+#if !defined(__APPLE__) || !defined(__MACH__)
+	#include <GL/glx.h>
+	#include <GL/glxext.h>
+#endif
 #endif
 #endif
 
