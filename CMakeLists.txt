@@ -52,9 +52,13 @@ endif()
 
 # Compile with compiler warnings turned on
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -DGL_GLEXT_PROTOTYPES=1 -O3 -Wall -fmessage-length=0 -MMD -MP -fopenmp")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DGL_GLEXT_PROTOTYPES=1 -O3 -Wall -fmessage-length=0 -MMD -MP -fopenmp")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -DGL_GLEXT_PROTOTYPES=1 -O3 -Wall -fmessage-length=0 -MMD -MP")
 
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DGL_GLEXT_PROTOTYPES=1 -O3 -Wall -fmessage-length=0 -MMD -MP")
+  if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+   set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+  endif()
 endif()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
