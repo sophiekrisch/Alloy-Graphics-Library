@@ -58,6 +58,43 @@ Alloy is yet another 2D/3D graphics library written in C++11. As mundane as that
 
 ## Dependencies
 GLFW 3.1+ and GLEW. Source code for all other libraries is included in the repository and compiles on windows, linux, and mac.
+## Building
+#### Ubuntu Linux:
+ 
+ ```bash
+ sudo apt-get install g++-4.8
+ sudo apt-get install gcc-4.8
+ sudo apt-get install libglu1-mesa-dev
+ sudo apt-get install libxxf86vm-dev 
+ sudo apt-get install libxrandr-dev
+ sudo apt-get install libxcursor-dev
+ sudo apt-get install libxinerama-dev
+ sudo apt-get install libxdamage-dev
+ sudo apt-get install libxi-dev
+ sudo apt-get install libglew-dev
+ sudo apt-get install libxi6
+ sudo apt-get install libglew1.10
+ sudo add-apt-repository -y ppa:george-edison55/cmake-3.x
+ sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+ sudo apt-get update
+ cmake -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=g++-4.8 -DCMAKE_C_COMPILER=gcc-4.8
+ make -j4
+ ```
+ 
+#### OS X:
+```bash
+brew update
+brew install glew
+brew tap homebrew/versions
+brew install --static glfw3
+cmake -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
+make -j4
+```
+
+#### Windows 10:
+ - Download [Visual Studio 2015 Community Edition](https://www.visualstudio.com/downloads/download-visual-studio-vs)
+ - Open solution file Alloy-Graphics-Library/vs2015/alloy
+ - Change build configuration to Release|x64 for best performance 
 
 ## License
 Alloy is <B>BSD licensed</B> and only uses libraries that also have a permissive license for commercial and academic use.
@@ -65,156 +102,156 @@ Alloy is <B>BSD licensed</B> and only uses libraries that also have a permissive
 
 Absolute/Relative Positioning Example
 -------------------------
-![UnitsEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0000.png)
+[![UnitsEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0000.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/UnitsEx.cpp)
 
 Composite Example
 -------------------------
-![CompisteEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0001.png)
+[![CompisteEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0001.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/CompositeEx.cpp)
 
 Events Example
 -------------------------
-![EventsEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0002.png)
+[![EventsEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0002.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/EventsEx.cpp)
 
 Drag and Drop Example
 -------------------------
-![DragEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0003.png)
+[![DragEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0003.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/DragEx.cpp)
 
 Tween Animation Example
 -------------------------
-![TweenEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0004.png)
+[![TweenEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0004.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/TweenEx.cpp)
 
 Image Example
 -------------------------
-![ImageEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0005.png)
+[![ImageEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0005.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/ImageEx.cpp)
 
 Controls Example
 -------------------------
-![ControlsEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0006.png)
+[![ControlsEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0006.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/ControlsEx.cpp)
 
 Dialog Example
 -------------------------
-![DialogEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0007.png)
+[![DialogEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0007.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/DialogEx.cpp)
 
 Expand Bar Example
 -------------------------
-![ExpandBarEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0008.png)
+[![ExpandBarEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0008.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/ExpandBarEx.cpp)
 
 Mesh with Matcap Shading Example
 -------------------------
-![MeshMatcapEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0009.png)
+[![MeshMatcapEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0009.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/MeshMatcapEx.cpp)
 
 Mesh Wireframe Example
 -------------------------
-![MeshWireframeEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0010.png)
+[![MeshWireframeEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0010.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/MeshWireframeEx.cpp)
 
 Mesh Subdivision Example
 -------------------------
-![MeshSubdivideEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0011.png)
+[![MeshSubdivideEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0011.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/MeshSubdivideEx.cpp)
 
 Mesh Texture Example
 -------------------------
-![MeshTextureEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0012.png)
+[![MeshTextureEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0012.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/MeshTextureEx.cpp)
 
 Mesh with Per Vertex Color Example
 -------------------------
-![MeshVertexColorEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0013.png)
+[![MeshVertexColorEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0013.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/MeshVertexColorEx.cpp)
 
 Particles Example
 -------------------------
-![MeshParticleEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0014.png)
+[![MeshParticleEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0014.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/MeshParticleEx.cpp)
 
 Mesh Depth / Normals / Distances Example
 -------------------------
-![MeshDepthEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0015.png)
+[![MeshDepthEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0015.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/MeshDepthEx.cpp)
 
 Mesh Phong Shading Example
 -------------------------
-![MeshPhongEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0016.png)
+[![MeshPhongEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0016.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/MeshPhongEx.cpp)
 
 Laplace Fill Example
 -------------------------
-![LaplaceFillEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0017.png)
+[![LaplaceFillEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0017.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/LaplaceFillEx.cpp)
 
 Poisson Blend Example
 -------------------------
-![PoissonBlendEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0018.png)
+[![PoissonBlendEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0018.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/PoissonBlendEx.cpp)
 
 Poisson Fill Example
 -------------------------
-![PoissonInpaintEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0019.png)
+[![PoissonInpaintEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0019.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/PoissonInpaintEx.cpp)
 
 Image Filter Example
 -------------------------
-![ImageProcessingEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0020.png)
+[![ImageProcessingEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0020.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/ImageProcessingEx.cpp)
 
 Object/Face Picker Example
 -------------------------
-![MeshPickerEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0021.png)
+[![MeshPickerEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0021.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/MeshPickerEx.cpp)
 
 Mesh Ray Intersection Example
 -------------------------
-![IntersectorEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0022.png)
+[![IntersectorEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0022.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/IntersectorEx.cpp)
 
 Mesh Smoothing Example
 -------------------------
-![MeshSmoothEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0023.png)
+[![MeshSmoothEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0023.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/MeshSmoothEx.cpp)
 
 Color Space Example
 -------------------------
-![ColorSpaceEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0024.png)
+[![ColorSpaceEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0024.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/ColorSpaceEx.cpp)
 
 Mesh Primitives Example
 -------------------------
-![MeshPrimitivesEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0025.png)
+[![MeshPrimitivesEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0025.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/MeshPrimitivesEx.cpp)
 
 Menu System Example
 -------------------------
-![MenuEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0026.png)
+[![MenuEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0026.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/MenuEx.cpp)
 
 Point Locator Example
 -------------------------
-![LocatorEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0027.png)
+[![LocatorEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0027.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/LocatorEx.cpp)
 
 Graph Example
 -------------------------
-![GraphEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0028.png)
+[![GraphPaneEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0028.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/GraphPaneEx.cpp)
 
 Window Pane Example
 -------------------------
-![WindowPaneEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0029.png)
+[![WindowPaneEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0029.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/WindowPaneEx.cpp)
 
 B-Spline Example
 -------------------------
-![SplineEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0030.png)
+[![SplineEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0030.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/SplineEx.cpp)
 
 Distance Field Example
 -------------------------
-![DistanceFieldEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0031.png)
+[![DistanceFieldEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0031.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/DistanceFieldEx.cpp)
 
 Expand Tree Example
 -------------------------
-![ExpandTreeEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0032.png)
+[![ExpandTreeEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0032.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/ExpandTreeEx.cpp)
 
 Tab Pane Example
 -------------------------
-![ForceDirectedGraphEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0036.png)
+[![TabPaneEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0036.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/TabPaneEx.cpp)
 
 Table Pane Example
 -------------------------
-![TablePaneEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0038.png)
+[![TablePaneEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0038.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/TablePaneEx.cpp)
 
 Parameter Pane Example
 -------------------------
-![ParameterPaneEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0037.png)
+[![ParameterPaneEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0037.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/ParameterPaneEx.cpp)
 
 One Euro Filter Example
 -------------------------
-![ForceDirectedGraphEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0035.png)
+[![OneEuroFilterEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0035.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/OneEuroFilterEx.cpp)
 
 DataFlow Example
 -------------------------
-![DataFlowEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0033.png)
+[![DataFlowEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0033.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/DataFlowEx.cpp)
 
 Force Directed Graph Example
 -------------------------
-![ForceDirectedGraphEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0034.png)
+[![ForceDirectedGraphEx](https://github.com/bclucas/blob/blob/master/screenshots/screenshot0034.png)](https://github.com/bclucas/Alloy-Graphics-Library/blob/master/src/example/ForceDirectedGraphEx.cpp)
