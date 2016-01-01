@@ -61,9 +61,7 @@ GLFW 3.1+ and GLEW. Source code for all other libraries is included in the repos
  sudo apt-get install libglew-dev
  sudo apt-get install libxi6
  sudo apt-get install libglew1.10
- sudo add-apt-repository -y ppa:george-edison55/cmake-3.x
- sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
- sudo apt-get update
+ sudo apt-get install cmake
  cmake -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=g++-4.8 -DCMAKE_C_COMPILER=gcc-4.8
  make -j4
  ```
