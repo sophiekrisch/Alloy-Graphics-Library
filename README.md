@@ -1,6 +1,6 @@
 Alloy Graphics Library
 ========
-Alloy is yet another 2D/3D graphics library written in C++11. As mundane as that sounds, this API provides an extensive collection of GUI components and engineering reference implementations of common 2D/3D graphics algorithms for fast prototyping on windows and linux platforms.
+Alloy is yet another 2D/3D graphics library written in C++11. As mundane as that sounds, this API provides an extensive collection of GUI components and engineering reference implementations of common 2D/3D graphics algorithms for fast prototyping on windows, linux, and mac platforms.
 
 [![Build Status](https://travis-ci.org/bclucas/Alloy-Graphics-Library.svg?branch=master)](https://travis-ci.org/bclucas/Alloy-Graphics-Library)
 [![Build status](https://ci.appveyor.com/api/projects/status/7kay7jjm6tpktme3/branch/master?svg=true)](https://ci.appveyor.com/project/bclucas/Alloy-Graphics-Library/branch/master)
@@ -57,7 +57,7 @@ Alloy is yet another 2D/3D graphics library written in C++11. As mundane as that
 - 2D physics (box2D)
 
 ## Dependencies
-GLFW 3.1+ and GLEW. Source code for all other libraries is included in the repository and compiles on windows and linux (unsure about mac, buy me a mac and I'll make sure it works ^_^).
+GLFW 3.1+ and GLEW. Source code for all other libraries is included in the repository and compiles on windows, linux, and mac.
 
 ## License
 Alloy is <B>BSD licensed</B> and only uses libraries that also have a permissive license for commercial and academic use.
