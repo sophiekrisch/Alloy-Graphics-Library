@@ -29,7 +29,7 @@ matrix:
         - sudo apt-get update
       script:
         - cmake -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=g++-4.8 -DCMAKE_C_COMPILER=gcc-4.8
-        - make -j 2
+        - make -j2
     - os: osx
       before_install:
         - brew update
@@ -39,4 +39,4 @@ matrix:
       compiler: clang
       script:
         - cmake -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
-        - make -j 2
+        - make -j2
