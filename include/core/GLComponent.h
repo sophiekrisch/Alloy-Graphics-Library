@@ -67,13 +67,13 @@ class GLComponentGroup: protected GLComponent {
 protected:
 	std::list<std::unique_ptr<GLComponent>> components;
 public:
-	virtual void update() {
+	virtual void update() override {
 		for (std::unique_ptr<GLComponent>& comp : components) {
 			comp->update();
 		}
 	}
-	virtual void draw() {
-		for (std::unique_ptr<GLComponent>& comp : components) {
+	virtual void draw() const override {
+		for (const std::unique_ptr<GLComponent>& comp : components) {
 			comp->draw();
 		}
 	}

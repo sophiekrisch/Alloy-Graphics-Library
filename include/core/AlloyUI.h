@@ -737,7 +737,7 @@ protected:
 			bool forceShow = false) override;
 	bool active;
 public:
-	void add(const std::shared_ptr<Menu>& menu);
+	void addMenu(const std::shared_ptr<Menu>& menu);
 	void hideMenus();
 	MenuBar(const std::string& name, const AUnit2D& position,
 			const AUnit2D& dimensions);

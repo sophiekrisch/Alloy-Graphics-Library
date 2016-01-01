@@ -4038,7 +4038,7 @@ MenuBar::MenuBar(const std::string& name, const AUnit2D& position,
 	//barRegion->cellPadding.x = 2;
 	this->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 }
-void MenuBar::add(const std::shared_ptr<Menu>& menu) {
+void MenuBar::addMenu(const std::shared_ptr<Menu>& menu) {
 	MenuHeaderPtr header = MenuHeaderPtr(
 			new MenuHeader(menu, CoordPerPX(0.0f, 1.0f, 0.0f, -30.0f),
 					CoordPX(100, 30)));

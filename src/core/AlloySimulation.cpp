@@ -22,6 +22,7 @@
 #include "AlloySimulation.h"
 #include <sstream>
 #include <iostream>
+#include <string>
 namespace aly {
 void ExecuteSimulation(Simulation* sim) {
 	try {
@@ -36,9 +37,7 @@ void ExecuteSimulation(Simulation* sim) {
 		std::cout << e.what() << std::endl;
 	}
 }
-SimulationListener::~SimulationListener() {
 
-}
 Simulation::Simulation(const std::string& name) :
 		running(false), paused(false), name(name), simulationTime(0), timeStep(
 				0), simulationDuration(0), computeTimeSeconds(0.0), simulationIteration(

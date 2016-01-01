@@ -31,7 +31,7 @@ class SimulationListener {
 public:
 	virtual void SimulationEvent(Simulation* simulation,
 			int mSimulationIteration, double time)=0;
-	virtual ~SimulationListener();
+	virtual ~SimulationListener(){}
 };
 class Simulation {
 protected:
