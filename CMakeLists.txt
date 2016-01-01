@@ -81,7 +81,7 @@ elseif (APPLE)
   list(APPEND ALLOY_EXTRA_LIBS ${cocoa_library} ${opengl_library} ${corevideo_library} ${iokit_library})
   list(APPEND LIBALLOY_EXTRA_SOURCE src/darwin.mm)
 elseif(CMAKE_SYSTEM MATCHES "Linux")
-  list(APPEND ALLOY_EXTRA_LIBS gomp GL Xext GLU Xi Xrandr X11 Xxf86vm Xinerama Xcursor Xdamage pthread m dl stdc++)
+  list(APPEND ALLOY_EXTRA_LIBS gomp GL Xext GLU GLEW Xi Xrandr X11 Xxf86vm Xinerama Xcursor Xdamage pthread m dl stdc++)
 endif()
 
 include_directories(include/core include/examples ext/glfw/include ext/glew/include ${CMAKE_CURRENT_BINARY_DIR})

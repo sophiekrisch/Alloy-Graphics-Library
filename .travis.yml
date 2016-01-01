@@ -20,7 +20,9 @@ addons:
       - libxinerama-dev
       - libxdamage-dev
       - libxi-dev
+      - libglew-dev
       - libxi6
+      - libglew1.10
 matrix:
   include:
     - os: linux
