@@ -4,7 +4,8 @@ addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
-      - cmake
+      - deadsnakes
+      - kalakris-cmake
     packages:
       - g++-4.8
       - gcc-4.8
