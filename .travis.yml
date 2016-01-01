@@ -1,8 +1,11 @@
 language: cpp
-sudo: false
+sudo: true
 addons:
   before_install:
-    - sudo add-apt-repository ppa:smspillaz/cmake-2.8.12 -y
+    - apt-get install software-properties-common
+    - add-apt-repository ppa:george-edison55/cmake-3.x
+    - apt-get update
+    - apt-get install cmake
   apt:
     sources:
       - ubuntu-toolchain-r-test
