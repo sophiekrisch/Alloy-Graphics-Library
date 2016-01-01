@@ -1,5 +1,7 @@
 language: cpp
 sudo: false
+env:
+  - DISTRO=ubuntu-precise
 addons:
   apt:
     sources:
