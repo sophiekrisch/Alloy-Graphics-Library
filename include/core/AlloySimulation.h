@@ -25,6 +25,7 @@
 #include <thread>
 #include <list>
 #include <vector>
+#include <string>
 namespace aly {
 class Simulation;
 class SimulationListener {
