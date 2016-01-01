@@ -31,7 +31,8 @@ matrix:
         - cmake -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=g++-4.8 -DCMAKE_C_COMPILER=gcc-4.8
         - make -j 2
     - os: osx
-      brew install glew
+      before_install:
+        - brew install glew
       compiler: clang
       script:
         - cmake -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
