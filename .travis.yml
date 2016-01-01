@@ -33,6 +33,7 @@ matrix:
     - os: osx
       before_install:
         - brew install glew
+        - brew install x11
       compiler: clang
       script:
         - cmake -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
