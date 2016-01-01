@@ -43,7 +43,7 @@ namespace aly {
 		std::list<std::shared_ptr<ExpandRegion>> expandRegions;
 		std::list<std::shared_ptr<Region>> contentRegions;
 	public:
-		CompositePtr add(const std::shared_ptr<Region>&, pixel expandHeight,
+		CompositePtr addRegion(const std::shared_ptr<Region>&, pixel expandHeight,
 			bool expanded);
 
 		ExpandBar(const std::string& name, const AUnit2D& pos, const AUnit2D& dims);

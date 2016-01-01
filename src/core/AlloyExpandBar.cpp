@@ -110,7 +110,7 @@ namespace aly {
 
 	}
 
-	CompositePtr ExpandBar::add(const std::shared_ptr<Region>& region,
+	CompositePtr ExpandBar::addRegion(const std::shared_ptr<Region>& region,
 		pixel expandHeight,
 		bool expanded) {
 		CompositePtr container = MakeComposite(
