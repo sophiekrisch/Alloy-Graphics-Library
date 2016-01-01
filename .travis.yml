@@ -19,6 +19,8 @@ addons:
       - libxcursor-dev
       - libxinerama-dev
       - libxdamage-dev
+      - libxi-dev
+      - libxi6
 matrix:
   include:
     - os: linux
