@@ -66,17 +66,17 @@ public:
 class GLComponentGroup: protected GLComponent {
 protected:
 	std::list<std::unique_ptr<GLComponent>> components;
-	virtual void draw() {
-		for (std::unique_ptr<GLComponent>& comp : components) {
-			comp->draw();
-		}
-	}
-	virtual void update() {
+public:
+	virtual void update() override {
 		for (std::unique_ptr<GLComponent>& comp : components) {
 			comp->update();
 		}
 	}
-public:
+	virtual void draw() const override {
+		for (const std::unique_ptr<GLComponent>& comp : components) {
+			comp->draw();
+		}
+	}
 	GLComponentGroup(bool onScreen = true,const std::shared_ptr<AlloyContext>& context =
 			AlloyDefaultContext()) :
 			GLComponent(onScreen,context) {

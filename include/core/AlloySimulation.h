@@ -25,13 +25,14 @@
 #include <thread>
 #include <list>
 #include <vector>
+#include <string>
 namespace aly {
 class Simulation;
 class SimulationListener {
 public:
 	virtual void SimulationEvent(Simulation* simulation,
 			int mSimulationIteration, double time)=0;
-	virtual ~SimulationListener();
+	virtual ~SimulationListener(){}
 };
 class Simulation {
 protected:
@@ -99,7 +100,9 @@ public:
 	void reset();
 	bool start();
 	bool stop();
-	virtual ~Simulation();
+	inline virtual ~Simulation() {
+		stop();
+	}
 };
 }
 

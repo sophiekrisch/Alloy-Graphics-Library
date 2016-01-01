@@ -1038,13 +1038,13 @@ BorderComposite::BorderComposite(const std::string& name, const AUnit2D& pos,
 		Application::addListener(this);
 	}
 }
-void BorderComposite::update(CursorLocator* cursorLocator) {
+void BorderComposite::updateCursor(CursorLocator* cursorLocator) {
 	if (!ignoreCursorEvents)
 		cursorLocator->add(this);
 	for (std::shared_ptr<Region>& region : children) {
 		if (region.get() == nullptr)
 			continue;
-		region->update(cursorLocator);
+		region->updateCursor(cursorLocator);
 	}
 }
 
@@ -1230,27 +1230,27 @@ bool Composite::onEventHandler(AlloyContext* context, const InputEvent& event) {
 	}
 	return Region::onEventHandler(context, event);
 }
-void Composite::update(CursorLocator* cursorLocator) {
+void Composite::updateCursor(CursorLocator* cursorLocator) {
 	if (!ignoreCursorEvents)
 		cursorLocator->add(this);
 	for (std::shared_ptr<Region>& region : children) {
-		region->update(cursorLocator);
+		region->updateCursor(cursorLocator);
 	}
 	if (verticalScrollTrack.get() != nullptr) {
-		verticalScrollTrack->update(cursorLocator);
+		verticalScrollTrack->updateCursor(cursorLocator);
 	}
 	if (verticalScrollHandle.get() != nullptr) {
-		verticalScrollHandle->update(cursorLocator);
+		verticalScrollHandle->updateCursor(cursorLocator);
 	}
 	if (horizontalScrollTrack.get() != nullptr) {
-		horizontalScrollTrack->update(cursorLocator);
+		horizontalScrollTrack->updateCursor(cursorLocator);
 	}
 	if (horizontalScrollHandle.get() != nullptr) {
-		horizontalScrollHandle->update(cursorLocator);
+		horizontalScrollHandle->updateCursor(cursorLocator);
 	}
 }
 
-void Region::update(CursorLocator* cursorLocator) {
+void Region::updateCursor(CursorLocator* cursorLocator) {
 	if (!ignoreCursorEvents)
 		cursorLocator->add(this);
 }
@@ -4038,7 +4038,7 @@ MenuBar::MenuBar(const std::string& name, const AUnit2D& position,
 	//barRegion->cellPadding.x = 2;
 	this->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 }
-void MenuBar::add(const std::shared_ptr<Menu>& menu) {
+void MenuBar::addMenu(const std::shared_ptr<Menu>& menu) {
 	MenuHeaderPtr header = MenuHeaderPtr(
 			new MenuHeader(menu, CoordPerPX(0.0f, 1.0f, 0.0f, -30.0f),
 					CoordPX(100, 30)));

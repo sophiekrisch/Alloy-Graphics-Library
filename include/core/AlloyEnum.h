@@ -181,6 +181,14 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(
 		return ss << "Normal";
 	case FontType::Bold:
 		return ss << "Bold";
+	case FontType::Code:
+		return ss << "Code";
+	case FontType::CodeItalic:
+		return ss << "Code Italic";
+	case FontType::CodeBold:
+		return ss << "Code Bold";
+	case FontType::CodeBoldItalic:
+		return ss << "Code Bold Italic";
 	case FontType::Italic:
 		return ss << "Italic";
 	case FontType::Icon:

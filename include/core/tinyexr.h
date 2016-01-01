@@ -26,9 +26,6 @@
  */
 #ifndef __TINYEXR_H__
 #define __TINYEXR_H__
-#ifndef _OPENMP
-#define _OPENMP
-#endif
 // 
 //   Do this:
 //    #define TINYEXR_IMPLEMENTATION

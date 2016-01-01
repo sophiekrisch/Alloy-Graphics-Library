@@ -107,11 +107,11 @@ bool MenuEx::init(Composite& rootNode) {
 	helpMenu->addItem("Where am I going?")->onSelect = [=]() {std::cout << "Help:Where am I going?" << std::endl;};
 	helpMenu->addItem("What day is it?")->onSelect = [=]() {std::cout << "Help:What day is it?" << std::endl;};
 
-	menuBar->add(fileMenu);
-	menuBar->add(editMenu);
-	menuBar->add(actionMenu);
-	menuBar->add(bigMenu);
-	menuBar->add(helpMenu);
+	menuBar->addMenu(fileMenu);
+	menuBar->addMenu(editMenu);
+	menuBar->addMenu(actionMenu);
+	menuBar->addMenu(bigMenu);
+	menuBar->addMenu(helpMenu);
 
 	CompositePtr north = MakeComposite("North Composite", CoordPX(0, 0), CoordPercent(1.0, 1.0), Color(128, 16, 32), COLOR_NONE, UnitPX(0));
 	north->add(menuBar);
