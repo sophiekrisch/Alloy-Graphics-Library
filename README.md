@@ -72,6 +72,7 @@ GLFW 3.1+ and GLEW. Source code for all other libraries is included in the repos
 ```bash
 brew update
 brew install glew
+brew install cmake
 brew tap homebrew/versions
 brew install --static glfw3
 cmake -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
