@@ -83,7 +83,7 @@ make -j4
  - Change build configuration to Release|x64 for best performance 
 
 ## License
-Alloy is <B>BSD licensed</B> and only uses libraries that also have a permissive license for commercial and academic use.
+Alloy is [BSD licensed](https://github.com/bclucas/Alloy-Graphics-Library/edit/master/LICENSE) and only uses libraries that also have a permissive license for commercial and academic use.
 
 ## Future Work
 - Active contour segmentation
