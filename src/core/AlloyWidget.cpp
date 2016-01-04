@@ -696,28 +696,85 @@ void SliderTrack::draw(AlloyContext* context) {
 void SliderHandle::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
-	if (context->isMouseOver(this) || context->isMouseDown(this)) {
-		nvgBeginPath(nvg);
-		nvgCircle(nvg, bounds.position.x + bounds.dimensions.x * 0.5f,
-				bounds.position.y + bounds.dimensions.y * 0.5f,
-				bounds.dimensions.y * 0.42f);
-		nvgFillColor(nvg, context->theme.LIGHT.toSemiTransparent(0.5f));
-		nvgFill(nvg);
-	}
-	nvgBeginPath(nvg);
-	nvgCircle(nvg, bounds.position.x + bounds.dimensions.x * 0.5f,
-			bounds.position.y + bounds.dimensions.y * 0.5f,
-			bounds.dimensions.y * 0.25f);
-	nvgFillColor(nvg, context->theme.LIGHTEST);
-	nvgFill(nvg);
 
-	nvgBeginPath(nvg);
+	const float w = bounds.dimensions.x;
+	const float h = bounds.dimensions.y;
+	
+	
+	const float cosx = cos(ALY_PI*60.0f / 180.0f);
+	const float cosy = sin(ALY_PI*60.0f / 180.0f);
+
+	float r = h*0.4f/cosy;
+	float x;
+	float y = bounds.position.y;
+
+	if (context->isMouseOver(this) || context->isMouseDown(this)) {
+		nvgFillColor(nvg, context->theme.LIGHT.toSemiTransparent(0.5f));
+		if (handleShape == SliderHandleShape::WHOLE) {
+			nvgBeginPath(nvg);
+			nvgCircle(nvg, bounds.position.x + bounds.dimensions.x * 0.5f,
+				bounds.position.y + bounds.dimensions.y * 0.5f,
+				bounds.dimensions.y * 0.4f);
+			nvgFill(nvg);
+		}
+		else if (handleShape == SliderHandleShape::HALF_LEFT) {
+			nvgBeginPath(nvg);
+			x = bounds.position.x + 0.15f*w;
+			nvgMoveTo(nvg, x + w - r, y + 0.5f*h);
+			nvgLineTo(nvg, x + w - r*cosx, y + 0.5f*h - r*cosy);
+			nvgLineTo(nvg, x + w, y + 0.5f*h - r*cosy);
+			nvgLineTo(nvg, x + w, y + 0.5f*h + r*cosy);
+			nvgLineTo(nvg, x + w - r*cosx, y + 0.5f*h + r*cosy);
+			nvgClosePath(nvg);
+			nvgFill(nvg);
+		}
+		else if (handleShape == SliderHandleShape::HALF_RIGHT) {
+			nvgBeginPath(nvg);
+			x = bounds.position.x - 0.15f*w;
+			nvgMoveTo(nvg, x + r, y + 0.5f*h);
+			nvgLineTo(nvg, x + r*cosx, y + 0.5f*h - r*cosy);
+			nvgLineTo(nvg, x, y + 0.5f*h - r*cosy);
+			nvgLineTo(nvg, x, y + 0.5f*h + r*cosy);
+			nvgLineTo(nvg, x + r*cosx, y + 0.5f*h + r*cosy);
+			nvgClosePath(nvg);
+			nvgFill(nvg);
+		}
+	}
 	nvgStrokeWidth(nvg, 2.0f);
 	nvgStrokeColor(nvg, context->theme.NEUTRAL.toSemiTransparent(0.5f));
-	nvgCircle(nvg, bounds.position.x + bounds.dimensions.x * 0.5f,
+	nvgFillColor(nvg, context->theme.LIGHTEST);
+
+	x = bounds.position.x;
+	r = h*0.25f/cosy;
+	if (handleShape == SliderHandleShape::WHOLE) {
+		nvgBeginPath(nvg);
+		nvgCircle(nvg, bounds.position.x + bounds.dimensions.x * 0.5f,
 			bounds.position.y + bounds.dimensions.y * 0.5f,
 			bounds.dimensions.y * 0.25f);
-	nvgStroke(nvg);
+		nvgFill(nvg);
+		nvgStroke(nvg);
+	} else if (handleShape == SliderHandleShape::HALF_LEFT) {
+		nvgBeginPath(nvg);
+		nvgMoveTo(nvg,x + w - r,y + 0.5f*h);
+		nvgLineTo(nvg,x + w - r*cosx,y + 0.5f*h - r*cosy);
+		nvgLineTo(nvg,x + w,y + 0.5f*h - r*cosy);
+		nvgLineTo(nvg,x + w,y + 0.5f*h + r*cosy);
+		nvgLineTo(nvg,x + w - r*cosx, y + 0.5f*h + r*cosy);
+		nvgClosePath(nvg);
+		nvgFill(nvg);
+		nvgStroke(nvg);
+	}
+	else if (handleShape == SliderHandleShape::HALF_RIGHT) {
+		nvgBeginPath(nvg);
+		nvgMoveTo(nvg, x + r, y + 0.5f*h);
+		nvgLineTo(nvg, x + r*cosx, y + 0.5f*h - r*cosy);
+		nvgLineTo(nvg, x, y + 0.5f*h - r*cosy);
+		nvgLineTo(nvg, x, y + 0.5f*h + r*cosy);
+		nvgLineTo(nvg, x + r*cosx, y + 0.5f*h + r*cosy);
+		nvgClosePath(nvg);
+		nvgFill(nvg);
+		nvgStroke(nvg);
+	}
 
 }
 bool Selection::handleMouseClick(AlloyContext* context,
@@ -2513,6 +2570,243 @@ MultiFileSelector::MultiFileSelector(const std::string& name, const AUnit2D& pos
 	openFileButton->onOpen = [this](const std::vector<std::string>& newFiles) {
 		addFiles(newFiles);
 	};
+}
+
+RangeSlider::RangeSlider(const std::string& name, const AUnit2D& pos, const AUnit2D& dims, const Number& min, const Number& max,
+	const Number& lowerValue, const Number& upperValue,bool showLabel) :
+	Composite(name,pos,dims), minValue(min), maxValue(max), lowerValue(lowerValue), upperValue(upperValue),sliderPosition(0.0) {
+	labelFormatter = [](const Number& value) {return value.toString();};
+	this->position = position;
+	this->dimensions = dimensions;
+	float handleSize = 30.0f;
+	float trackPadding = 10.0f;
+	this->aspectRatio = 4.0f;
+
+	sliderPosition.x = lowerValue.toDouble();
+	sliderPosition.y = upperValue.toDouble();
+
+	textColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
+	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
+	borderWidth = UnitPX(1.0f);
+	setRoundCorners(true);
+
+	lowerSliderHandle = std::shared_ptr<SliderHandle>(new SliderHandle("Lower Handle",SliderHandleShape::HALF_LEFT));
+	lowerSliderHandle->position = CoordPercent(0.0, 0.0);
+	lowerSliderHandle->dimensions = CoordPX(handleSize*0.5f, handleSize);
+	lowerSliderHandle->backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
+	lowerSliderHandle->setDragEnabled(true);
+
+	upperSliderHandle = std::shared_ptr<SliderHandle>(new SliderHandle("Upper Handle", SliderHandleShape::HALF_RIGHT));
+	upperSliderHandle->position = CoordPercent(0.0, 0.0);
+	upperSliderHandle->dimensions = CoordPX(handleSize*0.5f, handleSize);
+	upperSliderHandle->backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
+	upperSliderHandle->setDragEnabled(true);
+
+	sliderTrack = std::shared_ptr<SliderTrack>(new SliderTrack("Scroll Track", Orientation::Horizontal,AlloyApplicationContext()->theme.LIGHTEST,AlloyApplicationContext()->theme.LIGHTEST));
+	sliderTrack->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	sliderTrack->add(lowerSliderHandle);
+	sliderTrack->add(upperSliderHandle);
+	sliderTrack->onMouseDown =[this](AlloyContext* context, const InputEvent& e) {return this->onMouseDown(context, sliderTrack.get(), e);};	
+	lowerSliderHandle->onMouseDown =[this](AlloyContext* context, const InputEvent& e) {return this->onMouseDown(context, lowerSliderHandle.get(), e);};
+	lowerSliderHandle->onMouseDrag =[this](AlloyContext* context, const InputEvent& e) {return this->onMouseDrag(context, lowerSliderHandle.get(), e);};
+	upperSliderHandle->onMouseDown = [this](AlloyContext* context, const InputEvent& e) {return this->onMouseDown(context, upperSliderHandle.get(), e);};
+	upperSliderHandle->onMouseDrag = [this](AlloyContext* context, const InputEvent& e) {return this->onMouseDrag(context, upperSliderHandle.get(), e);};
+	if (showLabel) {
+		sliderTrack->position = CoordPerPX(0.0f, 1.0f, 0.0f, -handleSize);
+		sliderTrack->dimensions = CoordPerPX(1.0f, 0.0f, 0.0f, handleSize);
+		add(
+			sliderLabel = MakeTextLabel(name,
+				CoordPerPX(0.5f, 0.0f, 0.0f, 2.0f),
+				CoordPerPX(1.0f, 1.0f, 0.0f,
+					-(handleSize - trackPadding * 0.75f)),
+				FontType::Bold, UnitPerPX(1.0f, 0.0f),
+				AlloyApplicationContext()->theme.LIGHTER.toRGBA(),
+				HorizontalAlignment::Center, VerticalAlignment::Bottom));
+		sliderLabel->setOrigin(Origin::TopCenter);
+		add(
+			lowerValueLabel = MakeTextLabel("Lower Value",
+				CoordPerPX(0.0f, 0.0f, trackPadding, 2.0f),
+				CoordPerPX(1.0f, 1.0f, 0.0f,
+					-(handleSize - trackPadding * 0.75f)),
+				FontType::Normal, UnitPerPX(1.0f, -2),
+				AlloyApplicationContext()->theme.LIGHTER.toRGBA(),
+				HorizontalAlignment::Left, VerticalAlignment::Bottom));
+		add(
+			upperValueLabel = MakeTextLabel("Upper Value",
+				CoordPerPX(0.0f, 0.0f, 0.0f, 2.0f),
+				CoordPerPX(1.0f, 1.0f, -trackPadding,
+					-(handleSize - trackPadding * 0.75f)),
+				FontType::Normal, UnitPerPX(1.0f, -2),
+				AlloyApplicationContext()->theme.LIGHTER.toRGBA(),
+				HorizontalAlignment::Right, VerticalAlignment::Bottom));
+	}
+	else {
+		sliderTrack->position = CoordPerPX(0.0f, 0.5f, 0.0f, -0.5f*handleSize);
+		sliderTrack->dimensions = CoordPerPX(1.0f, 0.0f, 0.0f, handleSize);
+	}
+
+	add(sliderTrack);
+	this->onPack = [this]() {
+		this->setValue(sliderPosition);
+	};
+	this->onEvent =
+		[this](AlloyContext* context, const InputEvent& event) {
+		if (event.type == InputType::Scroll&&isVisible() && context->isMouseContainedIn(this)) {
+			double2 oldV = getBlendValue();
+			double2 newV = clamp(event.scroll.y*0.1 + oldV, double2(0.0), double2(1.0));
+			if (newV != oldV) {
+				this->setBlendValue(newV);
+				if (onChangeEvent)onChangeEvent(this->lowerValue,this->upperValue);
+				return true;
+			}
+		}
+		return false;
+	};
+	Application::addListener(this);
+}
+void RangeSlider::draw(AlloyContext* context) {
+	if (lowerValueLabel.get() != nullptr) {
+		lowerValueLabel->setLabel(labelFormatter(lowerValue));
+	}
+	if (upperValueLabel.get() != nullptr) {
+		upperValueLabel->setLabel(labelFormatter(upperValue));
+	}
+	Composite::draw(context);
+}
+void RangeSlider::setBlendValue(double2 value) {
+	value = clamp(value, 0.0, 1.0);
+	setValue(
+		value * (maxValue.toDouble() - minValue.toDouble())
+		+ minValue.toDouble());
+}
+
+double2 RangeSlider::getBlendValue() const {
+	return (sliderPosition - minValue.toDouble())
+		/ (maxValue.toDouble() - minValue.toDouble());
+}
+bool RangeSlider::onMouseDown(AlloyContext* context, Region* region,
+	const InputEvent& event) {
+	if (event.button == GLFW_MOUSE_BUTTON_LEFT) {		
+		if (region == sliderTrack.get()) {
+			lowerSliderHandle->setDragOffset(event.cursor,lowerSliderHandle->getBoundsDimensions() * 0.5f);
+			context->setDragObject(lowerSliderHandle.get());
+			upperSliderHandle->setDragOffset(event.cursor+ lowerSliderHandle->getBoundsDimensions(),upperSliderHandle->getBoundsDimensions() * 0.5f);
+			update();
+			if (onChangeEvent)
+				onChangeEvent(lowerValue,upperValue);
+			return true;
+			
+		}
+		else if (region == lowerSliderHandle.get()) {
+			update();
+			if (onChangeEvent)
+				onChangeEvent(lowerValue,upperValue);
+			return true;
+		}
+		else if (region == upperSliderHandle.get()) {
+			update();
+			if (onChangeEvent)
+				onChangeEvent(lowerValue, upperValue);
+			return true;
+		}
+	}
+	return false;
+}
+bool RangeSlider::onMouseDrag(AlloyContext* context, Region* region,
+	const InputEvent& event) {
+	if (region == lowerSliderHandle.get()) {
+		region->setDragOffset(event.cursor,
+			context->getRelativeCursorDownPosition());
+		update();
+		if (sliderPosition.x > sliderPosition.y) {
+			setUpperValue(sliderPosition.x);
+		}
+		if (onChangeEvent)
+			onChangeEvent(lowerValue, upperValue);
+		return true;
+	} else if (region == upperSliderHandle.get()) {
+		region->setDragOffset(event.cursor,
+			context->getRelativeCursorDownPosition());
+		update();
+		if (sliderPosition.x > sliderPosition.y) {
+			setLowerValue(sliderPosition.y);
+		}
+		if (onChangeEvent)
+			onChangeEvent(lowerValue, upperValue);
+		return true;
+	}
+	return false;
+}
+void RangeSlider::update() {
+	
+	double interp = (lowerSliderHandle->getBoundsPositionX() - sliderTrack->getBoundsPositionX())/ (double)(sliderTrack->getBoundsDimensionsX()- 2*lowerSliderHandle->getBoundsDimensionsX());
+	double val = (double)((1.0 - interp) * minValue.toDouble()+ interp * maxValue.toDouble());
+	sliderPosition.x = val;
+	lowerValue.setValue(clamp(val, minValue.toDouble(), maxValue.toDouble()));
+
+	interp = (upperSliderHandle->getBoundsPositionX() - sliderTrack->getBoundsPositionX()- upperSliderHandle->getBoundsDimensionsX())/ (double)(sliderTrack->getBoundsDimensionsX()-2*upperSliderHandle->getBoundsDimensionsX());
+	val = (double)((1.0 - interp) * minValue.toDouble()+ interp * maxValue.toDouble());
+	sliderPosition.y = val;
+	upperValue.setValue(clamp(val, minValue.toDouble(), maxValue.toDouble()));
+
+
+}
+void RangeSlider::setLowerValue(double value) {
+	double interp = clamp(
+		(value - minValue.toDouble())
+		/ (maxValue.toDouble() - minValue.toDouble()), 0.0, 1.0);
+	float xoff = (float)(sliderTrack->getBoundsPositionX() 
+		+ interp
+		* (sliderTrack->getBoundsDimensionsX()
+			- 2*lowerSliderHandle->getBoundsDimensionsX()));
+	lowerSliderHandle->setDragOffset(
+		pixel2(xoff, lowerSliderHandle->getBoundsDimensionsY()),
+		pixel2(0.0f, 0.0f));
+	sliderPosition.x = value;
+	lowerValue.setValue(clamp(value, minValue.toDouble(), maxValue.toDouble()));
+}
+void RangeSlider::setUpperValue(double value) {
+	double interp = clamp(
+		(value - minValue.toDouble())
+		/ (maxValue.toDouble() - minValue.toDouble()), 0.0, 1.0);
+	float xoff = (float)(sliderTrack->getBoundsPositionX()
+		+ upperSliderHandle->getBoundsDimensionsX() + interp
+		* (sliderTrack->getBoundsDimensionsX()
+			- 2*upperSliderHandle->getBoundsDimensionsX()));
+	upperSliderHandle->setDragOffset(
+		pixel2(xoff, upperSliderHandle->getBoundsDimensionsY()),
+		pixel2(0.0f, 0.0f));
+	sliderPosition.y = value;
+	upperValue.setValue(clamp(value, minValue.toDouble(), maxValue.toDouble()));
+}
+void RangeSlider::setValue(double2 value) {
+
+	double interp = clamp(
+		(value.x - minValue.toDouble())
+		/ (maxValue.toDouble() - minValue.toDouble()), 0.0, 1.0);
+	float xoff = (float)(sliderTrack->getBoundsPositionX()
+		+ interp
+		* (sliderTrack->getBoundsDimensionsX()
+			- 2*lowerSliderHandle->getBoundsDimensionsX()));
+	lowerSliderHandle->setDragOffset(
+		pixel2(xoff, lowerSliderHandle->getBoundsDimensionsY()),
+		pixel2(0.0f, 0.0f));
+	interp = clamp(
+		(value.y- minValue.toDouble())
+		/ (maxValue.toDouble() - minValue.toDouble()), 0.0, 1.0);
+	xoff = (float)(sliderTrack->getBoundsPositionX()
+		+ upperSliderHandle->getBoundsDimensionsX()
+		+ interp
+		* (sliderTrack->getBoundsDimensionsX()
+			- 2*upperSliderHandle->getBoundsDimensionsX()));
+	upperSliderHandle->setDragOffset(
+		pixel2(xoff, upperSliderHandle->getBoundsDimensionsY()),
+		pixel2(0.0f, 0.0f));
+	sliderPosition = value;
+	lowerValue.setValue(clamp(value.x, minValue.toDouble(), maxValue.toDouble()));
+	upperValue.setValue(clamp(value.y, minValue.toDouble(), maxValue.toDouble()));
+
 }
 }
 

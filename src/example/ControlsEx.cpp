@@ -48,6 +48,11 @@ bool ControlsEx::init(Composite& rootNode) {
 			new CheckBox("Check", CoordPX(10.0f, 100.0f),
 					CoordPercent(0.4f, 0.07f), false,true));
 	rootNode.add(checkbox);
+
+	RangeSliderPtr rangeSlider = RangeSliderPtr(
+		new RangeSlider("Range", CoordPerPX(0.5f,0.0f,10.0f, 130.0f),
+			CoordPX(250.0f,50.0f),Integer(0), Integer(100), Integer(25), Integer(75)));
+	rootNode.add(rangeSlider);
 	SelectionPtr selection = SelectionPtr(
 			new Selection("SF District", CoordPX(5, 350), CoordPX(200, 30),
 					std::vector<std::string> { "Civic Center", "Tenderloin",

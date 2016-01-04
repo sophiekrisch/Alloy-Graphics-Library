@@ -214,7 +214,9 @@ public:
 		return (value != 0);
 	}
 	std::string toString() const {
-		return MakeString() << value;
+		std::stringstream ss;
+		ss << toInteger();
+		return ss.str();
 	}
 	void setValue(float other) {
 		value = (int) other;
@@ -263,7 +265,10 @@ public:
 		return (value != 0);
 	}
 	std::string toString() const {
-		return MakeString() << value;
+		std::stringstream ss;
+		ss.setf(std::ios::fixed, std::ios::floatfield);
+		ss << std::setprecision(4) << toFloat();
+		return ss.str();
 	}
 	void setValue(float other) {
 		value = (float) other;
@@ -311,7 +316,10 @@ public:
 		return (value != 0);
 	}
 	std::string toString() const {
-		return MakeString() << value;
+		std::stringstream ss;
+		ss.setf(std::ios::fixed, std::ios::floatfield);
+		ss << std::setprecision(8) << toDouble();
+		return ss.str();
 	}
 	void setValue(float other) {
 		value = (double) other;

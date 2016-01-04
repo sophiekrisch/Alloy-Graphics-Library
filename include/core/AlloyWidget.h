@@ -25,7 +25,7 @@
 #include "AlloyUI.h"
 
 namespace aly {
-
+enum class SliderHandleShape { WHOLE, HALF_LEFT, HALF_RIGHT };
 class TextButton: public Region {
 private:
 	AColor textColor;
@@ -121,10 +121,13 @@ public:
 			const AUnit2D& dimensions, bool toggledOn ,bool showText=true);
 	virtual void draw(AlloyContext* context) override;
 };
+
 class SliderHandle: public Region {
+protected:
+	SliderHandleShape handleShape;
 public:
-	SliderHandle(const std::string& name) :
-			Region(name) {
+	SliderHandle(const std::string& name, const SliderHandleShape& handleShape=SliderHandleShape::WHOLE) :
+			Region(name),handleShape(handleShape) {
 	}
 	virtual void draw(AlloyContext* context) override;
 };
@@ -239,6 +242,71 @@ public:
 	}
 	virtual void draw(AlloyContext* context) override;
 	virtual inline ~HorizontalSlider() {
+	}
+};
+class RangeSlider : public Composite {
+protected:
+	AColor textColor;
+	AUnit1D fontSize;
+	Number minValue;
+	Number maxValue;
+	Number lowerValue;
+	Number upperValue;
+	TextLabelPtr sliderLabel;
+	TextLabelPtr lowerValueLabel;
+	TextLabelPtr upperValueLabel;
+	std::shared_ptr<SliderHandle> lowerSliderHandle;
+	std::shared_ptr<SliderHandle> upperSliderHandle;
+	std::shared_ptr<SliderTrack> sliderTrack;
+	std::function<std::string(const Number& value)> labelFormatter;
+	void update();
+	double2 sliderPosition;
+public:
+	std::function<void(const Number& lowerValue, const Number& upperValue)> onChangeEvent;
+	void setSliderColor(const Color& startColor, const Color& endColor) {
+		sliderTrack->startColor = startColor;
+		sliderTrack->endColor = endColor;
+	}
+	RangeSlider(const std::string& name, const AUnit2D& pos,const AUnit2D& dims,const Number& min, const Number& max,
+		const Number& lowerValue, const Number& upperValue,bool showLabel=true);
+	double2 getBlendValue() const;
+	void setBlendValue(double2 value);
+
+	void setLowerValue(double value);
+	void setUpperValue(double value);
+	inline void setLowerValue(float value) {
+		setLowerValue((double)value);
+	}
+	inline void setUpperValue(float value) {
+		setUpperValue((double)value);
+	}
+	inline void setLowerValue(int value) {
+		setLowerValue((double)value);
+	}
+	inline void setUpperValue(int value) {
+		setUpperValue((double)value);
+	}
+	void setValue(double2 range);
+	const Number& getLowerValue() {
+		return lowerValue;
+	}
+	const Number& getUpperValue() {
+		return upperValue;
+	}
+	inline void setOnChangeEvent(
+		const std::function<void(const Number& lowerValue,const Number& upperValue)>& func) {
+		onChangeEvent = func;
+	}
+	inline void setLabelFormatter(
+		const std::function<std::string(const Number& value)>& func) {
+		labelFormatter = func;
+	}
+	bool onMouseDown(AlloyContext* context, Region* region,
+		const InputEvent& event);
+	bool onMouseDrag(AlloyContext* context, Region* region,
+		const InputEvent& event);
+	virtual void draw(AlloyContext* context) override;
+	virtual inline ~RangeSlider() {
 	}
 };
 
@@ -590,6 +658,7 @@ typedef std::shared_ptr<HorizontalSlider> HSliderPtr;
 typedef std::shared_ptr<VerticalSlider> VSliderPtr;
 typedef std::shared_ptr<HorizontalSlider> HorizontalSliderPtr;
 typedef std::shared_ptr<VerticalSlider> VerticalSliderPtr;
+typedef std::shared_ptr<RangeSlider> RangeSliderPtr;
 typedef std::shared_ptr<CheckBox> CheckBoxPtr;
 typedef std::shared_ptr<ToggleBox> ToggleBoxPtr;
 typedef std::shared_ptr<Selection> SelectionPtr;
