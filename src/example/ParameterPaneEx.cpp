@@ -32,6 +32,8 @@ ParameterPaneEx::ParameterPaneEx() :
 	paramColor = aly::Color(1.0f, 0.0f, 0.0f, 1.0f);
 	paramBool1 = false;
 	paramBool2 = false;
+	paramLow = Integer(1001);
+	paramHi = Integer(1100);
 	paramString = "Hello";
 }
 bool ParameterPaneEx::init(Composite& rootNode) {
@@ -47,8 +49,10 @@ bool ParameterPaneEx::init(Composite& rootNode) {
 		paramPane->addSelectionField("Selection", paramSelect, std::vector<std::string>{"Cool", "Neat", "Awesome", "Boring"});
 		paramPane->addNumberField("Float", paramFloat1);
 		paramPane->addNumberField("Integer", paramInt1);
+		paramPane->addRangeField("Range", paramLow,paramHi);
 		paramPane->addTextField("String", paramString);
 
+		
 	paramPane->addGroup("Group 2",true);
 		paramPane->addMultiFileSelector("Multi-File", paramMultiFile);
 		paramPane->addColorField("Color", paramColor);

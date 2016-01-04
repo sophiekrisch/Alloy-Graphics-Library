@@ -27,6 +27,8 @@ protected:
 	aly::Number paramFloat1;
 	aly::Number paramInt1;
 	aly::Number paramFloat2;
+	aly::Number paramLow;
+	aly::Number paramHi;
 	int paramSelect;
 	std::string paramString;
 	aly::Color paramColor;

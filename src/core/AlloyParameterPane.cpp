@@ -182,6 +182,62 @@ namespace aly {
 		estimatedHeight += entryHeight + SPACING;
 		return valueRegion;
 	}
+	std::pair<NumberFieldPtr, NumberFieldPtr> ParameterPane::addRangeField(const std::string& label, Number& lowerValue, Number& upperValue, float aspect) {
+		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+		CompositePtr valueRegion = CompositePtr(new Composite("Value container", CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, 0.0f), CoordPX(aspect*entryHeight, entryHeight)));
+		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+		NumberFieldPtr lowValueRegion = NumberFieldPtr(new NumberField(label, CoordPercent(0.0f,0.0f), CoordPerPX(0.5f,1.0f,-2.0f,0.0f), lowerValue.type()));
+		NumberFieldPtr highValueRegion = NumberFieldPtr(new NumberField(label, CoordPerPX(0.5f, 0.0f,2.0f,0.0f), CoordPerPX(0.5f, 1.0f,-2.0f,0.0f) , upperValue.type()));
+		TextLabelPtr spaceRegion = TextLabelPtr(new TextLabel(":", CoordPerPX(0.5f, 0.0f, -2.0f, 0.0f), CoordPerPX(0.0f, 1.0f, 4.0f, 0.0f)));
+		spaceRegion->setAlignment(HorizontalAlignment::Center, VerticalAlignment::Middle);
+		spaceRegion->textColor = MakeColor(AlloyDefaultContext()->theme.DARKER);
+		spaceRegion->fontType = FontType::Bold;
+		spaceRegion->fontSize = UnitPerPX(1.0f,-8.0f);
+		valueRegion->add(lowValueRegion);
+		valueRegion->add(spaceRegion);
+		valueRegion->add(highValueRegion);
+		lowValueRegion->textColor = MakeColor(AlloyDefaultContext()->theme.DARKER);
+		lowValueRegion->setNumberValue(lowerValue);
+		lowValueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
+		lowValueRegion->borderWidth = UnitPX(0.0f);
+		lowValueRegion->setRoundCorners(true);
+		if (aspect <= 0) {
+			pixel2 labelBounds = labelRegion->getTextDimensions(AlloyDefaultContext().get());
+			labelBounds.x += 10;
+			valueRegion->position = CoordPX(labelBounds.x, 0.0f);
+			valueRegion->dimensions = CoordPerPX(1.0f, 0.0f, -labelBounds.x, entryHeight);
+		}
+		else {
+			labelRegion->position = CoordPX(0.0f, 0.0f);
+			labelRegion->dimensions = CoordPerPX(1.0f, 0.0f, -aspect*entryHeight, entryHeight);
+		}
+		highValueRegion->textColor = MakeColor(AlloyDefaultContext()->theme.DARKER);
+		highValueRegion->setNumberValue(upperValue);
+
+		std::shared_ptr<AnyInterface> ref = std::shared_ptr<AnyInterface>(new AnyValue<std::pair<Number*, Number*>>(std::pair<Number*, Number*>(&lowerValue,&upperValue)));
+		values.push_back(ref);
+		lowValueRegion->onTextEntered = [=](NumberField* field) {
+			*((ref->getValue<std::pair<Number*, Number*>>()).first) = field->getValue();
+			if (field->getValue() > highValueRegion->getValue()) {
+				*((ref->getValue<std::pair<Number*, Number*>>()).second) = field->getValue();
+				highValueRegion->setNumberValue(field->getValue());
+			}
+		};
+		highValueRegion->onTextEntered = [=](NumberField* field) {
+			*((ref->getValue<std::pair<Number*, Number*>>()).second) = field->getValue();
+			if (field->getValue() < lowValueRegion->getValue()) {
+				*((ref->getValue<std::pair<Number*, Number*>>()).first) = field->getValue();
+				lowValueRegion->setNumberValue(field->getValue());
+			}
+		};
+		highValueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
+		highValueRegion->borderWidth = UnitPX(0.0f);
+		highValueRegion->setRoundCorners(true);
+		setCommonParameters(comp, labelRegion, valueRegion);
+		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
+		estimatedHeight += entryHeight + SPACING;
+		return std::pair<NumberFieldPtr, NumberFieldPtr>(lowValueRegion,highValueRegion);
+	}
 	TextFieldPtr ParameterPane::addTextField(const std::string& label,std::string& value, float aspect) {
 		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
 		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));

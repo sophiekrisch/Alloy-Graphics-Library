@@ -50,6 +50,7 @@ namespace aly {
 		ParameterPane(const std::string& name, const AUnit2D& pos, const AUnit2D& dim,float entryHeight=30.0f);
 		CompositePtr addGroup(const std::string& name,bool expanded);
 		NumberFieldPtr addNumberField(const std::string& label,Number& value,float aspect=3.0f);
+		std::pair<NumberFieldPtr, NumberFieldPtr> addRangeField(const std::string& label, Number& lowerValue, Number& upperValue, float aspect = 6.0f);
 		TextFieldPtr addTextField(const std::string& label, std::string& value, float aspect = 3.0f);
 		ModifiableNumberPtr addNumberField(const std::string& label, Number& value, const Number& minValue, const Number& maxValue, float aspect = 7.0f);
 		SelectionPtr addSelectionField(const std::string& label,int& selectedIndex,const std::vector<std::string>& options, float aspect = 4.0f);
