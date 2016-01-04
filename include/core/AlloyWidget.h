@@ -134,10 +134,17 @@ public:
 class SliderTrack: public Composite {
 protected:
 	const Orientation orientation;
+	float2 activeRegion;
 public:
 	Color startColor, endColor;
 	SliderTrack(const std::string& name, Orientation orientColor,
 			const Color& st, const Color& ed);
+	void setLower(float x) {
+		activeRegion.x = x;
+	}
+	void setUpper(float y) {
+		activeRegion.y = y;
+	}
 	virtual void draw(AlloyContext* context) override;
 };
 class ProgressBar: public Composite {

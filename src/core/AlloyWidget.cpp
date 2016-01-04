@@ -652,7 +652,7 @@ void IconButton::draw(AlloyContext* context) {
 }
 SliderTrack::SliderTrack(const std::string& name, Orientation orient,
 		const Color& st, const Color& ed) :
-		Composite(name), orientation(orient), startColor(st), endColor(ed) {
+		Composite(name), orientation(orient), startColor(st), endColor(ed), activeRegion(0.0f,0.0f){
 }
 
 void SliderTrack::draw(AlloyContext* context) {
@@ -674,6 +674,18 @@ void SliderTrack::draw(AlloyContext* context) {
 		nvgStrokeWidth(nvg, 10.0f);
 		nvgLineCap(nvg, NVG_ROUND);
 		nvgStroke(nvg);
+
+		if(activeRegion.y- activeRegion.x>0.0f){
+			pushScissor(nvg,getCursorBounds());
+			pushScissor(nvg, bounds.position.x + bounds.dimensions.x*activeRegion.x, bounds.position.y, bounds.dimensions.x*(activeRegion.y - activeRegion.x), bounds.dimensions.y);
+			nvgBeginPath(nvg);
+			nvgMoveTo(nvg, ax,ay);
+			nvgLineTo(nvg,bx,by);
+			nvgStrokeColor(nvg, context->theme.DARK.toSemiTransparent(0.5f));
+			nvgStroke(nvg);
+			popScissor(nvg);
+			popScissor(nvg);
+		}
 	} else if (orientation == Orientation::Vertical) {
 		nvgBeginPath(nvg);
 		nvgMoveTo(nvg, ax = (bounds.position.x + bounds.dimensions.x * 0.5f),
@@ -2582,8 +2594,6 @@ RangeSlider::RangeSlider(const std::string& name, const AUnit2D& pos, const AUni
 	float trackPadding = 10.0f;
 	this->aspectRatio = 4.0f;
 
-	sliderPosition.x = lowerValue.toDouble();
-	sliderPosition.y = upperValue.toDouble();
 
 	textColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
@@ -2663,6 +2673,8 @@ RangeSlider::RangeSlider(const std::string& name, const AUnit2D& pos, const AUni
 		}
 		return false;
 	};
+	setLowerValue(lowerValue.toDouble());
+	setUpperValue(upperValue.toDouble());
 	Application::addListener(this);
 }
 void RangeSlider::draw(AlloyContext* context) {
@@ -2689,9 +2701,14 @@ bool RangeSlider::onMouseDown(AlloyContext* context, Region* region,
 	const InputEvent& event) {
 	if (event.button == GLFW_MOUSE_BUTTON_LEFT) {		
 		if (region == sliderTrack.get()) {
-			lowerSliderHandle->setDragOffset(event.cursor,lowerSliderHandle->getBoundsDimensions() * 0.5f);
-			context->setDragObject(lowerSliderHandle.get());
-			upperSliderHandle->setDragOffset(event.cursor+ lowerSliderHandle->getBoundsDimensions(),upperSliderHandle->getBoundsDimensions() * 0.5f);
+			if (distanceSqr(event.cursor, lowerSliderHandle->getBounds().center()) < distanceSqr(event.cursor, upperSliderHandle->getBounds().center())) {
+				lowerSliderHandle->setDragOffset(event.cursor, lowerSliderHandle->getBoundsDimensions() * 0.5f);
+				context->setDragObject(lowerSliderHandle.get());
+			}
+			else {
+				upperSliderHandle->setDragOffset(event.cursor, upperSliderHandle->getBoundsDimensions() * 0.5f);
+				context->setDragObject(upperSliderHandle.get());
+			}
 			update();
 			if (onChangeEvent)
 				onChangeEvent(lowerValue,upperValue);
@@ -2740,17 +2757,17 @@ bool RangeSlider::onMouseDrag(AlloyContext* context, Region* region,
 }
 void RangeSlider::update() {
 	
-	double interp = (lowerSliderHandle->getBoundsPositionX() - sliderTrack->getBoundsPositionX())/ (double)(sliderTrack->getBoundsDimensionsX()- 2*lowerSliderHandle->getBoundsDimensionsX());
-	double val = (double)((1.0 - interp) * minValue.toDouble()+ interp * maxValue.toDouble());
+	double interpLo = (lowerSliderHandle->getBoundsPositionX() - sliderTrack->getBoundsPositionX())/ (double)(sliderTrack->getBoundsDimensionsX()- 2*lowerSliderHandle->getBoundsDimensionsX());
+	double val = (double)((1.0 - interpLo) * minValue.toDouble()+ interpLo * maxValue.toDouble());
 	sliderPosition.x = val;
 	lowerValue.setValue(clamp(val, minValue.toDouble(), maxValue.toDouble()));
 
-	interp = (upperSliderHandle->getBoundsPositionX() - sliderTrack->getBoundsPositionX()- upperSliderHandle->getBoundsDimensionsX())/ (double)(sliderTrack->getBoundsDimensionsX()-2*upperSliderHandle->getBoundsDimensionsX());
-	val = (double)((1.0 - interp) * minValue.toDouble()+ interp * maxValue.toDouble());
+	double interpHi = (upperSliderHandle->getBoundsPositionX() - sliderTrack->getBoundsPositionX()- upperSliderHandle->getBoundsDimensionsX())/ (double)(sliderTrack->getBoundsDimensionsX()-2*upperSliderHandle->getBoundsDimensionsX());
+	val = (double)((1.0 - interpHi) * minValue.toDouble()+ interpHi * maxValue.toDouble());
 	sliderPosition.y = val;
 	upperValue.setValue(clamp(val, minValue.toDouble(), maxValue.toDouble()));
-
-
+	sliderTrack->setLower((lowerSliderHandle->getBoundsPositionX()-sliderTrack->getBoundsPositionX()+0.5f*lowerSliderHandle->getBoundsDimensionsX())/sliderTrack->getBoundsDimensionsX());
+	sliderTrack->setUpper((upperSliderHandle->getBoundsPositionX() - sliderTrack->getBoundsPositionX() + 0.5f*upperSliderHandle->getBoundsDimensionsX()) / sliderTrack->getBoundsDimensionsX());
 }
 void RangeSlider::setLowerValue(double value) {
 	double interp = clamp(
@@ -2765,6 +2782,7 @@ void RangeSlider::setLowerValue(double value) {
 		pixel2(0.0f, 0.0f));
 	sliderPosition.x = value;
 	lowerValue.setValue(clamp(value, minValue.toDouble(), maxValue.toDouble()));
+	sliderTrack->setLower((lowerSliderHandle->getBoundsPositionX() - sliderTrack->getBoundsPositionX() + 0.5f*lowerSliderHandle->getBoundsDimensionsX()) / sliderTrack->getBoundsDimensionsX());
 }
 void RangeSlider::setUpperValue(double value) {
 	double interp = clamp(
@@ -2779,6 +2797,7 @@ void RangeSlider::setUpperValue(double value) {
 		pixel2(0.0f, 0.0f));
 	sliderPosition.y = value;
 	upperValue.setValue(clamp(value, minValue.toDouble(), maxValue.toDouble()));
+	sliderTrack->setUpper((upperSliderHandle->getBoundsPositionX() - sliderTrack->getBoundsPositionX() + 0.5f*upperSliderHandle->getBoundsDimensionsX()) / sliderTrack->getBoundsDimensionsX());
 }
 void RangeSlider::setValue(double2 value) {
 
@@ -2806,6 +2825,8 @@ void RangeSlider::setValue(double2 value) {
 	sliderPosition = value;
 	lowerValue.setValue(clamp(value.x, minValue.toDouble(), maxValue.toDouble()));
 	upperValue.setValue(clamp(value.y, minValue.toDouble(), maxValue.toDouble()));
+	sliderTrack->setLower((lowerSliderHandle->getBoundsPositionX() - sliderTrack->getBoundsPositionX() + 0.5f*lowerSliderHandle->getBoundsDimensionsX()) / sliderTrack->getBoundsDimensionsX());
+	sliderTrack->setUpper((upperSliderHandle->getBoundsPositionX() - sliderTrack->getBoundsPositionX() + 0.5f*upperSliderHandle->getBoundsDimensionsX()) / sliderTrack->getBoundsDimensionsX());
 
 }
 }
