@@ -722,14 +722,14 @@ void SliderHandle::draw(AlloyContext* context) {
 
 	if (context->isMouseOver(this) || context->isMouseDown(this)) {
 		nvgFillColor(nvg, context->theme.LIGHT.toSemiTransparent(0.5f));
-		if (handleShape == SliderHandleShape::WHOLE) {
+		if (handleShape == SliderHandleShape::Whole) {
 			nvgBeginPath(nvg);
 			nvgCircle(nvg, bounds.position.x + bounds.dimensions.x * 0.5f,
 				bounds.position.y + bounds.dimensions.y * 0.5f,
 				bounds.dimensions.y * 0.4f);
 			nvgFill(nvg);
 		}
-		else if (handleShape == SliderHandleShape::HALF_LEFT) {
+		else if (handleShape == SliderHandleShape::HalfLeft) {
 			nvgBeginPath(nvg);
 			x = bounds.position.x + 0.15f*w;
 			nvgMoveTo(nvg, x + w - r, y + 0.5f*h);
@@ -740,7 +740,7 @@ void SliderHandle::draw(AlloyContext* context) {
 			nvgClosePath(nvg);
 			nvgFill(nvg);
 		}
-		else if (handleShape == SliderHandleShape::HALF_RIGHT) {
+		else if (handleShape == SliderHandleShape::HalfRight) {
 			nvgBeginPath(nvg);
 			x = bounds.position.x - 0.15f*w;
 			nvgMoveTo(nvg, x + r, y + 0.5f*h);
@@ -758,14 +758,14 @@ void SliderHandle::draw(AlloyContext* context) {
 
 	x = bounds.position.x;
 	r = h*0.25f/cosy;
-	if (handleShape == SliderHandleShape::WHOLE) {
+	if (handleShape == SliderHandleShape::Whole) {
 		nvgBeginPath(nvg);
 		nvgCircle(nvg, bounds.position.x + bounds.dimensions.x * 0.5f,
 			bounds.position.y + bounds.dimensions.y * 0.5f,
 			bounds.dimensions.y * 0.25f);
 		nvgFill(nvg);
 		nvgStroke(nvg);
-	} else if (handleShape == SliderHandleShape::HALF_LEFT) {
+	} else if (handleShape == SliderHandleShape::HalfLeft) {
 		nvgBeginPath(nvg);
 		nvgMoveTo(nvg,x + w - r,y + 0.5f*h);
 		nvgLineTo(nvg,x + w - r*cosx,y + 0.5f*h - r*cosy);
@@ -776,7 +776,7 @@ void SliderHandle::draw(AlloyContext* context) {
 		nvgFill(nvg);
 		nvgStroke(nvg);
 	}
-	else if (handleShape == SliderHandleShape::HALF_RIGHT) {
+	else if (handleShape == SliderHandleShape::HalfRight) {
 		nvgBeginPath(nvg);
 		nvgMoveTo(nvg, x + r, y + 0.5f*h);
 		nvgLineTo(nvg, x + r*cosx, y + 0.5f*h - r*cosy);
@@ -2601,13 +2601,13 @@ RangeSlider::RangeSlider(const std::string& name, const AUnit2D& pos, const AUni
 	borderWidth = UnitPX(1.0f);
 	setRoundCorners(true);
 
-	lowerSliderHandle = std::shared_ptr<SliderHandle>(new SliderHandle("Lower Handle",SliderHandleShape::HALF_LEFT));
+	lowerSliderHandle = std::shared_ptr<SliderHandle>(new SliderHandle("Lower Handle",SliderHandleShape::HalfLeft));
 	lowerSliderHandle->position = CoordPercent(0.0, 0.0);
 	lowerSliderHandle->dimensions = CoordPX(handleSize*0.5f, handleSize);
 	lowerSliderHandle->backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
 	lowerSliderHandle->setDragEnabled(true);
 
-	upperSliderHandle = std::shared_ptr<SliderHandle>(new SliderHandle("Upper Handle", SliderHandleShape::HALF_RIGHT));
+	upperSliderHandle = std::shared_ptr<SliderHandle>(new SliderHandle("Upper Handle", SliderHandleShape::HalfRight));
 	upperSliderHandle->position = CoordPercent(0.0, 0.0);
 	upperSliderHandle->dimensions = CoordPX(handleSize*0.5f, handleSize);
 	upperSliderHandle->backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);

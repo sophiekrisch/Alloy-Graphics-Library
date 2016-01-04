@@ -25,7 +25,7 @@
 #include "AlloyUI.h"
 
 namespace aly {
-enum class SliderHandleShape { WHOLE, HALF_LEFT, HALF_RIGHT };
+enum class SliderHandleShape {Whole, HalfLeft, HalfRight};
 class TextButton: public Region {
 private:
 	AColor textColor;
@@ -126,7 +126,7 @@ class SliderHandle: public Region {
 protected:
 	SliderHandleShape handleShape;
 public:
-	SliderHandle(const std::string& name, const SliderHandleShape& handleShape=SliderHandleShape::WHOLE) :
+	SliderHandle(const std::string& name, const SliderHandleShape& handleShape=SliderHandleShape::Whole) :
 			Region(name),handleShape(handleShape) {
 	}
 	virtual void draw(AlloyContext* context) override;
